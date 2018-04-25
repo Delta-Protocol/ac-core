@@ -1,0 +1,7 @@
+#!/bin/sh
+
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/core/1.58.0.0/core-1.58.0.0.jar -O app/libs/core-1.58.0.0.jar
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/prov/1.58.0.0/prov-1.58.0.0.jar -O app/libs/prov-1.58.0.0.jar
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pkix/1.54.0.0/pkix-1.54.0.0.jar -O app/libs/pkix-1.54.0.0.jar
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pg/1.54.0.0/pg-1.54.0.0.jar -O app/libs/pg-1.54.0.0.jar
+

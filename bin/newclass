@@ -1,0 +1,23 @@
+#!/bin/sh
+
+name=$1
+
+hash=`date +%c%N | sha256sum | awk '{print $1}'`
+
+echo "
+#ifndef USGOV_$hash
+#define USGOV_$hash
+
+namespace usgov {
+using namespace std;
+
+struct $name {
+
+};
+
+}
+
+#endif
+
+
+"
