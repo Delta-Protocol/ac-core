@@ -41,7 +41,7 @@ datagram::datagram(uint16_t service, uint16_t payload):service(service), error(0
 	encode_size(size());
 	encode_service(service);
 	(*this)[h]=payload&0xff;
-	(*this)[h+1]=payload>>8&0xff;
+	(*this)[h+1]=payload>>8; //&0xff;
 	dend=size();
 }
 
