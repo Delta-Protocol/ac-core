@@ -36,8 +36,8 @@ void help() {
 	cout << "  -d            Run daemon " << endl;
 	cout << "  -ds           Run daemon with sysop shell" << endl;
 	cout << "  -p <port>     Listening port, default " << p.port << endl;
-	cout << "  -e <edges>    Max num edges, default " << p.edges << endl;
-	cout << "  --genesis     start a new network" << endl;
+	cout << "  -e <edges>    Max num neightbours, default " << p.edges << endl;
+	cout << "  --genesis     start a new history" << endl;
 	cout << "  -h            Print this help and exit " << endl;
 }
 
@@ -138,11 +138,11 @@ struct cfg: filesystem::cfg {
 	    string keyfile=abs_file(home,"k");
 		cout << "Loading conf from " << keyfile << endl;
 		if (!file_exists(keyfile)) {
-			cout << "Generating cryptographic keys for this node, it can take a while until enough entropy in the system is collected, press keys and do any other activity to help generating entropy." << endl;
+			cout << "Generating cryptographic keys..."; cout.flush();
 			crypto::ec::keys k=crypto::ec::keys::generate();
-			cout << "Done." << endl;
 			ofstream f(keyfile);
 			f << k.priv.to_b58() << endl;
+			cout << "done." << endl;
 		}
 		string pk;
 		{
@@ -330,8 +330,7 @@ int main(int argc, char** argv) {
 
 	cfg conf=cfg::load(home);
 	if (p.daemon) {
-		cout << "Node PubKey is ";
-		cout << conf.keys.pub << endl;
+		cout << "Node public key is " << conf.keys.pub << endl;
 		signal(SIGINT,sig_handler);
 		signal(SIGTERM,sig_handler);
 		signal(SIGPIPE, SIG_IGN);

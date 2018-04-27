@@ -7,8 +7,7 @@ RELEASEFLAGS:=-O3 ${STDFLAGS}
 #dev
 CXXFLAGS:=-g -O0 -DDEBUG ${STDFLAGS}
 #distr
-#CXXFLAGS:=${STDFLAGS}                  
-
+#CXXFLAGS:=${STDFLAGS}
 export CXXFLAGS
 
 debug: export CXXFLAGS:=${DEBUGFLAGS}
