@@ -200,13 +200,21 @@ namespace auth { //blockchain network support, this service is free
 
 		struct db_t {
 			db_t() {
-				temp_fill();
+//				temp_fill();
 			}
-
+/*
 			void temp_fill() {
 				lock_guard<mutex> lock(mx_nodes);
-				nodes.emplace(pubkey_t::from_b58("wC8dAa6V9gJC9bMgqobkDM9Wqy6bxtxYk95BYJzKyMyE").hash(),"92.51.240.61"); //punisher
+				nodes.emplace(pubkey_t::from_b58("wC8dAa6V9gJC9bMgqobkDM9Wqy6bxtxYk95BYJzKyMyE").hash(),"--.--.--.--");
 			}
+*/
+/*
+            void genesis(const pubkey_t& k, const address& addr) {
+				lock_guard<mutex> lock(mx_nodes);
+                assert(nodes.empty());
+				nodes.emplace(k.hash(),addr);
+            }
+*/
 
 			peer_t::stage_t get_stage(const pubkeyh_t&) const;
 

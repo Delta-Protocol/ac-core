@@ -103,11 +103,11 @@ namespace blockchain {
 		void relay(int num, peer_t* exclude, datagram* d) {
 			peerd.send(num,exclude,d);
 		}
-
+/*
 		int miners_size() const {
 			return 30; //TODO based on the number of miner_guts a block has
 		}
-
+*/
 		void vote_tip(const diff& b);
 		void dump(ostream& os) const;
 		void list_apps(ostream& os) const;
@@ -215,7 +215,12 @@ namespace blockchain {
 		mutable mutex mx_pool;
 
 		apps apps_;
-		blockchain::auth::app* auth_app;
+		auth::app* auth_app;
+
+
+        void start_new_blockchain(const string& addr);
+
+
 
 		struct votes_t:unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> { // <pubkey,pair<hash,count>>
 			typedef unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> b;

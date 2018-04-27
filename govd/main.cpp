@@ -24,9 +24,11 @@ struct params {
 	uint16_t port;
 	uint16_t edges;
 	bool genesis{false};
+	string genesis_address;
 	bool daemon{false};
 	bool shell{false};
 	uint16_t simul_num_nodes_deployed{0};
+    string homedir;
 };
 
 void help() {
@@ -37,7 +39,8 @@ void help() {
 	cout << "  -ds           Run daemon with sysop shell" << endl;
 	cout << "  -p <port>     Listening port, default " << p.port << endl;
 	cout << "  -e <edges>    Max num neightbours, default " << p.edges << endl;
-	cout << "  --genesis     start a new history" << endl;
+	cout << "  -genesis <address of genesis node>    start a new history" << endl;
+	cout << "  -home <homedir>   Set home directory (default is ~/.us) " << endl;
 	cout << "  -h            Print this help and exit " << endl;
 }
 
@@ -83,13 +86,30 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 				}
 			}
 			else {
-				cerr << "I need the number of edges, please." << endl;
+				cerr << "I need the number of edges." << endl;
 				return false;
 			}
 			continue;
 		}
-		if (inp=="--genesis") {
+		if (inp=="-genesis") {
 			p.genesis=true;
+			if (i<argc) {
+				p.genesis_address=argv[i++];
+			}
+			else {
+				cerr << "I need the address of the genesis node." << endl;
+				return false;
+			}
+			continue;
+		}
+		if (inp=="-home") {
+			if (i<argc) {
+				p.homedir=argv[i++];
+			}
+			else {
+				cerr << "I need a directory." << endl;
+				return false;
+			}
 			continue;
 		}
 		if (inp=="-deploy_ports ") {
@@ -104,7 +124,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 				}
 			}
 			else {
-				cerr << "I need the number of nodes, please." << endl;
+				cerr << "I need the number of nodes." << endl;
 				return false;
 			}
 			continue;
@@ -131,10 +151,10 @@ struct cfg: filesystem::cfg {
 	}
 
 	static cfg load(const string& home) {
-	    if (!ensure_dir(home)) {
-		cerr << "Cannot create home dir " << home << endl;
-		exit(1);
-	    }
+        if (!ensure_dir(home)) {
+            cerr << "Cannot create home dir " << home << endl;
+            exit(1);
+        }
 	    string keyfile=abs_file(home,"k");
 		cout << "Loading conf from " << keyfile << endl;
 		if (!file_exists(keyfile)) {
@@ -307,14 +327,22 @@ int main(int argc, char** argv) {
 	if(!parse_cmdline(argc,argv,p)) return 1;
 
 
-	const char* env_p = std::getenv("HOME");
-	if (!env_p) {
-		cerr << "No $HOME env var defined" << endl;
-		exit(1);
-	}
-	string home(env_p);
+	string home;
+    if (p.homedir.empty()) {
+        const char* env_p = std::getenv("HOME");
+        if (!env_p) {
+            cerr << "No $HOME env var defined" << endl;
+            exit(1);
+        }
+        home=env_p;
+    	home+="/.us";
+    }
+    else {
+        home=p.homedir;
+    }
 
-	home+="/.us";
+    cout << "home dir: " << home << endl;
+
 	if (!cfg::ensure_dir(home)) {
 		cerr << "Cannot create dir " << home << endl;
 		exit(1);
@@ -338,6 +366,16 @@ int main(int argc, char** argv) {
 		d.sysop_allowed=p.shell;
 		d.add(new cash::app());
 		d.add(new rep::app());
+
+        if (p.genesis) {
+            cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
+//            d.auth_app->db.genesis(conf.keys.pub,p.genesis_address);
+            d.start_new_blockchain(p.genesis_address);
+            cout << "genesis block has been created." << endl;
+            exit(0);
+        }
+
+
 		d.run();
 		cout << "main: exited normally" << (thread_::_this.terminated?", terminated by signal":"") << endl;
 	}

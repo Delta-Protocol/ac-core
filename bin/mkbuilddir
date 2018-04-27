@@ -1,0 +1,23 @@
+#!/bin/bash
+
+dirname=$1
+
+if [ "_$dirname" == "_" ]; then
+	echo "must specify a directory name."
+	exit 1
+fi
+
+
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+dir="$dir/.."
+echo $dir
+
+
+mkdir $dirname
+
+cd $dirname
+ln -s $dir/gov
+ln -s $dir/govd
+ln -s $dir/wallet
+ln -s $dir/Makefile
+

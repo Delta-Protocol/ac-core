@@ -132,11 +132,9 @@ void c::add_growth_transactions(unsigned int seed) {
 void c::on_begin_cycle() {
 }
 
-
 int usgov::blockchain::auth::app_gut::app_id() const {
 	return app::id(); 
 }
-
 
 void usgov::blockchain::auth::app_gut::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";

@@ -34,6 +34,24 @@ void c::add(app*app) {
 	apps_.emplace(app->get_id(),app);
 }
 
+void c::start_new_blockchain(const string& addr) {
+    assert(!addr.empty());
+    auto pool=new diff();
+    auth_app->pool->to_hall.push_back(make_pair(peerd.id.pub.hash(),addr));
+    auto* mg=create_miner_gut();
+    assert(mg!=0);
+    pool->allow(*mg);
+    pool->add(mg);
+    pool->end_adding();
+    save(*pool);
+    if (!import(*pool)) {
+        cerr << "Error creating blockchain" << endl;
+        exit(1);
+    }
+    delete pool;
+}
+
+
 c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
 }
 
@@ -246,10 +264,12 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 		}
 		if (data.cycle.get_stage()!=cycle_t::miner_gut_io) return false;
 	}
-	if (auth_app->my_stage()!=peer_t::node) return false;
+//	if (auth_app->my_stage()!=peer_t::node) return false;
 
 	//int min_in_week=0;
 	//b->checkpoint=min_in_week==0; //once a week the closure block contains a ref to a checkpoint block
+    if (!auth_app->is_node()) return false;
+
 	auto* mg=create_miner_gut(); //send my gut to the network
 	if (mg!=0) {
 		send(*mg);
@@ -284,7 +304,7 @@ void c::load_head() {
 }
 
 void c::run() {
-	if (miners_size()>1000) peerd.set_ip4(); else peerd.set_tor();
+	//if (miners_size()>1000) peerd.set_ip4(); else peerd.set_tor();
 
 	thread peers(&networking::run,&peerd);
 
@@ -469,7 +489,6 @@ void c::send(const datagram& g, peer_t* exclude) {
 
 miner_gut* c::create_miner_gut() {
 	cout << "blockchain: create_miner_gut" << endl;
-	if (!auth_app->is_node()) return 0;
 	auto* mg=new miner_gut();
 
 	{
@@ -588,6 +607,7 @@ cout << "Cycle: current second is " << s.count() << ". I'll sleep for " << (n-s.
 	thread_::_this.sleep_for(seconds(n-s.count()));
 	cout << "blockchain: daemon: Starting stage: " << str(ts) << endl;
 }
+
 string usgov::blockchain::cycle_t::str(stage s) const {
 	switch(s) {
 		case new_cycle: return "new_cycle"; break;
