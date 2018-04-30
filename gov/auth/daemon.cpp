@@ -38,10 +38,10 @@ bool c::process_work(socket::peer_t *p, datagram*d) {
 	}
 	return true;
 }
-
+/*
 void c::report_in_service(vector<peer::peer_t*>& isp) {
 }
-
+*/
 void c::dump(ostream& os) const {
 	os << "Hello from auth::daemon" << endl;
 	os << "This node public key: " << id.pub << endl;

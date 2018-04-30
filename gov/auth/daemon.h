@@ -23,7 +23,7 @@ struct daemon:peer::daemon {
 	void dump(ostream& os) const;
 
 	virtual bool process_work(socket::peer_t *p, datagram*d) override;
-	virtual void report_in_service(vector<peer::peer_t*>&) override;
+	//virtual void report_in_service(vector<peer::peer_t*>&) override;
 
 	keys id;
 };
