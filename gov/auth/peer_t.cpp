@@ -21,22 +21,22 @@ void c::dump(ostream& os) const {
 }
 
 void c::process_auth_request(datagram* d, const keys& mykeys) {
-//cout << "AAA process_auth_request" << endl;
+cout << "AAA process_auth_request" << endl;
 	string hello_msg=d->parse_string();
-//cout << "process_auth_request " << hello_msg << endl;
+cout << "process_auth_request " << hello_msg << endl;
 	string signature=crypto::ec::instance.sign_encode(mykeys.priv,hello_msg);
 
 	msg=get_random_message();		
 	ostringstream os;
 	os << mykeys.pub << ' ' << signature << ' ' << msg;
-//cout << "AAA process_auth_request. sending auth_peer_challenge" << endl;
+cout << "AAA process_auth_request. sending auth_peer_challenge" << endl;
 	send(new datagram(protocol::auth_peer_challenge,os.str()));
 }
 
 void c::process_auth_peer_challenge(datagram* d, const keys& mykeys) {
-//cout << "AAA process_auth_peer_challenge" << endl;
+cout << "AAA process_auth_peer_challenge" << endl;
 	string data=d->parse_string();
-//cout << "process_auth_peer_challenge " << data << endl;
+cout << "process_auth_peer_challenge " << data << endl;
 	delete d;
 
 	string hello_msg;
@@ -49,15 +49,15 @@ void c::process_auth_peer_challenge(datagram* d, const keys& mykeys) {
 	is >> peer_signature_der_b58;
 	is >> hello_msg;
 	}
-//cout << "peer_signature_der_b58 " << peer_signature_der_b58 << endl;
-//cout << "peer_pubk " << peer_pubk << endl;
+cout << "peer_signature_der_b58 " << peer_signature_der_b58 << endl;
+cout << "peer_pubk " << peer_pubk << endl;
 
 	if (crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58)) {
 		stage_peer=verified;
 		pubkey=peer_pubk;
 	}
 	else {
-//cout << "FAIL 1" << endl;
+cout << "FAIL 1" << endl;
 		stage_peer=verified_fail;
 		//TODO sleep random time before answering peer , timing attack
 	}
@@ -67,15 +67,15 @@ void c::process_auth_peer_challenge(datagram* d, const keys& mykeys) {
 	string signature_der_b58=crypto::ec::instance.sign_encode(mykeys.priv,hello_msg);
 	ostringstream os;
 	os << mykeys.pub << ' ' << signature_der_b58 << ' ' << stage_peer;
-//cout << "AAA sending auth_challenge_response" << endl;
+cout << "AAA sending auth_challenge_response" << endl;
 	send(new datagram(protocol::auth_challenge_response,os.str()));
 
 }
 
 void c::process_auth_challenge_response(datagram* d) {
-//cout << "AAA process_auth_challenge_response" << endl;
+cout << "AAA process_auth_challenge_response" << endl;
 	string data=d->parse_string();
-//cout << "process_auth_challenge_response " << data << endl;
+cout << "process_auth_challenge_response " << data << endl;
 	delete d;
 
 	pubkey_t peer_pubk;
@@ -88,7 +88,7 @@ void c::process_auth_challenge_response(datagram* d) {
 	is >> peer_signature_der_b58;
 	is >> sveredict;
 	}
-//cout << "peer_signature_der_b58 " << peer_signature_der_b58 << endl;
+cout << "peer_signature_der_b58 " << peer_signature_der_b58 << endl;
 	stage_me=(stage_t)(stoi(sveredict));
 	
 	if (crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58)) {
@@ -96,25 +96,27 @@ void c::process_auth_challenge_response(datagram* d) {
 		pubkey=peer_pubk;
 	}
 	else {
-//cout << "FAIL 2" << endl;
+cout << "FAIL 2" << endl;
 		stage_peer=peer_t::verified_fail;
 	}
 	msg.clear();
 	send(new datagram(protocol::auth_peer_status,(uint16_t) stage_peer));
 
-//cout << "AAA calling verification_completed" << endl;
+cout << "AAA calling verification_completed" << endl;
 	verification_completed();
 }
 
 void c::process_auth_peer_status(datagram* d) {
 	stage_me=(stage_t)(d->parse_uint16());
-//cout << "AAA process_auth_peer_status " << stage_me << endl;
+cout << "AAA process_auth_peer_status " << stage_me << endl;
 	delete d;
 
+cout << "A2A calling verification_completed" << endl;
 	verification_completed();
 }
 
 void c::do_actions() {
+cout << "do_actions" << endl;
 	if (stage_me==anonymous && msg.empty()) {  //if msg not empty we are carrying on the auth process already
 		//cout << "auth: peer_t: send protocol::auth_request" << endl;
 		msg=get_random_message();		

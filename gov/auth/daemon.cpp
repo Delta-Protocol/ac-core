@@ -18,6 +18,12 @@ c::daemon(const keys& k, uint16_t port, uint16_t edges): b(port,edges), id(k) {
 c::~daemon() {
 }
 
+void c::on_connect(peer::peer_t& p) {
+    b::on_connect(p);
+    cout << "ON CONNECT" << endl;
+    static_cast<peer_t&>(p).do_actions();
+}
+
 socket::client* c::create_client(int sock) {
 	auto p=new peer_t(sock);
 	p->parent=this;
@@ -26,6 +32,7 @@ socket::client* c::create_client(int sock) {
 
 bool c::process_work(socket::peer_t *p, datagram*d) {
 	if (b::process_work(p,d)) return true;
+cout << "AUTH: process work" << endl;
 	peer_t *peer=static_cast<peer_t*>(p);
 
 	assert(d!=0);

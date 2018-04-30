@@ -57,6 +57,9 @@ namespace peer {
 
 		void clear_evidences();
 
+
+        virtual void on_connect(peer_t&) {}
+
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;
 		virtual bool process_evidence(peer_t *c, datagram*d);
 
