@@ -47,7 +47,7 @@ namespace peer {
 
 		pub_t connected_peers() const;
 
-		virtual void report_in_service(vector<peer_t*>&);
+//		virtual void report_in_service(vector<peer_t*>&);
 		void dump(ostream& os) const;
 
 		void send(int num, peer_t* exclude, datagram* d);

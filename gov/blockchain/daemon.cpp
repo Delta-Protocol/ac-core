@@ -397,9 +397,9 @@ void c::save_block(const string& content) const {
 }
 */
 void c::query_block(const diff::hash_t& hash) {
-	auto n=get_random_node();
+	auto n=get_random_edge();
 	if (n==0) return;
-	cout << "querying diff " << hash << " to " << n->pubkey << endl;
+//	cout << "querying diff " << hash << " to " << n->pubkey << endl;
 	n->send(protocol::query_block,hash.to_b58());
 }
 
@@ -436,13 +436,15 @@ bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
 	return true;
 }
 
-peer_t* c::get_random_node() {
-	vector<peer_t*> n=get_nodes();
+peer_t* c::get_random_edge() {
+//	vector<peer_t*> n=get_nodes();
+    auto n=peerd.in_service();
+    cout << n.size() << " nodes available" << endl;
 	if (n.empty()) return 0;
 	uniform_int_distribution<> d(0, n.size()-1);
 	auto i=n.begin();
 	advance(i,d(rng));
-	return *i;
+    return reinterpret_cast<peer_t*>(*i);
 }
 
 vector<peer_t*> c::get_nodes() {
@@ -453,6 +455,7 @@ vector<peer_t*> c::get_nodes() {
 	}
 	return v;
 }
+
 vector<peer_t*> c::get_people() {
 	vector<peer_t*> v;
 	for (auto& i:peerd.in_service()) {
@@ -640,7 +643,7 @@ void c::on_begin_cycle() {
 
 void c::process_query_block(peer_t *c, datagram*d) {
 	auto hash_b58=d->parse_string();
-cout << "Received a petition of block " << hash_b58 << " from " << c->pubkey << endl;
+//cout << "Received a petition of block " << hash_b58 << " from " << c->pubkey << endl;
 	delete d;
 	string content=load_block(hash_b58);
 	if (content.empty()) {

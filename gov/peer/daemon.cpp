@@ -21,18 +21,18 @@ socket::client* c::create_client(int sock) {
 	return p;
 }
 
-void c::daemon_timer() {
+void c::daemon_timer() { // network mutation
 	pub_t p=adjust_peer_number();
 
 	check_latency(p);
 
-	auto nis=in_service();
-	report_in_service(nis);
+//	auto nis=in_service();
+//	report_in_service(nis);
 }
-
+/*
 void c::report_in_service(vector<peer_t*>&) {
 }
-
+*/
 void c::check_latency(const pub_t& a) {
 	for (auto&i:a) {
 		if (i->stage==peer_t::connected) {
