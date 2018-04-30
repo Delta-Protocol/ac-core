@@ -172,6 +172,7 @@ struct cfg: filesystem::cfg {
 
 		vector<string> addrs;		
 		string seeds_file=abs_file(home,"nodes.manual");
+		cout << "reading " << seeds_file << endl;
 		ifstream f(seeds_file);
 		while(f.good()) {
 			string addr;
@@ -179,6 +180,7 @@ struct cfg: filesystem::cfg {
 			if (addr.empty()) continue;
 			addrs.push_back(addr);
 		}
+		cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
 
 	    string blocks_dir=abs_file(home,"blocks");
 	    if (!ensure_dir(blocks_dir)) {
