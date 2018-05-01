@@ -1,4 +1,5 @@
 *.o
+.vscode/
 gov/libusgov.so
 govd/us-govd
 wallet/us-wallet
