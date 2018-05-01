@@ -697,19 +697,22 @@ bool c::networking::process_evidence(peer::peer_t *c, datagram*d) {
 
 bool c::networking::process_work(socket::peer_t *c, datagram*d) {
 cout << "PROCESSING DATAGRAM " << d->service << endl;
-	if (protocol::is_node_protocol(d->service)) {
+	if (protocol::is_node_protocol(d->service)) { //high priority
 cout << "NODE PROTOCOL " << d->service << endl;
 		if (parent->process_work(static_cast<peer_t*>(c),d)) return true;
+cout << "NOT handled by specialists! " << d->service << endl;
 	}
-	else if (b::process_work(c,d)) { //ping, evidences
-cout << "EVIDENCE " << d->service << endl;
+	if (protocol::is_app_query(d->service)) {
+cout << "QUERY PROTOCOL " << d->service << endl;
+		if (parent->process_app_query(static_cast<peer_t*>(c),d)) return true;
+cout << "NOT handled by specialists! " << d->service << endl;
+	}
+
+
+	if (b::process_work(c,d)) { //ping, evidences, auth
 		return true;
 	}
-	else if (protocol::is_app_query(d->service)) {
-cout << "QUERY " << d->service << endl;
-		if (parent->process_app_query(static_cast<peer_t*>(c),d)) return true;
-		
-	}
+cout << "WARNING, NOT handled at all " << d->service << endl;
 	return false;
 }
 bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
