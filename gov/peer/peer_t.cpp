@@ -6,10 +6,12 @@ using namespace usgov::peer;
 using namespace std;
 using namespace chrono_literals;
 
+typedef usgov::peer::peer_t c;
+
 constexpr array<const char*,peer_t::num_stages> peer_t::stagestr;
 constexpr array<const char*,2> peer_t::modestr;
 
-peer_t::peer_t(int sock): b(sock), stage(service),latency(100ms) {
+c::peer_t(int sock): b(sock), stage(service),latency(100ms) {
 	if(sock!=0) {
 		since=chrono::steady_clock::now();
 	}
@@ -18,22 +20,28 @@ peer_t::peer_t(int sock): b(sock), stage(service),latency(100ms) {
 	}
 }
 
-peer_t::~peer_t() {
+c::~peer_t() {
 	delete curd;
 }
 
-
-bool peer_t::connect(const string& host, uint16_t port, bool block) {
+bool c::connect(const string& host, uint16_t port, bool block) {
 	if (b::connect(host, port, block)) {
 		since=chrono::steady_clock::now();
 		//stage=connected;
 		stage=service;
+        on_connect();
+
 		return true;
 	}
 	return false;
 }
 
-bool peer_t::ping() {
+void c::on_connect() {
+	parent->incorporate(this);
+}
+
+
+bool c::ping() {
 	{
 	lock_guard<mutex> lock(mx);
 	sent_ping=chrono::steady_clock::now();
@@ -41,7 +49,7 @@ bool peer_t::ping() {
 	return send(protocol::ping,"ping");
 }
 
-datagram* peer_t::complete_datagram() {
+datagram* c::complete_datagram() {
 	if (!curd) curd=new datagram();
 	if (!curd->recv(sock)) {
 		delete curd;
@@ -56,13 +64,13 @@ datagram* peer_t::complete_datagram() {
 	return curd;
 }
 
-bool peer_t::is_slow() const {
+bool c::is_slow() const {
 	using namespace std::chrono_literals;
 	if (latency>chrono::steady_clock::duration(300ms)) return true; //TODO parameter
 	return false;
 }
 
-void peer_t::process_pong() {
+void c::process_pong() {
 	lock_guard<mutex> lock(mx);
 	latency=chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now()-sent_ping);
 	if (!is_slow()) {
@@ -74,7 +82,7 @@ void peer_t::process_pong() {
 	}
 }
 
-void peer_t::disconnect() {
+void c::disconnect() {
      {
      lock_guard<mutex> lock(mx);
      stage=disconnecting;
@@ -82,7 +90,7 @@ void peer_t::disconnect() {
      b::disconnect();
 }
 
-bool peer_t::process_work(datagram* d) { //executed by thread from pool 
+bool c::process_work(datagram* d) { //executed by thread from pool 
      assert(d!=0);
      switch(d->service) {
          case protocol::ping: {
@@ -141,7 +149,7 @@ namespace {
 
 }
 
-void peer_t::dump(ostream& os) const {
+void c::dump(ostream& os) const {
 	os << this << "- mode: " << modestr[mode] << "; age: " << age(since) << "; latency: " << latency.count() << "us; stage: " << stagestr[stage] << endl;
 }
 

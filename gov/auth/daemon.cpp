@@ -18,11 +18,13 @@ c::daemon(const keys& k, uint16_t port, uint16_t edges): b(port,edges), id(k) {
 c::~daemon() {
 }
 
+/*
 void c::on_connect(peer::peer_t& p) {
     b::on_connect(p);
     cout << "ON CONNECT" << endl;
     static_cast<peer_t&>(p).do_actions();
 }
+*/
 
 socket::client* c::create_client(int sock) {
 	auto p=new peer_t(sock);

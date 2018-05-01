@@ -110,10 +110,8 @@ void c::add_peers(pub_t& a) {
 				exclude.emplace(addr);
 				auto* p=create_client(0);
 				if (p->connect(addr,16672)) {
-					incorporate(p);
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);
-                    on_connect(*pp);
 				}
 				else {
 					cout << "peerd: unable to connect, deleting peer" << endl;
