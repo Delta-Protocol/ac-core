@@ -39,7 +39,7 @@ namespace peer {
 
 		virtual bool connect(const string& host, uint16_t port, bool block=false) override;
 
-		virtual void on_connect();
+		virtual void on_connect() override;
 
 		virtual bool process_work(datagram* d);
 		void process_pong();

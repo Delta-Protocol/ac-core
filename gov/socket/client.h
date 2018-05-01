@@ -35,6 +35,8 @@ namespace socket {
 		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
 		bool init_sock(const string& host, uint16_t port, bool block=false);
 
+		virtual void on_connect() {}
+
 		void dump(ostream& os) const;
 
 		int sock;

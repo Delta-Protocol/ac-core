@@ -26,17 +26,16 @@ c::~peer_t() {
 
 bool c::connect(const string& host, uint16_t port, bool block) {
 	if (b::connect(host, port, block)) {
-		since=chrono::steady_clock::now();
-		//stage=connected;
-		stage=service;
-        on_connect();
-
 		return true;
 	}
 	return false;
 }
 
 void c::on_connect() {
+    b::on_connect();
+	since=chrono::steady_clock::now();
+	//stage=connected;
+	stage=service;
 	parent->incorporate(this);
 }
 
