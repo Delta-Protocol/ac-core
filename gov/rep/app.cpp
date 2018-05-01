@@ -29,6 +29,15 @@ void app::on_begin_cycle() {
 void c::dbhash(hasher_t&) const {
 }
 
+void c::clear() {
+    {
+	lock_guard<mutex> lock(mx_policies);
+    policies.clear();
+    }
+    db.clear();
+}
+
+
 /*
 unordered_map<const miner_gut*,uint64_t> blockchain_app::to_fees(const unordered_map<const miner_gut*,double>& shares,uint64_t total_fees) {
 	unordered_map<const miner_gut*,uint64_t> ans;

@@ -226,6 +226,9 @@ namespace auth { //blockchain network support, this service is free
 			typedef unordered_map<pubkeyh_t,address> hall_t; //TODO: guardar integer score, incrementar cada ciclo, net growth: solo seleccionar con score> 1200 
 //			typedef map<pubkey,ip_address> hall_t; //TODO: guardar integer score, incrementar cada ciclo, net growth: solo seleccionar con score> 1200 
 //Para una buena mezcla evil/honest se trata de consumir una IP mientras se esta en hall, hay que estar incrementando el score durante 1 dia para ser seleccionado.
+
+            void clear();
+
 			mutable mutex mx_nodes;
 			nodes_t nodes;
 
@@ -306,6 +309,8 @@ namespace auth { //blockchain network support, this service is free
 
 
 		db_t db;
+
+		virtual void clear() override;
 
 
 

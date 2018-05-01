@@ -113,6 +113,7 @@ namespace rep {
 			typedef unordered_map<hash_t,cash_t> accounts_t;
 
 			mutable mutex mx;
+            void clear() {}
 //			accounts_t accounts;
 //			cash_t supply_left{ 2100000000000}; //trusted variable
 //			cash_t block_reward{    500000000}; //trusted variable
@@ -121,6 +122,7 @@ namespace rep {
 		db_t db;
 
 		virtual void dbhash(hasher_t&) const override;
+		virtual void clear() override;
 
 		struct policies_t: blockchain::policies_t<hash_t, policies_traits> {
 			typedef blockchain::policies_t<hash_t, policies_traits> b;

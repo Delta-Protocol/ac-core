@@ -247,9 +247,10 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 		//cout << "save" << endl;
 				save(*data.new_block);
 				if (!import(*data.new_block)) {
+                    reset_db();
 					cout << "Reconstruction blockchain" << endl; //TODO
-					assert(false);
-					exit(1);
+					//assert(false);
+					//exit(1);
 				}
 			}
 			delete data.new_block;
@@ -844,6 +845,13 @@ void c::set_last_block_imported_(const diff::hash_t& h) {
 	string filename=blocksdir+"/head";
 	ofstream os(filename);
 	os << last_block_imported << endl;
+}
+
+void c::reset_db() {
+	for (auto&i:apps_) {
+        i.second->clear();
+	}
+	set_last_block_imported(0);
 }
 
 

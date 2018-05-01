@@ -383,7 +383,7 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 
 		struct db_t {
 			db_t() {
-				accounts=new accounts_t();
+                clear();
 			}
 			db_t(db_t&& other):supply_left(other.supply_left), block_reward(other.block_reward) {
 				accounts=other.accounts;
@@ -401,20 +401,21 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 			void dump(ostream& os) const;
 			//void clear();
 			cash_t get_newcash();
-
+            void clear();
 			//typedef unordered_map<string,cash_t> accounts_t;
 			void to_stream(ostream&) const;
 			static db_t from_stream(istream&);
 
 			mutable mutex mx;
-			accounts_t* accounts;
-			cash_t supply_left{2100000000000000}; //21.000.000e8  21e14
-			cash_t block_reward{500000000}; //5e8
+			accounts_t* accounts{0};
+			cash_t supply_left;
+			cash_t block_reward;
 		};
 
 		db_t db;
 
 		virtual void dbhash(hasher_t&) const override;
+		virtual void clear() override;
 
 
 		struct policies_t: blockchain::policies_t<double, policies_traits> {

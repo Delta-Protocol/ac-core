@@ -336,3 +336,28 @@ void c::db_t::hash(hasher_t& h) const {
 	}
 }
 
+void c::db_t::clear() {
+	{
+	lock_guard<mutex> lock(mx_nodes);
+    nodes.clear();
+	}
+	{
+	lock_guard<mutex> lock(mx_hall);
+    hall.clear();
+	}
+}
+
+
+void c::clear() {
+    {
+	lock_guard<mutex> lock(mx_policies);
+    policies.clear();
+    }
+    db.clear();
+
+}
+
+
+
+
+

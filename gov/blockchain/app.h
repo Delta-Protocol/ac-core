@@ -42,6 +42,8 @@ namespace blockchain {
 
 		virtual void dbhash(hasher_t&) const=0;
 
+		virtual void clear()=0;
+
 		virtual void run()=0;
 
 		virtual void import(const app_gut2&, const pow_t&)=0;
@@ -49,9 +51,6 @@ namespace blockchain {
 		const keys& get_keys() const;
 		daemon* parent{0};
 	};
-
-
-
 
 	struct app_gut {
 		virtual ~app_gut() { }
@@ -195,9 +194,13 @@ namespace blockchain {
 		typedef app::hasher_t hasher_t;
 
 		policies_t() {
-			for (auto& i:*this) i=0;
+			clear();
 		}
 		virtual ~policies_t() {}
+
+        void clear() {
+			for (auto& i:*this) i=0;
+        }
 		
 		policies_t& operator =(const policies_t& other) {
 			for (int i=0; i<T::num_params; ++i) {

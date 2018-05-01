@@ -1123,8 +1123,25 @@ string c::shell_command(const string& cmdline) {
 	return os.str();
 }
 
+void c::db_t::clear() {
+	lock_guard<mutex> lock(mx);
+    delete accounts;
+	accounts=new accounts_t();
+    supply_left=2100000000000000; //21.000.000e8  21e14
+    block_reward=500000000; //5e8
+}
+
 void c::dbhash(hasher_t&) const {
 }
+
+void c::clear() {
+    {
+	lock_guard<mutex> lock(mx_policies);
+    policies.clear();
+    }
+    db.clear();
+}
+
 
 void c::dump_policies(ostream& os) const {
 	lock_guard<mutex> lock(mx_policies);

@@ -175,6 +175,7 @@ namespace blockchain {
 
 		void update_peers_state();
 
+        void reset_db();
 
 
 		bool import(const diff& b);
