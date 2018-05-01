@@ -38,7 +38,7 @@ datagram* c::complete_datagram() {
 }
 
 void c::on_connect() {
-	parent->incorporate(this);
+	if (parent) parent->incorporate(this);
 }
 
 datagram* c::send_recv(const string&addr, uint16_t port, datagram*d) {
