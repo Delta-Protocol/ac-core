@@ -800,10 +800,11 @@ cout << "PW sysop" << endl;
 		return true;
 	}
 */	
-cout << "Delivering to apps" << endl;
+cout << "Delivering to " << apps_.size() << " apps" << endl;
 	bool processed=false;
 	for (auto&i:apps_) {
 //		if (!i.second->in_service()) continue;
+        cout << "delivering to app " << i.second->get_name() << endl;
 		if (i.second->process_work(c,d)) {
 			processed=true;
 			break;
