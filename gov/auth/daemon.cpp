@@ -31,6 +31,7 @@ socket::client* c::create_client(int sock) {
 }
 
 bool c::process_work(socket::peer_t *p, datagram*d) {
+cout << "AUTH: process work0" << endl;
 	if (b::process_work(p,d)) return true;
 cout << "AUTH: process work" << endl;
 	peer_t *peer=static_cast<peer_t*>(p);

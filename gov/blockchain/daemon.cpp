@@ -754,7 +754,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 cout << "BLOCKCHAIN: PW process_work " << d->service << endl;
 
 	if (d->service==protocol::sysop) {
-//cout << "PW sysop" << endl;
+cout << "PW sysop" << endl;
 		bool alowed_sysop=sysop_allowed;
 		if (c->stage==peer_t::sysop) { //Is peer a sysop?
 			if (!sysop_allowed) {
@@ -800,7 +800,7 @@ cout << "BLOCKCHAIN: PW process_work " << d->service << endl;
 		return true;
 	}
 */	
-
+cout << "Delivering to apps" << endl;
 	bool processed=false;
 	for (auto&i:apps_) {
 //		if (!i.second->in_service()) continue;
