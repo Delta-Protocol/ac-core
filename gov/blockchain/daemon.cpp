@@ -95,6 +95,9 @@ void c::syncd::run() {
 					lock_guard<mutex> lock(mx); 
 					tail=*patches.begin();
 				}
+                else {
+                    d->clear();
+                }
 			}
 		}
 		cout << "SYNCD: going to sleep indefinitely" << endl;
@@ -179,7 +182,6 @@ bool c::patch_db(const vector<diff::hash_t>& patches) { //this is syncd thread
 			return false;
 		}
 		if (!import(*b)) {
-			cout << "Unexpected import failure" << endl;
 			delete b;
 			return false;
 		}
@@ -247,8 +249,7 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 		//cout << "save" << endl;
 				save(*data.new_block);
 				if (!import(*data.new_block)) {
-                    reset_db();
-					cout << "Reconstruction blockchain" << endl; //TODO
+                    clear();
 					//assert(false);
 					//exit(1);
 				}
@@ -847,7 +848,8 @@ void c::set_last_block_imported_(const diff::hash_t& h) {
 	os << last_block_imported << endl;
 }
 
-void c::reset_db() {
+void c::clear() {
+	cout << "DB cleared" << endl; //TODO
 	for (auto&i:apps_) {
         i.second->clear();
 	}
