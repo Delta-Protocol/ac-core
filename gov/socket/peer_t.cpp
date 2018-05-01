@@ -37,6 +37,10 @@ datagram* c::complete_datagram() {
 	return curd;
 }
 
+void c::on_connect() {
+	if (parent) parent->incorporate(this);
+}
+
 datagram* c::send_recv(const string&addr, uint16_t port, datagram*d) {
 	peer_t cli;
 	if (!cli.connect(addr,port,true)) {

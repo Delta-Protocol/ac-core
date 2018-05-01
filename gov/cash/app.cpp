@@ -829,7 +829,7 @@ bool c::unlock(const hash_t& address, const size_t& this_index, const hash_t& lo
 		        waitpid(pid, &status, 0); /* Wait for the process to complete */
 		    }
 		    std::cout << "Process exited with " << WEXITSTATUS(status) << "\n";
-		    return 0;
+		    return status==0;
 	}
 }
 

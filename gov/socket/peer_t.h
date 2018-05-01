@@ -19,6 +19,7 @@ namespace socket {
 		static datagram* send_recv(const string&addr, uint16_t port, datagram*d);
 		virtual void ready() override;
 		void dump(ostream& os) const;
+		virtual void on_connect() override;
 		
 		daemon* parent{0};
 		datagram* curd{0};

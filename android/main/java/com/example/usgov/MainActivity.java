@@ -234,6 +234,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
 
+        findViewById(R.id.cashlogo).setVisibility(View.VISIBLE);
+
 
         findViewById(R.id.amount).setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override

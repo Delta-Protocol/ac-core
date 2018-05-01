@@ -61,6 +61,7 @@ bool client::connect(const string& host, uint16_t port, bool block) {
 	lock_guard<mutex> lock(mx);
 	if (!init_sock(host, port, block)) return false;
 	addr=host;
+    on_connect();
 	return true;
 }
 

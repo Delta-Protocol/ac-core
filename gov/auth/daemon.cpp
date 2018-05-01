@@ -18,6 +18,14 @@ c::daemon(const keys& k, uint16_t port, uint16_t edges): b(port,edges), id(k) {
 c::~daemon() {
 }
 
+/*
+void c::on_connect(peer::peer_t& p) {
+    b::on_connect(p);
+    cout << "ON CONNECT" << endl;
+    static_cast<peer_t&>(p).do_actions();
+}
+*/
+
 socket::client* c::create_client(int sock) {
 	auto p=new peer_t(sock);
 	p->parent=this;
@@ -25,7 +33,9 @@ socket::client* c::create_client(int sock) {
 }
 
 bool c::process_work(socket::peer_t *p, datagram*d) {
+cout << "AUTH: process work0" << endl;
 	if (b::process_work(p,d)) return true;
+cout << "AUTH: process work" << endl;
 	peer_t *peer=static_cast<peer_t*>(p);
 
 	assert(d!=0);
@@ -38,10 +48,10 @@ bool c::process_work(socket::peer_t *p, datagram*d) {
 	}
 	return true;
 }
-
+/*
 void c::report_in_service(vector<peer::peer_t*>& isp) {
 }
-
+*/
 void c::dump(ostream& os) const {
 	os << "Hello from auth::daemon" << endl;
 	os << "This node public key: " << id.pub << endl;

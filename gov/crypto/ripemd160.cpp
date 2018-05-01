@@ -349,6 +349,13 @@ bool c::value_type::operator == (const value_type& other) const { //result depen
 	return true;
 }
 
+bool c::value_type::operator != (const value_type& other) const { //result depends on endianness (different results in different archs),ok for local hash tables
+	if (*reinterpret_cast<const uint64_t*>(&(*this)[0]) != *reinterpret_cast<const uint64_t*>(&other[0])) return true;
+	if (*reinterpret_cast<const uint64_t*>(&(*this)[8]) != *reinterpret_cast<const uint64_t*>(&other[8])) return true;
+	if (*reinterpret_cast<const uint32_t*>(&(*this)[16]) != *reinterpret_cast<const uint32_t*>(&other[16])) return true;
+	return false;
+}
+
 bool c::value_type::operator < (const value_type& other) const { //result depends on endianness (different results in different archs),ok for local hash tables
 	if (*reinterpret_cast<const uint64_t*>(&(*this)[0]) < *reinterpret_cast<const uint64_t*>(&other[0])) return true;
 	if (*reinterpret_cast<const uint64_t*>(&(*this)[0]) > *reinterpret_cast<const uint64_t*>(&other[0])) return false;

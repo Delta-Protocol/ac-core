@@ -47,7 +47,7 @@ namespace peer {
 
 		pub_t connected_peers() const;
 
-		virtual void report_in_service(vector<peer_t*>&);
+//		virtual void report_in_service(vector<peer_t*>&);
 		void dump(ostream& os) const;
 
 		void send(int num, peer_t* exclude, datagram* d);
@@ -56,6 +56,7 @@ namespace peer {
 		virtual string get_random_peer(const unordered_set<string>& exclude) const { return ""; }
 
 		void clear_evidences();
+
 
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;
 		virtual bool process_evidence(peer_t *c, datagram*d);

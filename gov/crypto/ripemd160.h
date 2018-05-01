@@ -21,6 +21,7 @@ using namespace std;
 		value_type();
 		value_type(unsigned int i);
 		bool operator == (const value_type& other) const;  //result depends on endianness (different results in different archs),ok for local hash tables
+		bool operator != (const value_type& other) const;  //result depends on endianness (different results in different archs),ok for local hash tables
 		bool operator < (const value_type& other) const; //result depends on endianness (different results in different archs),ok for local hash tables
 		bool is_zero() const;
 		void zero();

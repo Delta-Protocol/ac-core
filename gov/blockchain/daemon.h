@@ -207,7 +207,7 @@ namespace blockchain {
 		mutable diff::hash_t cached_dbhash;
 		mutable bool cached_dbhash_ok{false};
 
-		peer_t* get_random_node();
+		peer_t* get_random_edge();
 
 		networking peerd;
 
