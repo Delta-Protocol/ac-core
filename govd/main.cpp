@@ -275,7 +275,7 @@ void open_shell(thinfo& i) {
 	cout << "/Start thread" << endl;
 	cout << "Connecting to daemon at localhost:" << i.p.port << endl;
 
-	cli.ping();
+	//cli.ping();
 
 	cout << "Authenticating..."; cout.flush();
 	while (true) {
@@ -302,6 +302,7 @@ void open_shell(thinfo& i) {
 			break;
 		}
 		datagram* d=new datagram(usgov::protocol::sysop,line);
+//cout << "sending " << usgov::protocol::sysop << " " <<line << endl;
 		cli.send(d);
 		{
 		unique_lock<mutex> lock(mx22);

@@ -19,32 +19,8 @@ using namespace std;
 
 void c::help(ostream& os) const {
 
-os << "   nobounds" << endl;
-os << "" << endl;
-os << "-Anonymous Society Network-" << endl;
-os << "  -Inclusive-" << endl;
-os << "PAYS TO WHOM WORK" << endl;
-os << "You work and get paid by dedicating one computer (or as many as you can), 24h connected." << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "You work 1% of the network workload, you take 1% of its profits, every minute." << endl;
-os << "PoRW - Proof Of Real Work" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
-os << "" << endl;
+os << "us.gov" << endl;
+os << "======" << endl;
 os << "" << endl;
 os << "1.Users" << endl;
 os << "  1.1. Run a node" << endl;
@@ -63,14 +39,9 @@ os << "" << endl;
 os << "2.2. submit changes" << endl;
 
 os << "" << endl;
-os << "" << endl;
-os << "" << endl;
 os << "Free Software licenced under GPL·" << endl;
-os << "Developers: This software has being designed to satisfy performance requirements over being user-friendly, e.g. it is not a good idea to add a JSON layer." << endl;
 
-
-
-	os << "Bitcoin++ Introspective Shell" << endl;
+	os << "us.gov ; Introspective Shell" << endl;
 	os << "h              Shows this help." << endl;
 	os << "l level [int]    Shows/set the current depth level." << endl;
 	if (level==0) {
