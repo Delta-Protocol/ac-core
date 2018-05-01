@@ -234,10 +234,10 @@ namespace blockchain {
 		syncd syncdemon;
 
 		struct sysops_t:unordered_map<peer_t *,shell> {
-			sysops_t(const daemon&d): d(d) {}
+			sysops_t(daemon&d): d(d) {}
 			bool process_work(peer_t *p, datagram*d);
 			mutex mx;
-			const daemon& d;
+			daemon& d;
 		};
 
 		sysops_t sysops;

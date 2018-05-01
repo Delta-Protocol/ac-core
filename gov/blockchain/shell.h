@@ -11,10 +11,10 @@ namespace blockchain {
 	using namespace std;
 	struct daemon;
 	struct shell {
-		shell(const daemon&d):d(d) {}
+		shell(daemon&d):d(d) {}
 		void help(ostream&) const;
 		string command(const string& cmd);
-		const daemon& d;
+		daemon& d;
 		int level{3};
 		int cur_app{-1};
 		string memory_cmd_lvl; //commands compatible across level, repeatable after level changes

@@ -140,6 +140,23 @@ string c::command(const string& cmdline) {
 			os << d.shell_command(cur_app,"hello");
 		}
 	}
+    else if (cmd=="add_node") {
+        string ip;
+        is >> ip;
+        if (!ip.empty()) {
+            d.peerd.seed_nodes.push_back(ip);
+    		os << "Added seed node " << ip << endl;
+        }
+        else {
+    		os << "Missing address" << endl;
+        }
+    }
+    else if (cmd=="seeds") {
+   		os << "Seed nodes" << endl;
+        for (auto& i:d.peerd.seed_nodes) {
+    		os << i << endl;
+        }
+    }
 	else {
 		memory_cmd_lvl.clear(); //do nothing if level changes
 		os << "Unknown command '" << cmd << "'" << endl;

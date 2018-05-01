@@ -440,7 +440,7 @@ bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
 
 peer_t* c::get_random_edge() {
 //	vector<peer_t*> n=get_nodes();
-    auto n=peerd.in_service();
+    auto n=get_people(); //peerd.in_service();   sysops are not taken into account
     cout << n.size() << " nodes available" << endl;
 	if (n.empty()) return 0;
 	uniform_int_distribution<> d(0, n.size()-1);
@@ -673,7 +673,7 @@ void c::process_block(peer_t *c, datagram*d) {
 */
 	diff* b=diff::from_stream(is);
 	if (b==0) return;
-	cout << "Received content of block " << b->hash() << endl;
+	cout << "Received content of block " << b->hash() << " from " << c->addr << endl;
 
 
 	string filename=blocksdir+"/"+b->hash().to_b58();
