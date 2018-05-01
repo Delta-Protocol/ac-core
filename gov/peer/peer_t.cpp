@@ -36,7 +36,6 @@ void c::on_connect() {
 	since=chrono::steady_clock::now();
 	//stage=connected;
 	stage=service;
-	parent->incorporate(this);
 }
 
 
