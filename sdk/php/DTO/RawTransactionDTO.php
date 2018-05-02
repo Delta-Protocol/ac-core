@@ -9,7 +9,7 @@ namespace Atlas\DTO;
  * @package Atlas\DTO
  * @copyright MIT
  */
-class RawTransactionDTO
+abstract class RawTransactionDTO
 {
     /**
      * The transaction id.
@@ -42,5 +42,26 @@ class RawTransactionDTO
      * @float
      */
     public $amount;
+
+    /**
+     * The transaction signature
+     *
+     * @string
+     */
+    public $signature;
+
+    /**
+     * Gets the raw transaction signature.
+     * @param $signature
+     * @return mixed
+     */
+    abstract public function setSignature($signature) : RawTransactionDTO;
+
+    /**
+     * Gets a raw transactions signature if it has one.
+     *
+     * @return string
+     */
+    abstract public function getSignature() : string ;
 
 }

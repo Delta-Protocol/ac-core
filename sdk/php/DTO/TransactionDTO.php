@@ -33,7 +33,7 @@ class TransactionDTO
 
     /**
      * An optional message that can be included in the transactions.
-     * 
+     *
      * @string
      */
     public $msg;
