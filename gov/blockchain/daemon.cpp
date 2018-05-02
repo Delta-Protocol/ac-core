@@ -343,8 +343,9 @@ void c::run() {
 string c::networking::get_random_peer(const unordered_set<string>& exclude_addrs) const { //returns ipaddress
 cout << "exclude: ";
 for (auto&i:exclude_addrs) cout << i << " ";
-cout << id.pub << endl;
+cout << "my pubkey is " << id.pub << endl;
 	auto n=parent->auth_app->get_random_node(id.pub.hash(),exclude_addrs);
+cout << "auth_app->get_random_node=" << n << endl;
 	if (n.empty() && !seed_nodes.empty()) {
 cout << "no nodes . using seeds " << endl;
 		uniform_int_distribution<> d(0, seed_nodes.size()-1);
