@@ -153,17 +153,6 @@ interface WalletDRPCInterface extends \Atlas\Abstracts\AbstractRPCInterface
     public function importPrivateKey(string $privKey, string $label) : bool;
 
     /**
-     * Returns an array of objects containing:
-     *
-     * @see \Atlas\DTO\ReceivedByAddressDTO
-     *
-     * @param int $minConf
-     * @param bool $includeEmpty
-     * @return array
-     */
-    public function listReceivedByAddress(int $minConf = 1, bool $includeEmpty = false) : array;
-
-    /**
      * Returns $count array of most recent transactions skipping the first $from transactions for $address.
      *
      * @see \Atlas\DTO\TransactionDTO
