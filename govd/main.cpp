@@ -220,6 +220,7 @@ condition_variable cv22;
 mutex mx22;
 bool ready22{false};
 bool finished22{false};
+bool finished23{false};
 void shell_echo(thinfo* info) {
 	blockchain::peer_t&cli=*info->peer;
 	fd_set read_fd_set;
@@ -234,13 +235,15 @@ void shell_echo(thinfo* info) {
 			cout << "Error in select" << endl;
 			continue;
 		}
+        if (finished22) break;
+
 		if (FD_ISSET (cli.sock, &read_fd_set)) {
 			datagram* d=cli.complete_datagram();
 			if (!d || d->error!=0) {
-				cout << "error recv datagram." << endl;
+				//cout << "error recv datagram." << endl;
 				if (d) delete d;
                 finished22=true;
-				return;
+				break;
 			}
 			if (!d->completed()) { 
 				return;
@@ -261,6 +264,8 @@ void shell_echo(thinfo* info) {
 			cv22.notify_all();
 		}
 	}
+    finished23=true;
+	cv22.notify_all();
 }
 
 #include <gov/blockchain/protocol.h>
@@ -303,7 +308,7 @@ void open_shell(thinfo& i) {
 		string line;
 		getline(cin,line);
 		if (line=="q") {
-			cout << "quitting.." << endl;
+//			cout << ".." << endl;
 			break;
 		}
 		datagram* d=new datagram(usgov::protocol::sysop,line);
@@ -316,9 +321,12 @@ void open_shell(thinfo& i) {
 		}
 
 	}
-	finished22=true;
-	//cli.send(new datagram(protocol::ping));
-	this_thread::sleep_for(chrono::seconds(1));
+	cli.send(new datagram(protocol::ping));
+
+	unique_lock<mutex> lock(mx22);
+	cv22.wait(lock,[]{return finished23;});
+
+	//this_thread::sleep_for(chrono::seconds(1));
 	cli.disconnect();
 	th.join();
 	
