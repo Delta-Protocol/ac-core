@@ -3,4 +3,5 @@
 gov/libusgov.so
 govd/us-govd
 wallet/us-wallet
+.idea/*
 
