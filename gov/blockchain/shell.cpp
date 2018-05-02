@@ -157,6 +157,11 @@ string c::command(const string& cmdline) {
     		os << i << endl;
         }
     }
+    else if (cmd=="mutate") {
+        d.peerd.daemon_timer();
+   		os << "mutation invoked" << endl;
+    }
+
 	else {
 		memory_cmd_lvl.clear(); //do nothing if level changes
 		os << "Unknown command '" << cmd << "'" << endl;

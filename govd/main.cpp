@@ -14,6 +14,8 @@ void sig_handler(int s) {
     signal_handler::_this.finish();
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
+	signal(SIGPIPE,SIG_DFL);
+
 }
 
 using namespace std::chrono_literals;
@@ -149,6 +151,8 @@ struct cfg: filesystem::cfg {
 
 	cfg(const string& privkb58, const string& blocksdir, const string& lockingdir, vector<string>&& seed_nodes): keys(privkb58), blocksdir(blocksdir), lockingdir(lockingdir), seed_nodes(seed_nodes) {
 	}
+    cfg(const cfg& other): keys(other.keys), blocksdir(other.blocksdir), lockingdir(other.lockingdir), seed_nodes(other.seed_nodes) {
+    }
 
 	static cfg load(const string& home) {
         if (!ensure_dir(home)) {
@@ -235,6 +239,7 @@ void shell_echo(thinfo* info) {
 			if (!d || d->error!=0) {
 				cout << "error recv datagram." << endl;
 				if (d) delete d;
+                finished22=true;
 				return;
 			}
 			if (!d->completed()) { 
@@ -270,9 +275,9 @@ void open_shell(thinfo& i) {
 		cerr << "Cannot connect" << endl;
 		return;
 	}
-	cout << "Start thread" << endl;
+	//cout << "Start thread" << endl;
 	thread th(&shell_echo,&i);
-	cout << "/Start thread" << endl;
+	//cout << "/Start thread" << endl;
 	cout << "Connecting to daemon at localhost:" << i.p.port << endl;
 
 	//cli.ping();
@@ -293,7 +298,7 @@ void open_shell(thinfo& i) {
 		cout << "."; cout.flush();		
 	}	
 	cout << endl;
-	while (true) {
+	while (!finished22) {
 		cout << "> "; cout.flush();
 		string line;
 		getline(cin,line);
@@ -312,7 +317,7 @@ void open_shell(thinfo& i) {
 
 	}
 	finished22=true;
-	cli.send(new datagram(protocol::ping));
+	//cli.send(new datagram(protocol::ping));
 	this_thread::sleep_for(chrono::seconds(1));
 	cli.disconnect();
 	th.join();
@@ -360,8 +365,8 @@ int main(int argc, char** argv) {
 	}
 
 	cfg conf=cfg::load(home);
+	cout << "Node public key is " << conf.keys.pub << endl;
 	if (p.daemon) {
-		cout << "Node public key is " << conf.keys.pub << endl;
 		signal(SIGINT,sig_handler);
 		signal(SIGTERM,sig_handler);
 		signal(SIGPIPE, SIG_IGN);

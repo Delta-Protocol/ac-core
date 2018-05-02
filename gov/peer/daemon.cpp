@@ -100,15 +100,18 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 }
 
 void c::add_peers(pub_t& a) {
+cout << "add peers" << endl;
 	auto n=edges-a.asize()+1;
 	unordered_set<string> exclude;
 	for (auto i:a) if (i!=0) exclude.emplace(i->addr);
 	while(n>0) {
 		string addr=get_random_peer(exclude);
+cout << "addr " << addr << endl;
 		if (!addr.empty()) {
 			if (exclude.find(addr)==exclude.end()) {
 				exclude.emplace(addr);
 				auto* p=create_client(0);
+cout << "connecting to address " << addr << endl;
 				if (p->connect(addr,16672)) {
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);

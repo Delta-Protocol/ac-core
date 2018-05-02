@@ -341,17 +341,18 @@ void c::run() {
 }
 
 string c::networking::get_random_peer(const unordered_set<string>& exclude_addrs) const { //returns ipaddress
-	//cout << "exclude: ";
-	//for (auto&i:exclude_addrs) cout << i << " ";
-//	string ps=id.pub_str();
-	//cout << ps << endl;
+cout << "exclude: ";
+for (auto&i:exclude_addrs) cout << i << " ";
+cout << id.pub << endl;
 	auto n=parent->auth_app->get_random_node(id.pub.hash(),exclude_addrs);
 	if (n.empty() && !seed_nodes.empty()) {
+cout << "no nodes . using seeds " << endl;
 		uniform_int_distribution<> d(0, seed_nodes.size()-1);
 		for (int j=0; j<10; ++j) {
 			auto i=seed_nodes.begin();
 			advance(i,d(parent->rng));
 			if (exclude_addrs.find(*i)==exclude_addrs.end()) {
+cout << "found " << *i << endl;
 				return *i;
 			}
 		}
@@ -771,6 +772,7 @@ cout << "PW sysop" << endl;
 			return sysops.process_work(c, d); //traslate the msg to sysopland
 		}
 		else {
+cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
 			delete d;
 			c->disconnect();
 //			c->send(new datagram(protocol::sysop,"Sysop operation is not allowed."));

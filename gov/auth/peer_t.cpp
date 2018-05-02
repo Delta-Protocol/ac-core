@@ -94,6 +94,7 @@ cout << "peer_signature_der_b58 " << peer_signature_der_b58 << endl;
 	if (crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58)) {
 		stage_peer=peer_t::verified;
 		pubkey=peer_pubk;
+cout << "Peer pubkey is " << pubkey << endl;
 	}
 	else {
 cout << "FAIL 2" << endl;
