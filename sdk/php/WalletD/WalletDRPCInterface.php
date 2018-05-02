@@ -171,14 +171,14 @@ interface WalletDRPCInterface extends \Atlas\Abstracts\AbstractRPCInterface
      *
      * @see \Atlas\DTO\TransactionDTO
      *
-     * @param string $sourceAccount
-     * @param string $destinationAccount
+     * @param string $sourceAddress
+     * @param string $destinationAddress
      * @param int $amount
      * @param int $minConf
      * @param null $msg
      * @return \Atlas\DTO\TransactionDTO
      */
-    public function sendFrom(string $sourceAccount, string $destinationAccount, int $amount, int $minConf = 1, $msg = null) : \Atlas\DTO\TransactionDTO;
+    public function sendFrom(string $sourceAddress, string $destinationAddress, int $amount, int $minConf = 1, $msg = null) : \Atlas\DTO\TransactionDTO;
 
     /**
      * Same as sendFrom(), but takes an array of multiple destination addresses.
@@ -186,14 +186,14 @@ interface WalletDRPCInterface extends \Atlas\Abstracts\AbstractRPCInterface
      *
      * @see \Atlas\DTO\TransactionDTO
      *
-     * @param string $string
-     * @param array $addresses
+     * @param string $sourceAddress
+     * @param array $destinationAddresses
      * @param int $amount
      * @param int $minConf
      * @param null $msg
      * @return array
      */
-    public function sendMany(string $string, array $addresses, int $amount, int $minConf = 1, $msg = null) : array;
+    public function sendMany(string $sourceAddress, array $destinationAddresses, int $amount, int $minConf = 1, $msg = null) : array;
 
     /**
      * Submits raw transaction (that has been serialized as a hex coded string) to the node.
@@ -204,19 +204,6 @@ interface WalletDRPCInterface extends \Atlas\Abstracts\AbstractRPCInterface
      * @return \Atlas\DTO\TransactionDTO
      */
     public function sendRawTransaction(string $hex) : \Atlas\DTO\TransactionDTO;
-
-    /**
-     * $amount is rounded to 8 decimal places.
-     * Returns a transaction object.
-     *
-     * @see \Atlas\DTO\TransactionDTO
-     *
-     * @param string $address
-     * @param int $amount
-     * @param string|null $msg
-     * @return \Atlas\DTO\TransactionDTO
-     */
-    public function sendToAddress(string $address, int $amount, string $msg = null) : \Atlas\DTO\TransactionDTO;
 
     /**
      * Sets default tx fee for transactions.
