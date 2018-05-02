@@ -47,71 +47,32 @@ namespace socket {
 
 			clients_t(){}
 			clients_t(const clients_t& other)=delete;
-			~clients_t() {
-				for (auto i:*this) delete i.second;
-			}
+			~clients_t();
+
 			bool is_here(client*) const;
 
 			struct rmlist:unordered_map<int,client*> {
 				typedef unordered_map<int,client*> b;
-
-				~rmlist() { for (auto i:*this) delete i.second; }
-				void add(client* c) {
-					lock_guard<mutex> lock(mx);
-					assert(c->sock);
-					assert(b::find(c->sock)==end());
-					emplace(c->sock,c);
-				}
-				bool remove(int fd) { //dont delete
-					lock_guard<mutex> lock(mx);
-					iterator i=b::find(fd);
-					if (i==end()) return false;
-					erase(i);
-					return true;	
-				}
-				bool find(int fd) const {
-					lock_guard<mutex> lock(mx);
-					return b::find(fd)!=end();
-				}
-				void dump(ostream& os) const {
-					lock_guard<mutex> lock(mx);	
-					os << "Size: " << size() << endl;
-					for (auto i:*this)
-						{ i.second->dump(os); }
-				}
+				~rmlist();
+				void add(client* c);
+				bool remove(int fd);
+				bool find(int fd) const;
+				void dump(ostream& os) const;
 				mutable mutex mx;
 			};
 
 			struct wait:unordered_set<client*> {
 				typedef unordered_set<client*> b;
-
-				~wait() { for (auto i:*this) delete i; }
-				void add(client* c) {
-					lock_guard<mutex> lock(mx);
-					emplace(c);
-				}
-				bool remove(client* c) { //dont delete
-					lock_guard<mutex> lock(mx);
-					iterator i=b::find(c);
-					if (i==end()) return false;
-					erase(i);
-					return true;	
-				}
-				bool find(client* c) const {
-					lock_guard<mutex> lock(mx);
-					return b::find(c)!=end();
-				}
-				void dump(ostream& os) const {
-					lock_guard<mutex> lock(mx);	
-					os << "Size: " << size() << endl;
-					for (auto i:*this)
-						{ i->dump(os); }
-				}
+				~wait();
+				void add(client* c);
+				bool remove(client* c);
+				bool find(client* c) const;
+				void dump(ostream& os) const;
 				mutable mutex mx;
 			};
 
 			struct attic_t:unordered_map<client*,chrono::steady_clock::time_point> {
-				~attic_t() { for (auto&i:*this) delete i.first; }
+				~attic_t();
 				void purge(); //definitely delete those clients that terminated long ago, in hope there is no more workers on them
 			};
 
