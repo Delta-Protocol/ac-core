@@ -106,8 +106,8 @@ cout << "add peers" << endl;
 	for (auto i:a) if (i!=0) exclude.emplace(i->addr);
 	while(n>0) {
 		string addr=get_random_peer(exclude);
-cout << "addr " << addr << endl;
 		if (!addr.empty()) {
+cout << "addr " << addr << endl;
 			if (exclude.find(addr)==exclude.end()) {
 				exclude.emplace(addr);
 				auto* p=create_client(0);
