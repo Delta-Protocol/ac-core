@@ -31,4 +31,11 @@ class TransactionDTO
      */
     public $amount;
 
+    /**
+     * An optional message that can be included in the transactions.
+     * 
+     * @string
+     */
+    public $msg;
+
 }

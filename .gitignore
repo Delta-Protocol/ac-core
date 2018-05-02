@@ -5,3 +5,4 @@ govd/us-govd
 wallet/us-wallet
 .idea/*
 
+*/**/.idea/*
