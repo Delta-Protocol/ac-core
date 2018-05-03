@@ -31,6 +31,7 @@ struct params {
 	bool shell{false};
 	uint16_t simul_num_nodes_deployed{0};
     string homedir;
+    string sysophost{"127.0.0.1"};
 };
 
 void help() {
@@ -43,6 +44,7 @@ void help() {
 	cout << "  -e <edges>    Max num neightbours, default " << p.edges << endl;
 	cout << "  -genesis <address of genesis node>    start a new history" << endl;
 	cout << "  -home <homedir>   Set home directory (default is ~/.us) " << endl;
+	cout << "  -host <address>   Specify where the daemon is running, defaults to localhost" << endl;
 	cout << "  -h            Print this help and exit " << endl;
 }
 
@@ -110,6 +112,16 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 			}
 			else {
 				cerr << "I need a directory." << endl;
+				return false;
+			}
+			continue;
+		}
+		if (inp=="-host") {
+			if (i<argc) {
+				p.sysophost=argv[i++];
+			}
+			else {
+				cerr << "I need an address." << endl;
 				return false;
 			}
 			continue;
@@ -276,8 +288,8 @@ void open_shell(thinfo& i) {
 	
 	cout << "us.gov Introspective Shell" << endl;
 	cout << "Connecting to daemon at localhost:" << i.p.port << endl;
-	if (!cli.connect("127.0.0.1",i.p.port,true)) {
-		cerr << "Cannot connect" << endl;
+	if (!cli.connect(i.p.sysophost,i.p.port,true)) {
+		cerr << "Cannot connect to " << i.p.sysophost << ":" << i.p.port << endl;
 		return;
 	}
 	//cout << "Start thread" << endl;
