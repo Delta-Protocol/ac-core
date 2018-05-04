@@ -242,14 +242,14 @@ interface WalletDRPCInterface extends \Atlas\Abstracts\AbstractRPCInterface
     public function validateAddress(string $address) : bool;
 
     /**
-     * Verify a signed message.
+     * Attempts to validate a signed message.
      *
      * @param string $address
      * @param string $signature
      * @param string $message
      * @return bool
      */
-    public function verifyAddress(string $address, string $signature, string $message) : bool;
+    public function validateMessage(string $address, string $signature, string $message) : bool;
 
     /**
      * Removes the wallet encryption key from memory, locking the wallet.
