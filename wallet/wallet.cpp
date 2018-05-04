@@ -83,13 +83,11 @@ void c::dump_balances(ostream& os) const {
 	os << "total balance: " << b << endl;
 }
 
-c::accounts_query_t c::get_accounts(const cash::app::query_accounts_t& addresses) {
+c::accounts_query_t c::query_accounts(const string&addr, uint16_t port, const cash::app::query_accounts_t& addresses) {
 	accounts_query_t ret;
 	socket::datagram* d=addresses.get_datagram();
 	if (!d) return ret;
 
-	string addr="92.51.240.61"; //"127.0.0.1";
-	uint16_t port=16672;
 	socket::datagram* response_datagram=socket::peer_t::send_recv(addr,port,d);
 	if (!response_datagram) return move(ret);
 	auto r=response_datagram->parse_string();
@@ -115,17 +113,17 @@ c::accounts_query_t c::get_accounts(const cash::app::query_accounts_t& addresses
 	return move(ret);
 }
 
-void c::refresh() {
+void c::refresh(const string&backend_host, uint16_t backend_port) {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
 	for (auto&i:*this) {
 		addresses.emplace_back(i.first);
 	}
-	data=get_accounts(addresses);
+	data=query_accounts(backend_host,backend_port,addresses);
 }
 
-c::input_accounts_t c::select_sources(const cash::cash_t& amount) {
-	refresh();
+c::input_accounts_t c::select_sources(const string&backend_host, uint16_t backend_port, const cash::cash_t& amount) {
+	refresh(backend_host,backend_port);
 	vector<accounts_query_t::const_iterator> v;	
 	v.reserve(data.size());
 	for (accounts_query_t::const_iterator i=data.begin(); i!=data.end(); ++i) {

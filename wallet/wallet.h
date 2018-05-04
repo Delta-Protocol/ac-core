@@ -48,10 +48,10 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	const crypto::ec::keys* get_keys(const cash::hash_t& address) const;
 	cash::cash_t balance() const;
 	void dump_balances(ostream& os) const;
-	static accounts_query_t get_accounts(const cash::app::query_accounts_t& addresses);
-	void refresh();
+	static accounts_query_t query_accounts(const string&host, uint16_t port, const cash::app::query_accounts_t& addresses);
+	void refresh(const string&addr, uint16_t port);
  
-	input_accounts_t select_sources(const cash::cash_t& amount);
+	input_accounts_t select_sources(const string&backend_host, uint16_t backend_port, const cash::cash_t& amount);
 	void dump(ostream& os) const;
 	accounts_query_t data;
 	string datapath;
