@@ -14,9 +14,13 @@ struct wallet_daemon: socket::daemon, wallet {
 	typedef socket::daemon b;
 	typedef socket::peer_t peer_t;
 
-	wallet_daemon(uint16_t port, const string& home);
+	wallet_daemon(uint16_t port, const string& home, const string&backend_host, uint16_t backend_port);
 	virtual ~wallet_daemon();
 	bool process_work(peer_t*, datagram*);
+
+    string backend_host;
+    uint16_t backend_port;
+
 };
 
 
