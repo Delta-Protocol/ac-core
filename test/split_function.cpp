@@ -1,38 +1,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
-  
+#include <gov/dfs/daemon.h>
 using namespace std;
-
-
-string resolve_filename(const string& filename) {
-	//result
-	string res;
-	//final string length with all slashes
-	int max_length = filename.size()/2 +filename.size() ; 
-	//memory reservation
-	res.reserve(max_length);
-	// slash"/" every 2 char
-    for(int i=0; i < filename.size(); i++){
-        if((i)%2 == 0){ 
-			res+="/";
-        }
-		res+=filename[i];
-    }
-	//delete the last slash '/'
-	if(res[res.size()-1]=='/'){
-		res.end()-1;
-	}
-	//return final result
-	return &res[1];
-}
-
 
 
 //---------------------------Testing------------------------//
 bool test(const string& input, const string& expected) {
 	
-	if( resolve_filename(input) != expected ){
+	if( usgov::dfs::daemon::resolve_filename(input) != expected ){
 		return false;
 	}
 	return true;
@@ -122,12 +98,4 @@ vector<int> testing_functions(){
 
 
 
-//-------------------------main()-------------------------------//
-int main(){				
-	
-	testing_functions();
-	
-	cout << resolve_filename("--kk--gg--ff--yy--oo--rr--ee--ss--oo") << endl;
-	exit(0);
-}
 

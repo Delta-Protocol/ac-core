@@ -61,6 +61,25 @@ string c::load(const string& hash) {
 }
 
 
+string c::resolve_filename(const string& filename) {
+	
+	string res;
+	
+	int max_length = filename.size()/2 +filename.size(); //final string length with slashes
+	res.reserve(max_length);
+    for(int i=0; i < filename.size(); i++){// slash"/" every 2 char
+        if((i&1) == 0){ 
+			res+="/";
+        }
+		res+=filename[i];
+    }
+	
+	if(res[res.size()-1]=='/'){
+		res.end()-1;//delete the last slash '/'
+	}
+	return &res[1];
+}
+
 
 
 
