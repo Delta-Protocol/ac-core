@@ -157,6 +157,9 @@ string c::command(const string& cmdline) {
     		os << i << endl;
         }
     }
+    else if (cmd=="home") {
+   		os << d.home << endl;
+    }
     else if (cmd=="mutate") {
         d.peerd.daemon_timer();
    		os << "mutation invoked" << endl;

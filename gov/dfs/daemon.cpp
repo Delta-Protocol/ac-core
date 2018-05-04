@@ -6,7 +6,7 @@ using namespace usgov::dfs;
 typedef usgov::dfs::daemon c;
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
-cout << "dfs::process_work for " << d->service << endl;
+//cout << "dfs::process_work for " << d->service << endl;
 	if (b::process_work(c,d)) return true;
 	peer_t* p=static_cast<peer_t*>(c);
 	switch(d->service) {

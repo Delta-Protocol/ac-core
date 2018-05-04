@@ -40,6 +40,8 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	wallet(const string& datapath);
 	~wallet();
 
+    string filename() const;
+
 	bool load();
 	bool save() const;
 

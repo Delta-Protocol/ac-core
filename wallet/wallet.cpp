@@ -17,11 +17,16 @@ c::~wallet() {
 	save();
 }
 
-bool c::load() {
+string c::filename() const {
 	auto file=datapath+"/wallet";
+    return file;
+}
+
+
+bool c::load() {
+	auto file=filename();
 	if (!file_exists(file)) return true;
-	string filename=datapath+"/wallet";
-	ifstream f(filename);
+	ifstream f(file);
 	while(f.good()) {
 		string pkb58;
 		f >> pkb58;
@@ -36,8 +41,8 @@ bool c::load() {
 
 bool c::save() const {
 	if (!need_save) return true;
-	string filename=datapath+"/wallet";
-	ofstream f(filename);
+	auto file=filename();
+	ofstream f(file);
 	for (auto&i:*this) {
 		f << i.second.priv << ' ';
 	}

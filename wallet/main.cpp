@@ -34,30 +34,6 @@ namespace usgov {
 
 }
 
-void help() {
-	cout << "-wp <port>  walletd port. default 16673" << endl;
-	cout << "-whost <address>  walletd host. default localhost" << endl;
-	cout << "-bp <port>  backend port. default 16672" << endl;
-	cout << "-bhost <address>  backend host. default localhost" << endl;
-	cout << "-offline" << endl;
-	cout << "-home <homedir>" << endl;
-	cout << "balance [0|1]" << endl;
-	cout << "address new" << endl;
-	cout << "address add <privkey>" << endl;
-	cout << "dump" << endl;
-	cout << "gen_keys" << endl;
-	cout << "priv_key <private key>          Gives information about the given private key." << endl;
-	cout << "tx base                         Reports the current parent block for new transactions" << endl;
-	cout << "tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
-	cout << "tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
-	cout << "tx decode <tx_b58>" << endl;
-	cout << "tx check <tx_b58>" << endl;
-	cout << "tx send <tx_b58>" << endl;
-	cout << "tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
-	cout << "   sigcodes: "; cash::tx::dump_sigcodes(cout); cout << endl;
-	cout << "daemon				Run daemon on port 16673" << endl;
-}
-
 struct params {
 	params() {
 	    const char* env_p = std::getenv("HOME");
@@ -68,12 +44,56 @@ struct params {
 	    homedir=env_p;
 	    homedir+="/.us";
 	}
+    void dump(ostream& os) const {
+        os << "home: " << homedir << endl;
+        os << "backend: " << backend_host << ":" << backend_port << endl;
+        os << "walletd: " << walletd_host << ":" << walletd_port << endl;
+    }
 	bool daemon{false};
     string homedir;
     bool offline{false};
-	string backend_host; uint16_t backend_port{16672};
+	string backend_host{"localhost"}; uint16_t backend_port{16672};
     string walletd_host{"localhost"}; uint16_t walletd_port{16673};
 };
+
+
+void help(const params& p) {
+    cout << "us.gov wallet" << endl;
+    cout << "usage:" << endl;
+    cout << " wallet [options] command" << endl;
+    cout << endl;
+    cout << "options are:" << endl;
+	cout << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
+	cout << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
+if (p.offline) {
+	cout << " backend connector:" << endl;
+	cout << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
+	cout << " -bp <port>  backend port. [" << p.backend_port << "]" << endl;
+}
+else {
+	cout << " walletd connector:" << endl;
+	cout << " -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
+	cout << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
+}
+    cout << endl;
+    cout << "commands are:" << endl;
+	cout << " balance [0|1]          Displays the spendable amount." << endl;
+	cout << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
+	cout << " address add <privkey>  Imports a given private key in the wallet" << endl;
+	cout << " dump                   Lists the keys/addresses managed by wallet" << endl;
+	cout << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
+	cout << " priv_key <private key> Gives information about the given private key." << endl;
+	cout << " tx base                Reports the current parent block for new transactions" << endl;
+	cout << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
+	cout << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
+	cout << " tx decode <tx_b58>" << endl;
+	cout << " tx check <tx_b58>" << endl;
+	cout << " tx send <tx_b58>" << endl;
+	cout << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
+	cout << "    sigcodes: "; cash::tx::dump_sigcodes(cout); cout << endl;
+	cout << " daemon                 Run wallet daemon on port " << p.walletd_port << endl;
+}
+
 
 string generate_locking_program_input(const params& p, const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
 	if (likely(locking_program<cash::min_locking_program)) {
@@ -132,7 +152,6 @@ void run_daemon(const params& p) {
 }
 
 #include "protocol.h"
-bool remote=true;
 
 
 string parse_options(args_t& args, params& p) {
@@ -151,7 +170,7 @@ string parse_options(args_t& args, params& p) {
         else if (cmd=="-bhost") {
         	p.backend_host=args.next<string>();
         }
-        else if (cmd=="-offline") {
+        else if (cmd=="-local") {
         	p.offline=true;
         }
         else if (cmd=="-home") {
@@ -235,7 +254,7 @@ void tx_make_p2pkh(args_t& args, const params& p) {
 				++n;
 			}
 		}
-		cout << endl;
+//		cout << endl;
 		cout << t << endl;
 
 		if (sendover) {
@@ -320,7 +339,7 @@ void tx(args_t& args, const params& p) {
 		bases.dump(cout);
 	}
 	else {
-		help();
+		help(p);
 		exit(1);
 	}
 }
@@ -356,7 +375,7 @@ int main(int argc, char** argv) {
 			cout << "Address: " << a << endl;
 		}
 		else {
-			help();
+			help(p);
 			exit(1);
 		}
 	}
@@ -366,10 +385,22 @@ int main(int argc, char** argv) {
 	} 
 	else if (command=="balance") {
 		bool detailed=args.next<bool>(false);
-		if (remote) {
+		if (p.offline) {
+			wallet my_wallet(p.homedir);
+            if (my_wallet.empty()) {
+                cerr << "wallet " << my_wallet.filename() << " doesn't contain keys." << endl;
+                exit(1);
+            }
+			my_wallet.refresh(p.backend_host,p.backend_port);
+			if (detailed) {
+				my_wallet.dump_balances(cout);
+			}
+			else {
+				cout << my_wallet.balance() << endl;
+			}
+		}
+		else {
 			datagram* q=new datagram(protocol::wallet::balance_query,"");
-
-//			string addr="92.51.240.61"; //"92.51.240.61"; //"127.0.0.1";
 			socket::datagram* response=socket::peer_t::send_recv(p.walletd_host, p.walletd_port, q);
 			if (response) {
 			cout << response->parse_string() << endl;
@@ -377,16 +408,6 @@ int main(int argc, char** argv) {
 			}
 			else {
 				cerr << "ERROR" << endl;
-			}
-		}
-		else {
-			wallet my_wallet(p.homedir);
-			my_wallet.refresh(p.backend_host,p.backend_port);
-			if (detailed) {
-				my_wallet.dump_balances(cout);
-			}
-			else {
-				cout << my_wallet.balance() << endl;
 			}
 		}
 	}
@@ -402,7 +423,7 @@ int main(int argc, char** argv) {
 		run_daemon(p);
 	}
 	else {
-		help();
+		help(p);
 		exit(1);
 	}
 	return 0;

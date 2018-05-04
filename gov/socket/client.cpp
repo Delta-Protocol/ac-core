@@ -114,7 +114,7 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
             struct sockaddr_storage addr;
             socklen_t lena=sizeof addr;
             while(true) {
-    			cout << "socket: client: ::connect in progress fd" << sock  << " looping" << endl;
+//    			cout << "socket: client: ::connect in progress fd" << sock  << " looping" << endl;
 	            int a=getpeername(sock, (struct sockaddr*)&addr, &lena);
 	            if (a==0) break;
                 if (chrono::duration_cast<std::chrono::milliseconds>(clock::now() - t1).count()>500) {
@@ -123,7 +123,7 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
                 }
                 this_thread::sleep_for(10ms);
             }
-   			cout << "socket: client: ::connect in progress fd" << sock  << " no longer INPROGRESS" << endl;
+//   			cout << "socket: client: ::connect in progress fd" << sock  << " no longer INPROGRESS" << endl;
 			return true;
 		}
 		cout << "socket: client: ::connect failed " << sock << " error: " << r << endl;
