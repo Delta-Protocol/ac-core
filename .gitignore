@@ -6,3 +6,5 @@ wallet/us-wallet
 .idea/*
 
 */**/.idea/*
+test/a.out
+
