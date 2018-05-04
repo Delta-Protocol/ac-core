@@ -1,4 +1,3 @@
-#ifndef USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
 #define USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
 
 #include <secp256k1.h>
@@ -77,6 +76,10 @@ struct ec {
 
 	bool verify(const keys::pub_t& pk, const string& text, const string& signature_der) const;
 	bool verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
+
+	vector<unsigned char> encrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& clear_text) const;
+	vector<unsigned char> decrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& cyphered_text) const;
+
 
 	static constexpr size_t bit_size() { return 256; }
 
