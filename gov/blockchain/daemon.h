@@ -54,7 +54,7 @@ namespace blockchain {
 		typedef app::keys keys;
 
 		daemon(const keys&);
-		daemon(const keys&, const string& blocksdir, uint16_t port, uint8_t num_edges,const vector<string>& seed_nodes);
+		daemon(const keys&, const string& home, uint16_t port, uint8_t num_edges,const vector<string>& seed_nodes);
 		daemon(const daemon&)=delete;
 		daemon(daemon&&)=delete;
 		~daemon();
@@ -64,6 +64,8 @@ namespace blockchain {
 		void add(app*app);
 
 		static bool file_exists(const string& f);
+
+        string blocksdir() const;
 
 		struct networking:dfs::daemon {
 			typedef dfs::daemon b;
@@ -244,7 +246,7 @@ namespace blockchain {
 
 
 		votes_t votes;
-		string blocksdir;
+		string home;
 
 		mutable mt19937_64 rng;
 

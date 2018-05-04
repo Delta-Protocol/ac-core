@@ -267,6 +267,10 @@ void c::clients_t::finish() {
 	}
 }
 
+c::clients_t::~clients_t() {
+	for (auto i:*this) delete i.second;
+}
+
 vector<int> c::clients_t::update() {
 	finish();
 	import();
@@ -304,6 +308,10 @@ c::pub_t c::clients_t::active() const { //called by worker threads
 	return move(copy);
 }
 
+c::clients_t::attic_t::~attic_t() {
+    for (auto&i:*this) delete i.first; 
+}
+
 void c::clients_t::attic_t::purge() { //delete those clients that terminated long ago, in hope there is no more workers on them
 	using namespace std::chrono_literals;
 	vector<client*> tmp;
@@ -317,7 +325,6 @@ void c::clients_t::attic_t::purge() { //delete those clients that terminated lon
 	}
 }
 
-
 void c::dump(ostream& os) const {
 	os << "Hello from socker::server" << endl;
 	os << "Listening socket: " << sock << endl;
@@ -327,21 +334,81 @@ void c::dump(ostream& os) const {
 }
 
 void c::clients_t::dump(ostream& os) const {
-	{
-	lock_guard<mutex> lock(mx);
-	os << "Size: " << size() << endl;
 	int n=0;
-	for (auto& i:*this) {
-		os << "client #" << n++ << ":" << endl;
-		i.second->dump(os);
+	for (auto& i:active()) {
+		os << "client #" << n++ << ": "; i->dump(os); os << endl;
 	}
-	}
-	os << "add: " << endl;
+    os << "Total active: " << n << endl;
+
+	os << "*add buffer: " << endl;
 	wadd.dump(os);
-	os << "remove: " << endl;
+	os << "*remove buffer: " << endl;
 	wremove.dump(os);
-	os << "hold: " << endl;
+	os << "*hold buffer: " << endl;
 	holds.dump(os);
+
 }
+
+c::clients_t::rmlist::~rmlist() {
+    for (auto i:*this) delete i.second; 
+}
+
+void c::clients_t::rmlist::add(client* c) {
+	lock_guard<mutex> lock(mx);
+	assert(c->sock);
+	assert(b::find(c->sock)==end());
+	emplace(c->sock,c);
+}
+
+bool c::clients_t::rmlist::remove(int fd) { //dont delete
+	lock_guard<mutex> lock(mx);
+	iterator i=b::find(fd);
+	if (i==end()) return false;
+	erase(i);
+	return true;	
+}
+
+bool c::clients_t::rmlist::find(int fd) const {
+	lock_guard<mutex> lock(mx);
+	return b::find(fd)!=end();
+}
+
+void c::clients_t::rmlist::dump(ostream& os) const {
+	lock_guard<mutex> lock(mx);	
+	os << "Size: " << size() << endl;
+	for (auto i:*this)
+		{ i.second->dump(os); }
+}
+
+
+c::clients_t::wait::~wait() {
+    for (auto i:*this) delete i; 
+}
+
+void c::clients_t::wait::add(client* c) {
+	lock_guard<mutex> lock(mx);
+	emplace(c);
+}
+
+bool c::clients_t::wait::remove(client* c) { //dont delete
+	lock_guard<mutex> lock(mx);
+	iterator i=b::find(c);
+	if (i==end()) return false;
+	erase(i);
+	return true;	
+}
+
+bool c::clients_t::wait::find(client* c) const {
+	lock_guard<mutex> lock(mx);
+	return b::find(c)!=end();
+}
+
+void c::clients_t::wait::dump(ostream& os) const {
+	lock_guard<mutex> lock(mx);	
+	os << "Size: " << size() << endl;
+	for (auto i:*this)
+		{ i->dump(os); }
+}
+
 
 

@@ -196,7 +196,7 @@ ec::sigmsg_hasher_t::value_type c::get_hash(const size_t& this_index, sigcodes_t
 	write_sigmsg(h,this_index,sc);
 	ec::sigmsg_hasher_t::value_type v;
 	h.finalize(v);
-cout << "sighash for index " << this_index << " sigcodes " << (int)sc << " " << v << endl;
+//cout << "sighash for index " << this_index << " sigcodes " << (int)sc << " " << v << endl;
 	return move(v);
 }
 

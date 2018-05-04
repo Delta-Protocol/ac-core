@@ -35,22 +35,20 @@ c::~client() {
 }
 
 string client::address() const {
-	socklen_t len;
 	struct sockaddr_storage addr;
-	char ipstr[INET6_ADDRSTRLEN];
-	int port;
-	len = sizeof addr;
-	auto a=getpeername(sock, (struct sockaddr*)&addr, &len);
+	socklen_t len=sizeof addr;
+	int a=getpeername(sock, (struct sockaddr*)&addr, &len);
 	if (a!=0) return "";
 
 	// deal with both IPv4 and IPv6:
+	char ipstr[INET6_ADDRSTRLEN];
 	if (addr.ss_family == AF_INET) {
 	    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-	    port = ntohs(s->sin_port);
+	    int port = ntohs(s->sin_port);
 	    inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
 	} else { // AF_INET6
 	    struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
-	    port = ntohs(s->sin6_port);
+	    int port = ntohs(s->sin6_port);
 	    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
 	}
 	return ipstr;
@@ -85,6 +83,8 @@ void client::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint
 }
 
 #include <fcntl.h>
+#include <chrono>
+#include <thread>
 bool c::init_sock(const string& host, uint16_t port, bool block) {
 	sockaddr_in servername;
 	sock=::socket(PF_INET, SOCK_STREAM, 0);// Create the socket.
@@ -104,6 +104,26 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 	if (r<0) {
 		if (errno==EINPROGRESS) {
 			cout << "socket: client: ::connect in progress fd" << sock  << endl;
+
+            typedef chrono::high_resolution_clock clock;
+            using namespace chrono_literals;
+
+            int error = 0;
+            socklen_t len = sizeof (error);
+            auto t1 = clock::now();
+            struct sockaddr_storage addr;
+            socklen_t lena=sizeof addr;
+            while(true) {
+//    			cout << "socket: client: ::connect in progress fd" << sock  << " looping" << endl;
+	            int a=getpeername(sock, (struct sockaddr*)&addr, &lena);
+	            if (a==0) break;
+                if (chrono::duration_cast<std::chrono::milliseconds>(clock::now() - t1).count()>500) {
+           			cout << "socket: client: ::connect in progress fd" << sock  << " timeout!" << endl;
+                    return false; //timeout
+                }
+                this_thread::sleep_for(10ms);
+            }
+//   			cout << "socket: client: ::connect in progress fd" << sock  << " no longer INPROGRESS" << endl;
 			return true;
 		}
 		cout << "socket: client: ::connect failed " << sock << " error: " << r << endl;
@@ -148,6 +168,6 @@ bool c::send(const datagram& d) const {
 }
 
 void c::dump(ostream& os) const {
-	os << this << "- file descriptor:" << sock << "; address: " << addr;
+	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
 }
 

@@ -1098,6 +1098,7 @@ string c::shell_command(const string& cmdline) {
 		os << "Cash shell." << endl;
 		os << "h|help              Shows this help." << endl;
 		os << "p|policies [id vote]          ." << endl;
+		os << "mempool           Dumps the mempool." << endl;
 		os << "exit                Exits this app and returns to parent shell." << endl;
 		os << "" << endl;
 	}
@@ -1115,6 +1116,12 @@ string c::shell_command(const string& cmdline) {
 		}
 		dump_policies(os);
 	}
+	else if (cmd=="mempool") {
+    	lock_guard<mutex> lock(mx_pool);
+        pool->accounts.dump(os);
+        os << "fees: " << pool->fees << endl;
+        
+    }
 	else if (cmd=="exit") {
 	}
 	else {

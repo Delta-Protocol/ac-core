@@ -17,7 +17,7 @@ c::daemon(const keys& k): rng(chrono::system_clock::now().time_since_epoch().cou
 	constructor();	
 }
 
-c::daemon(const keys& k, const string& blocksdir, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(k, port, edges, this, seed_nodes), blocksdir(blocksdir), syncdemon(this), sysops(*this) { //dependency order
+c::daemon(const keys& k, const string& home, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(k, port, edges, this, seed_nodes), home(home), syncdemon(this), sysops(*this) { //dependency order
 	constructor();	
 }
 
@@ -162,7 +162,7 @@ bool c::patch_db(const vector<diff::hash_t>& patches) { //this is syncd thread
 	cout << "Applying " << patches.size() << " patches" << endl;
 	for (auto i=patches.rbegin(); i!=patches.rend(); ++i) {
 		const diff::hash_t& hash=*i;
-		string filename=blocksdir+"/"+hash.to_b58();
+		string filename=blocksdir()+"/"+hash.to_b58();
 		ifstream is(filename);
 		if (!is.good()) {
 			cerr << "corrupt filename 1 " << filename << endl;
@@ -298,7 +298,7 @@ cout << "NB3 2 " << data.new_block << endl;
 }
 
 void c::load_head() {
-        string filename=blocksdir+"/head";
+        string filename=blocksdir()+"/head";
         ifstream is(filename);
         diff::hash_t head(0);
         if (is.good()) is >> head;
@@ -366,13 +366,17 @@ cout << "found " << *i << endl;
 #include <gov/crypto/base58.h>
 #include <fstream>
 
+string c::blocksdir() const {
+    return home+"/blocks";
+}
+
 void c::save(const diff& bl) const {
 	{
-cout << "file " << blocksdir+"/"+bl.hash().to_b58() << endl;
-	ofstream os(blocksdir+"/"+bl.hash().to_b58());
+cout << "file " << blocksdir()+"/"+bl.hash().to_b58() << endl;
+	ofstream os(blocksdir()+"/"+bl.hash().to_b58());
 	bl.to_stream(os);
 	}
-	ifstream is(blocksdir+"/"+bl.hash().to_b58());  //TODO remove this check
+	ifstream is(blocksdir()+"/"+bl.hash().to_b58());  //TODO remove this check
 	diff*b=diff::from_stream(is);
 	if (!b) {
 		cout << "ERROR A" << endl;
@@ -381,10 +385,10 @@ cout << "file " << blocksdir+"/"+bl.hash().to_b58() << endl;
 	if (b->hash()!=bl.hash()) {
 		cout << b->hash() << " " << bl.hash() << endl;
 		{
-		ofstream os(blocksdir+"/"+bl.hash().to_b58()+"_");
+		ofstream os(blocksdir()+"/"+bl.hash().to_b58()+"_");
 		b->to_stream(os);
 		}
-		cout << "ERROR B " << (blocksdir+"/"+bl.hash().to_b58()+"_") << endl;
+		cout << "ERROR B " << (blocksdir()+"/"+bl.hash().to_b58()+"_") << endl;
 		exit(1);
 	}
 	delete b;	
@@ -408,14 +412,14 @@ void c::query_block(const diff::hash_t& hash) {
 }
 
 string c::load_block(const string& block_hash_b58) const {
-	ifstream is(blocksdir+"/"+block_hash_b58);
+	ifstream is(blocksdir()+"/"+block_hash_b58);
 	if (!is.good()) return "";
 	return string((istreambuf_iterator<char>(is)), (istreambuf_iterator<char>()));
 }
 
 
 string c::load_block(const diff::hash_t& hash) const {
-	ifstream is(blocksdir+"/"+hash.to_b58());
+	ifstream is(blocksdir()+"/"+hash.to_b58());
 	if (!is.good()) return "";
 	return string((istreambuf_iterator<char>(is)), (istreambuf_iterator<char>()));
 }
@@ -431,7 +435,7 @@ bool c::file_exists(const string& f) {
 
 
 bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
-	string filename=blocksdir+"/"+h.to_b58();
+	string filename=blocksdir()+"/"+h.to_b58();
 	if (!file_exists(filename)) return false;
 	ifstream is(filename);
 	if (!is.good()) return false;
@@ -679,7 +683,7 @@ void c::process_block(peer_t *c, datagram*d) {
 	cout << "Received content of block " << b->hash() << " from " << c->addr << endl;
 
 
-	string filename=blocksdir+"/"+b->hash().to_b58();
+	string filename=blocksdir()+"/"+b->hash().to_b58();
 	if (!file_exists(filename)) { //TODO write under different name and then rename atomically
 		cout << "Saving it to disk " << filename << endl;
 		{
@@ -847,7 +851,7 @@ void c::clear_db() {
 
 void c::set_last_block_imported_(const diff::hash_t& h) {
 	last_block_imported=h;
-	string filename=blocksdir+"/head";
+	string filename=blocksdir()+"/head";
 	ofstream os(filename);
 	os << last_block_imported << endl;
 }
