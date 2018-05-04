@@ -54,6 +54,21 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	void refresh(const string&addr, uint16_t port);
  
 	input_accounts_t select_sources(const string&backend_host, uint16_t backend_port, const cash::cash_t& amount);
+
+    string generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
+    string generate_locking_program_input(const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
+    struct tx_make_p2pkh_input {
+        cash::hash_t rcpt_addr;
+        cash::cash_t amount;
+        cash::cash_t fee;
+        cash::tx::sigcode_t sigcode_inputs;
+        cash::tx::sigcode_t sigcode_outputs;
+        bool sendover;
+
+    };
+    pair<string,cash::tx> tx_make_p2pkh(const string&backend_host, uint16_t backend_port, const tx_make_p2pkh_input& i);
+
+
 	void dump(ostream& os) const;
 	accounts_query_t data;
 	string datapath;

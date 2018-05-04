@@ -193,3 +193,96 @@ void c::input_accounts_t::dump(ostream& os) const {
 	os << "total withdraw: " << get_withdraw_amount() << endl;
 }
 
+#include <gov/cash/locking_programs/p2pkh.h>
+
+
+void send(const string&backend_host, uint16_t backend_port, const cash::tx& t) {
+	auto fee=t.check();
+	if (fee<=0) {
+		cerr << "Individual inputs and fees must be positive." << endl;
+		exit(1);
+	}
+	socket::peer_t cli;
+	if (!cli.connect(p.backend_host,p.backend_port,true)) {
+		cerr << "wallet: unable to connect to " << p.backend_host << ":" << p.backend_port << endl;
+		exit(1);
+	}
+	cli.send(t.get_datagram());
+}
+
+string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
+	if (likely(locking_program<cash::min_locking_program)) {
+		if (unlikely(locking_program==0)) {
+			return "";
+		}
+		else if (locking_program==1) {
+			const crypto::ec::keys* k=get_keys(address);
+			if (k==0) return "";
+			return cash::p2pkh::create_input(msg, sigcodes, k->priv);
+		}
+	}
+	return "";
+}
+
+string c::generate_locking_program_input(const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
+	if (likely(locking_program<cash::min_locking_program)) {
+		if (unlikely(locking_program==0)) {
+			return "";
+		}
+		else if (locking_program==1) {
+			const crypto::ec::keys* k=get_keys(address);
+			if (k==0) return "";
+			return cash::p2pkh::create_input(t,this_index, sigcodes, k->priv);
+		}
+	}
+	return "";
+}
+
+pair<string,cash::tx> c::tx_make_p2pkh(const string&backend_host, uint16_t backend_port, const tx_make_p2pkh_input& i) {
+        pair<string,cash::tx> ret;
+        cash::tx& t=ret.second;
+
+        auto sigcodes=cash::tx::combine(i.sigcode_inputs, i.sigcode_outputs);
+
+		input_accounts_t input_accounts=select_sources(backend_host, backend_port, i.amount+i.fee);
+		if (input_accounts.empty()) {
+			ret.first="no inputs";
+			return move(ret);
+		}
+		assert(input_accounts.get_withdraw_amount()==i.amount+i.fee);
+
+		t.parent_block=input_accounts.parent_block;
+		t.inputs.reserve(input_accounts.size());
+		for (auto&i:input_accounts) {
+			t.add_input(i.address, i.balance, i.withdraw_amount);
+		}
+		t.add_output(i.rcpt_addr, i.amount, cash::p2pkh::locking_program_hash);
+		if (!t.check()) {
+			ret.first="Failed check";
+			return move(ret);
+		}
+		if (likely(cash::tx::same_sigmsg_across_inputs(sigcodes))) {
+			crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash(0, sigcodes);
+			int n=0;
+			for (auto&i:t.inputs) {
+				i.locking_program_input=generate_locking_program_input(h,sigcodes,i.address, input_accounts[n].locking_program);
+				++n;
+			}
+		}
+		else { //sigmsg optimization
+			int n=0;
+			for (auto&i:t.inputs) {
+				i.locking_program_input=generate_locking_program_input(t,n,sigcodes,i.address, input_accounts[n].locking_program);
+				++n;
+			}
+		}
+
+		if (i.sendover) {
+			send(backend_host, backend_port, t);
+			cout << "sent." << endl;
+		}
+
+        return move(ret);
+}
+
+

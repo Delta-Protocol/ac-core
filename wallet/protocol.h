@@ -8,6 +8,9 @@ namespace protocol {
 namespace wallet {
 	static constexpr uint16_t balance_query{0};
 	static constexpr uint16_t balance_response{1};
+
+	static constexpr uint16_t cash_tx_order{2};
+	static constexpr uint16_t cash_tx_response{3};
 }}}
 
 #endif

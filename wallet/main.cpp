@@ -95,50 +95,7 @@ else {
 }
 
 
-string generate_locking_program_input(const params& p, const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
-	if (likely(locking_program<cash::min_locking_program)) {
-		if (unlikely(locking_program==0)) {
-			return "";
-		}
-		else if (locking_program==1) {
-			wallet my_wallet(p.homedir);
-			const crypto::ec::keys* k=my_wallet.get_keys(address);
-			if (k==0) return "";
-			return cash::p2pkh::create_input(msg, sigcodes, k->priv);
-		}
-	}
-	return "";
-}
 
-string generate_locking_program_input(const params& p, const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
-	if (likely(locking_program<cash::min_locking_program)) {
-		if (unlikely(locking_program==0)) {
-			return "";
-		}
-		else if (locking_program==1) {
-			wallet my_wallet(p.homedir);
-			const crypto::ec::keys* k=my_wallet.get_keys(address);
-			if (k==0) return "";
-			return cash::p2pkh::create_input(t,this_index, sigcodes, k->priv);
-		}
-	}
-	return "";
-}
-
-
-void send(const cash::tx& t, const params& p) {
-	auto fee=t.check();
-	if (fee<=0) {
-		cerr << "Individual inputs and fees must be positive." << endl;
-		exit(1);
-	}
-	socket::peer_t cli;
-	if (!cli.connect(p.backend_host,p.backend_port,true)) {
-		cerr << "wallet: unable to connect to " << p.backend_host << ":" << p.backend_port << endl;
-		exit(1);
-	}
-	cli.send(t.get_datagram());
-}
 
 using datagram=socket::datagram;
 
@@ -212,55 +169,19 @@ void tx_make(args_t& args, const params& p) {
 
 
 void tx_make_p2pkh(args_t& args, const params& p) {
-		auto dstaddr=args.next<cash::hash_t>();
-		auto amount=args.next<cash::cash_t>();
-		auto fee=args.next<cash::cash_t>();
-		auto sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
-		auto sigcode_outputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
-		auto sigcodes=cash::tx::combine(sigcode_inputs,sigcode_outputs);
-		bool sendover=args.next<string>("nopes")=="send";
+    tx_make_p2pkh_input i;
+    i.dstaddr=args.next<cash::hash_t>();
+    i.amount=args.next<cash::cash_t>();
+    i.fee=args.next<cash::cash_t>();
+    i.sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
+    i.sigcode_outputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
+    i.sendover=args.next<string>("nopes")=="send";
+	wallet my_wallet(p.homedir);
 
-		wallet my_wallet(p.homedir);
-		wallet::input_accounts_t input_accounts=my_wallet.select_sources(p.backend_host, p.backend_port, amount+fee);
-		if (input_accounts.empty()) {
-			cerr << "no inputs available." << endl;
-			exit(1);
-		}
-		assert(input_accounts.get_withdraw_amount()==amount+fee);
+    auto tx=my_wallet.tx_make_p2pkh(p.backend_host, p.backend_port, i);
 
-		cash::tx t;
-		t.parent_block=input_accounts.parent_block;
-		t.inputs.reserve(input_accounts.size());
-		for (auto&i:input_accounts) {
-			t.add_input(i.address, i.balance, i.withdraw_amount);
-		}
-		t.add_output(dstaddr, amount, cash::p2pkh::locking_program_hash);
-		if (!t.check()) {
-			cerr << "Error" << endl;
-			exit(1);
-		}
-		if (likely(cash::tx::same_sigmsg_across_inputs(sigcodes))) {
-			crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash(0, sigcodes);
-			int n=0;
-			for (auto&i:t.inputs) {
-				i.locking_program_input=generate_locking_program_input(p,h,sigcodes,i.address, input_accounts[n].locking_program);
-				++n;
-			}
-		}
-		else { //sigmsg optimization
-			int n=0;
-			for (auto&i:t.inputs) {
-				i.locking_program_input=generate_locking_program_input(p,t,n,sigcodes,i.address, input_accounts[n].locking_program);
-				++n;
-			}
-		}
-//		cout << endl;
-		cout << t << endl;
+	cout << tx << endl;
 
-		if (sendover) {
-			send(t,p);
-			cout << "sent." << endl;
-		}
 }
 
 void tx_sign(args_t& args, const params& p) {

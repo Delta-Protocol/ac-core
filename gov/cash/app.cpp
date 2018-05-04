@@ -940,7 +940,7 @@ cout << "SGT-02-tx.Output size " << t.outputs.size() << endl;
 cout << "SGT-02-tx.Output #" << j << " addr " << i.address << endl; 
 		if (account_state(batch,i.address,state)) { 
 			if (unlikely(state.balance!=0 && state.locking_program!=i.locking_program)) { //locking program can only be replaced when balance is 0
-	cout << "SGT-02-tx.Output #" << j << " locking program can only be replaced when balance is 0. DENIED." << endl; 
+cout << "SGT-02-tx.Output #" << j << " locking program can only be replaced when balance is 0. DENIED." << endl; 
 				return false;
 			}
 			state.balance+=i.amount;
