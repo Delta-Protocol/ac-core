@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#tgt=$1
+
+if [ -d android_studio ]; then
+	echo "Android studio project already bootstrapped"
+	exit 1
+fi
+
+mkdir android_studio
+cd android_studio
+
+tar -xzf ../android/androidstudio_basic_activity.tgz
+
+cd usgov
+ln -s ../../android/getdeps
+./getdeps
+rm build.gradle
+ln -s ../../android/build.gradle
+
+
+
+cd app/src/
+rm main -r
+ln -s ../../../../android/main
+cd ../..
+
+

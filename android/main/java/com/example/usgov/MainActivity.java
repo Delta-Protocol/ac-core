@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pub = publicPointFromPrivate(priv);
     //log=pub.getEncoded(true).toString();
         //pub=new LazyECPoint(priv);
-
+        toggleContactless("AA");
 
         Button balance = (Button) findViewById(R.id.balance);
         balance.setText("balance");
@@ -215,7 +215,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         Button pay = (Button) findViewById(R.id.pay);
-
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -224,7 +223,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         Button get_paid = (Button) findViewById(R.id.get_paid);
-
         get_paid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -233,8 +231,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        Button tap = (Button) findViewById(R.id.tap);
+        pay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                on_tap();
+            }
+        });
 
-        findViewById(R.id.cashlogo).setVisibility(View.VISIBLE);
 
 
         findViewById(R.id.amount).setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -246,6 +250,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+
+    }
+
+    public void on_tap() {
 
     }
 
@@ -267,10 +275,71 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    String nodeAddress() {
+        EditText a = (EditText) findViewById(R.id.nodeaddr);
+        return a.getText().toString();
+    }
+    int nodePort() {
+        return 16673;
+    }
+
+
     public void hideKeyboard(View view) {
         InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
+    String queryCashAddress() {
+        final Handler handler = new Handler();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String signature = "";
+                try {
+                     Socket s = new Socket(nodeAddress(), nodePort());
+                    boolean b11 = s.isClosed();
+                    boolean b12 = s.isConnected();
+                    String msg = "BALANCE " + pub.getEncoded(true).toString() + " " + signature;
+                    Datagram d = new Datagram(0, msg);
+                    d.send(s);
+
+                    boolean b11_2 = s.isClosed();
+                    boolean b12_2 = s.isConnected();
+
+                    String st;
+                    Datagram r = new Datagram();
+                    if (r.recv(s)) {
+                        st = r.parse_string();
+                    } else {
+                        st = "?";
+                    }
+                    boolean b11_3 = s.isClosed();
+                    boolean b12_3 = s.isConnected();
+                    final String stf = st;
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Button balance = (Button) findViewById(R.id.balance);
+                            balance.setText(cash_human.show(stf));
+                        }
+                    });
+
+                    //output.close();
+                    //out.close();
+                    s.close();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+    }
+    String querySignedTx(String recipientAddress, int amount) {
+
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -287,9 +356,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void run() {
                             String signature = "";
                             try {
-                                //Replace below IP with the IP of that device in which server socket open.
-                                //If you change port then change the port number in the server side code also.
-                                Socket s = new Socket("92.51.240.61", 16673);
+                                Socket s = new Socket(nodeAddress(), nodePort());
                                 boolean b11 = s.isClosed();
                                 boolean b12 = s.isConnected();
                                 String msg = "BALANCE " + pub.getEncoded(true).toString() + " " + signature;
@@ -298,8 +365,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                 boolean b11_2 = s.isClosed();
                                 boolean b12_2 = s.isConnected();
-
-                                //Datagram r=Datagram.recv(s);
 
                                 String st;
                                 Datagram r = new Datagram();
@@ -317,9 +382,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     public void run() {
                                         Button balance = (Button) findViewById(R.id.balance);
                                         balance.setText(cash_human.show(stf));
-//                                    String s = mTextViewReplyFromServer.getText().toString();
-//                                    if (st.trim().length() != 0)
-                                        //                                      mTextViewReplyFromServer.setText(s + "\nFrom Server : " + st);
                                     }
                                 });
 
