@@ -75,64 +75,36 @@ namespace auth { //blockchain network support, this service is free
 	};
 
 
-
-
-	struct local_delta: blockchain::policies_local_delta<double, policies_traits> {
-		typedef blockchain::policies_local_delta<double, policies_traits> b;
-		//typedef map<crypto::sha256::value_type,pair<unsigned long,tx>> nodes_diff_t;
-//		typedef map<crypto::sha256::value_type,pair<unsigned long,tx>> nodes_diff_t;
-		//unordered_map<int,pair<unsigned long,double>> policies_diff_t;
-		virtual ~local_delta() {
-			//for (auto i:*this) delete i; 
-		}
-/*
-		void clear() {
-			txs::clear();
-		}
-*/
-		virtual int app_id() const override;
-		//bool empty() const {
-		//	return nodes_diff.empty() && policies_diff.empty();
-		//}
-		virtual void to_stream(ostream& os) const override;
-		virtual void from_stream(istream& is) override;
-//		virtual void merge(blockchain::app_gut* other) override;
-
-
-//		nodes_diff_t nodes_diff;
-		vector<pair<pubkeyh_t,address>> to_hall; //pubkey
-	};
-
-	struct delta: blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> {
-		typedef blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> b;
-		delta() {}
-/*
-		delta(app_gut* g):b(*g) {
-			for (auto& i:g->to_hall) to_hall.emplace(i);
-			delete g;
-		}
-*/
-		virtual ~delta() {
-		}
-		virtual uint64_t merge(blockchain::local_delta* other0) override {
-			local_delta* other=static_cast<local_delta*>(other0);
-			for (auto& i:other->to_hall) to_hall.emplace(i);
-			b::merge(other0);
-			return 0;
-		}
-		//virtual void end_merge() override {
-		//	b::end_merge();
-		//}
-		virtual void to_stream(ostream& os) const override;
-		static delta* from_stream(istream& is);
-		map<pubkeyh_t,address> to_hall; //pubkey
-		//array<double,policies_traits::num_params> policies;
-	};
-
 	struct app: blockchain::runnable_app {
 		typedef blockchain::app b;
 		app(pubkey_t&);
 		virtual ~app();
+
+		struct local_delta: blockchain::policies_local_delta<double, policies_traits> {
+			typedef blockchain::policies_local_delta<double, policies_traits> b;
+			virtual ~local_delta() {
+			}
+			virtual int app_id() const override;
+			virtual void to_stream(ostream& os) const override;
+			virtual void from_stream(istream& is) override;
+			vector<pair<pubkeyh_t,address>> to_hall; //pubkey
+		};
+
+		struct delta: blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> {
+			typedef blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> b;
+			delta() {}
+			virtual ~delta() {
+			}
+			virtual uint64_t merge(blockchain::app::local_delta* other0) override {
+				local_delta* other=static_cast<local_delta*>(other0);
+				for (auto& i:other->to_hall) to_hall.emplace(i);
+				b::merge(other0);
+				return 0;
+			}
+			virtual void to_stream(ostream& os) const override;
+			static delta* from_stream(istream& is);
+			map<pubkeyh_t,address> to_hall; //pubkey
+		};
 
 		constexpr static const char* name={"auth"};
 		virtual string get_name() const override { return name; }
@@ -165,10 +137,10 @@ namespace auth { //blockchain network support, this service is free
 //		virtual void on_head_ready() override { //can start verification
 //		}
 
-		virtual void import(const blockchain::delta&, const blockchain::pow_t&) override;
+		virtual void import(const blockchain::app::delta&, const blockchain::pow_t&) override;
 		//void import(const tx&);
 
-		virtual blockchain::local_delta* create_local_delta() override;
+		virtual blockchain::app::local_delta* create_local_delta() override;
 
 //		virtual blockchain::app_gut* create_closure_gut(const blockchain::block&) override;
 

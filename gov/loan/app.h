@@ -61,7 +61,7 @@ namespace loan {
 		delta() {}
 		virtual ~delta() {
 		}
-		virtual uint64_t merge(blockchain::local_delta* other0) override {
+		virtual uint64_t merge(blockchain::app::local_delta* other0) override {
 
 			local_delta* other=static_cast<local_delta*>(other0);
 			auto val=other->fees;
@@ -92,12 +92,12 @@ namespace loan {
 //		virtual void run() override;
 		void add_policies();
 
-		local_delta* pool{0};
+		loan::local_delta* pool{0};
 		mutex mx_pool;
 
-		virtual blockchain::local_delta* create_local_delta() override;
+		virtual blockchain::app::local_delta* create_local_delta() override;
 		//virtual bool process_work(peer_t *c, datagram*d) override;
-		virtual void import(const blockchain::delta&, const blockchain::pow_t&) override;
+		virtual void import(const blockchain::app::delta&, const blockchain::pow_t&) override;
 //		bool process(const tx&);
 
 		struct db_t {

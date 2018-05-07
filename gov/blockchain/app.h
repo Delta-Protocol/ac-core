@@ -30,6 +30,34 @@ namespace blockchain {
 		typedef crypto::ripemd160 hasher_t;
 		typedef hasher_t::value_type hash_t;
 
+		struct local_delta {
+			virtual ~local_delta() { }
+
+			static local_delta* create(int id);
+			static local_delta* create(istream&);
+			static local_delta* create(int id, istream& is);
+
+			virtual void to_stream(ostream&) const=0;
+			virtual void from_stream(istream&)=0;
+			virtual int app_id() const=0;
+		};
+
+		struct delta {
+			delta() {}
+			virtual ~delta() {}
+
+			static delta* create(int id);
+			static delta* create(istream&);
+			static delta* create(int id,istream&);
+
+			virtual uint64_t merge(local_delta* other);
+			virtual void end_merge()=0;
+			virtual void to_stream(ostream&) const=0;
+
+			unsigned long multiplicity{1}; //updated by merge
+
+		};
+
 		app() {}
 		virtual ~app() {}
 
@@ -55,38 +83,6 @@ namespace blockchain {
 		virtual void run()=0;
 	};
 
-	struct local_delta {
-		virtual ~local_delta() { }
-
-		static local_delta* create(int id);
-		static local_delta* create(istream&);
-		static local_delta* create(int id, istream& is);
-
-		virtual void to_stream(ostream&) const=0;
-		virtual void from_stream(istream&)=0;
-		virtual int app_id() const=0;
-	};
-
-	struct delta {
-		delta() {
-		}
-		virtual ~delta() { 
-		}
-		static delta* create(int id);
-		static delta* create(istream&);
-		static delta* create(int id,istream&);
-
-		virtual uint64_t merge(local_delta* other) {
-			++multiplicity;
-			delete other;
-			return 0;
-		}
-		virtual void end_merge()=0;
-		virtual void to_stream(ostream&) const=0;
-
-		unsigned long multiplicity{1}; //updated by merge
-
-	};
 
 
 	template<typename D, typename T>
@@ -113,7 +109,7 @@ namespace blockchain {
 
 
 	template<typename D, typename T>
-	struct policies_local_delta: policies_base<D,T>, local_delta {
+	struct policies_local_delta: policies_base<D,T>, app::local_delta {
 		typedef policies_base<D,T> b1;
 		typedef local_delta b;
 		policies_local_delta() {}
@@ -169,7 +165,7 @@ namespace blockchain {
 
 
 	template<typename D, typename T, typename M>
-	struct policies_delta: policies_base<D,T>, delta {
+	struct policies_delta: policies_base<D,T>, app::delta {
 		typedef policies_base<D,T> b1;
 		typedef delta b;
 		policies_delta() {}
@@ -178,7 +174,7 @@ namespace blockchain {
 		}
 		virtual ~policies_delta() {}
 
-		virtual uint64_t merge(local_delta* other0) override {
+		virtual uint64_t merge(app::local_delta* other0) override {
 			b1* other=dynamic_cast<b1*>(other0);
 			for (int i=0; i<T::num_params; ++i) merger.merge((*this)[i],(*other)[i]);  //(*this)[i]+=(*other)[i];
 			b::merge(other0);

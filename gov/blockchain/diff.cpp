@@ -80,7 +80,7 @@ local_deltas* local_deltas::from_stream(istream& is) {
 		int appid;
 		is >> appid;
 
-		local_delta* v=local_delta::create(appid,is);
+		app::local_delta* v=app::local_delta::create(appid,is);
 		if (v!=0) {
 			instance->emplace(appid,v);
 		}
@@ -127,7 +127,7 @@ c* c::from_stream(istream& is) {
 		int appid;
 		is >> appid;
 
-		delta* ag=delta::create(appid,is);
+		app::delta* ag=app::delta::create(appid,is);
 		if (ag!=0) {
 			bl->emplace(appid,ag);
 		}
@@ -165,10 +165,10 @@ bool c::allow(const local_deltas& g) {
 	proof_of_work.emplace(pubkeyh,0);
 }
 
-uint64_t c::add(int appid, local_delta* g) { //private, not protected by mutex, see add fn below
+uint64_t c::add(int appid, app::local_delta* g) { //private, not protected by mutex, see add fn below
 	auto i=find(appid);
 	if (i==end()) {
-		i=emplace(appid,delta::create(appid)).first;
+		i=emplace(appid,app::delta::create(appid)).first;
 	}
 	return i->second->merge(g);
 }

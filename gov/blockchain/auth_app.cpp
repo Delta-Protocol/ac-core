@@ -10,7 +10,7 @@ typedef usgov::blockchain::auth::app c;
 constexpr array<const char*,policies_traits::num_params> policies_traits::paramstr;
 
 c::app(pubkey_t&pk): node_pubkey(pk) {
-	pool=new local_delta();
+	pool=new app::local_delta();
 	policies_local=policies;
 }
 
@@ -138,11 +138,11 @@ void c::add_growth_transactions(unsigned int seed) {
 void c::on_begin_cycle() {
 }
 */
-int usgov::blockchain::auth::local_delta::app_id() const {
+int usgov::blockchain::auth::app::local_delta::app_id() const {
 	return app::id(); 
 }
 
-void usgov::blockchain::auth::local_delta::to_stream(ostream& os) const {
+void usgov::blockchain::auth::app::local_delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
 		os << i.first << " " << i.second << " ";
@@ -150,7 +150,7 @@ void usgov::blockchain::auth::local_delta::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
-void usgov::blockchain::auth::local_delta::from_stream(istream& is) {
+void usgov::blockchain::auth::app::local_delta::from_stream(istream& is) {
 	int n;
 	is >> n;
 	to_hall.reserve(n);
@@ -166,7 +166,7 @@ void usgov::blockchain::auth::local_delta::from_stream(istream& is) {
 }
 
 
-void usgov::blockchain::auth::delta::to_stream(ostream& os) const {
+void usgov::blockchain::auth::app::delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
 		os << i.first << " " << i.second << " ";
@@ -174,7 +174,7 @@ void usgov::blockchain::auth::delta::to_stream(ostream& os) const {
 	b::b1::to_stream(os);
 }
 
-delta* usgov::blockchain::auth::delta::from_stream(istream& is) {
+app::delta* usgov::blockchain::auth::app::delta::from_stream(istream& is) {
 	delta* g=new delta();
 	{
 	int n;
@@ -192,7 +192,7 @@ delta* usgov::blockchain::auth::delta::from_stream(istream& is) {
 	return g;
 }
 
-void app::import(const blockchain::delta& gg, const blockchain::pow_t&) {
+void app::import(const blockchain::app::delta& gg, const blockchain::pow_t&) {
 	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(db.mx_hall);
@@ -230,13 +230,13 @@ blockchain::peer_t::stage_t app::db_t::get_stage(const pubkeyh_t& key) const {
 
 
 
-usgov::blockchain::local_delta* c::create_local_delta() {
+usgov::blockchain::app::local_delta* c::create_local_delta() {
 	cout << "app: auth: create_local_delta " << endl;
 
 	add_policies();
 	lock_guard<mutex> lock(mx_pool);
 	auto full=pool;
-	pool=new local_delta();
+	pool=new app::local_delta();
 	return full; //send collected transactions to the network
 }
 

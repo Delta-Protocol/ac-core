@@ -142,7 +142,7 @@ blockchain::app_gut* blockchain_app::create_closure_gut(const blockchain::block&
 ///----------------------------------------------
 
 c::app() {
-	pool=new local_delta();
+	pool=new loan::local_delta();
 	policies_local=policies;
 //	verif_thread=new thread(&app::verification_daemon,this);
 }
@@ -212,7 +212,7 @@ void c::add_policies() {
 }
 
 
-blockchain::local_delta* c::create_local_delta() {
+blockchain::app::local_delta* c::create_local_delta() {
 	//{
 	//lock_guard<mutex> lock(buffer.mx);
 	cout << "app: loan: create_local_delta " << endl; // << buffer.size() << " verified/unverified txs in mempool. ";
@@ -220,7 +220,7 @@ blockchain::local_delta* c::create_local_delta() {
 	add_policies();
 	lock_guard<mutex> lock(mx_pool);
 	auto full=pool;
-	pool=new local_delta();
+	pool=new loan::local_delta();
 	//full->to_stream(cout);
 	/*
 	if (full->empty()) {
@@ -427,7 +427,7 @@ double c::supply_function(double x0, double x, double xf) const {
 }
 */
 
-void c::import(const blockchain::delta& gg, const blockchain::pow_t& w) {
+void c::import(const blockchain::app::delta& gg, const blockchain::pow_t& w) {
 cout << "loan: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 /*
 	const delta& g=static_cast<const delta&>(gg);

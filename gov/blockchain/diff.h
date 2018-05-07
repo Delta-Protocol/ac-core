@@ -28,7 +28,7 @@ namespace blockchain {
 //	struct signature:string {
 //	};
 
-	struct local_delta;
+	//struct local_delta;
 	struct diff;
 /*
 	struct appguts_by_pubkey: unordered_map<string,app_gut*> {
@@ -44,7 +44,7 @@ namespace blockchain {
 	};
 */
 
-	struct local_deltas: map<int,local_delta*>, signed_data { /// indexed by app id;
+	struct local_deltas: map<int,app::local_delta*>, signed_data { /// indexed by app id;
 		virtual ~local_deltas() {}
 		//typedef appguts_by_pubkey bucket;
 		//local_deltas(const string& pubkey): pubkey(pubkey) {}
@@ -80,8 +80,8 @@ namespace blockchain {
 		}
 	};
 
-	struct diff: map<int,delta*> {
-		typedef map<int,delta*> b;
+	struct diff: map<int,app::delta*> {
+		typedef map<int,app::delta*> b;
 //		typedef crypto::sha256 hasher_t;
 //		typedef crypto::double_sha256 hasher_t;
 		typedef app::hasher_t hasher_t;
@@ -100,7 +100,7 @@ namespace blockchain {
 
 
 //		void add(int appid, const app_gut& g);
-		uint64_t add(int appid, local_delta* g);
+		uint64_t add(int appid, app::local_delta* g);
 		void add(local_deltas*); //returns false if already a local_deltas exists for this pubk
 		void end_adding(); 
 

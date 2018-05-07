@@ -23,35 +23,41 @@ unsigned int c::get_seed() {
 #include <gov/rep/app.h>
 
 
-local_delta* local_delta::create(int id) {
-	if (id==auth::app::id()) return new auth::local_delta();
-	if (id==cash::app::id()) return new cash::local_delta();
+uint64_t c::delta::merge(local_delta* other) {
+	++multiplicity;
+	delete other;
+	return 0;
+}
+
+c::local_delta* c::local_delta::create(int id) {
+	if (id==auth::app::id()) return new auth::app::local_delta();
+	if (id==cash::app::id()) return new cash::app::local_delta();
 	if (id==rep::app::id()) return new rep::local_delta();
 	return 0;
 }
 
-delta* delta::create(int id) {
-	if (id==auth::app::id()) return new auth::delta();
-	if (id==cash::app::id()) return new cash::delta();
+c::delta* c::delta::create(int id) {
+	if (id==auth::app::id()) return new auth::app::delta();
+	if (id==cash::app::id()) return new cash::app::delta();
 	if (id==rep::app::id()) return new rep::delta();
 	return 0;
 }
 
-delta* delta::create(int id, istream& is) {
-	if (id==auth::app::id()) return auth::delta::from_stream(is);
-	if (id==cash::app::id()) return cash::delta::from_stream(is);
+c::delta* c::delta::create(int id, istream& is) {
+	if (id==auth::app::id()) return auth::app::delta::from_stream(is);
+	if (id==cash::app::id()) return cash::app::delta::from_stream(is);
 	if (id==rep::app::id()) return rep::delta::from_stream(is);
 	return 0;
 }
 
-local_delta* local_delta::create(int id, istream& is) {
+c::local_delta* c::local_delta::create(int id, istream& is) {
 	local_delta* i=local_delta::create(id);
 	if (!i) return 0;
 	i->from_stream(is);
 	return i;	
 }
 
-local_delta* local_delta::create(istream& is) {
+c::local_delta* c::local_delta::create(istream& is) {
 	int id;
 	is >> id;
 	{
@@ -64,7 +70,7 @@ local_delta* local_delta::create(istream& is) {
 	return i;
 }
 
-delta* delta::create(istream& is) {
+c::delta* c::delta::create(istream& is) {
 	int id;
 	is >> id;
 	return create(id,is);
