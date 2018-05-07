@@ -9,7 +9,7 @@ using namespace std;
 typedef usgov::blockchain::daemon c;
 
 void c::constructor() {
-	auth_app=new auth::app();
+	auth_app=new auth::app(peerd.id.pub);
 	add(auth_app);
 }
 
@@ -30,7 +30,7 @@ void c::add(app*app) {
 		cerr << "Fatal error: App collision. Two apps with same id." << endl;
 		exit(1);
 	}
-	app->parent=this;
+	//app->parent=this;
 	apps_.emplace(app->get_id(),app);
 }
 
@@ -217,12 +217,6 @@ diff::hash_t c::get_last_block_imported() const {
 	return last_block_imported;
 }
 
-unsigned int c::get_seed() const { //import lock must be acquired (lock_guard<mutex> lock(mx_import); )
-	if (!syncdemon.in_sync()) return 0;
-	if (last_block_imported.empty()) return 0;
-	unsigned int seed=*reinterpret_cast<const unsigned int*>(&last_block_imported);
-	return seed;
-}
 
 void c::stage1(cycle_data& data) {
 cout << "stage1 NB1 " << data.new_block << endl;
@@ -312,7 +306,10 @@ void c::run() {
 
 	vector<thread> apps_threads;
 	apps_threads.reserve(apps_.size());
-	for (auto& i:apps_) apps_threads.emplace_back(thread(&app::run,i.second));
+	for (auto& i:apps_) {
+		auto p=dynamic_cast<runnable_app*>(i.second);
+		if (p!=0) apps_threads.emplace_back(thread(&runnable_app::run,p));
+	}
 
 	signal_handler::_this.add(&syncdemon);
 
@@ -344,7 +341,7 @@ string c::networking::get_random_peer(const unordered_set<string>& exclude_addrs
 cout << "exclude: ";
 for (auto&i:exclude_addrs) cout << i << " ";
 cout << "my pubkey is " << id.pub << endl;
-	auto n=parent->auth_app->get_random_node(id.pub.hash(),exclude_addrs);
+	auto n=parent->get_random_node(exclude_addrs);
 cout << "auth_app->get_random_node=" << n << endl;
 	if (n.empty() && !seed_nodes.empty()) {
 cout << "no nodes . using seeds " << endl;
@@ -404,6 +401,11 @@ void c::save_block(const string& content) const {
 	bl.to_stream(os);
 }
 */
+
+string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
+	return auth_app->get_random_node(rng,exclude_addrs);
+}
+
 void c::query_block(const diff::hash_t& hash) {
 	auto n=get_random_edge();
 	if (n==0) return;
@@ -476,8 +478,8 @@ vector<peer_t*> c::get_people() {
 void c::update_peers_state() {
 	for (auto& i:peerd.in_service()) {
 		auto p=reinterpret_cast<peer_t*>(i);
-        if (p->stage!=peer_t::sysop)
-    		p->stage=auth_app->db.get_stage(p->pubkey.hash());
+		if (p->stage!=peer_t::sysop)
+			p->stage=auth_app->db.get_stage(p->pubkey.hash());
 	}
 }
 
@@ -507,7 +509,7 @@ miner_gut* c::create_miner_gut() {
     lock_guard<mutex> lock(peerd.mx_evidences); //pause reception of evidences while changing app pools
 	for (auto&i:apps_) {
   cout << "===>create app gut for app " << i.first << endl;
-		auto* amg=i.second->create_app_gut(); //
+		auto* amg=i.second->create_local_delta(); //
 		if (amg!=0) {
 			mg->emplace(i.first,amg);
 		}
@@ -643,11 +645,11 @@ usgov::blockchain::cycle_t::stage usgov::blockchain::cycle_t::get_stage() {
 
 void c::on_begin_cycle() {
 	cout << "blockchain daemon: on_begin_cycle" << endl;
-
+/*
 	for (auto&i:apps_) {
 		i.second->on_begin_cycle();
 	}
-
+*/
 }
 
 void c::process_query_block(peer_t *c, datagram*d) {
@@ -813,6 +815,12 @@ cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
 		return true;
 	}
 */	
+	if (!syncdemon.in_sync()) {
+		delete d;
+		cout << "missing command cause I am syncing" << endl;
+		return true;
+	}
+/*
 cout << "Delivering to " << apps_.size() << " apps" << endl;
 	bool processed=false;
 	for (auto&i:apps_) {
@@ -826,7 +834,7 @@ cout << "Delivering to " << apps_.size() << " apps" << endl;
 //cout << "d" << endl;
 
 	if (processed) return true;
-
+*/
 	switch(d->service) {
 		case protocol::miner_gut: {
 			process_incoming_miner_gut(c,d); 
@@ -885,8 +893,16 @@ bool c::import(const diff& b) {
 		return false;
 	}
 */
+	app::last_block_imported=last_block_imported;
+
 	for (auto&i:b) {
-		apps_.find(i.first)->second->import(*i.second,b.proof_of_work);
+		auto a=apps_.find(i.first);
+		assert(a!=apps_.end());
+		assert(a->second!=0);
+		a->second->import(*i.second,b.proof_of_work);
+		if (a->second==auth_app) {
+			update_peers_state();
+		}
 		//for (auto& g: b) {
 		//	auto ag=g.second->get_app_gut(i.second->get_id());
 		//	if (ag!=0) i.second->import(*ag);

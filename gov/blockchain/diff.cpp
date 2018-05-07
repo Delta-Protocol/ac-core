@@ -80,7 +80,7 @@ miner_gut* miner_gut::from_stream(istream& is) {
 		int appid;
 		is >> appid;
 
-		app_gut* v=app_gut::create(appid,is);
+		local_delta* v=local_delta::create(appid,is);
 		if (v!=0) {
 			instance->emplace(appid,v);
 		}
@@ -165,7 +165,7 @@ bool c::allow(const miner_gut& g) {
 	proof_of_work.emplace(pubkeyh,0);
 }
 
-uint64_t c::add(int appid, app_gut* g) { //private, not protected by mutex, see add fn below
+uint64_t c::add(int appid, local_delta* g) { //private, not protected by mutex, see add fn below
 	auto i=find(appid);
 	if (i==end()) {
 		i=emplace(appid,app_gut2::create(appid)).first;

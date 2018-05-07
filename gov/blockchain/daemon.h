@@ -51,7 +51,7 @@ namespace blockchain {
 	};
 
 	struct daemon {
-		typedef app::keys keys;
+		typedef crypto::ec::keys keys;
 
 		daemon(const keys&);
 		daemon(const keys&, const string& home, uint16_t port, uint8_t num_edges,const vector<string>& seed_nodes);
@@ -186,7 +186,6 @@ namespace blockchain {
 		diff::hash_t get_last_block_imported() const;
 		void set_last_block_imported(const diff::hash_t&);
 		void set_last_block_imported_(const diff::hash_t&);
-		unsigned int get_seed() const;
 
 		string shell_command(int app_id, const string& cmdline) const;
 
@@ -204,6 +203,8 @@ namespace blockchain {
 		vector<peer_t*> get_people();
 
 		bool patch_db(const vector<diff::hash_t>& patches);
+
+		string get_random_node(const unordered_set<string>& exclude_addrs) const;
 
 		const diff::hash_t& dbhash_off() const;
 

@@ -37,12 +37,12 @@ namespace loan {
 			constexpr static array<const char*,num_params> paramstr={"next_patch"};
 		};
 
-	struct app_gut: blockchain::policies_app_gut<hash_t, policies_traits> {
-		typedef blockchain::policies_app_gut<hash_t, policies_traits> b;
+	struct local_delta: blockchain::policies_local_delta<hash_t, policies_traits> {
+		typedef blockchain::policies_local_delta<hash_t, policies_traits> b;
 
-		app_gut() {
+		local_delta() {
 		}
-		virtual ~app_gut() {
+		virtual ~local_delta() {
 			//for (auto i:*this) delete i; // delete checkpoint_; 
 		}
 		virtual int app_id() const override;
@@ -61,9 +61,9 @@ namespace loan {
 		app_gut2() {}
 		virtual ~app_gut2() {
 		}
-		virtual uint64_t merge(blockchain::app_gut* other0) override {
+		virtual uint64_t merge(blockchain::local_delta* other0) override {
 
-			app_gut* other=static_cast<app_gut*>(other0);
+			local_delta* other=static_cast<local_delta*>(other0);
 			auto val=other->fees;
 			b::merge(other0);
 			return val;
@@ -80,7 +80,7 @@ namespace loan {
 		constexpr static const char* name={"rep"};
 		virtual string get_name() const override { return name; }
 
-		virtual void on_begin_cycle() override;
+//		virtual void on_begin_cycle() override;
 
 		static int id() { return 40; }
 		virtual int get_id() const override { return id(); }
@@ -89,14 +89,14 @@ namespace loan {
 
 		double supply_function(double x0, double x, double xf) const;
 
-		virtual void run() override;
+//		virtual void run() override;
 		void add_policies();
 
-		app_gut* pool{0};
+		local_delta* pool{0};
 		mutex mx_pool;
 
-		virtual blockchain::app_gut* create_app_gut() override;
-		virtual bool process_work(peer_t *c, datagram*d) override;
+		virtual blockchain::local_delta* create_local_delta() override;
+		//virtual bool process_work(peer_t *c, datagram*d) override;
 		virtual void import(const blockchain::app_gut2&, const blockchain::pow_t&) override;
 //		bool process(const tx&);
 

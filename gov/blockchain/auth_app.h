@@ -77,12 +77,12 @@ namespace auth { //blockchain network support, this service is free
 
 
 
-	struct app_gut: blockchain::policies_app_gut<double, policies_traits> {
-		typedef blockchain::policies_app_gut<double, policies_traits> b;
+	struct local_delta: blockchain::policies_local_delta<double, policies_traits> {
+		typedef blockchain::policies_local_delta<double, policies_traits> b;
 		//typedef map<crypto::sha256::value_type,pair<unsigned long,tx>> nodes_diff_t;
 //		typedef map<crypto::sha256::value_type,pair<unsigned long,tx>> nodes_diff_t;
 		//unordered_map<int,pair<unsigned long,double>> policies_diff_t;
-		virtual ~app_gut() {
+		virtual ~local_delta() {
 			//for (auto i:*this) delete i; 
 		}
 /*
@@ -114,8 +114,8 @@ namespace auth { //blockchain network support, this service is free
 */
 		virtual ~app_gut2() {
 		}
-		virtual uint64_t merge(blockchain::app_gut* other0) override {
-			app_gut* other=static_cast<app_gut*>(other0);
+		virtual uint64_t merge(blockchain::local_delta* other0) override {
+			local_delta* other=static_cast<local_delta*>(other0);
 			for (auto& i:other->to_hall) to_hall.emplace(i);
 			b::merge(other0);
 			return 0;
@@ -129,9 +129,9 @@ namespace auth { //blockchain network support, this service is free
 		//array<double,policies_traits::num_params> policies;
 	};
 
-	struct app: blockchain::app {
+	struct app: blockchain::runnable_app {
 		typedef blockchain::app b;
-		app();
+		app(pubkey_t&);
 		virtual ~app();
 
 		constexpr static const char* name={"auth"};
@@ -149,18 +149,18 @@ namespace auth { //blockchain network support, this service is free
 
 		void add_growth_transactions(unsigned int seed);
 		void add_policies();
-
+/*
 		virtual bool process_work(peer_t *c, datagram*d) override {
 			return false;
 		}
-
+*/
 		peer_t::stage_t my_stage() const;
 		mutable peer_t::stage_t cache_my_stage{peer_t::unknown};
 
 		bool is_node() const { return my_stage()==peer_t::node; }
 //		virtual bool in_service() const override; //is this node in service (i.e. does it belong to the network?)
 
-		virtual void on_begin_cycle() override;
+//		virtual void on_begin_cycle() override;
 
 //		virtual void on_head_ready() override { //can start verification
 //		}
@@ -168,7 +168,7 @@ namespace auth { //blockchain network support, this service is free
 		virtual void import(const blockchain::app_gut2&, const blockchain::pow_t&) override;
 		//void import(const tx&);
 
-		virtual blockchain::app_gut* create_app_gut() override;
+		virtual blockchain::local_delta* create_local_delta() override;
 
 //		virtual blockchain::app_gut* create_closure_gut(const blockchain::block&) override;
 
@@ -187,14 +187,14 @@ namespace auth { //blockchain network support, this service is free
 			//void revoke() { //free the ip4 resource, can only be done in the last day before granted period expires#
 			//}
 
-		app_gut* pool{0};
+		local_delta* pool{0};
 		mutex mx_pool;
 
 	//	time_point issued;
 	//	time_point expiry;
 
 		
-		string get_random_node(const pubkeyh_t& exclude, const unordered_set<string>& exclude_addrs) const; //there exist a possibility of returning "" even though there were eligible items available
+		string get_random_node(mt19937_64& rng, const unordered_set<string>& exclude_addrs) const; //there exist a possibility of returning "" even though there were eligible items available
 
 //		virtual void clear_db() override;
 
@@ -306,12 +306,15 @@ namespace auth { //blockchain network support, this service is free
 		};
 */
 		
+		pubkey_t node_pubkey;
 
 
 		db_t db;
 
 		virtual void clear() override;
 
+
+		const keys& get_keys() const;
 
 
 //		struct policies_t: consensuated_array_average<paramid,double> { // network value, my vote

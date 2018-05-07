@@ -19,7 +19,7 @@ constexpr const char* c::name;
 constexpr array<const char*,policies_traits::num_params> policies_traits::paramstr;
 
 
-size_t std::hash<usgov::cash::app_gut>::operator() (const usgov::cash::app_gut&g) const {
+size_t std::hash<usgov::cash::local_delta>::operator() (const usgov::cash::local_delta&g) const {
 	return *reinterpret_cast<const size_t*>(&g.get_hash()[0]);
 }
 
@@ -43,13 +43,13 @@ return false;
 }
 */
 
-bool app_gut::accounts_t::add_input(tx& t, const hash_t& addr, const cash_t& amount) {
+bool local_delta::accounts_t::add_input(tx& t, const hash_t& addr, const cash_t& amount) {
 //	spend_code_t sc=lookup_spend_code(addr);
 //	if (sc==0) return false;
 	cash_t prev_balance=0; //TODO
 	return t.add_input(addr,prev_balance, amount/*,sc*/);
 }
-bool app_gut::accounts_t::add_output(tx& t, const hash_t& addr, const cash_t& amount, const hash_t& locking_program) {
+bool local_delta::accounts_t::add_output(tx& t, const hash_t& addr, const cash_t& amount, const hash_t& locking_program) {
 	return t.add_output(addr,amount,locking_program);
 }
 
@@ -92,7 +92,7 @@ c::accounts_t::spend_code_t c::accounts_t::lookup_spend_code(const hash_t& addre
 }
 */
 
-int app_gut::app_id() const {
+int local_delta::app_id() const {
 	return app::id();
 }
 /*
@@ -100,9 +100,11 @@ bool blockchain_app::in_service() const {
 	return true;
 }
 */
+/*
 void app::on_begin_cycle() {
 		cout << "app: cash: on_begin_cycle" << endl;
 }
+*/
 /*
 unordered_map<const miner_gut*,uint64_t> blockchain_app::to_fees(const unordered_map<const miner_gut*,double>& shares,uint64_t total_fees) {
 	unordered_map<const miner_gut*,uint64_t> ans;
@@ -142,7 +144,7 @@ cout << "diff0 " << diff << endl;
 }
 */
 /*
-void app_gut::merge(blockchain::app_gut* g) {
+void local_delta::merge(blockchain::local_delta* g) {
 	delete g;
 
 }
@@ -218,7 +220,7 @@ blockchain::app_gut* blockchain_app::create_closure_gut(const blockchain::block&
 ///----------------------------------------------
 
 c::app() {
-	pool=new app_gut();
+	pool=new local_delta();
 	policies_local=policies;
 //	verif_thread=new thread(&app::verification_daemon,this);
 }
@@ -288,15 +290,15 @@ void c::add_policies() {
 }
 
 
-blockchain::app_gut* c::create_app_gut() {
+blockchain::local_delta* c::create_local_delta() {
 	//{
 	//lock_guard<mutex> lock(buffer.mx);
-	cout << "app: cash: create_app_gut " << endl; // << buffer.size() << " verified/unverified txs in mempool. ";
+	cout << "app: cash: create_local_delta " << endl; // << buffer.size() << " verified/unverified txs in mempool. ";
 	//}
 	add_policies();
 	lock_guard<mutex> lock(mx_pool);
 	auto full=pool;
-	pool=new app_gut();
+	pool=new local_delta();
 	//full->to_stream(cout);
 	/*
 	if (full->empty()) {
@@ -357,11 +359,6 @@ c::query_accounts_t c::query_accounts_t::from_datagram(datagram*d) {
 
 void c::cash_query(peer_t *c, datagram*d) {
 cout << "CASH_QUERY" << endl;
-	if (!parent->syncdemon.in_sync()) {
-		delete d;
-		c->send(protocol::cash_response,"-1 Syncing");	
-		return;
-	}
 	query_accounts_t q=query_accounts_t::from_datagram(d);
 
 	ostringstream os;
@@ -383,19 +380,20 @@ cout << "CASH_QUERY" << endl;
 	}
 	}
 
-	os << ' ' << parent->get_last_block_imported();
+	os << ' ' << last_block_imported;
 
 cout << "CASH_RESPONSE " << os.str() << endl;
 
 	c->send(protocol::cash_response,os.str());	
 }
-
+/*
 bool c::process_work(peer_t *c, datagram*d) {
 	switch(d->service) {
 		default: return false;
 	}
 	return true;
 }
+*/
 /*
 c::buffer_t::~buffer_t() {
 	for (auto i:*this) delete i.second; 
@@ -486,11 +484,11 @@ void c::accounts_t::p2sh_t::dump(ostream& os) const {
 }
 */
 
-void app_gut::account_t::dump(ostream& os) const {
+void local_delta::account_t::dump(ostream& os) const {
  os << "locking_program " << locking_program << "; balance " << balance; // << "; spend code " << spend_code;
 }
 
-void app_gut::accounts_t::dump(ostream& os) const {
+void local_delta::accounts_t::dump(ostream& os) const {
 	cout << size() << " p2sh accounts:" << endl;
 	for (auto& i:*this) {
 		cout << ' ' << i.first << ' ';
@@ -539,11 +537,11 @@ c::spend_code_t c::accounts_t::new_spend_code(unsigned int seed) const {
 	return distribution(generator);
 }
 */
-bool app_gut::accounts_t::pay(unsigned int seed, const hash_t& address, const cash_t& amount) { //caller has to get the lock
+bool local_delta::accounts_t::pay(const hash_t& address, const cash_t& amount) { //caller has to get the lock
 	if (amount<=0) return false;
 	auto i=find(address);
 	if (i==end()) {
-		emplace(make_pair(address,account_t{1/*,new_spend_code(seed)*/,amount}));
+		emplace(make_pair(address,account_t{1,amount}));
 	}
 	else {
 		//same spend_code
@@ -576,7 +574,7 @@ bool app_gut::accounts_t::pay(unsigned int seed, const hash_t& address, const ca
 
 
 
-bool app_gut::accounts_t::withdraw(unsigned int seed/*, const spend_code_t& sc*/, const hash_t& address, const cash_t& amount/*, undo_t& undo*/) { //caller has to get the lock
+bool local_delta::accounts_t::withdraw(const hash_t& address, const cash_t& amount/*, undo_t& undo*/) { //caller has to get the lock
 	auto i=find(address);
 	if (i==end()) {
 		return false;
@@ -606,13 +604,13 @@ bool app_gut::accounts_t::withdraw(unsigned int seed/*, const spend_code_t& sc*/
 
 
 
-bool c::db_t::add_(unsigned int seed, const hash_t& k, const cash_t& amount) { //caller has to get the lock
-	return accounts->pay(seed, k,amount);
+bool c::db_t::add_(const hash_t& k, const cash_t& amount) { //caller has to get the lock
+	return accounts->pay(k,amount);
 }
 
 
-bool c::db_t::withdraw_(unsigned int seed/*, const spend_code_t& sc*/, const hash_t& k, const cash_t& amount/*, accounts_t::undo_t& undo*/) { //caller has to get the lock
-	return accounts->withdraw(seed,/*sc,*/k,amount/*,undo*/);
+bool c::db_t::withdraw_(const hash_t& k, const cash_t& amount/*, accounts_t::undo_t& undo*/) { //caller has to get the lock
+	return accounts->withdraw(k,amount/*,undo*/);
 }
 
 /*
@@ -720,7 +718,7 @@ cout << "cash: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 //patch db.
 
 	{
-	const app_gut::accounts_t& a=g.g.accounts;
+	const local_delta::accounts_t& a=g.g.accounts;
 	lock_guard<mutex> lock(db.mx);
 	for (auto& i:a) {
 //cout << "AAAAAAAAAAAAAAAAA- " << i.first << endl;
@@ -749,8 +747,6 @@ cout << "cash: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 
 //spread fees
 
-	auto seed=parent->get_seed();
-
 	if (likely(!w.empty())) {
 	///spread newcash+fees weighted by work
 		lock_guard<mutex> lock(db.mx);
@@ -772,20 +768,19 @@ cout << "PoW " << i.first << " " << i.second << endl;
 cout << "rel_work " << rel_work << endl;
 			cash_t amount=total_cash*rel_work;
 cout << "amount " << amount << endl;
-			db.add_(seed, i.first,amount);
+			db.add_(i.first,amount);
 			paid+=amount;
 		}
 cout << "paid " << paid << endl;
 		cash_t remainder=total_cash_int-paid;
 cout << "remainder " << remainder << endl;
 		if (remainder>0) {
-			auto seed=parent->get_seed();
-			default_random_engine generator(seed);
+			default_random_engine generator(get_seed());
 			uniform_int_distribution<size_t> distribution(0,w.size()-1);
 			auto i=w.begin();
 			advance(i,distribution(generator));
 			cout << "lucky guy " << i->first << " got remainder " << remainder << endl;
-			db.add_(seed,i->first,remainder);
+			db.add_(i->first,remainder);
 		}
 	}
 }
@@ -833,7 +828,7 @@ bool c::unlock(const hash_t& address, const size_t& this_index, const hash_t& lo
 	}
 }
 
-bool c::account_state(const app_gut::batch_t& batch, const hash_t& address, account_t& acc) const {
+bool c::account_state(const local_delta::batch_t& batch, const hash_t& address, account_t& acc) const {
 cout << "SGT-03-Acc state " << " address " << address << endl; 
 		auto  b=batch.find(address);
 		if (likely(b==batch.end())) { //this input has already been consumed at least once
@@ -876,8 +871,8 @@ cout << "SGT-03-Acc state " << " balance  " << acc.balance << endl;
 bool c::process(const tx& t) {
 	cout << "cash: Processing transaction " << endl;
 
-	if (t.parent_block!=parent->get_last_block_imported()) {
-		cout << "SGT-02-tx.rejected - base mismatch - " << t.parent_block << " != base:" << parent->get_last_block_imported() << endl; 
+	if (t.parent_block!=last_block_imported) {
+		cout << "SGT-02-tx.rejected - base mismatch - " << t.parent_block << " != base:" << last_block_imported << endl; 
 		return false;
 	}
 
@@ -897,7 +892,7 @@ cout << "SGT-02-tx.check (I>O,fees) " << endl;
 
 //	auto seed=parent->get_seed();
 
-	app_gut::batch_t batch;
+	local_delta::batch_t batch;
 
 //	accounts_t::undo_t undo;
 //	undo.reserve(t.inputs.size());
@@ -963,7 +958,7 @@ cout << "SGT-02-tx OK" << endl;
 	return true;
 }
 
-void usgov::cash::app_gut::to_stream(ostream& os) const {
+void usgov::cash::local_delta::to_stream(ostream& os) const {
 	os << accounts.size() << " ";
 	for (auto& i:accounts) {
 		os << i.first << ' '; // << /*i.second.spend_code << ' ' <<*/ i.second.balance << ' ';
@@ -974,7 +969,7 @@ cout << "appgut WRITE fees: " << fees << endl;
 	b::to_stream(os);
 }
 
-void usgov::cash::app_gut::from_stream(istream& is) {
+void usgov::cash::local_delta::from_stream(istream& is) {
 	int n;
 	is >> n;
 	for (int i=0; i<n; ++i) {

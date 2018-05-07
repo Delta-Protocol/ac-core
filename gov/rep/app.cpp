@@ -14,7 +14,7 @@ constexpr const char* c::name;
 constexpr array<const char*,policies_traits::num_params> policies_traits::paramstr;
 
 
-int app_gut::app_id() const {
+int local_delta::app_id() const {
 	return app::id();
 }
 /*
@@ -22,10 +22,11 @@ bool blockchain_app::in_service() const {
 	return true;
 }
 */
+/*
 void app::on_begin_cycle() {
 		cout << "app: rep: on_begin_cycle" << endl;
 }
-
+*/
 void c::dbhash(hasher_t&) const {
 }
 
@@ -153,7 +154,7 @@ blockchain::app_gut* blockchain_app::create_closure_gut(const blockchain::block&
 ///----------------------------------------------
 
 c::app() {
-	pool=new app_gut();
+	pool=new local_delta();
 	policies_local=policies;
 //	verif_thread=new thread(&app::verification_daemon,this);
 }
@@ -223,15 +224,15 @@ void c::add_policies() {
 }
 
 
-blockchain::app_gut* c::create_app_gut() {
+blockchain::local_delta* c::create_local_delta() {
 	//{
 	//lock_guard<mutex> lock(buffer.mx);
-	cout << "app: rep: create_app_gut " << endl; // << buffer.size() << " verified/unverified txs in mempool. ";
+	cout << "app: rep: create_local_delta " << endl; // << buffer.size() << " verified/unverified txs in mempool. ";
 	//}
 	add_policies();
 	lock_guard<mutex> lock(mx_pool);
 	auto full=pool;
-	pool=new app_gut();
+	pool=new local_delta();
 	//full->to_stream(cout);
 	/*
 	if (full->empty()) {
@@ -243,17 +244,19 @@ blockchain::app_gut* c::create_app_gut() {
 	return full; //send collected transactions to the network
 }
 
+/*
 bool c::process_work(peer_t *c, datagram*d) {
 	return false;
-/*
+/ *
 	switch(d->service) {
 		case svc_tx_merchant: incoming_transaction_from_merchant(c,d); break;
 		case svc_tx_node: incoming_transaction_from_node(c,d); break;
 		default: return false;
 	}
 	return true;
-*/
+* /
 }
+*/
 /*
 c::buffer_t::~buffer_t() {
 	for (auto i:*this) delete i.second; 
@@ -313,6 +316,7 @@ void c::verification_daemon() {
 	}
 }
 */
+/*
 void c::run() {
 	while(!program::_this.terminated) {
 //		cout << "APP: auth: doing something" << endl;
@@ -323,7 +327,7 @@ void c::run() {
 
 	}
 }
-
+*/
 void c::db_t::dump(ostream& os) const {
 	cout << "rep app db dump" << endl;
 /*
@@ -499,7 +503,7 @@ bool c::process(const tx& t) {
 	return true;
 }
 */
-void usgov::rep::app_gut::to_stream(ostream& os) const {
+void usgov::rep::local_delta::to_stream(ostream& os) const {
 /*
 	os << accounts.size() << " ";
 	for (auto& i:accounts) {
@@ -510,7 +514,7 @@ void usgov::rep::app_gut::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
-void usgov::rep::app_gut::from_stream(istream& is) {
+void usgov::rep::local_delta::from_stream(istream& is) {
 /*
 	int n;
 	is >> n;

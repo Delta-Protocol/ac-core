@@ -11,6 +11,7 @@
 #include <chrono>
 #include <gov/crypto.h>
 
+
 namespace usgov {
 namespace blockchain {
 	using namespace std;
@@ -18,7 +19,7 @@ namespace blockchain {
 
 	struct peer_t;
 
-	struct app_gut;
+	struct local_delta;
 	struct app_gut2;
 	struct block;
 	struct pow_t;
@@ -26,38 +27,40 @@ namespace blockchain {
 	struct daemon;
 	struct block;
 	struct app {
-		typedef crypto::ec::keys keys;
-		app() {}
-		virtual ~app() { }
-		virtual int get_id() const=0;
-		virtual string get_name() const=0;
-		virtual void on_begin_cycle()=0;
-		virtual app_gut* create_app_gut()=0;
-		virtual bool process_work(peer_t *, datagram*)=0;
-		virtual bool process_query(peer_t *, datagram*) { return false; }
-		virtual bool process_evidence(peer_t *, datagram*) { return false; }
-		virtual string shell_command(const string& cmdline)=0;
-
 		typedef crypto::ripemd160 hasher_t;
+		typedef hasher_t::value_type hash_t;
 
-		virtual void dbhash(hasher_t&) const=0;
+		app() {}
+		virtual ~app() {}
 
-		virtual void clear()=0;
+		virtual int get_id() const=0;
+		virtual string get_name() const=0; //provide a name for your app
 
-		virtual void run()=0;
+		virtual void clear()=0; //override and implement a db reset to a genesis state.
+		virtual void dbhash(hasher_t&) const=0; //override and return the hash of the content of your db
+		virtual void import(const app_gut2&, const pow_t&)=0; //override and apply the given delta to your db
 
-		virtual void import(const app_gut2&, const pow_t&)=0;
+		virtual bool process_evidence(peer_t *, datagram*) { return false; } //update your mempool with the given evidence
+		virtual bool process_query(peer_t *, datagram*) { return false; } //override to respond to user's read-only queries
 
-		const keys& get_keys() const;
-		daemon* parent{0};
+		virtual local_delta* create_local_delta()=0; // override to be able to submit your diff (your mempool)
+
+		virtual string shell_command(const string& cmdline); //answers to shell commands
+
+		static unsigned int get_seed();
+		static hash_t last_block_imported;
 	};
 
-	struct app_gut {
-		virtual ~app_gut() { }
+	struct runnable_app: app {
+		virtual void run()=0;
+	};
 
-		static app_gut* create(int id);
-		static app_gut* create(istream&);
-		static app_gut* create(int id, istream& is);
+	struct local_delta {
+		virtual ~local_delta() { }
+
+		static local_delta* create(int id);
+		static local_delta* create(istream&);
+		static local_delta* create(int id, istream& is);
 
 		virtual void to_stream(ostream&) const=0;
 		virtual void from_stream(istream&)=0;
@@ -73,7 +76,7 @@ namespace blockchain {
 		static app_gut2* create(istream&);
 		static app_gut2* create(int id,istream&);
 
-		virtual uint64_t merge(blockchain::app_gut* other) {
+		virtual uint64_t merge(local_delta* other) {
 			++multiplicity;
 			delete other;
 			return 0;
@@ -110,13 +113,13 @@ namespace blockchain {
 
 
 	template<typename D, typename T>
-	struct policies_app_gut: policies_base<D,T>, app_gut {
+	struct policies_local_delta: policies_base<D,T>, local_delta {
 		typedef policies_base<D,T> b1;
-		typedef app_gut b;
-		policies_app_gut() {}
-		policies_app_gut(const typename b1::b& g): b1(g) {
+		typedef local_delta b;
+		policies_local_delta() {}
+		policies_local_delta(const typename b1::b& g): b1(g) {
 		}
-		virtual ~policies_app_gut() {}
+		virtual ~policies_local_delta() {}
 		virtual void to_stream(ostream& os) const override {
 			b1::to_stream(os);
 		}
@@ -170,12 +173,12 @@ namespace blockchain {
 		typedef policies_base<D,T> b1;
 		typedef app_gut2 b;
 		policies_app_gut2() {}
-		policies_app_gut2(const policies_app_gut<D,T>& g): b1(g) {
+		policies_app_gut2(const policies_local_delta<D,T>& g): b1(g) {
 
 		}
 		virtual ~policies_app_gut2() {}
 
-		virtual uint64_t merge(blockchain::app_gut* other0) override {
+		virtual uint64_t merge(local_delta* other0) override {
 			b1* other=dynamic_cast<b1*>(other0);
 			for (int i=0; i<T::num_params; ++i) merger.merge((*this)[i],(*other)[i]);  //(*this)[i]+=(*other)[i];
 			b::merge(other0);

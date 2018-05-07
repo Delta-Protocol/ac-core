@@ -28,7 +28,7 @@ namespace blockchain {
 //	struct signature:string {
 //	};
 
-	struct app_gut;
+	struct local_delta;
 	struct diff;
 /*
 	struct appguts_by_pubkey: unordered_map<string,app_gut*> {
@@ -44,7 +44,7 @@ namespace blockchain {
 	};
 */
 
-	struct miner_gut: map<int,app_gut*>, signed_data { /// indexed by app id;
+	struct miner_gut: map<int,local_delta*>, signed_data { /// indexed by app id;
 		virtual ~miner_gut() {}
 		//typedef appguts_by_pubkey bucket;
 		//miner_gut(const string& pubkey): pubkey(pubkey) {}
@@ -84,8 +84,9 @@ namespace blockchain {
 		typedef map<int,app_gut2*> b;
 //		typedef crypto::sha256 hasher_t;
 //		typedef crypto::double_sha256 hasher_t;
-		typedef crypto::ripemd160 hasher_t;
-		typedef hasher_t::value_type hash_t;
+		typedef app::hasher_t hasher_t;
+		typedef app::hash_t hash_t;
+
 		diff() {
 			//assert(closure==0);
 		}
@@ -99,7 +100,7 @@ namespace blockchain {
 
 
 //		void add(int appid, const app_gut& g);
-		uint64_t add(int appid, app_gut* g);
+		uint64_t add(int appid, local_delta* g);
 		void add(miner_gut*); //returns false if already a miner_gut exists for this pubk
 		void end_adding(); 
 

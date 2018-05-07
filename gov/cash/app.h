@@ -21,14 +21,14 @@
 
 namespace usgov {
 namespace cash {
-	struct app_gut;
+	struct local_delta;
 }}
 
 namespace std {
 
   template <>
-  struct hash<usgov::cash::app_gut> {
-	size_t operator()(const usgov::cash::app_gut&) const;
+  struct hash<usgov::cash::local_delta> {
+	size_t operator()(const usgov::cash::local_delta&) const;
   };
 
 
@@ -67,17 +67,17 @@ namespace cash {
 		constexpr static array<const char*,num_params> paramstr={"minimum_fee"/*,"lifestyle_minimum_level"*/};
 	};
 
-	struct app_gut: blockchain::policies_app_gut<double, policies_traits> {
-		typedef blockchain::policies_app_gut<double, policies_traits> b;
+	struct local_delta: blockchain::policies_local_delta<double, policies_traits> {
+		typedef blockchain::policies_local_delta<double, policies_traits> b;
 
-		app_gut& operator =(int zero) {
-			*this=app_gut();
+		local_delta& operator =(int zero) {
+			*this=local_delta();
 			return *this;
 		}
 
-		app_gut() {
+		local_delta() {
 		}
-		virtual ~app_gut() {
+		virtual ~local_delta() {
 			//for (auto i:*this) delete i; // delete checkpoint_; 
 		}
 		virtual int app_id() const override;
@@ -160,8 +160,8 @@ namespace cash {
 			bool add_output(tx& t, const hash_t& addr, const cash_t& amount, const hash_t& locking_program);
 			
 			void dump(ostream& os) const;
-			bool pay(unsigned int seed, const hash_t& k, const cash_t& amount);
-			bool withdraw(unsigned int seed, const hash_t& k, const cash_t& amount);
+			bool pay(const hash_t& k, const cash_t& amount);
+			bool withdraw(const hash_t& k, const cash_t& amount);
 		};
 
 
@@ -193,7 +193,7 @@ namespace cash {
 
 	struct app_gut2: blockchain::policies_app_gut2<double, policies_traits, blockchain::average_merger<double>> {
 		typedef blockchain::policies_app_gut2<double, policies_traits, blockchain::average_merger<double>> b;
-		typedef app_gut::accounts_t accounts_t;
+		typedef local_delta::accounts_t accounts_t;
 		app_gut2() {}
 /*
 		 app_gut2(app_gut* g):b(*g) { //:policies(move(g->policies)) {
@@ -203,8 +203,8 @@ namespace cash {
 */
 		virtual ~app_gut2() {
 		}
-		virtual uint64_t merge(blockchain::app_gut* other0) override {
-			app_gut* other=static_cast<app_gut*>(other0);
+		virtual uint64_t merge(blockchain::local_delta* other0) override {
+			local_delta* other=static_cast<local_delta*>(other0);
 			m.merge(*other,*other);		
 
 			b::merge(other0);
@@ -223,8 +223,8 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 		static app_gut2* from_stream(istream& is);
 //		map<pubkey,address> to_hall; //pubkey
 //		array<double,policies_traits::num_params> policies;
-		app_gut g;
-		blockchain::majority_merger<app_gut> m;
+		local_delta g;
+		blockchain::majority_merger<local_delta> m;
 		//cash_t fees{0};
 	};
 
@@ -239,41 +239,25 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 
 	};
 */
-	struct app:blockchain::app { 
+	struct app:blockchain::runnable_app { 
 		app();
 		virtual ~app();
 		constexpr static const char* name={"cash"};
 		virtual string get_name() const override { return name; }
-
-		virtual void on_begin_cycle() override;
 
 		static int id() { return 30; }
 		virtual int get_id() const override { return id(); }
 
 		virtual string shell_command(const string& cmdline) override;
 
-	//	thread* verif_thread{0};
-	//	virtual void on_head_ready() override; //can start verification
-
-     //   	enum validation_result { valid, invalid, unable_to_validate };
 		double supply_function(double x0, double x, double xf) const;
 
 		virtual void run() override;
 		void add_policies();
 
-    //    validation_result validate(const tx& tr) const;
-/*
-		enum svcid {
-			svc_tx_merchant=300,
-			svc_tx_node=301,
-		};
-*/
-		
-		app_gut* pool{0};
+		local_delta* pool{0};
 		mutex mx_pool;
 
-//        void incoming_transaction_from_node(peer_t *src, datagram*d);
-//		void incoming_transaction_from_merchant(peer_t *src, datagram*d);
 		struct query_accounts_t:vector<hash_t> {
 			void add(const string& addr) {	
 				istringstream is(addr);
@@ -297,8 +281,8 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 			static query_accounts_t from_string(const string&);
 		};
 
-		virtual blockchain::app_gut* create_app_gut() override;
-		virtual bool process_work(peer_t *c, datagram*d) override;
+		virtual blockchain::local_delta* create_local_delta() override;
+//		virtual bool process_work(peer_t *c, datagram*d) override;
 		virtual bool process_query(peer_t *, datagram*) override;
 
 		virtual bool process_evidence(peer_t *, datagram*) override;
@@ -331,9 +315,9 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 //		typedef double_sha256 hasher_t;
 
 
-		typedef app_gut::account_t account_t;
+		typedef local_delta::account_t account_t;
 
-		typedef app_gut::accounts_t accounts_t;
+		typedef local_delta::accounts_t accounts_t;
 
 
 /*
@@ -374,7 +358,7 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 		};
 */
 
-		bool account_state(const app_gut::batch_t& batch, const hash_t& address, account_t& acc) const;
+		bool account_state(const local_delta::batch_t& batch, const hash_t& address, account_t& acc) const;
 
 		bool checksig(const size_t& this_index, const string& locking_program_input, const tx&) const;
 		static bool unlock(const hash_t& address, const size_t& this_index, const hash_t& locking_program, const string& locking_program_input, const tx&);
@@ -394,9 +378,9 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 			}
 			//bool move(const string& src, const string& dst, uint64_t amount);
 			//bool move(const tx::end_t& srcs, const tx::end_t& dsts);
-			bool add_(unsigned int seed, const hash_t&, const cash_t& amount);
+			bool add_(const hash_t&, const cash_t& amount);
 //			bool withdraw_(unsigned int seed, const spend_code_t& sc, const hash_t& k, const cash_t& amount, accounts_t::undo_t&);
-			bool withdraw_(unsigned int seed, const hash_t& k, const cash_t& amount/*, accounts_t::undo_t&*/);
+			bool withdraw_(const hash_t& k, const cash_t& amount/*, accounts_t::undo_t&*/);
 
 			void dump(ostream& os) const;
 			//void clear();
