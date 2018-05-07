@@ -191,17 +191,17 @@ namespace cash {
 
 	};
 
-	struct app_gut2: blockchain::policies_app_gut2<double, policies_traits, blockchain::average_merger<double>> {
-		typedef blockchain::policies_app_gut2<double, policies_traits, blockchain::average_merger<double>> b;
+	struct delta: blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> {
+		typedef blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> b;
 		typedef local_delta::accounts_t accounts_t;
-		app_gut2() {}
+		delta() {}
 /*
-		 app_gut2(app_gut* g):b(*g) { //:policies(move(g->policies)) {
+		 delta(app_gut* g):b(*g) { //:policies(move(g->policies)) {
 //			for (auto& i:g->to_hall) to_hall.emplace(i);
 			delete g;
 		}
 */
-		virtual ~app_gut2() {
+		virtual ~delta() {
 		}
 		virtual uint64_t merge(blockchain::local_delta* other0) override {
 			local_delta* other=static_cast<local_delta*>(other0);
@@ -220,7 +220,7 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 //			for (int i=0; i<policies_traits::num_params; ++i) policies[i]/=m;
 		}
 		virtual void to_stream(ostream& os) const override;
-		static app_gut2* from_stream(istream& is);
+		static delta* from_stream(istream& is);
 //		map<pubkey,address> to_hall; //pubkey
 //		array<double,policies_traits::num_params> policies;
 		local_delta g;
@@ -309,7 +309,7 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 		//bool exit;
 		buffer_t buffer;
 */
-		virtual void import(const blockchain::app_gut2&, const blockchain::pow_t&) override;
+		virtual void import(const blockchain::delta&, const blockchain::pow_t&) override;
 		//virtual void import(const blockchain::app_gut&);
 	//	virtual void clear_db() override;
 //		typedef double_sha256 hasher_t;

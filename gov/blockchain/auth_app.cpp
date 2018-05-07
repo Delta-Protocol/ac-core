@@ -166,7 +166,7 @@ void usgov::blockchain::auth::local_delta::from_stream(istream& is) {
 }
 
 
-void usgov::blockchain::auth::app_gut2::to_stream(ostream& os) const {
+void usgov::blockchain::auth::delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
 		os << i.first << " " << i.second << " ";
@@ -174,8 +174,8 @@ void usgov::blockchain::auth::app_gut2::to_stream(ostream& os) const {
 	b::b1::to_stream(os);
 }
 
-app_gut2* usgov::blockchain::auth::app_gut2::from_stream(istream& is) {
-	app_gut2* g=new app_gut2();
+delta* usgov::blockchain::auth::delta::from_stream(istream& is) {
+	delta* g=new delta();
 	{
 	int n;
 	is >> n;
@@ -192,8 +192,8 @@ app_gut2* usgov::blockchain::auth::app_gut2::from_stream(istream& is) {
 	return g;
 }
 
-void app::import(const blockchain::app_gut2& gg, const blockchain::pow_t&) {
-	const app_gut2& g=static_cast<const app_gut2&>(gg);
+void app::import(const blockchain::delta& gg, const blockchain::pow_t&) {
+	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(db.mx_hall);
 	for (auto& i:g.to_hall) {

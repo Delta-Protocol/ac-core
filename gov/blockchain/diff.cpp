@@ -127,7 +127,7 @@ c* c::from_stream(istream& is) {
 		int appid;
 		is >> appid;
 
-		app_gut2* ag=app_gut2::create(appid,is);
+		delta* ag=delta::create(appid,is);
 		if (ag!=0) {
 			bl->emplace(appid,ag);
 		}
@@ -168,7 +168,7 @@ bool c::allow(const miner_gut& g) {
 uint64_t c::add(int appid, local_delta* g) { //private, not protected by mutex, see add fn below
 	auto i=find(appid);
 	if (i==end()) {
-		i=emplace(appid,app_gut2::create(appid)).first;
+		i=emplace(appid,delta::create(appid)).first;
 	}
 	return i->second->merge(g);
 }

@@ -427,10 +427,10 @@ double c::supply_function(double x0, double x, double xf) const {
 }
 */
 
-void c::import(const blockchain::app_gut2& gg, const blockchain::pow_t& w) {
+void c::import(const blockchain::delta& gg, const blockchain::pow_t& w) {
 cout << "loan: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 /*
-	const app_gut2& g=static_cast<const app_gut2&>(gg);
+	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(mx_policies);
 	for (int i=0; i<policies_traits::num_params; ++i) policies[i]=g[i];
@@ -521,7 +521,7 @@ void usgov::loan::local_delta::from_stream(istream& is) {
 	b::from_stream(is);
 }
 
-void usgov::loan::app_gut2::to_stream(ostream& os) const {
+void usgov::loan::delta::to_stream(ostream& os) const {
 /*
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
@@ -536,8 +536,8 @@ void usgov::loan::app_gut2::to_stream(ostream& os) const {
 
 }
 
-app_gut2* usgov::loan::app_gut2::from_stream(istream& is) {
-	app_gut2* g=new app_gut2();
+delta* usgov::loan::delta::from_stream(istream& is) {
+	delta* g=new delta();
 /*
 	{
 	int n;

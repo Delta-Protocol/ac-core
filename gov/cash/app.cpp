@@ -707,9 +707,9 @@ cash_t c::db_t::get_newcash() { //db lock must be acquired
 	return block_reward;
 }
 
-void c::import(const blockchain::app_gut2& gg, const blockchain::pow_t& w) {
+void c::import(const blockchain::delta& gg, const blockchain::pow_t& w) {
 cout << "cash: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
-	const app_gut2& g=static_cast<const app_gut2&>(gg);
+	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(mx_policies);
 	for (int i=0; i<policies_traits::num_params; ++i) policies[i]=g[i];
@@ -984,7 +984,7 @@ cout << "appgut READ fees: " << fees << endl;
 	b::from_stream(is);
 }
 
-void usgov::cash::app_gut2::to_stream(ostream& os) const {
+void usgov::cash::delta::to_stream(ostream& os) const {
 /*
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
@@ -1000,8 +1000,8 @@ void usgov::cash::app_gut2::to_stream(ostream& os) const {
 
 }
 
-app_gut2* usgov::cash::app_gut2::from_stream(istream& is) {
-	app_gut2* g=new app_gut2();
+delta* usgov::cash::delta::from_stream(istream& is) {
+	delta* g=new delta();
 /*
 	{
 	int n;

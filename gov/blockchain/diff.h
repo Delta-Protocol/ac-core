@@ -80,8 +80,8 @@ namespace blockchain {
 		}
 	};
 
-	struct diff: map<int,app_gut2*> {
-		typedef map<int,app_gut2*> b;
+	struct diff: map<int,delta*> {
+		typedef map<int,delta*> b;
 //		typedef crypto::sha256 hasher_t;
 //		typedef crypto::double_sha256 hasher_t;
 		typedef app::hasher_t hasher_t;

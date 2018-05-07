@@ -56,10 +56,10 @@ namespace loan {
 
 	};
 
-	struct app_gut2: blockchain::policies_app_gut2<hash_t, policies_traits, blockchain::majority_merger<hash_t>> {
-		typedef blockchain::policies_app_gut2<hash_t, policies_traits, blockchain::majority_merger<hash_t>> b;
-		app_gut2() {}
-		virtual ~app_gut2() {
+	struct delta: blockchain::policies_delta<hash_t, policies_traits, blockchain::majority_merger<hash_t>> {
+		typedef blockchain::policies_delta<hash_t, policies_traits, blockchain::majority_merger<hash_t>> b;
+		delta() {}
+		virtual ~delta() {
 		}
 		virtual uint64_t merge(blockchain::local_delta* other0) override {
 
@@ -70,7 +70,7 @@ namespace loan {
 
 		}
 		virtual void to_stream(ostream& os) const override;
-		static app_gut2* from_stream(istream& is);
+		static delta* from_stream(istream& is);
 		cash_t fees{0};
 	};
 
@@ -97,7 +97,7 @@ namespace loan {
 
 		virtual blockchain::local_delta* create_local_delta() override;
 		//virtual bool process_work(peer_t *c, datagram*d) override;
-		virtual void import(const blockchain::app_gut2&, const blockchain::pow_t&) override;
+		virtual void import(const blockchain::delta&, const blockchain::pow_t&) override;
 //		bool process(const tx&);
 
 		struct db_t {

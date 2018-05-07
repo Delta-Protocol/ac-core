@@ -20,7 +20,7 @@ namespace blockchain {
 	struct peer_t;
 
 	struct local_delta;
-	struct app_gut2;
+	struct delta;
 	struct block;
 	struct pow_t;
 
@@ -38,7 +38,7 @@ namespace blockchain {
 
 		virtual void clear()=0; //override and implement a db reset to a genesis state.
 		virtual void dbhash(hasher_t&) const=0; //override and return the hash of the content of your db
-		virtual void import(const app_gut2&, const pow_t&)=0; //override and apply the given delta to your db
+		virtual void import(const delta&, const pow_t&)=0; //override and apply the given delta to your db
 
 		virtual bool process_evidence(peer_t *, datagram*) { return false; } //update your mempool with the given evidence
 		virtual bool process_query(peer_t *, datagram*) { return false; } //override to respond to user's read-only queries
@@ -67,14 +67,14 @@ namespace blockchain {
 		virtual int app_id() const=0;
 	};
 
-	struct app_gut2 {
-		app_gut2() {
+	struct delta {
+		delta() {
 		}
-		virtual ~app_gut2() { 
+		virtual ~delta() { 
 		}
-		static app_gut2* create(int id);
-		static app_gut2* create(istream&);
-		static app_gut2* create(int id,istream&);
+		static delta* create(int id);
+		static delta* create(istream&);
+		static delta* create(int id,istream&);
 
 		virtual uint64_t merge(local_delta* other) {
 			++multiplicity;
@@ -169,14 +169,14 @@ namespace blockchain {
 
 
 	template<typename D, typename T, typename M>
-	struct policies_app_gut2: policies_base<D,T>, app_gut2 {
+	struct policies_delta: policies_base<D,T>, delta {
 		typedef policies_base<D,T> b1;
-		typedef app_gut2 b;
-		policies_app_gut2() {}
-		policies_app_gut2(const policies_local_delta<D,T>& g): b1(g) {
+		typedef delta b;
+		policies_delta() {}
+		policies_delta(const policies_local_delta<D,T>& g): b1(g) {
 
 		}
-		virtual ~policies_app_gut2() {}
+		virtual ~policies_delta() {}
 
 		virtual uint64_t merge(local_delta* other0) override {
 			b1* other=dynamic_cast<b1*>(other0);
