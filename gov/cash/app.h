@@ -40,7 +40,7 @@ namespace cash {
 	using namespace std;
 	using socket::datagram;
 	//using blockchain::signature;
-	using blockchain::miner_gut;
+	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using crypto::ec;
 	using blockchain::peer_t;
@@ -233,7 +233,7 @@ cout << "END MERGE: g.fees=" << g.fees << endl;
 //		virtual bool in_service() const override;
 		virtual void on_begin_cycle() override;
 
-//		static unordered_map<const miner_gut*,uint64_t> to_fees(const unordered_map<const miner_gut*,double>& shares,uint64_t total_fees);
+//		static unordered_map<const local_deltas*,uint64_t> to_fees(const unordered_map<const local_deltas*,double>& shares,uint64_t total_fees);
 //		tx* pay_to_net(const blockchain::block& b); 
 //		virtual blockchain::app_gut* create_closure_gut(const blockchain::block& b) override;
 

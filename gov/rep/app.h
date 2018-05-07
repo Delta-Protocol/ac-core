@@ -20,7 +20,7 @@ namespace rep {
 	using namespace std;
 	using socket::datagram;
 //	using blockchain::signature;
-	using blockchain::miner_gut;
+	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using blockchain::peer_t;
 

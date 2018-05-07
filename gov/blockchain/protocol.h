@@ -8,7 +8,7 @@ namespace usgov {
 namespace protocol {
 	static constexpr uint16_t blockchain_base{400};
 	//static inline bool is_blockchain_or_above(const uint16_t& i) { return (i>>2)>=blockchain_base; }
-	static constexpr uint16_t miner_gut{((blockchain_base+0)<<2)+protocol_suffix};
+	static constexpr uint16_t local_deltas{((blockchain_base+0)<<2)+protocol_suffix};
 	static constexpr uint16_t vote_tip{((blockchain_base+1)<<2)+protocol_suffix};
 	static constexpr uint16_t query_block{((blockchain_base+2))<<2+protocol_suffix};
 	static constexpr uint16_t block{((blockchain_base+3)<<2)+protocol_suffix};

@@ -21,7 +21,7 @@ namespace cash {
 	using namespace std;
 	using socket::datagram;
 //	using blockchain::signature;
-	using blockchain::miner_gut;
+	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using crypto::ec;
 	using blockchain::peer_t;

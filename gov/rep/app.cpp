@@ -40,8 +40,8 @@ void c::clear() {
 
 
 /*
-unordered_map<const miner_gut*,uint64_t> blockchain_app::to_fees(const unordered_map<const miner_gut*,double>& shares,uint64_t total_fees) {
-	unordered_map<const miner_gut*,uint64_t> ans;
+unordered_map<const local_deltas*,uint64_t> blockchain_app::to_fees(const unordered_map<const local_deltas*,double>& shares,uint64_t total_fees) {
+	unordered_map<const local_deltas*,uint64_t> ans;
 	if (total_fees==0) return move(ans);
 	double tot_shares=0;
 	for (auto& i:shares) {
@@ -91,8 +91,8 @@ return 0;
 	if (b.empty()) return 0;
 	tx* paynet=new tx();
 	unordered_set<const tx*> seentx;
-	unordered_map<const miner_gut*,double> shares;
-	unordered_map<const miner_gut*,string> pubkeys;
+	unordered_map<const local_deltas*,double> shares;
+	unordered_map<const local_deltas*,string> pubkeys;
 	uint64_t total_fees=0;
 	for (auto& m:b) {
 		pubkeys.emplace(m.second,m.first);
@@ -113,7 +113,7 @@ return 0;
 		shares.emplace(m.second,miner_fees);
 	}
 //cout << "pay_to_net B" << endl;
-	unordered_map<const miner_gut*,uint64_t> fees=to_fees(shares,total_fees);
+	unordered_map<const local_deltas*,uint64_t> fees=to_fees(shares,total_fees);
 	//b.purge(); //delete miners not adding value, no puedo es const, puede haber otras apps que les sirva el gut
 	uint64_t coinbase=8e8;
 	uint64_t coinbase_per_miner;

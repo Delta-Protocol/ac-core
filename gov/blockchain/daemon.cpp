@@ -38,7 +38,7 @@ void c::start_new_blockchain(const string& addr) {
     assert(!addr.empty());
     auto pool=new diff();
     auth_app->pool->to_hall.push_back(make_pair(peerd.id.pub.hash(),addr));
-    auto* mg=create_miner_gut();
+    auto* mg=create_local_deltas();
     assert(mg!=0);
     pool->allow(*mg);
     pool->add(mg);
@@ -256,9 +256,9 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 		while (!syncdemon.in_sync() && !program::_this.terminated) {
 			cout << "syncing" << endl;
 			thread_::_this.sleep_for(chrono::seconds(1));
-			if (data.cycle.get_stage()!=cycle_t::miner_gut_io) break;
+			if (data.cycle.get_stage()!=cycle_t::local_deltas_io) break;
 		}
-		if (data.cycle.get_stage()!=cycle_t::miner_gut_io) return false;
+		if (data.cycle.get_stage()!=cycle_t::local_deltas_io) return false;
 	}
 //	if (auth_app->my_stage()!=peer_t::node) return false;
 
@@ -266,7 +266,7 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 	//b->checkpoint=min_in_week==0; //once a week the closure block contains a ref to a checkpoint block
     if (!auth_app->is_node()) return false;
 
-	auto* mg=create_miner_gut(); //send my gut to the network
+	auto* mg=create_local_deltas(); //send my gut to the network
 	if (mg!=0) {
 		send(*mg);
 		{
@@ -326,7 +326,7 @@ void c::run() {
 	while(!program::_this.terminated) { // main loop
 		data.cycle.wait_for_stage(cycle_t::new_cycle);
 		stage1(data);
-		data.cycle.wait_for_stage(cycle_t::miner_gut_io);
+		data.cycle.wait_for_stage(cycle_t::local_deltas_io);
 		if (!stage2(data)) continue;
 		data.cycle.wait_for_stage(cycle_t::consensus_vote_tip_io);
 		stage3(data);
@@ -484,13 +484,13 @@ void c::update_peers_state() {
 }
 
 
-void c::send(const miner_gut& g, peer_t* exclude) {
+void c::send(const local_deltas& g, peer_t* exclude) {
 	ostringstream os;
 	g.to_stream(os);
 	string msg=os.str();
 	for (auto& i:get_nodes()) {
 		if (i==exclude) continue; //dont relay to the original sender
-		i->send(protocol::miner_gut,msg);
+		i->send(protocol::local_deltas,msg);
 	}
 }
 
@@ -501,9 +501,9 @@ void c::send(const datagram& g, peer_t* exclude) {
 	}
 }
 
-miner_gut* c::create_miner_gut() {
-	cout << "blockchain: create_miner_gut" << endl;
-	auto* mg=new miner_gut();
+local_deltas* c::create_local_deltas() {
+	cout << "blockchain: create_local_deltas" << endl;
+	auto* mg=new local_deltas();
 
 	{
     lock_guard<mutex> lock(peerd.mx_evidences); //pause reception of evidences while changing app pools
@@ -567,7 +567,7 @@ cout << "Received vote from " << pubkey << " head be " << block_hash_b58 << endl
 
 }
 #include <gov/likely.h>
-void c::process_incoming_miner_gut(peer_t *c, datagram*d) {
+void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 	auto s=d->parse_string();
 	delete d;
 //cout << "RECeived miner gut" << endl;
@@ -575,7 +575,7 @@ void c::process_incoming_miner_gut(peer_t *c, datagram*d) {
 //cout << s << endl;
 //cout << "----" << endl;
 	istringstream is(s);
-	miner_gut* g=miner_gut::from_stream(is);
+	local_deltas* g=local_deltas::from_stream(is);
 	if (!g) return;
 //cout << "----" << endl;
 //g->to_stream(cout);
@@ -583,7 +583,7 @@ void c::process_incoming_miner_gut(peer_t *c, datagram*d) {
 	/// discard if not properly signed
 	if (unlikely(!g->verify())) {
 		delete g;
-		cout << "Failed verification of incoming miner_gut" << endl;
+		cout << "Failed verification of incoming local_deltas" << endl;
 		return;
 	}
 
@@ -625,7 +625,7 @@ cout << "Cycle: current second is " << s.count() << ". I'll sleep for " << (n-s.
 string usgov::blockchain::cycle_t::str(stage s) const {
 	switch(s) {
 		case new_cycle: return "new_cycle"; break;
-		case miner_gut_io: return "miner_gut_io"; break;
+		case local_deltas_io: return "local_deltas_io"; break;
 		case consensus_vote_tip_io: return "consensus_vote_tip_io"; break;
 	}
 	return "?";
@@ -638,8 +638,8 @@ usgov::blockchain::cycle_t::stage usgov::blockchain::cycle_t::get_stage() {
 	tp-=m;
 	seconds s = duration_cast<seconds>(tp);
 	int sec=s.count();
-	if (sec<miner_gut_io) return new_cycle;
-	if (sec<consensus_vote_tip_io) return miner_gut_io;
+	if (sec<local_deltas_io) return new_cycle;
+	if (sec<consensus_vote_tip_io) return local_deltas_io;
 	return consensus_vote_tip_io;
 }
 
@@ -836,8 +836,8 @@ cout << "Delivering to " << apps_.size() << " apps" << endl;
 	if (processed) return true;
 */
 	switch(d->service) {
-		case protocol::miner_gut: {
-			process_incoming_miner_gut(c,d); 
+		case protocol::local_deltas: {
+			process_incoming_local_deltas(c,d); 
 			return true;
 		}
 	}
