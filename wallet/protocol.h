@@ -6,11 +6,16 @@
 namespace usgov {
 namespace protocol {
 namespace wallet {
-	static constexpr uint16_t balance_query{0};
-	static constexpr uint16_t balance_response{1};
+	static constexpr uint16_t wallet_base{0};
 
-	static constexpr uint16_t cash_tx_order{2};
-	static constexpr uint16_t cash_tx_response{3};
+	static constexpr uint16_t seq_query{wallet_base+0};
+	static constexpr uint16_t seq_response{wallet_base+1};
+
+	static constexpr uint16_t balance_query{wallet_base+2};
+	static constexpr uint16_t balance_response{wallet_base+3};
+
+	static constexpr uint16_t cash_tx_order{wallet_base+4};
+	static constexpr uint16_t cash_tx_response{wallet_base+5};
 }}}
 
 #endif

@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <gov/cash/locking_programs/p2pkh.h>
+#include <gov/cash/tx.h>
 #include <gov/signal_handler.h>
 #include <gov/socket/datagram.h>
 #include "wallet.h"
@@ -169,8 +170,8 @@ void tx_make(args_t& args, const params& p) {
 
 
 void tx_make_p2pkh(args_t& args, const params& p) {
-    tx_make_p2pkh_input i;
-    i.dstaddr=args.next<cash::hash_t>();
+    wallet::tx_make_p2pkh_input i;
+    i.rcpt_addr=args.next<cash::hash_t>();
     i.amount=args.next<cash::cash_t>();
     i.fee=args.next<cash::cash_t>();
     i.sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
@@ -179,45 +180,20 @@ void tx_make_p2pkh(args_t& args, const params& p) {
 	wallet my_wallet(p.homedir);
 
     auto tx=my_wallet.tx_make_p2pkh(p.backend_host, p.backend_port, i);
-
-	cout << tx << endl;
+    if (tx.first.empty())
+    	cout << tx.second << endl;
+    else 
+    	cerr << tx.first << endl;
 
 }
 
-void tx_sign(args_t& args, const params& p) {
+pair<string,cash::tx> tx_sign(args_t& args, const params& p) {
 	auto b58=args.next<string>();
 	auto sigcodei=args.next<cash::tx::sigcode_t>();
 	auto sigcodeo=args.next<cash::tx::sigcode_t>();
-	auto sigcodes=cash::tx::combine(sigcodei,sigcodeo);
+	wallet my_wallet(p.homedir);
 
-	cash::tx t=cash::tx::from_b58(b58);
-
-	cash::app::query_accounts_t addresses;
-	for (auto&i:t.inputs) {
-		addresses.emplace_back(i.address);
-	}
-	wallet::accounts_query_t bases=wallet::query_accounts(p.backend_host, p.backend_port, addresses);
-	bases.dump(cout);
-	int n=0;
-	for (auto&i:t.inputs) {
-		auto b=bases.find(i.address);
-		if(b==bases.end()) {
-			cerr << "No such address " << i.address << endl;	
-			exit(1);
-		}
-		const cash::app::account_t& src=b->second;
-		if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,t)) {
-			i.locking_program_input=generate_locking_program_input(p,t,n,sigcodes,i.address, src.locking_program);
-			if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,t)) {	
-				i.locking_program_input="";
-				cout << "cannot unlock account " << i.address << endl;
-			}
-		}	
-		else {
-			cout << "unlocked! " << i.address << endl;
-		}
-		++n;
-	}
+    return my_wallet.tx_sign(p.backend_host, p.backend_port,b58,sigcodei,sigcodeo);
 }
 
 void tx(args_t& args, const params& p) {
@@ -229,7 +205,11 @@ void tx(args_t& args, const params& p) {
         tx_make_p2pkh(args,p);
 	}
 	else if (command=="sign") { //access backend
-        tx_sign(args,p);
+        auto tx=tx_sign(args,p);
+        if (tx.first.empty())
+            cout << tx.second << endl;
+        else
+            cerr << tx.first << endl;
 	}
 	else if (command=="decode") {
 		auto b58=args.next<string>();
@@ -248,7 +228,7 @@ void tx(args_t& args, const params& p) {
 	else if (command=="send") {
 		auto b58=args.next<string>();
 		cash::tx t=cash::tx::from_b58(b58);
-		send(t,p);
+		wallet::send(p.backend_host, p.backend_port,t);
 		cout << "sent" << endl;
 		
 	}

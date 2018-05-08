@@ -66,7 +66,10 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
         bool sendover;
 
     };
+    static void send(const string&backend_host, uint16_t backend_port, const cash::tx& t);
+
     pair<string,cash::tx> tx_make_p2pkh(const string&backend_host, uint16_t backend_port, const tx_make_p2pkh_input& i);
+    pair<string,cash::tx> tx_sign(const string&backend_host, uint16_t backend_port, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
 
 
 	void dump(ostream& os) const;

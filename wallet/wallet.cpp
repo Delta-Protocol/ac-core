@@ -196,15 +196,15 @@ void c::input_accounts_t::dump(ostream& os) const {
 #include <gov/cash/locking_programs/p2pkh.h>
 
 
-void send(const string&backend_host, uint16_t backend_port, const cash::tx& t) {
+void c::send(const string&backend_host, uint16_t backend_port, const cash::tx& t) {
 	auto fee=t.check();
 	if (fee<=0) {
 		cerr << "Individual inputs and fees must be positive." << endl;
 		exit(1);
 	}
 	socket::peer_t cli;
-	if (!cli.connect(p.backend_host,p.backend_port,true)) {
-		cerr << "wallet: unable to connect to " << p.backend_host << ":" << p.backend_port << endl;
+	if (!cli.connect(backend_host,backend_port,true)) {
+		cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
 		exit(1);
 	}
 	cli.send(t.get_datagram());
@@ -236,6 +236,46 @@ string c::generate_locking_program_input(const cash::tx& t, size_t this_index, c
 		}
 	}
 	return "";
+}
+
+pair<string,cash::tx> c::tx_sign(const string&backend_host, uint16_t backend_port, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
+	auto sigcodes=cash::tx::combine(sigcodei,sigcodeo);
+
+    pair<string,cash::tx> ret;
+	ret.second=cash::tx::from_b58(txb58);
+
+	cash::app::query_accounts_t addresses;
+	for (auto&i:ret.second.inputs) {
+		addresses.emplace_back(i.address);
+	}
+	wallet::accounts_query_t bases=query_accounts(backend_host, backend_port, addresses);
+//	bases.dump(cout);
+    string err;
+	int n=0;
+	for (auto&i:ret.second.inputs) {
+		auto b=bases.find(i.address);
+		if(b==bases.end()) {
+			cerr << "No such address " << i.address << endl;	
+			exit(1);
+		}
+		const cash::app::account_t& src=b->second;
+		if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,ret.second)) {
+			i.locking_program_input=generate_locking_program_input(ret.second,n,sigcodes,i.address, src.locking_program);
+			if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,ret.second)) {	
+				i.locking_program_input="";
+				ostringstream os;
+                os << "cannot unlock account " << i.address << endl;
+                ret.first=os.str(); 
+			}
+		}	
+/*
+		else {
+			cout << "unlocked! " << i.address << endl;
+		}
+*/
+		++n;
+	}
+    return move(ret);
 }
 
 pair<string,cash::tx> c::tx_make_p2pkh(const string&backend_host, uint16_t backend_port, const tx_make_p2pkh_input& i) {
