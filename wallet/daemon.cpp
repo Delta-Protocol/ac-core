@@ -83,6 +83,9 @@ const string& c::devices_t::get_name(const pub_t& pub) {
 
 bool c::process_work(peer_t *c, datagram*d) {
 	switch(d->service) {
+		case protocol::wallet::seq_query: {
+        }
+        break;
 		case protocol::wallet::balance_query: {
             
 
