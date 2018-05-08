@@ -59,5 +59,22 @@ Obtain the probability of fraud in a given length of time.
 Fraud happens when Evils nodes have managed to set the counter to their will.
 
 
+Toolchain
+=========
+
+Write a bash program that takes as input the git repository and builds an ISO image for ARM (raspberry PI)
+    * Headless GNU/linux
+    
+Write a bash program that takes as input the git repository and builds the android APK
+
+  
+
+
+
+
+
+
+
+
 
 
