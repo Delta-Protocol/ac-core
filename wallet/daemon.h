@@ -5,6 +5,7 @@
 #include <gov/crypto/ec.h>
 #include "wallet.h"
 #include <unordered_map>
+#include "api.h"
 
 namespace usgov {
 
@@ -12,7 +13,7 @@ using namespace std;
 
 using socket::datagram;
 
-struct wallet_daemon: socket::daemon, wallet {
+struct wallet_daemon: socket::daemon, local_api {
 	typedef socket::daemon b;
 	typedef socket::peer_t peer_t;
 	typedef crypto::ec::keys::pub_t pub_t;
@@ -22,9 +23,10 @@ struct wallet_daemon: socket::daemon, wallet {
 	virtual ~wallet_daemon();
 	bool process_work(peer_t*, datagram*);
 
-    string backend_host;
-    uint16_t backend_port;
+  //  string backend_host;
+  //  uint16_t backend_port;
 
+	bool send_response(peer_t *c, datagram*d, const string& payload);
 
     struct device {
         device() {

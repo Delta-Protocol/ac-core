@@ -6,7 +6,6 @@
 #include <gov/cash/locking_programs/p2pkh.h>
 #include <gov/cash/tx.h>
 #include <gov/signal_handler.h>
-#include <gov/socket/datagram.h>
 #include "wallet.h"
 #include "daemon.h"
 #include "args.h"
@@ -84,8 +83,8 @@ else {
 	cout << " dump                   Lists the keys/addresses managed by wallet" << endl;
 	cout << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
 	cout << " priv_key <private key> Gives information about the given private key." << endl;
-	cout << " tx base                Reports the current parent block for new transactions" << endl;
-	cout << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
+//	cout << " tx base                Reports the current parent block for new transactions" << endl;
+//	cout << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
 	cout << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
 	cout << " tx decode <tx_b58>" << endl;
 	cout << " tx check <tx_b58>" << endl;
@@ -98,7 +97,6 @@ else {
 
 
 
-using datagram=socket::datagram;
 
 void run_daemon(const params& p) {
 	signal(SIGINT,sig_handler);
@@ -140,9 +138,8 @@ string parse_options(args_t& args, params& p) {
     }
     return cmd;        
 }
-
-void tx_make(args_t& args, const params& p) {
-	cash::tx t;
+/*
+void tx_make(api& wapi, args_t& args, const params& p) {
 	t.parent_block=args.next<blockchain::diff::hash_t>();
 
 	auto src=args.next<cash::hash_t>();
@@ -153,6 +150,7 @@ void tx_make(args_t& args, const params& p) {
 	auto deposit_amount=args.next<cash::cash_t>();
 	auto locking_program=args.next<cash::hash_t>();
 
+	cash::tx t;
 	t.add_input(src, prev_balance, withdraw_amount);
 	t.add_output(dst, deposit_amount, locking_program);
 	if (!t.check()) {
@@ -167,9 +165,9 @@ void tx_make(args_t& args, const params& p) {
 	t.write(cout);	
 	cout << endl;
 }
+*/
 
-
-void tx_make_p2pkh(args_t& args, const params& p) {
+void tx_make_p2pkh(api& wapi, args_t& args, const params& p) {
     wallet::tx_make_p2pkh_input i;
     i.rcpt_addr=args.next<cash::hash_t>();
     i.amount=args.next<cash::cash_t>();
@@ -177,14 +175,8 @@ void tx_make_p2pkh(args_t& args, const params& p) {
     i.sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
     i.sigcode_outputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
     i.sendover=args.next<string>("nopes")=="send";
-	wallet my_wallet(p.homedir);
 
-    auto tx=my_wallet.tx_make_p2pkh(p.backend_host, p.backend_port, i);
-    if (tx.first.empty())
-    	cout << tx.second << endl;
-    else 
-    	cerr << tx.first << endl;
-
+    wapi.tx_make_p2pkh(i,cout);
 }
 
 pair<string,cash::tx> tx_sign(args_t& args, const params& p) {
@@ -196,20 +188,23 @@ pair<string,cash::tx> tx_sign(args_t& args, const params& p) {
     return my_wallet.tx_sign(p.backend_host, p.backend_port,b58,sigcodei,sigcodeo);
 }
 
-void tx(args_t& args, const params& p) {
+void tx(api& wapi, args_t& args, const params& p) {
 	string command=args.next<string>();
+/*
 	if (command=="make") {
-        tx_make(args,p);
+        	tx_make(wapi,args,p);
 	}
-	else if (command=="make_p2pkh") {
-        tx_make_p2pkh(args,p);
+	else
+*/
+	if (command=="make_p2pkh") {
+        	tx_make_p2pkh(wapi,args,p);
 	}
 	else if (command=="sign") { //access backend
-        auto tx=tx_sign(args,p);
-        if (tx.first.empty())
-            cout << tx.second << endl;
-        else
-            cerr << tx.first << endl;
+		auto tx=tx_sign(args,p);
+		if (tx.first.empty())
+		    cout << tx.second << endl;
+		else
+		    cerr << tx.first << endl;
 	}
 	else if (command=="decode") {
 		auto b58=args.next<string>();
@@ -232,6 +227,7 @@ void tx(args_t& args, const params& p) {
 		cout << "sent" << endl;
 		
 	}
+/*
 	else if (command=="base") {
 		cash::app::query_accounts_t addresses;
 		addresses.add("2vVN9EUdmZ5ypMe84JrQqwExMRjn");
@@ -239,41 +235,44 @@ void tx(args_t& args, const params& p) {
 		wallet::accounts_query_t bases=wallet::query_accounts(p.backend_host, p.backend_port, addresses);
 		bases.dump(cout);
 	}
+*/
 	else {
 		help(p);
 		exit(1);
 	}
 }
 
+#include "api.h"
+
 int main(int argc, char** argv) {
 	args_t args(argc,argv);
 	params p;
 	string command=parse_options(args,p);
 
+	api* papi;
+	if (p.offline) {
+		papi=new local_api(p.homedir,p.backend_host,p.backend_port);
+	}
+	else {
+		papi=new rpc_api(p.walletd_host,p.walletd_port);
+	}
+	api& wapi=*papi;
+
 	if (command=="tx") {
-        tx(args,p);
+        	tx(wapi,args,p);
 	}
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
-		if (!crypto::ec::keys::verify(privkey)) {
-			cout << "The private key is incorrect." << endl;
-		}
-		auto pub=crypto::ec::keys::get_pubkey(privkey);
-		cout << "Public key: " << pub << endl;
-		cout << "Public key hash: " << pub.compute_hash() << endl;
+		wapi.priv_key(privkey,cout);
 	}
 	else if (command=="address") {
 		command=args.next<string>();
 		if (command=="new") {
-			wallet my_wallet(p.homedir);
-			auto a=my_wallet.new_address();
-			cout << "Address: " << a << endl;
+			wapi.new_address(cout);
 		}
 		else if (command=="add") {
 			crypto::ec::keys::priv_t k=args.next<crypto::ec::keys::priv_t>();
-			wallet my_wallet(p.homedir);
-			auto a=my_wallet.add_address(k);
-			cout << "Address: " << a << endl;
+			wapi.add_address(k,cout);
 		}
 		else {
 			help(p);
@@ -281,44 +280,13 @@ int main(int argc, char** argv) {
 		}
 	}
 	else if (command=="dump") {
-		wallet my_wallet(p.homedir);
-		my_wallet.dump(cout);
+		wapi.dump(cout);
 	} 
 	else if (command=="balance") {
-		bool detailed=args.next<bool>(false);
-		if (p.offline) {
-			wallet my_wallet(p.homedir);
-            if (my_wallet.empty()) {
-                cerr << "wallet " << my_wallet.filename() << " doesn't contain keys." << endl;
-                exit(1);
-            }
-			my_wallet.refresh(p.backend_host,p.backend_port);
-			if (detailed) {
-				my_wallet.dump_balances(cout);
-			}
-			else {
-				cout << my_wallet.balance() << endl;
-			}
-		}
-		else {
-			datagram* q=new datagram(protocol::wallet::balance_query,"");
-			socket::datagram* response=socket::peer_t::send_recv(p.walletd_host, p.walletd_port, q);
-			if (response) {
-			cout << response->parse_string() << endl;
-			delete response;
-			}
-			else {
-				cerr << "ERROR" << endl;
-			}
-		}
+		wapi.balance(args.next<bool>(false),cout);
 	}
 	else if (command=="gen_keys") {
-		crypto::ec::keys k=crypto::ec::keys::generate();
-		cout << "Private key: " << k.priv.to_b58() << endl;
-		cout << "Public key: " << k.pub.to_b58() << endl;
-		cout << "Address: " << k.pub.compute_hash() << endl;
-		return 0;
-
+		wapi.gen_keys(cout);
 	}
 	else if (command=="daemon") {
 		run_daemon(p);
@@ -327,6 +295,7 @@ int main(int argc, char** argv) {
 		help(p);
 		exit(1);
 	}
+	delete papi;
 	return 0;
 }
 

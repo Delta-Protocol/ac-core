@@ -140,6 +140,18 @@ static istream& operator >> (istream&is, cash::tx::sigcodes_t& t) {
 	return is;
 }
 
+static ostream& operator << (ostream&os, const cash::tx::sigcode_t& x) {
+	os << (int)x;
+	return os;
+}
+
+static istream& operator >> (istream&is, cash::tx::sigcode_t& t) {
+	int x;
+	is >> x;
+	t=(cash::tx::sigcode_t)x;
+	return is;
+}
+
 }
 
 #endif

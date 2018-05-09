@@ -8,7 +8,7 @@ typedef usgov::wallet_daemon c;
 
 string c::devices_t::default_name("my device");
 
-c::wallet_daemon(uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), wallet(home), backend_port(backend_port), backend_host(backend_host), devices(home) {
+c::wallet_daemon(uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), local_api(home,backend_host,backend_port), devices(home) {
 }
 
 c::~wallet_daemon() {
@@ -80,22 +80,51 @@ const string& c::devices_t::get_name(const pub_t& pub) {
     return i->second.name;
 }
 
+bool c::send_response(peer_t *c, datagram*d, const string& payload) {
+	c->send(protocol::wallet::response,payload);
+	this_thread::sleep_for(1s);
+	delete d;
+	return true;
+}
 
 bool c::process_work(peer_t *c, datagram*d) {
 	switch(d->service) {
-		case protocol::wallet::seq_query: {
-        }
-        break;
+		case protocol::wallet::tx_make_p2pkh_query: {
+			istringstream is(d->parse_string());
+			wallet::tx_make_p2pkh_input i=wallet::tx_make_p2pkh_input::from_stream(is);
+			ostringstream ans;
+			local_api::tx_make_p2pkh(i,ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case protocol::wallet::add_address_query: {
+			crypto::ec::keys::priv_t privkey;
+			istringstream is(d->parse_string());
+			is >> privkey;
+			ostringstream ans;
+			local_api::add_address(privkey,ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case protocol::wallet::new_address_query: {
+			ostringstream ans;
+			local_api::new_address(ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case protocol::wallet::dump_query: {
+			ostringstream ans;
+			local_api::dump(ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
 		case protocol::wallet::balance_query: {
-            
+			bool detailed=d->parse_string()=="1";
+			refresh();
 
-			refresh(backend_host, backend_port);
-			ostringstream msg;
-			msg << balance();
-			c->send(protocol::wallet::balance_response,msg.str());
-			this_thread::sleep_for(1s);
-			delete d;
-			return true;
+			ostringstream ans;
+			local_api::balance(detailed,ans);
+			return send_response(c,d,ans.str());
 		}
 		break;
 		default: break;

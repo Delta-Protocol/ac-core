@@ -6,7 +6,7 @@ using namespace std;
 typedef usgov::wallet c;
 
 
-c::wallet(const string& datapath):datapath(datapath) {
+c::wallet(const string& datapath, const string& backend_host, uint16_t backend_port):datapath(datapath), backend_host(backend_host), backend_port(backend_port){
 	if (!load()) {
 		cerr << "cannot find wallet file in " << datapath << endl;
 		exit(1);
@@ -88,12 +88,12 @@ void c::dump_balances(ostream& os) const {
 	os << "total balance: " << b << endl;
 }
 
-c::accounts_query_t c::query_accounts(const string&addr, uint16_t port, const cash::app::query_accounts_t& addresses) {
+c::accounts_query_t c::query_accounts(const cash::app::query_accounts_t& addresses) const {
 	accounts_query_t ret;
 	socket::datagram* d=addresses.get_datagram();
 	if (!d) return ret;
 
-	socket::datagram* response_datagram=socket::peer_t::send_recv(addr,port,d);
+	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
 	if (!response_datagram) return move(ret);
 	auto r=response_datagram->parse_string();
 	delete response_datagram;
@@ -118,17 +118,17 @@ c::accounts_query_t c::query_accounts(const string&addr, uint16_t port, const ca
 	return move(ret);
 }
 
-void c::refresh(const string&backend_host, uint16_t backend_port) {
+void c::refresh() {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
 	for (auto&i:*this) {
 		addresses.emplace_back(i.first);
 	}
-	data=query_accounts(backend_host,backend_port,addresses);
+	data=query_accounts(addresses);
 }
 
-c::input_accounts_t c::select_sources(const string&backend_host, uint16_t backend_port, const cash::cash_t& amount) {
-	refresh(backend_host,backend_port);
+c::input_accounts_t c::select_sources( const cash::cash_t& amount) {
+	refresh();
 	vector<accounts_query_t::const_iterator> v;	
 	v.reserve(data.size());
 	for (accounts_query_t::const_iterator i=data.begin(); i!=data.end(); ++i) {
@@ -196,7 +196,7 @@ void c::input_accounts_t::dump(ostream& os) const {
 #include <gov/cash/locking_programs/p2pkh.h>
 
 
-void c::send(const string&backend_host, uint16_t backend_port, const cash::tx& t) {
+void c::send(const cash::tx& t) const {
 	auto fee=t.check();
 	if (fee<=0) {
 		cerr << "Individual inputs and fees must be positive." << endl;
@@ -238,7 +238,7 @@ string c::generate_locking_program_input(const cash::tx& t, size_t this_index, c
 	return "";
 }
 
-pair<string,cash::tx> c::tx_sign(const string&backend_host, uint16_t backend_port, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
+pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
 	auto sigcodes=cash::tx::combine(sigcodei,sigcodeo);
 
     pair<string,cash::tx> ret;
@@ -248,7 +248,7 @@ pair<string,cash::tx> c::tx_sign(const string&backend_host, uint16_t backend_por
 	for (auto&i:ret.second.inputs) {
 		addresses.emplace_back(i.address);
 	}
-	wallet::accounts_query_t bases=query_accounts(backend_host, backend_port, addresses);
+	wallet::accounts_query_t bases=query_accounts(addresses);
 //	bases.dump(cout);
     string err;
 	int n=0;
@@ -278,13 +278,13 @@ pair<string,cash::tx> c::tx_sign(const string&backend_host, uint16_t backend_por
     return move(ret);
 }
 
-pair<string,cash::tx> c::tx_make_p2pkh(const string&backend_host, uint16_t backend_port, const tx_make_p2pkh_input& i) {
+pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
         pair<string,cash::tx> ret;
         cash::tx& t=ret.second;
 
         auto sigcodes=cash::tx::combine(i.sigcode_inputs, i.sigcode_outputs);
 
-		input_accounts_t input_accounts=select_sources(backend_host, backend_port, i.amount+i.fee);
+		input_accounts_t input_accounts=select_sources(i.amount+i.fee);
 		if (input_accounts.empty()) {
 			ret.first="no inputs";
 			return move(ret);
@@ -318,11 +318,27 @@ pair<string,cash::tx> c::tx_make_p2pkh(const string&backend_host, uint16_t backe
 		}
 
 		if (i.sendover) {
-			send(backend_host, backend_port, t);
+			send(t);
 			cout << "sent." << endl;
 		}
 
         return move(ret);
+}
+
+
+void c::tx_make_p2pkh_input::to_stream(ostream& os) const {
+	os << rcpt_addr << ' ' << amount << ' ' << fee << ' ' << sigcode_inputs << ' ' << sigcode_outputs << ' ' << (sendover?'1':'0');
+}
+
+c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
+	tx_make_p2pkh_input i;
+	is >> i.rcpt_addr;
+	is >> i.amount;
+	is >> i.fee;
+	is >> i.sigcode_inputs;
+	is >> i.sigcode_outputs;
+	is >> i.sendover;
+	return move(i);
 }
 
 
