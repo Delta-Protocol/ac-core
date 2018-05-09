@@ -127,6 +127,46 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
+		case protocol::wallet::tx_sign_query: {
+	        string txb58;
+            cash::tx::sigcode_t sci;
+            cash::tx::sigcode_t sco;
+			istringstream is(d->parse_string());
+            is >> txb58;
+            is >> sci;
+            is >> sco;
+			ostringstream ans;
+			local_api::tx_sign(txb58,sci,sco,ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case protocol::wallet::tx_send_query: {
+	        string txb58;
+			istringstream is(d->parse_string());
+            is >> txb58;
+			ostringstream ans;
+			local_api::tx_send(txb58,ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case protocol::wallet::tx_decode_query: {
+	        string txb58;
+			istringstream is(d->parse_string());
+            is >> txb58;
+			ostringstream ans;
+			local_api::tx_decode(txb58,ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case protocol::wallet::tx_check_query: {
+	        string txb58;
+			istringstream is(d->parse_string());
+            is >> txb58;
+			ostringstream ans;
+			local_api::tx_check(txb58,ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
 		default: break;
 	}
 	return false;

@@ -69,6 +69,24 @@ void rpc_api::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {
 	ask(protocol::wallet::tx_make_p2pkh_query,si.str(),os);
 }
 
+void rpc_api::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) {
+	ostringstream si;
+	si << txb58 << ' ' << sigcodei << ' ' << sigcodeo;
+	ask(protocol::wallet::tx_sign_query,si.str(),os);
+}
+
+void rpc_api::tx_send(const string&txb58, ostream&os) {
+	ask(protocol::wallet::tx_send_query,txb58,os);
+}
+
+void rpc_api::tx_decode(const string&txb58, ostream&os) {
+	ask(protocol::wallet::tx_decode_query,txb58,os);
+}
+
+void rpc_api::tx_check(const string&txb58, ostream&os) {
+	ask(protocol::wallet::tx_check_query,txb58,os);
+}
+
 //----------------local api
 
 local_api::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port) {
@@ -108,5 +126,31 @@ void local_api::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream&os) {
     	os << tx.first << endl;
 }
 
+void local_api::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) {
+    pair<string,cash::tx> tx=wallet::tx_sign(txb58,sigcodei,sigcodeo);
+	if (tx.first.empty())
+	    os << tx.second << endl;
+	else
+	    os << tx.first << endl;
+}
+
+void local_api::tx_send(const string&txb58, ostream&os) {
+	wallet::send(cash::tx::from_b58(txb58));
+	os << "sent" << endl;
+}
+   
+void local_api::tx_decode(const string&txb58, ostream&os) {
+	cash::tx t=cash::tx::from_b58(txb58);
+	t.write_pretty(os);
+}
+     
+void local_api::tx_check(const string&txb58, ostream&os) {
+	cash::tx t=cash::tx::from_b58(txb58);
+	auto fee=t.check();
+	if (fee<=0) {
+		os << "Individual inputs and fees must be positive." << endl;
+	}
+	os << "Looks ok." << endl;
+}
 
 

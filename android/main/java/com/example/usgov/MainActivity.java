@@ -323,11 +323,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public static final int wallet_base = 0;
-    public static final int protocol_balance_query = wallet_base+0;
-    public static final int protocol_dump_query = wallet_base+1;
-    public static final int protocol_new_address_query = wallet_base+2;
-    public static final int protocol_add_address_query = wallet_base+3;
-    public static final int tx_make_p2pkh_query = wallet_base+4;
+
+    public static final int protocol_balance_query = wallet_base+1;
+    public static final int protocol_dump_query = wallet_base+2;
+    public static final int protocol_new_address_query = wallet_base+3;
+    public static final int protocol_add_address_query = wallet_base+4;
+    public static final int tx_make_p2pkh_query = wallet_base+5;
+    public static final int tx_sign_query = wallet_base+6;
+    public static final int tx_send_query = wallet_base+7;
+    public static final int tx_decode_query = wallet_base+8;
+    public static final int tx_check_query = wallet_base+9;
 
     public static final int protocol_response = wallet_base+0;
 

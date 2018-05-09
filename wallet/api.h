@@ -19,6 +19,10 @@ struct api {
 	virtual void add_address(const crypto::ec::keys::priv_t& privkey, ostream&)=0;
 	typedef wallet::tx_make_p2pkh_input tx_make_p2pkh_input;
 	virtual void tx_make_p2pkh(const tx_make_p2pkh_input&, ostream&)=0;
+	virtual void tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os)=0;
+	virtual void tx_send(const string&txb58, ostream&os)=0;
+	virtual void tx_decode(const string&txb58, ostream&os)=0;
+	virtual void tx_check(const string&txb58, ostream&os)=0;
 
 	void gen_keys(ostream&os);
 
@@ -32,8 +36,11 @@ struct rpc_api:api {
 	virtual void dump(ostream&os) override;
 	virtual void new_address(ostream&os) override;
 	virtual void add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) override;
-
 	virtual void tx_make_p2pkh(const tx_make_p2pkh_input&, ostream&os) override;
+	virtual void tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) override;
+	virtual void tx_send(const string&txb58, ostream&os) override;
+	virtual void tx_decode(const string&txb58, ostream&os) override;
+	virtual void tx_check(const string&txb58, ostream&os) override;
 
 
 private:
@@ -54,6 +61,10 @@ struct local_api:api, wallet {
 	virtual void new_address(ostream&os) override;
 	virtual void add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) override;
 	virtual void tx_make_p2pkh(const api::tx_make_p2pkh_input&, ostream&os) override;
+	virtual void tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) override;
+	virtual void tx_send(const string&txb58, ostream&os) override;
+	virtual void tx_decode(const string&txb58, ostream&os) override;
+	virtual void tx_check(const string&txb58, ostream&os) override;
 
 private:
 };

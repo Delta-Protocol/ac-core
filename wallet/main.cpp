@@ -57,41 +57,41 @@ struct params {
 };
 
 
-void help(const params& p) {
-    cout << "us.gov wallet" << endl;
-    cout << "usage:" << endl;
-    cout << " wallet [options] command" << endl;
-    cout << endl;
-    cout << "options are:" << endl;
-	cout << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
-	cout << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
-if (p.offline) {
-	cout << " backend connector:" << endl;
-	cout << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
-	cout << " -bp <port>  backend port. [" << p.backend_port << "]" << endl;
-}
-else {
-	cout << " walletd connector:" << endl;
-	cout << " -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
-	cout << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
-}
-    cout << endl;
-    cout << "commands are:" << endl;
-	cout << " balance [0|1]          Displays the spendable amount." << endl;
-	cout << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
-	cout << " address add <privkey>  Imports a given private key in the wallet" << endl;
-	cout << " dump                   Lists the keys/addresses managed by wallet" << endl;
-	cout << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
-	cout << " priv_key <private key> Gives information about the given private key." << endl;
-//	cout << " tx base                Reports the current parent block for new transactions" << endl;
-//	cout << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
-	cout << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
-	cout << " tx decode <tx_b58>" << endl;
-	cout << " tx check <tx_b58>" << endl;
-	cout << " tx send <tx_b58>" << endl;
-	cout << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
-	cout << "    sigcodes: "; cash::tx::dump_sigcodes(cout); cout << endl;
-	cout << " daemon                 Run wallet daemon on port " << p.walletd_port << endl;
+void help(const params& p, ostream& os=cout) {
+    os << "us.gov wallet" << endl;
+    os << "usage:" << endl;
+    os << " wallet [options] command" << endl;
+    os << endl;
+    os << "options are:" << endl;
+	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
+	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
+    if (p.offline) {
+	    os << " backend connector:" << endl;
+	    os << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
+	    os << " -bp <port>  backend port. [" << p.backend_port << "]" << endl;
+    }
+    else {
+	    os << " walletd connector:" << endl;
+	    os << " -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
+	    os << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
+    }
+    os << endl;
+    os << "commands are:" << endl;
+	os << " balance [0|1]          Displays the spendable amount." << endl;
+	os << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
+	os << " address add <privkey>  Imports a given private key in the wallet" << endl;
+	os << " dump                   Lists the keys/addresses managed by wallet" << endl;
+	os << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
+	os << " priv_key <private key> Gives information about the given private key." << endl;
+//	os << " tx base                Reports the current parent block for new transactions" << endl;
+//	os << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
+	os << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
+	os << " tx decode <tx_b58>" << endl;
+	os << " tx check <tx_b58>" << endl;
+	os << " tx send <tx_b58>" << endl;
+	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
+	os << "    sigcodes: "; cash::tx::dump_sigcodes(cout); cout << endl;
+	os << " daemon                 Run wallet daemon on port " << p.walletd_port << endl;
 }
 
 
@@ -167,26 +167,7 @@ void tx_make(api& wapi, args_t& args, const params& p) {
 }
 */
 
-void tx_make_p2pkh(api& wapi, args_t& args, const params& p) {
-    wallet::tx_make_p2pkh_input i;
-    i.rcpt_addr=args.next<cash::hash_t>();
-    i.amount=args.next<cash::cash_t>();
-    i.fee=args.next<cash::cash_t>();
-    i.sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
-    i.sigcode_outputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
-    i.sendover=args.next<string>("nopes")=="send";
 
-    wapi.tx_make_p2pkh(i,cout);
-}
-
-pair<string,cash::tx> tx_sign(args_t& args, const params& p) {
-	auto b58=args.next<string>();
-	auto sigcodei=args.next<cash::tx::sigcode_t>();
-	auto sigcodeo=args.next<cash::tx::sigcode_t>();
-	wallet my_wallet(p.homedir);
-
-    return my_wallet.tx_sign(p.backend_host, p.backend_port,b58,sigcodei,sigcodeo);
-}
 
 void tx(api& wapi, args_t& args, const params& p) {
 	string command=args.next<string>();
@@ -197,35 +178,32 @@ void tx(api& wapi, args_t& args, const params& p) {
 	else
 */
 	if (command=="make_p2pkh") {
-        	tx_make_p2pkh(wapi,args,p);
+        wallet::tx_make_p2pkh_input i;
+        i.rcpt_addr=args.next<cash::hash_t>();
+        i.amount=args.next<cash::cash_t>();
+        i.fee=args.next<cash::cash_t>();
+        i.sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
+        i.sigcode_outputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
+        i.sendover=args.next<string>("nopes")=="send";
+        wapi.tx_make_p2pkh(i,cout);
 	}
-	else if (command=="sign") { //access backend
-		auto tx=tx_sign(args,p);
-		if (tx.first.empty())
-		    cout << tx.second << endl;
-		else
-		    cerr << tx.first << endl;
+	else if (command=="sign") {
+	    auto b58=args.next<string>();
+	    auto sigcodei=args.next<cash::tx::sigcode_t>();
+	    auto sigcodeo=args.next<cash::tx::sigcode_t>();
+        wapi.tx_sign(b58,sigcodei,sigcodeo,cout);
 	}
 	else if (command=="decode") {
-		auto b58=args.next<string>();
-		cash::tx t=cash::tx::from_b58(b58);
-		t.write_pretty(cout);
+	    auto b58=args.next<string>();
+        wapi.tx_decode(b58,cout);
 	}
 	else if (command=="check") {
-		auto b58=args.next<string>();
-		cash::tx t=cash::tx::from_b58(b58);
-		auto fee=t.check();
-		if (fee<=0) {
-			cerr << "Individual inputs and fees must be positive." << endl;
-			exit(1);
-		}
+	    auto b58=args.next<string>();
+        wapi.tx_check(b58,cout);
 	}
 	else if (command=="send") {
 		auto b58=args.next<string>();
-		cash::tx t=cash::tx::from_b58(b58);
-		wallet::send(p.backend_host, p.backend_port,t);
-		cout << "sent" << endl;
-		
+		wapi.tx_send(b58,cout);
 	}
 /*
 	else if (command=="base") {
@@ -238,7 +216,6 @@ void tx(api& wapi, args_t& args, const params& p) {
 */
 	else {
 		help(p);
-		exit(1);
 	}
 }
 
@@ -259,7 +236,7 @@ int main(int argc, char** argv) {
 	api& wapi=*papi;
 
 	if (command=="tx") {
-        	tx(wapi,args,p);
+    	tx(wapi,args,p);
 	}
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
@@ -276,7 +253,6 @@ int main(int argc, char** argv) {
 		}
 		else {
 			help(p);
-			exit(1);
 		}
 	}
 	else if (command=="dump") {
@@ -293,7 +269,6 @@ int main(int argc, char** argv) {
 	}
 	else {
 		help(p);
-		exit(1);
 	}
 	delete papi;
 	return 0;
