@@ -4,7 +4,7 @@
 #include "server.h"
 #include "ctpl_stl.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	using namespace std;
 
@@ -40,7 +40,7 @@ struct daemon: server {
 
 }
 
-}
+}}
 
 #endif
 

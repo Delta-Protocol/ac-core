@@ -5,7 +5,7 @@
 #include <vector>
 #include "double_sha256.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace crypto {
 using namespace std;
 
@@ -116,6 +116,7 @@ inline istream& operator >> (istream& is, ec::keys::priv_t& k) {
 	return is;
 }
 
+}
 }}
 
 #endif

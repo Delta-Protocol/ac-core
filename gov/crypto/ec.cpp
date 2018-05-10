@@ -4,10 +4,10 @@
 #include <cassert>
 #include "base58.h"
 
-using namespace usgov::crypto;
+using namespace us::gov::crypto;
 using namespace std;
 
-typedef usgov::crypto::ec c;
+typedef us::gov::crypto::ec c;
 
 c c::instance;
 

@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	struct daemon;
@@ -21,7 +21,7 @@ namespace blockchain {
 	};
 
 
-}
+}}
 }
 
 #endif

@@ -9,7 +9,7 @@
 #include <array>
 #include <iostream>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace crypto {
 using namespace std;
 
@@ -52,31 +52,32 @@ using namespace std;
 	};
 
 
-  inline ostream& operator << (ostream& os, const usgov::crypto::ripemd160::value_type& v) {
+  inline ostream& operator << (ostream& os, const us::gov::crypto::ripemd160::value_type& v) {
 	os << v.to_b58();
 	return os;
   }
 
   template<typename T>
-  inline usgov::crypto::ripemd160& operator << (usgov::crypto::ripemd160& h, const T& v) {
+  inline us::gov::crypto::ripemd160& operator << (us::gov::crypto::ripemd160& h, const T& v) {
 	h.write(v);
 	return h;
   }
 
-  inline istream& operator >> (istream& is, usgov::crypto::ripemd160::value_type& v) {
+  inline istream& operator >> (istream& is, us::gov::crypto::ripemd160::value_type& v) {
 	string s;
 	is >> s;
 	v.set_b58(s);
 	return is;
   }
 
+}
 }}
 
 namespace std {
 
   template <>
-  struct hash<usgov::crypto::ripemd160::value_type> {
-	size_t operator()(const usgov::crypto::ripemd160::value_type& k) const {
+  struct hash<us::gov::crypto::ripemd160::value_type> {
+	size_t operator()(const us::gov::crypto::ripemd160::value_type& k) const {
 		return *reinterpret_cast<const size_t*>(&k[0]);
 
 	}

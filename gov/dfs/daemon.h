@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace dfs { //distributed file system
 	using namespace std;
 	typedef auth::peer_t peer_t;
@@ -32,6 +32,7 @@ namespace dfs { //distributed file system
 
 }
 
-}
+}}
+
 #endif
 

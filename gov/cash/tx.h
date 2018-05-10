@@ -16,12 +16,12 @@
 #include <cassert>
 #include <map>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace cash {
 	using namespace std;
 	using socket::datagram;
 //	using blockchain::signature;
-	using blockchain::miner_gut;
+	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using crypto::ec;
 	using blockchain::peer_t;
@@ -140,7 +140,19 @@ static istream& operator >> (istream&is, cash::tx::sigcodes_t& t) {
 	return is;
 }
 
+static ostream& operator << (ostream&os, const cash::tx::sigcode_t& x) {
+	os << (int)x;
+	return os;
 }
+
+static istream& operator >> (istream&is, cash::tx::sigcode_t& t) {
+	int x;
+	is >> x;
+	t=(cash::tx::sigcode_t)x;
+	return is;
+}
+
+}}
 
 #endif
 

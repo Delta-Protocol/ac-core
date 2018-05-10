@@ -13,7 +13,7 @@
 #include <cassert>
 #include <array>
 #include <unordered_set>
-namespace usgov {
+namespace us { namespace gov {
 namespace peer {
 	using namespace std;
 
@@ -65,7 +65,7 @@ namespace peer {
 	};
 
 }
-}
+}}
 
 #endif
 

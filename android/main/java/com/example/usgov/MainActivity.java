@@ -47,6 +47,8 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import java.util.Random;
+
 import android.view.inputmethod.InputMethodManager;
 import android.app.Activity;
 import android.widget.EditText;
@@ -198,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pub = publicPointFromPrivate(priv);
     //log=pub.getEncoded(true).toString();
         //pub=new LazyECPoint(priv);
-
+        toggleContactless("AA");
 
         Button balance = (Button) findViewById(R.id.balance);
         balance.setText("balance");
@@ -215,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         Button pay = (Button) findViewById(R.id.pay);
-
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -224,7 +225,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         Button get_paid = (Button) findViewById(R.id.get_paid);
-
         get_paid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -233,8 +233,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        Button tap = (Button) findViewById(R.id.tap);
+        pay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                on_tap();
+            }
+        });
 
-        findViewById(R.id.cashlogo).setVisibility(View.VISIBLE);
 
 
         findViewById(R.id.amount).setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -247,6 +253,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
 
+    }
+
+    public String sign(String msg) {
+        return "AN1rKvtbihLRkX6Utv2FjxLfehr43uqZr4eFUDvkZuNxmdjuecmSRmag3YFiXNu5HV8XiAkbERjmyCad1V556GqRLTmutYA5S";
+    }
+
+    public void on_tap() {
+        boolean isPay=findViewById(R.id.get_paid).getVisibility() == View.VISIBLE;
+        //pay protocol:
+        //inet     node                         payer ===========NFC============ payee         node       inet
+        // *        *<--------SEQ_REQ()----------- * -----PAY_INTENT(amount) ----> *             *          *
+        // *        *---------random msg---------> *                               *             *          *
+        // *        *                              *                               *             *          *
+        // *        *                              * <----------address ---------- *             *          *
+        // *        *<-TRANSFER_CASH(addr,amount)- *                               *             *          *
+        // *        *---------signed tx ---------> *                               *             *          *
+        // *<-relay-*                              * ----------signed tx --------> *             *          *
+        // *        *                              *                               * ---tx------>*          *
+        // *        *                              *                               *             * -relay-> *
+
+        String amount=
+
+        //Send to payee a message PAY_INTENT with the amount
+        String msg = "PAY_INTENT " + findViewById(R.id.amount).getText();
+        //Send and receive NFC
+        String rcptAddress="jGdHCR7xLb33dkAp7JcEu7bwu6g";
+        //Send and receive to node
+
+        String msg = "TRANSFER_CASH " + rcptAddress + " " + amount + " " + pub.getEncoded(true).toString();
+        String signature=sign(msg);
+        msg+=" "+signature;
+
+        //received this transaction from the node
+        String signedTx="2SEZqt5m9xFmSAa4cjKQPvRwCEd2YSVxifKAbQP3Ht1ubJH55zcHifq3JtQkP2nieHRVguJi7bE4sZCWpyrXcwfKaMrYK63Kr6mEU4aGpLg454sLdc4iXQ2aJH5CjN6v2LBPfGHUJBEQBQejH8GaJhz2sbeABjczsR2nKcrG61aKg9z5JPVRkLHtgoQatBhbGNqJ2c6GNi2kMPiDVgR1DorRTmjWsNmLH9zqzvfSEytkiN1KWdMVWN4n18aq9ZwL999WvoRucKkD2QT6shirc9zaLn5vNdEQ55m7uqDvtiVjgouL2dgE4HdJfDpsztQrsMqtQvWaxPLgDcK1HWXcbemsbDKT64CtnqdKyfrtkSDLwtps2FSedewbWotzEMybgcjZA88kYySmyno9mX6vGXzKVzWnZspFEG5h9KDHtGXisLQushWE7o1oD7X46q1qy6XvhcBQgF";
+        //relay to the other mobile via NFC
     }
 
     public void toggleContactless(String verb) {
@@ -267,10 +308,121 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    String nodeAddress() {
+        EditText a = (EditText) findViewById(R.id.nodeaddr);
+        return a.getText().toString();
+    }
+    int nodePort() {
+        return 16673;
+    }
+
+
     public void hideKeyboard(View view) {
         InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
+    public static final int wallet_base = 0;
+
+    public static final int protocol_balance_query = wallet_base+1;
+    public static final int protocol_dump_query = wallet_base+2;
+    public static final int protocol_new_address_query = wallet_base+3;
+    public static final int protocol_add_address_query = wallet_base+4;
+    public static final int tx_make_p2pkh_query = wallet_base+5;
+    public static final int tx_sign_query = wallet_base+6;
+    public static final int tx_send_query = wallet_base+7;
+    public static final int tx_decode_query = wallet_base+8;
+    public static final int tx_check_query = wallet_base+9;
+
+    public static final int protocol_response = wallet_base+0;
+
+    private String seq;
+    
+
+    String querySeq() {
+        seq = "";
+        final Handler handler = new Handler();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Socket s = new Socket(nodeAddress(), nodePort());
+                    boolean b11 = s.isClosed();
+                    boolean b12 = s.isConnected();
+                    Datagram d = new Datagram(protocol_seq_query);
+                    d.send(s);
+
+                    boolean b11_2 = s.isClosed();
+                    boolean b12_2 = s.isConnected();
+
+                    String st;
+                    Datagram r = new Datagram();
+                    if (!r.recv(s)) {
+                        s.close();
+                        return;
+                    }
+                    s.close();
+                    if (r.service!=protocol_seq_response) return;
+                    seq = r.parse_string();
+                } catch (IOException e) {
+                }
+            }
+        });
+
+        thread.start();
+    }
+
+    String queryCashAddress() {
+        final Handler handler = new Handler();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String signature = "";
+                try {
+                    Socket s = new Socket(nodeAddress(), nodePort());
+                    boolean b11 = s.isClosed();
+                    boolean b12 = s.isConnected();
+                    String msg=pub.getEncoded(true).toString() + " " + sign(msg);
+                    Datagram d = new Datagram(protocol_balance_query, msg);
+                    d.send(s);
+
+                    boolean b11_2 = s.isClosed();
+                    boolean b12_2 = s.isConnected();
+
+                    String st;
+                    Datagram r = new Datagram();
+                    if (r.recv(s)) {
+                        st = r.parse_string();
+                    } else {
+                        st = "?";
+                    }
+                    boolean b11_3 = s.isClosed();
+                    boolean b12_3 = s.isConnected();
+                    final String stf = st;
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Button balance = (Button) findViewById(R.id.balance);
+                            balance.setText(cash_human.show(stf));
+                        }
+                    });
+
+                    //output.close();
+                    //out.close();
+                    s.close();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+    }
+    String querySignedTx(String recipientAddress, int amount) {
+
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -287,9 +439,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void run() {
                             String signature = "";
                             try {
-                                //Replace below IP with the IP of that device in which server socket open.
-                                //If you change port then change the port number in the server side code also.
-                                Socket s = new Socket("92.51.240.61", 16673);
+                                Socket s = new Socket(nodeAddress(), nodePort());
                                 boolean b11 = s.isClosed();
                                 boolean b12 = s.isConnected();
                                 String msg = "BALANCE " + pub.getEncoded(true).toString() + " " + signature;
@@ -298,8 +448,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                 boolean b11_2 = s.isClosed();
                                 boolean b12_2 = s.isConnected();
-
-                                //Datagram r=Datagram.recv(s);
 
                                 String st;
                                 Datagram r = new Datagram();
@@ -317,9 +465,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     public void run() {
                                         Button balance = (Button) findViewById(R.id.balance);
                                         balance.setText(cash_human.show(stf));
-//                                    String s = mTextViewReplyFromServer.getText().toString();
-//                                    if (st.trim().length() != 0)
-                                        //                                      mTextViewReplyFromServer.setText(s + "\nFrom Server : " + st);
                                     }
                                 });
 

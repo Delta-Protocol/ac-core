@@ -2,10 +2,10 @@
 #include "protocol.h"
 #include "daemon.h"
 
-
-using namespace usgov::auth;
+using namespace us::gov::auth;
 using namespace std;
-typedef usgov::auth::peer_t c;
+
+typedef us::gov::auth::peer_t c;
 
 constexpr array<const char*,c::num_stages> c::stagestr;
 

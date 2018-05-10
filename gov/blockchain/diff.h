@@ -13,7 +13,7 @@
 #include "app.h"
 #include "signed_data.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using socket::datagram;
@@ -28,7 +28,7 @@ namespace blockchain {
 //	struct signature:string {
 //	};
 
-	struct app_gut;
+	//struct local_delta;
 	struct diff;
 /*
 	struct appguts_by_pubkey: unordered_map<string,app_gut*> {
@@ -44,10 +44,10 @@ namespace blockchain {
 	};
 */
 
-	struct miner_gut: map<int,app_gut*>, signed_data { /// indexed by app id;
-		virtual ~miner_gut() {}
+	struct local_deltas: map<int,app::local_delta*>, signed_data { /// indexed by app id;
+		virtual ~local_deltas() {}
 		//typedef appguts_by_pubkey bucket;
-		//miner_gut(const string& pubkey): pubkey(pubkey) {}
+		//local_deltas(const string& pubkey): pubkey(pubkey) {}
 
 		//const bucket& get_app_guts(int id) const;
 
@@ -60,12 +60,12 @@ namespace blockchain {
 
 		string message_to_sign() const override;
 		void to_stream(ostream&) const;
-		static miner_gut* from_stream(istream&);
+		static local_deltas* from_stream(istream&);
 //		static bucket empty_bucket;
 	};
 /*
 	struct app_guts:map<int,app_gut*> { /// indexed by app id; needs to be sorted, otherwise serialization will be undeterministic and block hash would fail
-		//miner_gut(const string& pubkey): pubkey(pubkey) {}
+		//local_deltas(const string& pubkey): pubkey(pubkey) {}
 		virtual ~app_guts();
 	};
 */
@@ -80,12 +80,13 @@ namespace blockchain {
 		}
 	};
 
-	struct diff: map<int,app_gut2*> {
-		typedef map<int,app_gut2*> b;
+	struct diff: map<int,app::delta*> {
+		typedef map<int,app::delta*> b;
 //		typedef crypto::sha256 hasher_t;
 //		typedef crypto::double_sha256 hasher_t;
-		typedef crypto::ripemd160 hasher_t;
-		typedef hasher_t::value_type hash_t;
+		typedef app::hasher_t hasher_t;
+		typedef app::hash_t hash_t;
+
 		diff() {
 			//assert(closure==0);
 		}
@@ -99,8 +100,8 @@ namespace blockchain {
 
 
 //		void add(int appid, const app_gut& g);
-		uint64_t add(int appid, app_gut* g);
-		void add(miner_gut*); //returns false if already a miner_gut exists for this pubk
+		uint64_t add(int appid, app::local_delta* g);
+		void add(local_deltas*); //returns false if already a local_deltas exists for this pubk
 		void end_adding(); 
 
 		static hash_t hash(const string&);
@@ -110,12 +111,12 @@ namespace blockchain {
 		void to_stream(ostream&) const;
 		static diff* from_stream(istream&);
 
-		bool allow(const miner_gut& g);
+		bool allow(const local_deltas& g);
 
 		
 		mutable hash_t hash_cached;
 		mutable bool h{false};
-		//miner_gut* closure{0};
+		//local_deltas* closure{0};
 		//bool checkpoint{false};
 		hash_t prev; /// pointer to previous block
 		pair<hash_t,hash_t> base; /// (5 cycles ago block hash, base hash) (5 diff ago can be applied to this base)
@@ -127,7 +128,7 @@ namespace blockchain {
 
 	};
 
-}
+}}
 }
 
 #endif

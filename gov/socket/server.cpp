@@ -21,9 +21,9 @@
 #include <gov/net.h>
 
 using namespace std;
-typedef usgov::socket::server c;
+typedef us::gov::socket::server c;
 
-unique_ptr<usgov::net::os> c::os=make_unique<usgov::net::posix>();
+unique_ptr<us::gov::net::os> c::os=make_unique<us::gov::net::posix>();
 
 c::server():port(0) {
 }

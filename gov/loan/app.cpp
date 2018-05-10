@@ -4,9 +4,9 @@
 #include <chrono>
 #include <gov/likely.h>
 
-typedef usgov::loan::app c;
-using namespace usgov;
-using namespace usgov::loan;
+typedef us::gov::loan::app c;
+using namespace us::gov;
+using namespace us::gov::loan;
 using namespace std;
 
 constexpr const char* c::name;
@@ -14,7 +14,7 @@ constexpr const char* c::name;
 constexpr array<const char*,policies_traits::num_params> policies_traits::paramstr;
 
 
-int app_gut::app_id() const {
+int local_delta::app_id() const {
 	return app::id();
 }
 /*
@@ -22,12 +22,14 @@ bool blockchain_app::in_service() const {
 	return true;
 }
 */
+/*
 void app::on_begin_cycle() {
 		cout << "app: loan: on_begin_cycle" << endl;
 }
+*/
 /*
-unordered_map<const miner_gut*,uint64_t> blockchain_app::to_fees(const unordered_map<const miner_gut*,double>& shares,uint64_t total_fees) {
-	unordered_map<const miner_gut*,uint64_t> ans;
+unordered_map<const local_deltas*,uint64_t> blockchain_app::to_fees(const unordered_map<const local_deltas*,double>& shares,uint64_t total_fees) {
+	unordered_map<const local_deltas*,uint64_t> ans;
 	if (total_fees==0) return move(ans);
 	double tot_shares=0;
 	for (auto& i:shares) {
@@ -77,8 +79,8 @@ return 0;
 	if (b.empty()) return 0;
 	tx* paynet=new tx();
 	unordered_set<const tx*> seentx;
-	unordered_map<const miner_gut*,double> shares;
-	unordered_map<const miner_gut*,string> pubkeys;
+	unordered_map<const local_deltas*,double> shares;
+	unordered_map<const local_deltas*,string> pubkeys;
 	uint64_t total_fees=0;
 	for (auto& m:b) {
 		pubkeys.emplace(m.second,m.first);
@@ -99,7 +101,7 @@ return 0;
 		shares.emplace(m.second,miner_fees);
 	}
 //cout << "pay_to_net B" << endl;
-	unordered_map<const miner_gut*,uint64_t> fees=to_fees(shares,total_fees);
+	unordered_map<const local_deltas*,uint64_t> fees=to_fees(shares,total_fees);
 	//b.purge(); //delete miners not adding value, no puedo es const, puede haber otras apps que les sirva el gut
 	uint64_t coinbase=8e8;
 	uint64_t coinbase_per_miner;
@@ -140,7 +142,7 @@ blockchain::app_gut* blockchain_app::create_closure_gut(const blockchain::block&
 ///----------------------------------------------
 
 c::app() {
-	pool=new app_gut();
+	pool=new loan::local_delta();
 	policies_local=policies;
 //	verif_thread=new thread(&app::verification_daemon,this);
 }
@@ -210,15 +212,15 @@ void c::add_policies() {
 }
 
 
-blockchain::app_gut* c::create_app_gut() {
+blockchain::app::local_delta* c::create_local_delta() {
 	//{
 	//lock_guard<mutex> lock(buffer.mx);
-	cout << "app: loan: create_app_gut " << endl; // << buffer.size() << " verified/unverified txs in mempool. ";
+	cout << "app: loan: create_local_delta " << endl; // << buffer.size() << " verified/unverified txs in mempool. ";
 	//}
 	add_policies();
 	lock_guard<mutex> lock(mx_pool);
 	auto full=pool;
-	pool=new app_gut();
+	pool=new loan::local_delta();
 	//full->to_stream(cout);
 	/*
 	if (full->empty()) {
@@ -230,17 +232,19 @@ blockchain::app_gut* c::create_app_gut() {
 	return full; //send collected transactions to the network
 }
 
+/*
 bool c::process_work(peer_t *c, datagram*d) {
 	return false;
-/*
+/ *
 	switch(d->service) {
 		case svc_tx_merchant: incoming_transaction_from_merchant(c,d); break;
 		case svc_tx_node: incoming_transaction_from_node(c,d); break;
 		default: return false;
 	}
 	return true;
-*/
+* /
 }
+*/
 /*
 c::buffer_t::~buffer_t() {
 	for (auto i:*this) delete i.second; 
@@ -300,6 +304,7 @@ void c::verification_daemon() {
 	}
 }
 */
+/*
 void c::run() {
 	while(!program::_this.terminated) {
 //		cout << "APP: auth: doing something" << endl;
@@ -310,7 +315,7 @@ void c::run() {
 
 	}
 }
-
+*/
 void c::dbhash(hasher_t&) const {
 }
 
@@ -422,10 +427,10 @@ double c::supply_function(double x0, double x, double xf) const {
 }
 */
 
-void c::import(const blockchain::app_gut2& gg, const blockchain::pow_t& w) {
+void c::import(const blockchain::app::delta& gg, const blockchain::pow_t& w) {
 cout << "loan: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 /*
-	const app_gut2& g=static_cast<const app_gut2&>(gg);
+	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(mx_policies);
 	for (int i=0; i<policies_traits::num_params; ++i) policies[i]=g[i];
@@ -489,7 +494,7 @@ bool c::process(const tx& t) {
 	return true;
 }
 */
-void usgov::loan::app_gut::to_stream(ostream& os) const {
+void us::gov::loan::local_delta::to_stream(ostream& os) const {
 /*
 	os << accounts.size() << " ";
 	for (auto& i:accounts) {
@@ -500,7 +505,7 @@ void usgov::loan::app_gut::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
-void usgov::loan::app_gut::from_stream(istream& is) {
+void us::gov::loan::local_delta::from_stream(istream& is) {
 /*
 	int n;
 	is >> n;
@@ -516,7 +521,7 @@ void usgov::loan::app_gut::from_stream(istream& is) {
 	b::from_stream(is);
 }
 
-void usgov::loan::app_gut2::to_stream(ostream& os) const {
+void us::gov::loan::delta::to_stream(ostream& os) const {
 /*
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
@@ -531,8 +536,8 @@ void usgov::loan::app_gut2::to_stream(ostream& os) const {
 
 }
 
-app_gut2* usgov::loan::app_gut2::from_stream(istream& is) {
-	app_gut2* g=new app_gut2();
+delta* us::gov::loan::delta::from_stream(istream& is) {
+	delta* g=new delta();
 /*
 	{
 	int n;
@@ -564,7 +569,7 @@ app_gut2* usgov::loan::app_gut2::from_stream(istream& is) {
 
 
 /*
-void usgov::cash::tx::to_stream(ostream& os) const {
+void us::gov::cash::tx::to_stream(ostream& os) const {
 //	os << transition << " " << pubkey << " " << address << endl;
 	os << inputs.size() << endl;
 	for (auto& i:inputs) {
@@ -576,7 +581,7 @@ void usgov::cash::tx::to_stream(ostream& os) const {
 	}
 }
 
-void usgov::cash::tx::from_stream(istream& is, end_t& dest) {
+void us::gov::cash::tx::from_stream(istream& is, end_t& dest) {
 	size_t n;
 	{
 	is >> n;
@@ -595,14 +600,14 @@ void usgov::cash::tx::from_stream(istream& is, end_t& dest) {
 	}
 }
 
-tx* usgov::cash::tx::from_stream(istream& is) {
+tx* us::gov::cash::tx::from_stream(istream& is) {
 	tx*t=new tx();
 	from_stream(is,t->inputs);
 	from_stream(is,t->outputs);
 	return t;
 }
 
-uint64_t usgov::cash::tx::fee() const {
+uint64_t us::gov::cash::tx::fee() const {
 	uint64_t ti=0;
 	for (auto&i:inputs) ti+=i.second;
 	uint64_t to=0;

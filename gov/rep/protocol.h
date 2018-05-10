@@ -4,10 +4,10 @@
 #include <stdint.h>
 #include <gov/peer/protocol.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace protocol {
 	static constexpr uint16_t rep_base{600};
 }
-}
+}}
 
 #endif

@@ -16,7 +16,7 @@
 #include "client.h"
 #include "datagram.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	struct datagram;
 	struct server: signal_handler::callback {
@@ -105,7 +105,7 @@ namespace socket {
 	};
 
 }
-}
+}}
 
 #endif
 

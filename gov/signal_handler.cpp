@@ -2,10 +2,10 @@
 #include <iostream>
 #include "unistd.h"
 
-using namespace usgov;
+using namespace us::gov;
 using namespace std;
 
-typedef usgov::signal_handler c;
+typedef us::gov::signal_handler c;
 
 c c::_this;
 

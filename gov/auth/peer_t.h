@@ -5,7 +5,7 @@
 #include <gov/crypto/crypto.h>
 #include <gov/crypto/hash.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace auth {
 
 	using namespace std;
@@ -62,6 +62,7 @@ namespace auth {
 		pubkey_t pubkey;
 	};
 
+}
 }
 }
 
