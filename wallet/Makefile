@@ -1,14 +1,14 @@
 CPPS := $(wildcard *.cpp)
 HS := $(wildcard *.h)
 
-CXXFLAGS=-g -O0
+CXXFLAGS := -fPIC ${CXXFLAGS}
 
 .PHONY: all
-all: us-wallet
+all: libuswallet.so
 
-us-wallet: ${CPPS} ${HS}
-	g++ ${CXXFLAGS} -pthread -lusgov -L../gov -I.. ${CPPS} -o us-wallet
+libuswallet.so: ${CPPS} ${HS}
+	g++ ${CXXFLAGS} -shared -pthread -lsecp256k1 -lusgov -L../gov -I.. ${CPPS} -o libuswallet.so
 
 clean:
-	rm -f us-wallet
+	rm -f libuswallet.so
 

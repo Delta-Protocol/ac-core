@@ -46,7 +46,7 @@ c::bucket::~appguts_by_pubkey() {
 }
 */
 
-string miner_gut::message_to_sign() const {
+string local_deltas::message_to_sign() const {
 	ostringstream os;
 	os << size() << " ";
 	for (auto& i:*this) {
@@ -56,13 +56,13 @@ string miner_gut::message_to_sign() const {
 	return os.str();
 }
 
-void miner_gut::to_stream(ostream& os) const {
+void local_deltas::to_stream(ostream& os) const {
 	assert(!signature.empty());
 	os << pubkey << " " << signature << " " << message_to_sign() << " ";
 }
 
-miner_gut* miner_gut::from_stream(istream& is) {
-	miner_gut* instance=new miner_gut();
+local_deltas* local_deltas::from_stream(istream& is) {
+	local_deltas* instance=new local_deltas();
 	is >> instance->pubkey;
 	is >> instance->signature;
 	if (unlikely(instance->signature.empty())) {
@@ -80,7 +80,7 @@ miner_gut* miner_gut::from_stream(istream& is) {
 		int appid;
 		is >> appid;
 
-		app_gut* v=app_gut::create(appid,is);
+		app::local_delta* v=app::local_delta::create(appid,is);
 		if (v!=0) {
 			instance->emplace(appid,v);
 		}
@@ -127,7 +127,7 @@ c* c::from_stream(istream& is) {
 		int appid;
 		is >> appid;
 
-		app_gut2* ag=app_gut2::create(appid,is);
+		app::delta* ag=app::delta::create(appid,is);
 		if (ag!=0) {
 			bl->emplace(appid,ag);
 		}
@@ -155,7 +155,7 @@ c* c::from_stream(istream& is) {
 }
 
 
-bool c::allow(const miner_gut& g) { 
+bool c::allow(const local_deltas& g) { 
 	lock_guard<mutex> lock(mx_proof_of_work);
 	const auto& pubkeyh=g.pubkey.hash();
 	auto i=proof_of_work.find(pubkeyh);
@@ -165,15 +165,15 @@ bool c::allow(const miner_gut& g) {
 	proof_of_work.emplace(pubkeyh,0);
 }
 
-uint64_t c::add(int appid, app_gut* g) { //private, not protected by mutex, see add fn below
+uint64_t c::add(int appid, app::local_delta* g) { //private, not protected by mutex, see add fn below
 	auto i=find(appid);
 	if (i==end()) {
-		i=emplace(appid,app_gut2::create(appid)).first;
+		i=emplace(appid,app::delta::create(appid)).first;
 	}
 	return i->second->merge(g);
 }
 
-void c::add(miner_gut* mg) {
+void c::add(local_deltas* mg) {
 	uint64_t work=0;
 	{
 	lock_guard<mutex> lock(mx);

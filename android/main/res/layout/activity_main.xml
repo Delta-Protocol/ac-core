@@ -24,6 +24,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <include
+        android:id="@+id/tap"
         layout="@layout/content_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

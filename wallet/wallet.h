@@ -8,10 +8,16 @@
 #include <fstream>
 #include <unordered_map>
 
-namespace usgov {
+namespace uswallet {
 using namespace std;
+using namespace usgov;
 
 struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
+	wallet(const string& datapath, const string& backend_host, uint16_t backend_port);
+	~wallet();
+	string backend_host;
+	uint16_t backend_port;
+
 	typedef cash::app::account_t account_t;
 
 	struct accounts_query_t:cash::app::accounts_t {
@@ -37,8 +43,8 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 		void dump(ostream& os) const;
 	};
 
-	wallet(const string& datapath);
-	~wallet();
+
+    string filename() const;
 
 	bool load();
 	bool save() const;
@@ -48,10 +54,31 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	const crypto::ec::keys* get_keys(const cash::hash_t& address) const;
 	cash::cash_t balance() const;
 	void dump_balances(ostream& os) const;
-	static accounts_query_t query_accounts(const string&host, uint16_t port, const cash::app::query_accounts_t& addresses);
-	void refresh(const string&addr, uint16_t port);
+	accounts_query_t query_accounts(const cash::app::query_accounts_t& addresses) const;
+	void refresh();
  
-	input_accounts_t select_sources(const string&backend_host, uint16_t backend_port, const cash::cash_t& amount);
+	input_accounts_t select_sources(const cash::cash_t& amount);
+
+    string generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
+    string generate_locking_program_input(const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
+    struct tx_make_p2pkh_input {
+        cash::hash_t rcpt_addr;
+        cash::cash_t amount;
+        cash::cash_t fee;
+        cash::tx::sigcode_t sigcode_inputs;
+        cash::tx::sigcode_t sigcode_outputs;
+        bool sendover;
+
+	void to_stream(ostream&) const;
+	static tx_make_p2pkh_input from_stream(istream&);
+
+    };
+    void send(const cash::tx& t) const;
+
+    pair<string,cash::tx> tx_make_p2pkh(const tx_make_p2pkh_input& i);
+    pair<string,cash::tx> tx_sign(const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
+
+
 	void dump(ostream& os) const;
 	accounts_query_t data;
 	string datapath;

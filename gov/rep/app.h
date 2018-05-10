@@ -20,7 +20,7 @@ namespace rep {
 	using namespace std;
 	using socket::datagram;
 //	using blockchain::signature;
-	using blockchain::miner_gut;
+	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using blockchain::peer_t;
 
@@ -37,12 +37,12 @@ namespace rep {
 			constexpr static array<const char*,num_params> paramstr={"next_patch"};
 		};
 
-	struct app_gut: blockchain::policies_app_gut<hash_t, policies_traits> {
-		typedef blockchain::policies_app_gut<hash_t, policies_traits> b;
+	struct local_delta: blockchain::policies_local_delta<hash_t, policies_traits> {
+		typedef blockchain::policies_local_delta<hash_t, policies_traits> b;
 
-		app_gut() {
+		local_delta() {
 		}
-		virtual ~app_gut() {
+		virtual ~local_delta() {
 			//for (auto i:*this) delete i; // delete checkpoint_; 
 		}
 		virtual int app_id() const override;
@@ -56,21 +56,21 @@ namespace rep {
 
 	};
 
-	struct app_gut2: blockchain::policies_app_gut2<hash_t, policies_traits, blockchain::majority_merger<hash_t>> {
-		typedef blockchain::policies_app_gut2<hash_t, policies_traits, blockchain::majority_merger<hash_t>> b;
-		app_gut2() {}
-		virtual ~app_gut2() {
+	struct delta: blockchain::policies_delta<hash_t, policies_traits, blockchain::majority_merger<hash_t>> {
+		typedef blockchain::policies_delta<hash_t, policies_traits, blockchain::majority_merger<hash_t>> b;
+		delta() {}
+		virtual ~delta() {
 		}
-		virtual uint64_t merge(blockchain::app_gut* other0) override {
+		virtual uint64_t merge(blockchain::app::local_delta* other0) override {
 
-			app_gut* other=static_cast<app_gut*>(other0);
+			local_delta* other=static_cast<local_delta*>(other0);
 			auto val=other->fees;
 			b::merge(other0);
 			return val;
 
 		}
 		virtual void to_stream(ostream& os) const override;
-		static app_gut2* from_stream(istream& is);
+		static delta* from_stream(istream& is);
 		cash_t fees{0};
 	};
 
@@ -80,7 +80,7 @@ namespace rep {
 		constexpr static const char* name={"rep"};
 		virtual string get_name() const override { return name; }
 
-		virtual void on_begin_cycle() override;
+//		virtual void on_begin_cycle() override;
 
 		static int id() { return 40; }
 		virtual int get_id() const override { return id(); }
@@ -89,15 +89,15 @@ namespace rep {
 
 		double supply_function(double x0, double x, double xf) const;
 
-		virtual void run() override;
+//		virtual void run() override;
 		void add_policies();
 
-		app_gut* pool{0};
+		rep::local_delta* pool{0};
 		mutex mx_pool;
 
-		virtual blockchain::app_gut* create_app_gut() override;
-		virtual bool process_work(peer_t *c, datagram*d) override;
-		virtual void import(const blockchain::app_gut2&, const blockchain::pow_t&) override;
+		virtual blockchain::app::local_delta* create_local_delta() override;
+		//virtual bool process_work(peer_t *c, datagram*d) override;
+		virtual void import(const blockchain::app::delta&, const blockchain::pow_t&) override;
 //		bool process(const tx&);
 
 		struct db_t {

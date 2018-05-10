@@ -21,10 +21,24 @@ void sig_handler(int s) {
 using namespace std::chrono_literals;
 
 struct params {
-	params(): port(16672), edges(10) {
+	params() {
+        const char* env_p = std::getenv("HOME");
+        if (!env_p) {
+            cerr << "No $HOME env var defined" << endl;
+            exit(1);
+        }
+        homedir=env_p;
+    	homedir+="/.us";
 	}
-	uint16_t port;
-	uint16_t edges;
+    void dump(ostream& os) const {
+        os << "home: " << homedir << endl;
+        os << "sysophost: " << sysophost << ":" << port << endl;
+        os << "edges: " << edges << endl;
+        os << "port: " << port << endl;
+    }
+
+	uint16_t port{16672};
+	uint16_t edges{10};
 	bool genesis{false};
 	string genesis_address;
 	bool daemon{false};
@@ -161,9 +175,9 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 struct cfg: filesystem::cfg {
 	typedef crypto::ec::keys keys_t;
 
-	cfg(const string& privkb58, const string& blocksdir, const string& lockingdir, vector<string>&& seed_nodes): keys(privkb58), blocksdir(blocksdir), lockingdir(lockingdir), seed_nodes(seed_nodes) {
+	cfg(const string& privkb58, const string& home, vector<string>&& seed_nodes): keys(privkb58), home(home), seed_nodes(seed_nodes) {
 	}
-    cfg(const cfg& other): keys(other.keys), blocksdir(other.blocksdir), lockingdir(other.lockingdir), seed_nodes(other.seed_nodes) {
+    cfg(const cfg& other): keys(other.keys), home(other.home), seed_nodes(other.seed_nodes) {
     }
 
 	static cfg load(const string& home) {
@@ -210,11 +224,9 @@ struct cfg: filesystem::cfg {
 			exit(1);
 	    }
 
-	    return cfg(pk,blocks_dir,locking_dir,move(addrs));
+	    return cfg(pk,home,move(addrs));
 	}
 	string home;
-	string blocksdir;
-	string lockingdir;
 	keys_t keys;
 	vector<string> seed_nodes;
 };
@@ -355,42 +367,40 @@ int main(int argc, char** argv) {
 	if(!parse_cmdline(argc,argv,p)) return 1;
 
 
-	string home;
-    if (p.homedir.empty()) {
-        const char* env_p = std::getenv("HOME");
-        if (!env_p) {
-            cerr << "No $HOME env var defined" << endl;
-            exit(1);
-        }
-        home=env_p;
-    	home+="/.us";
-    }
-    else {
-        home=p.homedir;
-    }
+    p.dump(cout);
 
-    cout << "home dir: " << home << endl;
-
-	if (!cfg::ensure_dir(home)) {
-		cerr << "Cannot create dir " << home << endl;
+	if (!cfg::ensure_dir(p.homedir)) {
+		cerr << "Cannot create dir " << p.homedir << endl;
 		exit(1);
 	}
-	home+="/gov";
+
+    string wallet_file=p.homedir+"/wallet";
+    if (cfg::file_exists(wallet_file)) wallet_file.clear();
+
+	p.homedir+="/gov";
 
 	if (p.genesis) {
-		if (cfg::exists_dir(home)) {
-			cerr << "Cannot start a new blockchain if home dir exists: " << home << endl;
+		if (cfg::exists_dir(p.homedir)) {
+			cerr << "Cannot start a new blockchain if home dir exists: " << p.homedir << endl;
 			exit(1);
 		}
 	}
 
-	cfg conf=cfg::load(home);
+	cfg conf=cfg::load(p.homedir);
+
+    if (!wallet_file.empty()) {
+        ofstream os(wallet_file);
+        os << conf.keys.priv;
+        cout << "created wallet at " << wallet_file << endl;
+    }
+
+
 	cout << "Node public key is " << conf.keys.pub << endl;
 	if (p.daemon) {
 		signal(SIGINT,sig_handler);
 		signal(SIGTERM,sig_handler);
 		signal(SIGPIPE, SIG_IGN);
-		blockchain::daemon d(conf.keys,conf.blocksdir,p.port,p.edges,conf.seed_nodes);
+		blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 		d.sysop_allowed=p.shell;
 		d.add(new cash::app());
 		d.add(new rep::app());

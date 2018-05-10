@@ -9,7 +9,7 @@ using namespace std;
 typedef usgov::blockchain::daemon c;
 
 void c::constructor() {
-	auth_app=new auth::app();
+	auth_app=new auth::app(peerd.id.pub);
 	add(auth_app);
 }
 
@@ -17,7 +17,7 @@ c::daemon(const keys& k): rng(chrono::system_clock::now().time_since_epoch().cou
 	constructor();	
 }
 
-c::daemon(const keys& k, const string& blocksdir, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(k, port, edges, this, seed_nodes), blocksdir(blocksdir), syncdemon(this), sysops(*this) { //dependency order
+c::daemon(const keys& k, const string& home, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(k, port, edges, this, seed_nodes), home(home), syncdemon(this), sysops(*this) { //dependency order
 	constructor();	
 }
 
@@ -30,7 +30,7 @@ void c::add(app*app) {
 		cerr << "Fatal error: App collision. Two apps with same id." << endl;
 		exit(1);
 	}
-	app->parent=this;
+	//app->parent=this;
 	apps_.emplace(app->get_id(),app);
 }
 
@@ -38,7 +38,7 @@ void c::start_new_blockchain(const string& addr) {
     assert(!addr.empty());
     auto pool=new diff();
     auth_app->pool->to_hall.push_back(make_pair(peerd.id.pub.hash(),addr));
-    auto* mg=create_miner_gut();
+    auto* mg=create_local_deltas();
     assert(mg!=0);
     pool->allow(*mg);
     pool->add(mg);
@@ -162,7 +162,7 @@ bool c::patch_db(const vector<diff::hash_t>& patches) { //this is syncd thread
 	cout << "Applying " << patches.size() << " patches" << endl;
 	for (auto i=patches.rbegin(); i!=patches.rend(); ++i) {
 		const diff::hash_t& hash=*i;
-		string filename=blocksdir+"/"+hash.to_b58();
+		string filename=blocksdir()+"/"+hash.to_b58();
 		ifstream is(filename);
 		if (!is.good()) {
 			cerr << "corrupt filename 1 " << filename << endl;
@@ -217,12 +217,6 @@ diff::hash_t c::get_last_block_imported() const {
 	return last_block_imported;
 }
 
-unsigned int c::get_seed() const { //import lock must be acquired (lock_guard<mutex> lock(mx_import); )
-	if (!syncdemon.in_sync()) return 0;
-	if (last_block_imported.empty()) return 0;
-	unsigned int seed=*reinterpret_cast<const unsigned int*>(&last_block_imported);
-	return seed;
-}
 
 void c::stage1(cycle_data& data) {
 cout << "stage1 NB1 " << data.new_block << endl;
@@ -262,9 +256,9 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 		while (!syncdemon.in_sync() && !program::_this.terminated) {
 			cout << "syncing" << endl;
 			thread_::_this.sleep_for(chrono::seconds(1));
-			if (data.cycle.get_stage()!=cycle_t::miner_gut_io) break;
+			if (data.cycle.get_stage()!=cycle_t::local_deltas_io) break;
 		}
-		if (data.cycle.get_stage()!=cycle_t::miner_gut_io) return false;
+		if (data.cycle.get_stage()!=cycle_t::local_deltas_io) return false;
 	}
 //	if (auth_app->my_stage()!=peer_t::node) return false;
 
@@ -272,7 +266,7 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 	//b->checkpoint=min_in_week==0; //once a week the closure block contains a ref to a checkpoint block
     if (!auth_app->is_node()) return false;
 
-	auto* mg=create_miner_gut(); //send my gut to the network
+	auto* mg=create_local_deltas(); //send my gut to the network
 	if (mg!=0) {
 		send(*mg);
 		{
@@ -298,7 +292,7 @@ cout << "NB3 2 " << data.new_block << endl;
 }
 
 void c::load_head() {
-        string filename=blocksdir+"/head";
+        string filename=blocksdir()+"/head";
         ifstream is(filename);
         diff::hash_t head(0);
         if (is.good()) is >> head;
@@ -312,7 +306,10 @@ void c::run() {
 
 	vector<thread> apps_threads;
 	apps_threads.reserve(apps_.size());
-	for (auto& i:apps_) apps_threads.emplace_back(thread(&app::run,i.second));
+	for (auto& i:apps_) {
+		auto p=dynamic_cast<runnable_app*>(i.second);
+		if (p!=0) apps_threads.emplace_back(thread(&runnable_app::run,p));
+	}
 
 	signal_handler::_this.add(&syncdemon);
 
@@ -329,7 +326,7 @@ void c::run() {
 	while(!program::_this.terminated) { // main loop
 		data.cycle.wait_for_stage(cycle_t::new_cycle);
 		stage1(data);
-		data.cycle.wait_for_stage(cycle_t::miner_gut_io);
+		data.cycle.wait_for_stage(cycle_t::local_deltas_io);
 		if (!stage2(data)) continue;
 		data.cycle.wait_for_stage(cycle_t::consensus_vote_tip_io);
 		stage3(data);
@@ -344,7 +341,7 @@ string c::networking::get_random_peer(const unordered_set<string>& exclude_addrs
 cout << "exclude: ";
 for (auto&i:exclude_addrs) cout << i << " ";
 cout << "my pubkey is " << id.pub << endl;
-	auto n=parent->auth_app->get_random_node(id.pub.hash(),exclude_addrs);
+	auto n=parent->get_random_node(exclude_addrs);
 cout << "auth_app->get_random_node=" << n << endl;
 	if (n.empty() && !seed_nodes.empty()) {
 cout << "no nodes . using seeds " << endl;
@@ -366,13 +363,17 @@ cout << "found " << *i << endl;
 #include <gov/crypto/base58.h>
 #include <fstream>
 
+string c::blocksdir() const {
+    return home+"/blocks";
+}
+
 void c::save(const diff& bl) const {
 	{
-cout << "file " << blocksdir+"/"+bl.hash().to_b58() << endl;
-	ofstream os(blocksdir+"/"+bl.hash().to_b58());
+cout << "file " << blocksdir()+"/"+bl.hash().to_b58() << endl;
+	ofstream os(blocksdir()+"/"+bl.hash().to_b58());
 	bl.to_stream(os);
 	}
-	ifstream is(blocksdir+"/"+bl.hash().to_b58());  //TODO remove this check
+	ifstream is(blocksdir()+"/"+bl.hash().to_b58());  //TODO remove this check
 	diff*b=diff::from_stream(is);
 	if (!b) {
 		cout << "ERROR A" << endl;
@@ -381,10 +382,10 @@ cout << "file " << blocksdir+"/"+bl.hash().to_b58() << endl;
 	if (b->hash()!=bl.hash()) {
 		cout << b->hash() << " " << bl.hash() << endl;
 		{
-		ofstream os(blocksdir+"/"+bl.hash().to_b58()+"_");
+		ofstream os(blocksdir()+"/"+bl.hash().to_b58()+"_");
 		b->to_stream(os);
 		}
-		cout << "ERROR B " << (blocksdir+"/"+bl.hash().to_b58()+"_") << endl;
+		cout << "ERROR B " << (blocksdir()+"/"+bl.hash().to_b58()+"_") << endl;
 		exit(1);
 	}
 	delete b;	
@@ -400,6 +401,11 @@ void c::save_block(const string& content) const {
 	bl.to_stream(os);
 }
 */
+
+string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
+	return auth_app->get_random_node(rng,exclude_addrs);
+}
+
 void c::query_block(const diff::hash_t& hash) {
 	auto n=get_random_edge();
 	if (n==0) return;
@@ -408,14 +414,14 @@ void c::query_block(const diff::hash_t& hash) {
 }
 
 string c::load_block(const string& block_hash_b58) const {
-	ifstream is(blocksdir+"/"+block_hash_b58);
+	ifstream is(blocksdir()+"/"+block_hash_b58);
 	if (!is.good()) return "";
 	return string((istreambuf_iterator<char>(is)), (istreambuf_iterator<char>()));
 }
 
 
 string c::load_block(const diff::hash_t& hash) const {
-	ifstream is(blocksdir+"/"+hash.to_b58());
+	ifstream is(blocksdir()+"/"+hash.to_b58());
 	if (!is.good()) return "";
 	return string((istreambuf_iterator<char>(is)), (istreambuf_iterator<char>()));
 }
@@ -431,7 +437,7 @@ bool c::file_exists(const string& f) {
 
 
 bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
-	string filename=blocksdir+"/"+h.to_b58();
+	string filename=blocksdir()+"/"+h.to_b58();
 	if (!file_exists(filename)) return false;
 	ifstream is(filename);
 	if (!is.good()) return false;
@@ -472,19 +478,19 @@ vector<peer_t*> c::get_people() {
 void c::update_peers_state() {
 	for (auto& i:peerd.in_service()) {
 		auto p=reinterpret_cast<peer_t*>(i);
-        if (p->stage!=peer_t::sysop)
-    		p->stage=auth_app->db.get_stage(p->pubkey.hash());
+		if (p->stage!=peer_t::sysop)
+			p->stage=auth_app->db.get_stage(p->pubkey.hash());
 	}
 }
 
 
-void c::send(const miner_gut& g, peer_t* exclude) {
+void c::send(const local_deltas& g, peer_t* exclude) {
 	ostringstream os;
 	g.to_stream(os);
 	string msg=os.str();
 	for (auto& i:get_nodes()) {
 		if (i==exclude) continue; //dont relay to the original sender
-		i->send(protocol::miner_gut,msg);
+		i->send(protocol::local_deltas,msg);
 	}
 }
 
@@ -495,15 +501,15 @@ void c::send(const datagram& g, peer_t* exclude) {
 	}
 }
 
-miner_gut* c::create_miner_gut() {
-	cout << "blockchain: create_miner_gut" << endl;
-	auto* mg=new miner_gut();
+local_deltas* c::create_local_deltas() {
+	cout << "blockchain: create_local_deltas" << endl;
+	auto* mg=new local_deltas();
 
 	{
     lock_guard<mutex> lock(peerd.mx_evidences); //pause reception of evidences while changing app pools
 	for (auto&i:apps_) {
   cout << "===>create app gut for app " << i.first << endl;
-		auto* amg=i.second->create_app_gut(); //
+		auto* amg=i.second->create_local_delta(); //
 		if (amg!=0) {
 			mg->emplace(i.first,amg);
 		}
@@ -561,7 +567,7 @@ cout << "Received vote from " << pubkey << " head be " << block_hash_b58 << endl
 
 }
 #include <gov/likely.h>
-void c::process_incoming_miner_gut(peer_t *c, datagram*d) {
+void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 	auto s=d->parse_string();
 	delete d;
 //cout << "RECeived miner gut" << endl;
@@ -569,7 +575,7 @@ void c::process_incoming_miner_gut(peer_t *c, datagram*d) {
 //cout << s << endl;
 //cout << "----" << endl;
 	istringstream is(s);
-	miner_gut* g=miner_gut::from_stream(is);
+	local_deltas* g=local_deltas::from_stream(is);
 	if (!g) return;
 //cout << "----" << endl;
 //g->to_stream(cout);
@@ -577,7 +583,7 @@ void c::process_incoming_miner_gut(peer_t *c, datagram*d) {
 	/// discard if not properly signed
 	if (unlikely(!g->verify())) {
 		delete g;
-		cout << "Failed verification of incoming miner_gut" << endl;
+		cout << "Failed verification of incoming local_deltas" << endl;
 		return;
 	}
 
@@ -619,7 +625,7 @@ cout << "Cycle: current second is " << s.count() << ". I'll sleep for " << (n-s.
 string usgov::blockchain::cycle_t::str(stage s) const {
 	switch(s) {
 		case new_cycle: return "new_cycle"; break;
-		case miner_gut_io: return "miner_gut_io"; break;
+		case local_deltas_io: return "local_deltas_io"; break;
 		case consensus_vote_tip_io: return "consensus_vote_tip_io"; break;
 	}
 	return "?";
@@ -632,18 +638,18 @@ usgov::blockchain::cycle_t::stage usgov::blockchain::cycle_t::get_stage() {
 	tp-=m;
 	seconds s = duration_cast<seconds>(tp);
 	int sec=s.count();
-	if (sec<miner_gut_io) return new_cycle;
-	if (sec<consensus_vote_tip_io) return miner_gut_io;
+	if (sec<local_deltas_io) return new_cycle;
+	if (sec<consensus_vote_tip_io) return local_deltas_io;
 	return consensus_vote_tip_io;
 }
 
 void c::on_begin_cycle() {
 	cout << "blockchain daemon: on_begin_cycle" << endl;
-
+/*
 	for (auto&i:apps_) {
 		i.second->on_begin_cycle();
 	}
-
+*/
 }
 
 void c::process_query_block(peer_t *c, datagram*d) {
@@ -679,7 +685,7 @@ void c::process_block(peer_t *c, datagram*d) {
 	cout << "Received content of block " << b->hash() << " from " << c->addr << endl;
 
 
-	string filename=blocksdir+"/"+b->hash().to_b58();
+	string filename=blocksdir()+"/"+b->hash().to_b58();
 	if (!file_exists(filename)) { //TODO write under different name and then rename atomically
 		cout << "Saving it to disk " << filename << endl;
 		{
@@ -809,6 +815,12 @@ cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
 		return true;
 	}
 */	
+	if (!syncdemon.in_sync()) {
+		delete d;
+		cout << "missing command cause I am syncing" << endl;
+		return true;
+	}
+/*
 cout << "Delivering to " << apps_.size() << " apps" << endl;
 	bool processed=false;
 	for (auto&i:apps_) {
@@ -822,10 +834,10 @@ cout << "Delivering to " << apps_.size() << " apps" << endl;
 //cout << "d" << endl;
 
 	if (processed) return true;
-
+*/
 	switch(d->service) {
-		case protocol::miner_gut: {
-			process_incoming_miner_gut(c,d); 
+		case protocol::local_deltas: {
+			process_incoming_local_deltas(c,d); 
 			return true;
 		}
 	}
@@ -847,7 +859,7 @@ void c::clear_db() {
 
 void c::set_last_block_imported_(const diff::hash_t& h) {
 	last_block_imported=h;
-	string filename=blocksdir+"/head";
+	string filename=blocksdir()+"/head";
 	ofstream os(filename);
 	os << last_block_imported << endl;
 }
@@ -881,8 +893,16 @@ bool c::import(const diff& b) {
 		return false;
 	}
 */
+	app::last_block_imported=last_block_imported;
+
 	for (auto&i:b) {
-		apps_.find(i.first)->second->import(*i.second,b.proof_of_work);
+		auto a=apps_.find(i.first);
+		assert(a!=apps_.end());
+		assert(a->second!=0);
+		a->second->import(*i.second,b.proof_of_work);
+		if (a->second==auth_app) {
+			update_peers_state();
+		}
 		//for (auto& g: b) {
 		//	auto ag=g.second->get_app_gut(i.second->get_id());
 		//	if (ag!=0) i.second->import(*ag);

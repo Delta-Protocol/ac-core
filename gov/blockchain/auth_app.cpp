@@ -9,8 +9,8 @@ typedef usgov::blockchain::auth::app c;
 
 constexpr array<const char*,policies_traits::num_params> policies_traits::paramstr;
 
-c::app() {
-	pool=new app_gut();
+c::app(pubkey_t&pk): node_pubkey(pk) {
+	pool=new app::local_delta();
 	policies_local=policies;
 }
 
@@ -18,9 +18,15 @@ c::~app() {
 	delete pool;
 }
 
+//const c::keys& c::get_keys() const {
+//	assert(parent!=0);
+//	return parent->peerd.id; 
+//}
+
 usgov::blockchain::peer_t::stage_t c::my_stage() const {
 	if (cache_my_stage!=peer_t::unknown) return cache_my_stage;
-	auto k=get_keys().pub.hash();
+//	auto k=get_keys().pub.hash();
+	auto k=node_pubkey.hash();
 	if (db.nodes.find(k)!=db.nodes.end()) {
 		cache_my_stage=peer_t::node;
 	}
@@ -43,7 +49,7 @@ void c::run() {
 
 void c::basic_auth_completed(peer_t* p) {
 	cout << "APP auth_app, basic_auth_completed for " <<  p->pubkey <<  " " << p->pubkey.hash() << endl;
-	if (p->pubkey==parent->peerd.id.pub) {  ///sysop connection, this connection requires a shell
+	if (p->pubkey==node_pubkey) { //parent->peerd.id.pub) {  ///sysop connection, this connection requires a shell
 		p->stage=peer_t::sysop;
 		cout << "SYSOP " << endl;
 		return;
@@ -128,15 +134,15 @@ void c::add_growth_transactions(unsigned int seed) {
 		src->erase(p);
 	}	
 }
-
+/*
 void c::on_begin_cycle() {
 }
-
-int usgov::blockchain::auth::app_gut::app_id() const {
+*/
+int usgov::blockchain::auth::app::local_delta::app_id() const {
 	return app::id(); 
 }
 
-void usgov::blockchain::auth::app_gut::to_stream(ostream& os) const {
+void usgov::blockchain::auth::app::local_delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
 		os << i.first << " " << i.second << " ";
@@ -144,7 +150,7 @@ void usgov::blockchain::auth::app_gut::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
-void usgov::blockchain::auth::app_gut::from_stream(istream& is) {
+void usgov::blockchain::auth::app::local_delta::from_stream(istream& is) {
 	int n;
 	is >> n;
 	to_hall.reserve(n);
@@ -160,7 +166,7 @@ void usgov::blockchain::auth::app_gut::from_stream(istream& is) {
 }
 
 
-void usgov::blockchain::auth::app_gut2::to_stream(ostream& os) const {
+void usgov::blockchain::auth::app::delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
 		os << i.first << " " << i.second << " ";
@@ -168,8 +174,8 @@ void usgov::blockchain::auth::app_gut2::to_stream(ostream& os) const {
 	b::b1::to_stream(os);
 }
 
-app_gut2* usgov::blockchain::auth::app_gut2::from_stream(istream& is) {
-	app_gut2* g=new app_gut2();
+app::delta* usgov::blockchain::auth::app::delta::from_stream(istream& is) {
+	delta* g=new delta();
 	{
 	int n;
 	is >> n;
@@ -186,8 +192,8 @@ app_gut2* usgov::blockchain::auth::app_gut2::from_stream(istream& is) {
 	return g;
 }
 
-void app::import(const blockchain::app_gut2& gg, const blockchain::pow_t&) {
-	const app_gut2& g=static_cast<const app_gut2&>(gg);
+void app::import(const blockchain::app::delta& gg, const blockchain::pow_t&) {
+	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(db.mx_hall);
 	for (auto& i:g.to_hall) {
@@ -202,11 +208,10 @@ void app::import(const blockchain::app_gut2& gg, const blockchain::pow_t&) {
 	for (int i=0; i<policies_traits::num_params; ++i) policies[i]=g[i];
 	}
 
-	auto seed=parent->get_seed();
+	//auto seed=parent->get_seed();
 
-	add_growth_transactions(seed);
+	add_growth_transactions(get_seed());
 
-	parent->update_peers_state();
 	cache_my_stage=peer_t::unknown;
 }
 
@@ -225,13 +230,13 @@ blockchain::peer_t::stage_t app::db_t::get_stage(const pubkeyh_t& key) const {
 
 
 
-usgov::blockchain::app_gut* c::create_app_gut() {
-	cout << "app: auth: create_app_gut " << endl;
+usgov::blockchain::app::local_delta* c::create_local_delta() {
+	cout << "app: auth: create_local_delta " << endl;
 
 	add_policies();
 	lock_guard<mutex> lock(mx_pool);
 	auto full=pool;
-	pool=new app_gut();
+	pool=new app::local_delta();
 	return full; //send collected transactions to the network
 }
 
@@ -255,14 +260,14 @@ void c::db_t::dump(ostream& os) const {
 	}
 }
 
-string c::get_random_node(const pubkeyh_t& exclude, const unordered_set<string>& exclude_addrs) const {
+string c::get_random_node(mt19937_64& rng, const unordered_set<string>& exclude_addrs) const {
 	lock_guard<mutex> lock(db.mx_nodes);
 	if (db.nodes.empty()) return "";
 	uniform_int_distribution<> d(0, db.nodes.size()-1);
 	for (int j=0; j<10; ++j) {
 		auto i=db.nodes.begin();
-		advance(i,d(parent->rng));
-		if (i->first!=exclude && exclude_addrs.find(i->second)==exclude_addrs.end()) {
+		advance(i,d(rng));
+		if (i->first!=node_pubkey.hash() && exclude_addrs.find(i->second)==exclude_addrs.end()) {
 			return i->second;
 		}
 	}

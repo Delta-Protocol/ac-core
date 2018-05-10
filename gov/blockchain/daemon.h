@@ -36,7 +36,7 @@ namespace blockchain {
 		typedef chrono::seconds seconds;
 		enum stage {
 			new_cycle=0,
-			miner_gut_io=10,
+			local_deltas_io=10,
 			consensus_vote_tip_io=40,
 			num_stages
 		};
@@ -51,10 +51,10 @@ namespace blockchain {
 	};
 
 	struct daemon {
-		typedef app::keys keys;
+		typedef crypto::ec::keys keys;
 
 		daemon(const keys&);
-		daemon(const keys&, const string& blocksdir, uint16_t port, uint8_t num_edges,const vector<string>& seed_nodes);
+		daemon(const keys&, const string& home, uint16_t port, uint8_t num_edges,const vector<string>& seed_nodes);
 		daemon(const daemon&)=delete;
 		daemon(daemon&&)=delete;
 		~daemon();
@@ -64,6 +64,8 @@ namespace blockchain {
 		void add(app*app);
 
 		static bool file_exists(const string& f);
+
+        string blocksdir() const;
 
 		struct networking:dfs::daemon {
 			typedef dfs::daemon b;
@@ -105,7 +107,7 @@ namespace blockchain {
 		}
 /*
 		int miners_size() const {
-			return 30; //TODO based on the number of miner_guts a block has
+			return 30; //TODO based on the number of local_deltass a block has
 		}
 */
 		void vote_tip(const diff& b);
@@ -145,12 +147,12 @@ namespace blockchain {
 		bool need_sync(const string& target) const;
 		void sync(const string& target);
 
-		void process_incoming_miner_gut(peer_t *c, datagram*d);
+		void process_incoming_local_deltas(peer_t *c, datagram*d);
 
 		bool sysop_allowed{false};
 		bool get_prev(const diff::hash_t& h, diff::hash_t& prev) const;
 
-		void send(const miner_gut& g, peer_t* exclude=0);
+		void send(const local_deltas& g, peer_t* exclude=0);
 		void send(const datagram& g, peer_t* exclude=0);
 
 		struct cycle_data {
@@ -171,7 +173,7 @@ namespace blockchain {
 		void load_head();
 
 		void on_begin_cycle();
-		miner_gut* create_miner_gut();
+		local_deltas* create_local_deltas();
 
 		void update_peers_state();
 
@@ -184,7 +186,6 @@ namespace blockchain {
 		diff::hash_t get_last_block_imported() const;
 		void set_last_block_imported(const diff::hash_t&);
 		void set_last_block_imported_(const diff::hash_t&);
-		unsigned int get_seed() const;
 
 		string shell_command(int app_id, const string& cmdline) const;
 
@@ -202,6 +203,8 @@ namespace blockchain {
 		vector<peer_t*> get_people();
 
 		bool patch_db(const vector<diff::hash_t>& patches);
+
+		string get_random_node(const unordered_set<string>& exclude_addrs) const;
 
 		const diff::hash_t& dbhash_off() const;
 
@@ -244,7 +247,7 @@ namespace blockchain {
 
 
 		votes_t votes;
-		string blocksdir;
+		string home;
 
 		mutable mt19937_64 rng;
 
