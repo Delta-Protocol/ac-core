@@ -2,10 +2,10 @@
 #include "daemon.h"
 
 using namespace std;
-using namespace usgov;
-using namespace usgov::blockchain::auth;
+using namespace us::gov;
+using namespace us::gov::blockchain::auth;
 
-typedef usgov::blockchain::auth::app c;
+typedef us::gov::blockchain::auth::app c;
 
 constexpr array<const char*,policies_traits::num_params> policies_traits::paramstr;
 
@@ -23,7 +23,7 @@ c::~app() {
 //	return parent->peerd.id; 
 //}
 
-usgov::blockchain::peer_t::stage_t c::my_stage() const {
+us::gov::blockchain::peer_t::stage_t c::my_stage() const {
 	if (cache_my_stage!=peer_t::unknown) return cache_my_stage;
 //	auto k=get_keys().pub.hash();
 	auto k=node_pubkey.hash();
@@ -138,11 +138,11 @@ void c::add_growth_transactions(unsigned int seed) {
 void c::on_begin_cycle() {
 }
 */
-int usgov::blockchain::auth::app::local_delta::app_id() const {
+int us::gov::blockchain::auth::app::local_delta::app_id() const {
 	return app::id(); 
 }
 
-void usgov::blockchain::auth::app::local_delta::to_stream(ostream& os) const {
+void us::gov::blockchain::auth::app::local_delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
 		os << i.first << " " << i.second << " ";
@@ -150,7 +150,7 @@ void usgov::blockchain::auth::app::local_delta::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
-void usgov::blockchain::auth::app::local_delta::from_stream(istream& is) {
+void us::gov::blockchain::auth::app::local_delta::from_stream(istream& is) {
 	int n;
 	is >> n;
 	to_hall.reserve(n);
@@ -166,7 +166,7 @@ void usgov::blockchain::auth::app::local_delta::from_stream(istream& is) {
 }
 
 
-void usgov::blockchain::auth::app::delta::to_stream(ostream& os) const {
+void us::gov::blockchain::auth::app::delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
 		os << i.first << " " << i.second << " ";
@@ -174,7 +174,7 @@ void usgov::blockchain::auth::app::delta::to_stream(ostream& os) const {
 	b::b1::to_stream(os);
 }
 
-app::delta* usgov::blockchain::auth::app::delta::from_stream(istream& is) {
+app::delta* us::gov::blockchain::auth::app::delta::from_stream(istream& is) {
 	delta* g=new delta();
 	{
 	int n;
@@ -230,7 +230,7 @@ blockchain::peer_t::stage_t app::db_t::get_stage(const pubkeyh_t& key) const {
 
 
 
-usgov::blockchain::app::local_delta* c::create_local_delta() {
+us::gov::blockchain::app::local_delta* c::create_local_delta() {
 	cout << "app: auth: create_local_delta " << endl;
 
 	add_policies();

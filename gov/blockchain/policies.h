@@ -4,7 +4,7 @@
 #include <string>
 #include <array>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	struct param_t {
@@ -20,7 +20,7 @@ namespace blockchain {
 		int id;
 		consensus_t consensus_type;
 	};
-}
+}}
 }
 #endif
 

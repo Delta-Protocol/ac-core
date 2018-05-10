@@ -8,6 +8,7 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <gov/socket/datagram.h>
 #include <gov/signal_handler.h>
 #include <gov/crypto/crypto.h>
 #include <gov/blockchain/diff.h>
@@ -19,7 +20,7 @@
 #include "tx.h"
 
 
-namespace usgov {
+namespace us { namespace gov {
 namespace cash {
 	using namespace std;
 	using socket::datagram;
@@ -252,7 +253,7 @@ namespace cash {
   nblock_pool::get_block() based on head
   add it to my local blockchain
 */
-}
+}}
 }
 
 

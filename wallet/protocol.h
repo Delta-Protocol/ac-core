@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 
-namespace uswallet {
+namespace us { namespace wallet {
 namespace protocol {
 
 	static constexpr uint16_t wallet_base{0};
@@ -22,6 +22,8 @@ namespace protocol {
 
 	static constexpr uint16_t response{wallet_base+0};
 
+}
 }}
+
 
 #endif

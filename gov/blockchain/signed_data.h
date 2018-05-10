@@ -5,7 +5,7 @@
 #include <gov/crypto/ec.h>
 #include <string>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using crypto::ripemd160;
@@ -25,7 +25,7 @@ namespace blockchain {
 		bool verify() const;
 	};
 
-}
+}}
 }
 
 #endif

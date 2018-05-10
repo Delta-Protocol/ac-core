@@ -13,7 +13,7 @@
 #include <gov/net.h>
 #include <gov/crypto/ripemd160.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	using namespace std;
 	struct datagram:vector<uint8_t> {
@@ -55,7 +55,7 @@ namespace socket {
 		int error;
 	};
 }
-}
+}}
 
 #endif
 

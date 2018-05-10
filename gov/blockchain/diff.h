@@ -13,7 +13,7 @@
 #include "app.h"
 #include "signed_data.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using socket::datagram;
@@ -128,7 +128,7 @@ namespace blockchain {
 
 	};
 
-}
+}}
 }
 
 #endif

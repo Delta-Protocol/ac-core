@@ -15,7 +15,7 @@
 #include <map>
 #include <gov/crypto/hash.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace rep {
 	using namespace std;
 	using socket::datagram;
@@ -142,7 +142,7 @@ namespace rep {
 
 
 }
-}
+}}
 
 
 #endif

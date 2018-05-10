@@ -4,10 +4,10 @@
 #include <gov/likely.h>
 #include <cstring>
 
-using namespace usgov::crypto;
+using namespace us::gov::crypto;
 using namespace std;
 
-typedef usgov::crypto::sha256 c;
+typedef us::gov::crypto::sha256 c;
 
 c::sha256() : bytes(0) {
     initialize(s);

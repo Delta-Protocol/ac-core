@@ -6,7 +6,7 @@
 #include <gov/crypto.h>
 #include "wallet.h"
 
-namespace uswallet {
+namespace us { namespace wallet {
 
 using namespace std;
 
@@ -70,7 +70,7 @@ struct local_api:api, wallet {
 private:
 };
 
-}
+}}
 
 #endif
 

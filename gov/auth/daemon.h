@@ -5,8 +5,9 @@
 #include "peer_t.h"
 #include <gov/socket.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace auth {
+
 using namespace std;
 
 struct daemon:peer::daemon {
@@ -31,6 +32,7 @@ struct daemon:peer::daemon {
 };
 
 
+}
 }
 }
 

@@ -4,8 +4,8 @@
 #include "diff.h"
 
 
-using namespace usgov::blockchain;
-typedef usgov::blockchain::app c;
+using namespace us::gov::blockchain;
+typedef us::gov::blockchain::app c;
 
 //unsigned int c::rng_seed{0};
 diff::hash_t c::last_block_imported{0};

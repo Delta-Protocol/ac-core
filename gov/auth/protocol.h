@@ -4,13 +4,14 @@
 #include <stdint.h>
 #include <gov/peer/protocol.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace protocol {
 	static constexpr uint16_t auth_base{200};
 	static constexpr uint16_t auth_request{((auth_base+0)<<2)+protocol_suffix};
 	static constexpr uint16_t auth_peer_challenge{((auth_base+1)<<2)+protocol_suffix};
 	static constexpr uint16_t auth_challenge_response{((auth_base+2)<<2)+protocol_suffix};
 	static constexpr uint16_t auth_peer_status{((auth_base+3)<<2)+protocol_suffix};
+}
 }
 }
 

@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <iostream>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace net {
 
 using namespace std;
@@ -38,7 +38,7 @@ struct sim:os {
 };
 
 }
-}
+}}
 
 #endif
 

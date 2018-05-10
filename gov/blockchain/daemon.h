@@ -24,7 +24,7 @@
 #include "shell.h"
 //#include <queue>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using socket::datagram;
@@ -116,7 +116,7 @@ namespace blockchain {
 		string load_block(const diff::hash_t& hash) const;
 		string load_block(const string& block_hash_b58) const;
 
-		struct syncd: usgov::signal_handler::callback {
+		struct syncd: us::gov::signal_handler::callback {
 			typedef diff::hash_t hash_t;
 			syncd(daemon* d);
 	
@@ -253,7 +253,7 @@ namespace blockchain {
 
 	};
 
-}
+}}
 }
 
 #endif

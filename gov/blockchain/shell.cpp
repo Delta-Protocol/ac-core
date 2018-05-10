@@ -12,8 +12,8 @@
 #include <gov/signal_handler.h>
 #include "daemon.h"
 
-using namespace usgov::blockchain;
-typedef usgov::blockchain::shell c;
+using namespace us::gov::blockchain;
+typedef us::gov::blockchain::shell c;
 using namespace std;
 
 
@@ -99,13 +99,13 @@ string c::command(const string& cmdline) {
 	}
 	else if (cmd=="server" || cmd=="s") {
 		if (level==0) {
-			dynamic_cast<const usgov::socket::server&>(d.peerd).dump(os);
+			dynamic_cast<const us::gov::socket::server&>(d.peerd).dump(os);
 		}
 		else if (level==1) {
-			dynamic_cast<const usgov::peer::daemon&>(d.peerd).dump(os);
+			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os);
 		}
 		else if (level==2) {
-			dynamic_cast<const usgov::auth::daemon&>(d.peerd).dump(os);
+			dynamic_cast<const us::gov::auth::daemon&>(d.peerd).dump(os);
 		}
 		else if (level==3) {
 			d.peerd.dump(os);

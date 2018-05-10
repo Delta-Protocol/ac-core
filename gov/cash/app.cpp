@@ -6,9 +6,9 @@
 #include <gov/crypto/base58.h>
 #include <gov/likely.h>
 
-typedef usgov::cash::app c;
-using namespace usgov;
-using namespace usgov::cash;
+typedef us::gov::cash::app c;
+using namespace us::gov;
+using namespace us::gov::cash;
 using namespace std;
 
 constexpr const char* c::name;
@@ -22,14 +22,14 @@ constexpr array<const char*,app::policies_traits::num_params> app::policies_trai
 namespace std {
 
   template <>
-  struct hash<usgov::cash::app::local_delta> {
-	size_t operator()(const usgov::cash::app::local_delta&) const;
+  struct hash<us::gov::cash::app::local_delta> {
+	size_t operator()(const us::gov::cash::app::local_delta&) const;
   };
 
 }
 
 
-size_t std::hash<usgov::cash::app::local_delta>::operator() (const usgov::cash::app::local_delta&g) const {
+size_t std::hash<us::gov::cash::app::local_delta>::operator() (const us::gov::cash::app::local_delta&g) const {
 	return *reinterpret_cast<const size_t*>(&g.get_hash()[0]);
 }
 
@@ -1044,7 +1044,7 @@ c::delta* c::delta::from_stream(istream& is) {
 
 
 /*
-void usgov::cash::tx::to_stream(ostream& os) const {
+void us::gov::cash::tx::to_stream(ostream& os) const {
 //	os << transition << " " << pubkey << " " << address << endl;
 	os << inputs.size() << endl;
 	for (auto& i:inputs) {
@@ -1056,7 +1056,7 @@ void usgov::cash::tx::to_stream(ostream& os) const {
 	}
 }
 
-void usgov::cash::tx::from_stream(istream& is, end_t& dest) {
+void us::gov::cash::tx::from_stream(istream& is, end_t& dest) {
 	size_t n;
 	{
 	is >> n;
@@ -1075,14 +1075,14 @@ void usgov::cash::tx::from_stream(istream& is, end_t& dest) {
 	}
 }
 
-tx* usgov::cash::tx::from_stream(istream& is) {
+tx* us::gov::cash::tx::from_stream(istream& is) {
 	tx*t=new tx();
 	from_stream(is,t->inputs);
 	from_stream(is,t->outputs);
 	return t;
 }
 
-uint64_t usgov::cash::tx::fee() const {
+uint64_t us::gov::cash::tx::fee() const {
 	uint64_t ti=0;
 	for (auto&i:inputs) ti+=i.second;
 	uint64_t to=0;
@@ -1305,5 +1305,6 @@ c::db_t::db_t(db_t&& other):supply_left(other.supply_left), block_reward(other.b
 c::db_t::~db_t() {
 	delete accounts;
 }
+
 
 

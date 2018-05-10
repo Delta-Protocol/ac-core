@@ -13,7 +13,7 @@
 #include <gov/net.h>
 #include "datagram.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	using namespace std;
 	struct io {
@@ -26,7 +26,7 @@ namespace socket {
 	};
 
 }
-}
+}}
 
 #endif
 

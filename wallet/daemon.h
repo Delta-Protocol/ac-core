@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include "api.h"
 
-namespace uswallet {
+namespace us { namespace wallet {
 
 using namespace std;
 
@@ -65,7 +65,7 @@ struct wallet_daemon: socket::daemon, local_api {
 };
 
 
-}
+}}
 
 #endif
 

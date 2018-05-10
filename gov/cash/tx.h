@@ -16,7 +16,7 @@
 #include <cassert>
 #include <map>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace cash {
 	using namespace std;
 	using socket::datagram;
@@ -152,7 +152,7 @@ static istream& operator >> (istream&is, cash::tx::sigcode_t& t) {
 	return is;
 }
 
-}
+}}
 
 #endif
 

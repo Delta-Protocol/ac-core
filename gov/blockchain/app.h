@@ -12,7 +12,7 @@
 #include <gov/crypto.h>
 
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using socket::datagram;
@@ -231,8 +231,7 @@ namespace blockchain {
 			return v;
 		}		
 	};
+}}
 }
-}
-
 #endif
 

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <gov/peer/protocol.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace protocol {
 	static constexpr uint16_t blockchain_base{400};
 	//static inline bool is_blockchain_or_above(const uint16_t& i) { return (i>>2)>=blockchain_base; }
@@ -13,7 +13,7 @@ namespace protocol {
 	static constexpr uint16_t query_block{((blockchain_base+2))<<2+protocol_suffix};
 	static constexpr uint16_t block{((blockchain_base+3)<<2)+protocol_suffix};
 	static constexpr uint16_t sysop{((blockchain_base+4)<<2)+protocol_suffix};
-}
+}}
 }
 
 #endif

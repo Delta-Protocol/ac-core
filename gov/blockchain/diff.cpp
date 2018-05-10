@@ -2,10 +2,10 @@
 #include "app.h"
 #include <cassert>
 
-using namespace usgov::blockchain;
+using namespace us::gov::blockchain;
 using namespace std;
 
-typedef usgov::blockchain::diff c;
+typedef us::gov::blockchain::diff c;
 
 
 #include <iomanip>

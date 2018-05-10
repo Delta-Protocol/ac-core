@@ -1,10 +1,10 @@
 #include "signed_data.h"
 #include <cassert>
 
-using namespace usgov::blockchain;
+using namespace us::gov::blockchain;
 using namespace std;
 
-typedef usgov::blockchain::signed_data c;
+typedef us::gov::blockchain::signed_data c;
 
 
 void c::sign(const crypto::ec::keys& k) {

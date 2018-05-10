@@ -1,9 +1,9 @@
 #include "daemon.h"
 #include "protocol.h"
 
-typedef usgov::peer::daemon c;
-using namespace usgov;
-using namespace usgov::peer;
+typedef us::gov::peer::daemon c;
+using namespace us::gov;
+using namespace us::gov::peer;
 using namespace std;
 
 c::daemon(): edges(0) {
