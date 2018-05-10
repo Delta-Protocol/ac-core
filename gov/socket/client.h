@@ -15,7 +15,7 @@
 #include "io.h"
 #include <iostream>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	using namespace std;
 
@@ -46,7 +46,7 @@ namespace socket {
 	};
 
 }
-}
+}}
 
 #endif
 

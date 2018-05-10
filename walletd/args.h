@@ -6,7 +6,7 @@
 #include <gov/cash.h>
 #include <gov/crypto.h>
 
-namespace uswallet {
+namespace us { namespace wallet {
 using namespace std;
 
 template<typename T>
@@ -18,8 +18,8 @@ T convert(const string& s) {
 }
 
 template<> string convert(const string& s);
-template<> usgov::cash::tx::sigcode_t convert(const string& s);
-template<> usgov::crypto::ec::keys::priv_t convert(const string& s);
+template<> us::gov::cash::tx::sigcode_t convert(const string& s);
+template<> us::gov::crypto::ec::keys::priv_t convert(const string& s);
 
 
 
@@ -49,6 +49,6 @@ struct args_t {
 };
 
 
-}
+}}
 
 #endif

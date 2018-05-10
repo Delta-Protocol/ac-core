@@ -8,7 +8,7 @@
 #include <mutex>
 #include <map>
 
-namespace usgov {
+namespace us { namespace gov {
 using namespace std;
 
 struct signal_handler {
@@ -37,6 +37,7 @@ private:
 typedef signal_handler thread_;
 typedef signal_handler program;
 
-}
+}}
+
 
 #endif

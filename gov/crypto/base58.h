@@ -19,7 +19,7 @@
 #include <vector>
 #include <array>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace crypto {
 namespace b58 {
 	using namespace std;
@@ -54,7 +54,7 @@ bool decode(const std::string& str, std::vector<unsigned char>& vchRet);
 
 }
 }
-}
+}}
 
 #endif
 

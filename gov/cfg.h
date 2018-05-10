@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sys/stat.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace filesystem {
 using namespace std;
 
@@ -41,6 +41,7 @@ struct cfg {
 
 };
 
+}
 }
 }
 

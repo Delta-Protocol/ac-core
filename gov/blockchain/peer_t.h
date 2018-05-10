@@ -3,7 +3,7 @@
 
 #include <gov/dfs/daemon.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 
@@ -36,7 +36,7 @@ private:
 
 
 }
-}
+}}
 
 #endif
 

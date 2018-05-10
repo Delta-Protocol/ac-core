@@ -2,8 +2,8 @@
 #include "daemon.h"
 #include "protocol.h"
 
-typedef usgov::socket::peer_t c;
-using namespace usgov::socket;
+typedef us::gov::socket::peer_t c;
+using namespace us::gov::socket;
 using namespace std;
 using namespace chrono_literals;
 

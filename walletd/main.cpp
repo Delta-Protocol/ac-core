@@ -10,8 +10,8 @@
 #include <wallet/daemon.h>
 #include "args.h"
 
-using namespace uswallet;
-//using namespace usgov;
+using namespace us::wallet;
+
 using namespace std;
 
 

@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace protocol {
 	static constexpr uint16_t protocol_suffix{0};
 	static constexpr uint16_t evidence_suffix{1};
@@ -11,13 +11,11 @@ namespace protocol {
 	static inline bool is_node_protocol(const uint16_t& i) { return (i&3)==protocol_suffix; } 
 	static inline bool is_evidence(const uint16_t& i) { return (i&3)==evidence_suffix; }
 	static inline bool is_app_query(const uint16_t& i) { return (i&3)==query_suffix; }
-}}
 
-namespace usgov {
-namespace protocol {
 	static constexpr uint16_t peer_base{100};
 	static constexpr uint16_t ping{((peer_base+1)<<2)+protocol_suffix};
 	static constexpr uint16_t pong{((peer_base+2)<<2)+protocol_suffix};
+}
 }}
 
 #endif

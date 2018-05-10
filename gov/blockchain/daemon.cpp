@@ -3,10 +3,10 @@
 #include "protocol.h"
 #include <gov/signal_handler.h>
 
-using namespace usgov::blockchain;
+using namespace us::gov::blockchain;
 using namespace std;
 
-typedef usgov::blockchain::daemon c;
+typedef us::gov::blockchain::daemon c;
 
 void c::constructor() {
 	auth_app=new auth::app(peerd.id.pub);
@@ -606,7 +606,7 @@ void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 
 }
 
-void usgov::blockchain::cycle_t::wait_for_stage(stage ts) {
+void us::gov::blockchain::cycle_t::wait_for_stage(stage ts) {
 	using namespace chrono;
 		//this_thread::sleep_until();
 	time_point now=system_clock::now();
@@ -622,7 +622,7 @@ cout << "Cycle: current second is " << s.count() << ". I'll sleep for " << (n-s.
 	cout << "blockchain: daemon: Starting stage: " << str(ts) << endl;
 }
 
-string usgov::blockchain::cycle_t::str(stage s) const {
+string us::gov::blockchain::cycle_t::str(stage s) const {
 	switch(s) {
 		case new_cycle: return "new_cycle"; break;
 		case local_deltas_io: return "local_deltas_io"; break;
@@ -630,7 +630,7 @@ string usgov::blockchain::cycle_t::str(stage s) const {
 	}
 	return "?";
 }
-usgov::blockchain::cycle_t::stage usgov::blockchain::cycle_t::get_stage() {
+us::gov::blockchain::cycle_t::stage us::gov::blockchain::cycle_t::get_stage() {
 	using namespace chrono;
 	time_point now=system_clock::now();
 	duration tp = now.time_since_epoch();
@@ -964,7 +964,7 @@ cout << "processing sysop data request " << d->parse_string() << endl;
 	string response=i->second.command(d->parse_string());
 	delete d;
 cout << "sending response: " << response << endl;
-	p->send(usgov::protocol::sysop,response);
+	p->send(us::gov::protocol::sysop,response);
 	return true;
 }
 

@@ -3,7 +3,7 @@
 
 #include "client.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	using namespace std;
 	struct daemon;
@@ -25,7 +25,7 @@ namespace socket {
 		datagram* curd{0};
 	};
 }
-}
+}}
 
 #endif
 

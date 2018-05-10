@@ -2,11 +2,11 @@
 #include "protocol.h"
 #include <gov/auth.h>
 
-using namespace usgov;
-using namespace usgov::auth;
+using namespace us::gov;
+using namespace us::gov::auth;
 using namespace std;
 
-typedef usgov::auth::daemon c;
+typedef us::gov::auth::daemon c;
 
 
 c::daemon(const keys& k): id(k) {

@@ -13,7 +13,7 @@
 #include <random>
 #include <unordered_set>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 
 struct peer_t;
@@ -330,7 +330,7 @@ namespace auth { //blockchain network support, this service is free
 
 
 }
-}
+}}
 }
 #endif
 

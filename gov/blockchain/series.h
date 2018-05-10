@@ -1,9 +1,9 @@
 #ifndef USGOV_161484e3427dab1da17e7cc5b457e84c200ad9cc0da7e7d690dd3cef49ca3c07
 #define USGOV_161484e3427dab1da17e7cc5b457e84c200ad9cc0da7e7d690dd3cef49ca3c07
-
+/*
 #include <vector>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 
 using namespace std;
@@ -46,5 +46,7 @@ struct series: vector<diff> {
 
 
 }}
+}
+*/
 
 #endif

@@ -1,9 +1,9 @@
 #include "daemon.h"
 #include "protocol.h"
 
-using namespace usgov;
-using namespace usgov::dfs;
-typedef usgov::dfs::daemon c;
+using namespace us::gov;
+using namespace us::gov::dfs;
+typedef us::gov::dfs::daemon c;
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
 //cout << "dfs::process_work for " << d->service << endl;

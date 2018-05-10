@@ -15,7 +15,7 @@
 //#include <boost/variant/apply_visitor.hpp>
 //#include <boost/variant/static_visitor.hpp>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace crypto {
 namespace b58 {
 
@@ -174,5 +174,5 @@ bool decode(const std::string& str, std::vector<unsigned char>& vchRet) {
     return decode(str.c_str(), vchRet);
 }
 
-}}}
+}}}}
 

@@ -6,7 +6,8 @@
 #include <gov/socket/datagram.h>
 #include <gov/blockchain/protocol.h>
 
-using namespace usgov; using namespace std;
+using namespace us::gov;
+using namespace std;
 using socket::datagram;
 
 void sig_handler(int s) {
@@ -275,7 +276,7 @@ void shell_echo(thinfo* info) {
 			if (demon.peerd.process_work_sysop(&cli,d)) {
 				continue;
 			}
-			if (d->service!=usgov::protocol::sysop) {
+			if (d->service!=us::gov::protocol::sysop) {
 				delete d;
 				continue;
 			}
@@ -335,8 +336,8 @@ void open_shell(thinfo& i) {
 //			cout << ".." << endl;
 			break;
 		}
-		datagram* d=new datagram(usgov::protocol::sysop,line);
-//cout << "sending " << usgov::protocol::sysop << " " <<line << endl;
+		datagram* d=new datagram(us::gov::protocol::sysop,line);
+//cout << "sending " << us::gov::protocol::sysop << " " <<line << endl;
 		cli.send(d);
 		{
 		unique_lock<mutex> lock(mx22);
