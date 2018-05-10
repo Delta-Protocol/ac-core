@@ -28,6 +28,8 @@ namespace dfs { //distributed file system
 
 		string load(const string& hash);
 
+		static string resolve_filename(const string& filename);
+
 	};
 
 }
