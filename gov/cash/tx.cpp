@@ -1,10 +1,10 @@
 #include "tx.h"
-#include <gov/peer.h>
+#include <us/gov/peer.h>
 #include "protocol.h"
 #include <thread>
 #include <chrono>
-#include <gov/crypto/base58.h>
-#include <gov/likely.h>
+#include <us/gov/crypto/base58.h>
+#include <us/gov/likely.h>
 
 typedef us::gov::cash::tx c;
 using namespace us::gov;

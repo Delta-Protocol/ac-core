@@ -2,8 +2,8 @@
 #ifndef USGOV_d13c48a8154b47f3ebe88feb637366f84eff26bd36195bf8c5039244c42f9507
 #define USGOV_d13c48a8154b47f3ebe88feb637366f84eff26bd36195bf8c5039244c42f9507
 
-#include <gov/socket/datagram.h>
-#include <gov/crypto.h>
+#include <us/gov/socket/datagram.h>
+#include <us/gov/crypto.h>
 #include "wallet.h"
 
 namespace us { namespace wallet {

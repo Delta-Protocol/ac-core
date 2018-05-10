@@ -3,8 +3,8 @@
 
 #include <string>
 #include <sstream>
-#include <gov/cash.h>
-#include <gov/crypto.h>
+#include <us/gov/cash.h>
+#include <us/gov/crypto.h>
 
 namespace us { namespace wallet {
 using namespace std;

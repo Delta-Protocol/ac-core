@@ -1,7 +1,7 @@
 #include "ripemd160.h"
 #include "base58.h"
 #include "endian_rw.h"
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 #include <cstring>
 
 using namespace us::gov::crypto;

@@ -1,7 +1,7 @@
 #include "daemon.h"
-#include <gov/auth.h>
+#include <us/gov/auth.h>
 #include "protocol.h"
-#include <gov/signal_handler.h>
+#include <us/gov/signal_handler.h>
 
 using namespace us::gov::blockchain;
 using namespace std;
@@ -360,7 +360,7 @@ cout << "found " << *i << endl;
 	return move(n);
 }
 
-#include <gov/crypto/base58.h>
+#include <us/gov/crypto/base58.h>
 #include <fstream>
 
 string c::blocksdir() const {
@@ -566,7 +566,7 @@ cout << "Received vote from " << pubkey << " head be " << block_hash_b58 << endl
 	}
 
 }
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 	auto s=d->parse_string();
 	delete d;

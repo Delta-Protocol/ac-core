@@ -1,6 +1,6 @@
 #include "daemon.h"
 #include "protocol.h"
-#include <gov/auth.h>
+#include <us/gov/auth.h>
 
 using namespace us::gov;
 using namespace us::gov::auth;

@@ -2,7 +2,7 @@
 #define USGOV_053e7a3036e689162036fca90f15499d3546c78380e3221c2c49c33806c112b2
 
 #include <stdint.h>
-#include <gov/peer/protocol.h>
+#include <us/gov/peer/protocol.h>
 
 namespace us { namespace gov {
 namespace protocol {

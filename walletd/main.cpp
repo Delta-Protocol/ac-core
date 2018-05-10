@@ -1,13 +1,13 @@
-#include <gov/cash.h>
-#include <gov/crypto.h>
+#include <us/gov/cash.h>
+#include <us/gov/crypto.h>
 #include <string>
 #include <chrono>
 #include <thread>
-#include <gov/cash/locking_programs/p2pkh.h>
-#include <gov/cash/tx.h>
-#include <gov/signal_handler.h>
-#include <wallet/wallet.h>
-#include <wallet/daemon.h>
+#include <us/gov/cash/locking_programs/p2pkh.h>
+#include <us/gov/cash/tx.h>
+#include <us/gov/signal_handler.h>
+#include <us/wallet/wallet.h>
+#include <us/wallet/daemon.h>
 #include "args.h"
 
 using namespace us::wallet;
@@ -96,7 +96,7 @@ void run_daemon(const params& p) {
 	d.run();
 }
 
-#include <wallet/protocol.h>
+#include <us/wallet/protocol.h>
 
 
 string parse_options(args_t& args, params& p) {
@@ -211,7 +211,7 @@ void tx(api& wapi, args_t& args, const params& p) {
 	}
 }
 
-#include <wallet/api.h>
+#include <us/wallet/api.h>
 
 int main(int argc, char** argv) {
 	args_t args(argc,argv);

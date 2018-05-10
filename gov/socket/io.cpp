@@ -19,7 +19,7 @@
 #include <arpa/inet.h>
 #include "datagram.h"
 #include "server.h"
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 
 using namespace std;
 using namespace us::gov::socket;
