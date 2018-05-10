@@ -6,11 +6,12 @@
 #include <gov/cash/locking_programs/p2pkh.h>
 #include <gov/cash/tx.h>
 #include <gov/signal_handler.h>
-#include "wallet.h"
-#include "daemon.h"
+#include <wallet/wallet.h>
+#include <wallet/daemon.h>
 #include "args.h"
 
-using namespace usgov;
+using namespace uswallet;
+//using namespace usgov;
 using namespace std;
 
 
@@ -19,19 +20,6 @@ void sig_handler(int s) {
     signal_handler::_this.finish();
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
-}
-
-namespace usgov {
-	template<> cash::tx::sigcode_t convert(const string& s) {
-		if (s==cash::tx::sigcodestr[cash::tx::sigcode_all]) return cash::tx::sigcode_all;
-		if (s==cash::tx::sigcodestr[cash::tx::sigcode_none]) return cash::tx::sigcode_none;
-		if (s==cash::tx::sigcodestr[cash::tx::sigcode_this]) return cash::tx::sigcode_this;
-		return cash::tx::sigcode_all;
-	}
-	template<> crypto::ec::keys::priv_t convert(const string& s) {
-		return crypto::ec::keys::priv_t::from_b58(s);
-	}
-
 }
 
 struct params {
@@ -64,7 +52,9 @@ void help(const params& p, ostream& os=cout) {
     os << endl;
     os << "options are:" << endl;
 	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
+	os << " -d        Run wallet daemon on port " << p.walletd_port << endl;
 	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
+	os << " -json     output json instead of text" << endl;
     if (p.offline) {
 	    os << " backend connector:" << endl;
 	    os << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
@@ -90,8 +80,7 @@ void help(const params& p, ostream& os=cout) {
 	os << " tx check <tx_b58>" << endl;
 	os << " tx send <tx_b58>" << endl;
 	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
-	os << "    sigcodes: "; cash::tx::dump_sigcodes(cout); cout << endl;
-	os << " daemon                 Run wallet daemon on port " << p.walletd_port << endl;
+	os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
 }
 
 
@@ -107,7 +96,7 @@ void run_daemon(const params& p) {
 	d.run();
 }
 
-#include "protocol.h"
+#include <wallet/protocol.h>
 
 
 string parse_options(args_t& args, params& p) {
@@ -131,6 +120,9 @@ string parse_options(args_t& args, params& p) {
         }
         else if (cmd=="-home") {
         	p.homedir=args.next<string>();
+        }
+        else if (cmd=="-d") {
+        	p.daemon=true;
         }
         else {
             break;
@@ -219,12 +211,17 @@ void tx(api& wapi, args_t& args, const params& p) {
 	}
 }
 
-#include "api.h"
+#include <wallet/api.h>
 
 int main(int argc, char** argv) {
 	args_t args(argc,argv);
 	params p;
 	string command=parse_options(args,p);
+
+    if (p.daemon) {
+        run_daemon(p);
+        return 0;
+    }
 
 	api* papi;
 	if (p.offline) {
@@ -263,9 +260,6 @@ int main(int argc, char** argv) {
 	}
 	else if (command=="gen_keys") {
 		wapi.gen_keys(cout);
-	}
-	else if (command=="daemon") {
-		run_daemon(p);
 	}
 	else {
 		help(p);

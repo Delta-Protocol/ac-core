@@ -8,8 +8,9 @@
 #include <fstream>
 #include <unordered_map>
 
-namespace usgov {
+namespace uswallet {
 using namespace std;
+using namespace usgov;
 
 struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	wallet(const string& datapath, const string& backend_host, uint16_t backend_port);

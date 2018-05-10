@@ -1,9 +1,9 @@
 #include "wallet.h"
 #include "protocol.h"
 
-using namespace usgov;
+using namespace uswallet;
 using namespace std;
-typedef usgov::wallet c;
+typedef uswallet::wallet c;
 
 
 c::wallet(const string& datapath, const string& backend_host, uint16_t backend_port):datapath(datapath), backend_host(backend_host), backend_port(backend_port){

@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include "api.h"
 
-namespace usgov {
+namespace uswallet {
 
 using namespace std;
 

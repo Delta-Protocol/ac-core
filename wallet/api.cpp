@@ -3,7 +3,7 @@
 #include <sstream>
 #include <gov/socket/datagram.h>
 
-using namespace usgov;
+using namespace uswallet;
 
 using datagram=socket::datagram;
 
@@ -46,45 +46,45 @@ void rpc_api::ask(int service, const string& args, ostream&os) {
 }
 
 void rpc_api::balance(bool detailed, ostream&os) {
-	ask(protocol::wallet::balance_query,detailed?"1":"0",os);
+	ask(uswallet::protocol::balance_query,detailed?"1":"0",os);
 }
 
 void rpc_api::dump(ostream&os) {
-	ask(protocol::wallet::dump_query,os);
+	ask(uswallet::protocol::dump_query,os);
 }
 
 void rpc_api::new_address(ostream&os) {
-	ask(protocol::wallet::new_address_query,os);
+	ask(uswallet::protocol::new_address_query,os);
 }
 
 void rpc_api::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	ostringstream k;
 	k << privkey;
-	ask(protocol::wallet::add_address_query,k.str(),os);
+	ask(uswallet::protocol::add_address_query,k.str(),os);
 }
 
 void rpc_api::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {
 	ostringstream si;
 	i.to_stream(si);
-	ask(protocol::wallet::tx_make_p2pkh_query,si.str(),os);
+	ask(uswallet::protocol::tx_make_p2pkh_query,si.str(),os);
 }
 
 void rpc_api::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) {
 	ostringstream si;
 	si << txb58 << ' ' << sigcodei << ' ' << sigcodeo;
-	ask(protocol::wallet::tx_sign_query,si.str(),os);
+	ask(uswallet::protocol::tx_sign_query,si.str(),os);
 }
 
 void rpc_api::tx_send(const string&txb58, ostream&os) {
-	ask(protocol::wallet::tx_send_query,txb58,os);
+	ask(uswallet::protocol::tx_send_query,txb58,os);
 }
 
 void rpc_api::tx_decode(const string&txb58, ostream&os) {
-	ask(protocol::wallet::tx_decode_query,txb58,os);
+	ask(uswallet::protocol::tx_decode_query,txb58,os);
 }
 
 void rpc_api::tx_check(const string&txb58, ostream&os) {
-	ask(protocol::wallet::tx_check_query,txb58,os);
+	ask(uswallet::protocol::tx_check_query,txb58,os);
 }
 
 //----------------local api

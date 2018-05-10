@@ -3,9 +3,9 @@
 
 #include <inttypes.h>
 
-namespace usgov {
+namespace uswallet {
 namespace protocol {
-namespace wallet {
+
 	static constexpr uint16_t wallet_base{0};
 
 
@@ -21,6 +21,7 @@ namespace wallet {
 
 
 	static constexpr uint16_t response{wallet_base+0};
-}}}
+
+}}
 
 #endif

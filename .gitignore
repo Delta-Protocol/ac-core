@@ -2,7 +2,8 @@
 .vscode/
 gov/libusgov.so
 govd/us-govd
-wallet/us-wallet
+wallet/libuswallet.so
+walletd/us-walletd
 .idea/*
 
 */**/.idea/*

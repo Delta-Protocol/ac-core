@@ -1,9 +1,9 @@
 #include "daemon.h"
 #include "protocol.h"
 
-using namespace usgov;
+using namespace uswallet;
 using namespace std;
-typedef usgov::wallet_daemon c;
+typedef uswallet::wallet_daemon c;
 
 
 string c::devices_t::default_name("my device");
@@ -81,7 +81,7 @@ const string& c::devices_t::get_name(const pub_t& pub) {
 }
 
 bool c::send_response(peer_t *c, datagram*d, const string& payload) {
-	c->send(protocol::wallet::response,payload);
+	c->send(uswallet::protocol::response,payload);
 	this_thread::sleep_for(1s);
 	delete d;
 	return true;
@@ -89,7 +89,7 @@ bool c::send_response(peer_t *c, datagram*d, const string& payload) {
 
 bool c::process_work(peer_t *c, datagram*d) {
 	switch(d->service) {
-		case protocol::wallet::tx_make_p2pkh_query: {
+		case uswallet::protocol::tx_make_p2pkh_query: {
 			istringstream is(d->parse_string());
 			wallet::tx_make_p2pkh_input i=wallet::tx_make_p2pkh_input::from_stream(is);
 			ostringstream ans;
@@ -97,7 +97,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::add_address_query: {
+		case uswallet::protocol::add_address_query: {
 			crypto::ec::keys::priv_t privkey;
 			istringstream is(d->parse_string());
 			is >> privkey;
@@ -106,19 +106,19 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::new_address_query: {
+		case uswallet::protocol::new_address_query: {
 			ostringstream ans;
 			local_api::new_address(ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::dump_query: {
+		case uswallet::protocol::dump_query: {
 			ostringstream ans;
 			local_api::dump(ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::balance_query: {
+		case uswallet::protocol::balance_query: {
 			bool detailed=d->parse_string()=="1";
 			refresh();
 
@@ -127,7 +127,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::tx_sign_query: {
+		case uswallet::protocol::tx_sign_query: {
 	        string txb58;
             cash::tx::sigcode_t sci;
             cash::tx::sigcode_t sco;
@@ -140,7 +140,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::tx_send_query: {
+		case uswallet::protocol::tx_send_query: {
 	        string txb58;
 			istringstream is(d->parse_string());
             is >> txb58;
@@ -149,7 +149,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::tx_decode_query: {
+		case uswallet::protocol::tx_decode_query: {
 	        string txb58;
 			istringstream is(d->parse_string());
             is >> txb58;
@@ -158,7 +158,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::tx_check_query: {
+		case uswallet::protocol::tx_check_query: {
 	        string txb58;
 			istringstream is(d->parse_string());
             is >> txb58;
