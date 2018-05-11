@@ -77,8 +77,8 @@ struct ec {
 	bool verify(const keys::pub_t& pk, const string& text, const string& signature_der) const;
 	bool verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
 
-	vector<unsigned char> encrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& clear_text) const;
-	vector<unsigned char> decrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& cyphered_text) const;
+	/*vector<unsigned char> encrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& clear_text) const;
+	vector<unsigned char> decrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& cyphered_text) const;*/
 
 
 	static constexpr size_t bit_size() { return 256; }
