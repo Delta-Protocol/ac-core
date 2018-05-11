@@ -1,9 +1,9 @@
 #ifndef USGOV_adb8d14e20731e001ab4e0eb7742ff5881fc9a7fabb4666497868c91f9a18570
 #define USGOV_adb8d14e20731e001ab4e0eb7742ff5881fc9a7fabb4666497868c91f9a18570
 
-#include <gov/peer/peer_t.h>
-#include <gov/crypto/crypto.h>
-#include <gov/crypto/hash.h>
+#include <us/gov/peer/peer_t.h>
+#include <us/gov/crypto/crypto.h>
+#include <us/gov/crypto/hash.h>
 
 namespace us { namespace gov {
 namespace auth {
