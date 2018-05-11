@@ -7,7 +7,7 @@
 #include <cassert>
 #include <cstring>
 #include <array>
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 
 namespace us { namespace gov {
 namespace crypto {

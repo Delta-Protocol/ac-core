@@ -3,8 +3,8 @@
 #include "protocol.h"
 #include <thread>
 #include <chrono>
-#include <gov/crypto/base58.h>
-#include <gov/likely.h>
+#include <us/gov/crypto/base58.h>
+#include <us/gov/likely.h>
 
 typedef us::gov::cash::app c;
 using namespace us::gov;

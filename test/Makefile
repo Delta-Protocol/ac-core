@@ -1,17 +1,17 @@
-OBJ := crypto
 CPPS := $(wildcard *.cpp)
-OBJS := $(patsubst %.cpp, %.o, $(CPPS))
 HS := $(wildcard *.h)
 INC := ../..
-CXXFLAGS = -fPIC -O0 -g -std=c++17
+CXXFLAGS = -O0 -g -std=c++17
 
-${OBJ}.o: ${OBJS}
-	ld -r -o ${OBJ}.o ${OBJS}
+.PHONY: all
 
-${OBJS}: ${HS} ${CPPS}
-	g++ ${CXXFLAGS} -I${INC} -c ${CPPS}
+all: unit_tests
+
+unit_tests: ${HS} ${CPPS}
+	g++ ${CXXFLAGS} -I${INC} -lusgov -L../gov ${CPPS} -o unit_tests
 
 clean:
+	rm -f unit_tests
 	find . -name "*.o" -delete
 
 

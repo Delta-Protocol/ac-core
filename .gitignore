@@ -5,7 +5,7 @@ govd/us-govd
 wallet/libuswallet.so
 walletd/us-walletd
 .idea/*
-
 */**/.idea/*
-test/a.out
+test/unit_tests
+android_studio/
 

@@ -8,7 +8,7 @@
 #include <cassert>
 #include <stdlib.h>
 #include <unistd.h>
-#include <gov/signal_handler.h>
+#include <us/gov/signal_handler.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -18,7 +18,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <gov/net.h>
+#include <us/gov/net.h>
 
 using namespace std;
 typedef us::gov::socket::server c;

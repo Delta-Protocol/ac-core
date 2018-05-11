@@ -19,8 +19,8 @@ unsigned int c::get_seed() {
 */
 #include "auth_app.h"
 #include "policies.h"
-#include <gov/cash/app.h>
-#include <gov/rep/app.h>
+#include <us/gov/cash/app.h>
+#include <us/gov/rep/app.h>
 
 
 uint64_t c::delta::merge(local_delta* other) {

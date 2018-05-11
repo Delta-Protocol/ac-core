@@ -1,8 +1,8 @@
 #ifndef USGOV_7e890654e98bf7c2878b37b6916dcb394f32fdcde3e1c8e0ac04dfd8d224f02c
 #define USGOV_7e890654e98bf7c2878b37b6916dcb394f32fdcde3e1c8e0ac04dfd8d224f02c
 
-#include <gov/crypto/hash.h>
-#include <gov/crypto/ec.h>
+#include <us/gov/crypto/hash.h>
+#include <us/gov/crypto/ec.h>
 #include <string>
 
 namespace us { namespace gov {

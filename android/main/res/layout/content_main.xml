@@ -117,22 +117,4 @@
         tools:layout_editor_absoluteX="74dp"
         tools:visibility="invisible" />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="51dp"
-        android:layout_height="wrap_content"
-        android:text="TAP"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="368dp" />
-
-    <EditText
-        android:id="@+id/nodeaddr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="NodeAddress"
-        tools:layout_editor_absoluteX="28dp"
-        tools:layout_editor_absoluteY="516dp" />
-
 </android.support.constraint.ConstraintLayout>
