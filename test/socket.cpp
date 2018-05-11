@@ -1,4 +1,5 @@
-
+#include <iostream>
+#include <string>
 #include "socket.h"
 #include <gov/socket/datagram.h>
 
@@ -26,9 +27,7 @@ using namespace std;
 
 
 
-void datagram(uint16_t service){
+	//usgov::socket::datagram d(0);
 
-//
-
-}
+	
 	
