@@ -5,7 +5,10 @@ govd/us-govd
 wallet/libuswallet.so
 walletd/us-walletd
 .idea/*
-
 */**/.idea/*
+<<<<<<< HEAD
 test/a.out
+=======
+android_studio/
+>>>>>>> 058c42e6c249272f55950e326cdd23dfdeb5e069
 

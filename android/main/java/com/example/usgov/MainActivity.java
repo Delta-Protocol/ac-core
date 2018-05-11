@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -131,10 +132,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (isAndroidRuntime()) new LinuxSecureRandom(); //Asserts /dev/urandom is ok
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+  //      FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
         //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
 
@@ -200,14 +201,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pub = publicPointFromPrivate(priv);
     //log=pub.getEncoded(true).toString();
         //pub=new LazyECPoint(priv);
-        toggleContactless("AA");
+        //toggleContactless("AA");
 
         Button balance = (Button) findViewById(R.id.balance);
         balance.setText("balance");
         balance.setOnClickListener(this);
 
         final String flog=log;
-
+/*
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -215,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setAction("Action", null).show();
             }
         });
-
+*/
         Button pay = (Button) findViewById(R.id.pay);
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,22 +234,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        Button tap = (Button) findViewById(R.id.tap);
-        pay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                on_tap();
-            }
-        });
-
-
-
         findViewById(R.id.amount).setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     hideKeyboard(v);
                 }
+            }
+        });
+
+        findViewById(R.id.get_paid).setEnabled(false);
+        findViewById(R.id.pay).setEnabled(false);
+
+        findViewById(R.id.amount).setOnKeyListener(new View.OnKeyListener() {
+            @Override
+
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                EditText a = (EditText) findViewById(R.id.amount);
+                if (a.getText().length()==0) {
+                    findViewById(R.id.get_paid).setEnabled(false);
+                    findViewById(R.id.pay).setEnabled(false);
+
+                } else {
+                    findViewById(R.id.get_paid).setEnabled(true);
+                    findViewById(R.id.pay).setEnabled(true);
+
+                }
+                return false;
             }
         });
 
@@ -273,16 +285,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // *        *                              *                               * ---tx------>*          *
         // *        *                              *                               *             * -relay-> *
 
-        String amount=
+        //String amount=
 
         //Send to payee a message PAY_INTENT with the amount
-        String msg = "PAY_INTENT " + findViewById(R.id.amount).getText();
+        EditText a = (EditText) findViewById(R.id.amount);
+        String msg = "PAY_INTENT " + a.getText();
         //Send and receive NFC
         String rcptAddress="jGdHCR7xLb33dkAp7JcEu7bwu6g";
         //Send and receive to node
 
-        String msg = "TRANSFER_CASH " + rcptAddress + " " + amount + " " + pub.getEncoded(true).toString();
-        String signature=sign(msg);
+        String msg2 = "TRANSFER_CASH " + rcptAddress + " " + a.getText() + " " + pub.getEncoded(true).toString();
+        String signature=sign(msg2);
         msg+=" "+signature;
 
         //received this transaction from the node
@@ -309,8 +322,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     String nodeAddress() {
-        EditText a = (EditText) findViewById(R.id.nodeaddr);
-        return a.getText().toString();
+        return "11.11.11.11";
     }
     int nodePort() {
         return 16673;
@@ -336,42 +348,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final int protocol_response = wallet_base+0;
 
-    private String seq;
-    
 
-    String querySeq() {
-        seq = "";
-        final Handler handler = new Handler();
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Socket s = new Socket(nodeAddress(), nodePort());
-                    boolean b11 = s.isClosed();
-                    boolean b12 = s.isConnected();
-                    Datagram d = new Datagram(protocol_seq_query);
-                    d.send(s);
 
-                    boolean b11_2 = s.isClosed();
-                    boolean b12_2 = s.isConnected();
-
-                    String st;
-                    Datagram r = new Datagram();
-                    if (!r.recv(s)) {
-                        s.close();
-                        return;
-                    }
-                    s.close();
-                    if (r.service!=protocol_seq_response) return;
-                    seq = r.parse_string();
-                } catch (IOException e) {
-                }
-            }
-        });
-
-        thread.start();
-    }
-
+/*
     String queryCashAddress() {
         final Handler handler = new Handler();
         Thread thread = new Thread(new Runnable() {
@@ -423,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
+*/
     @Override
     public void onClick(View v) {
 
