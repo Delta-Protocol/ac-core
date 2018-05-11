@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <gov/dfs/daemon.h>
+#include <us/gov/dfs/daemon.h>
 
 #include "split_function.h"
 
@@ -10,7 +10,7 @@ using namespace std;
 
 bool test(const string& input, const string& expected ) {
 	
-	if( usgov::dfs::daemon::resolve_filename(input) != expected )  {  	 
+	if( us::gov::dfs::daemon::resolve_filename(input) != expected )  {  	 
 		assert (false);
 	 }
    return true;
