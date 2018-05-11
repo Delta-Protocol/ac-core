@@ -7,24 +7,40 @@ using namespace std;
 
 
 
-
-
-
 	
  void call_datagram(){
 
+	//us::gov::socket::datagram d(1);
+	//us::gov::socket::datagram d(10,12);
+
+	us::gov::socket::datagram d(10,"kyprosssf"); //kyprosssf
 	
-	us::gov::socket::datagram dg(10,12);
+
 	
-	cout << dg.decode_size() << endl;
+	
+	
+	
+	cout << "parse_string()-> " << d.parse_string() << endl;
+	
+	cout << "parse_uint16() -> " << d.parse_uint16() << endl;
 
 
-	cout << "completed: " << dg.completed() << endl;
-	
+	cout << "completed() -> " << d.completed() << endl;
+
+	cout <<	"  " <<d.send(2) << endl;
+
 }
 
 
-
+/*
+	test(d.service==10);
+	test(d.error==0);
+	test(d.size()==8);
+	test(d.completed());
+	parse_uint16()==12
+	parse_string()
+*/
+	
 
 
 

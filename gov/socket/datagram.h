@@ -31,10 +31,6 @@ namespace socket {
 		datagram(uint16_t service, vector<uint8_t>&&) {}
 
 		bool completed() const;
-		uint32_t decode_size() const;
-		uint16_t decode_service() const;
-		void encode_size(uint32_t);
-		void encode_service(uint16_t);
 		
 		hash_t compute_hash() const;
 
@@ -48,7 +44,13 @@ namespace socket {
 		vector<string> parse_strings() const;
 		string parse_string() const;
 		uint16_t parse_uint16() const;
+	private:
+		uint32_t decode_size() const;
+		uint16_t decode_service() const;
+		void encode_size(uint32_t);
+		void encode_service(uint16_t);
 
+	public: //TODO change to private
 		uint16_t service;
 		//size_t cur;
 		size_t dend;

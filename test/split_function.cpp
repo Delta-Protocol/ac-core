@@ -33,8 +33,6 @@ void testing_split_function(){
 
 	
 	test("43 gfF ","43/ g/fF/ ");
-	
-	
 	test("/43gfF","/4/3g/fF");
 	
 	
