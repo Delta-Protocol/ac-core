@@ -87,6 +87,12 @@ void rpc_api::tx_check(const string&txb58, ostream&os) {
 	ask(us::wallet::protocol::tx_check_query,txb58,os);
 }
 
+void rpc_api::pair(const pub_t& pk, ostream&os) {
+	ostringstream si;
+	si << pk;
+	ask(us::wallet::protocol::pair_query,si.str(),os);
+}
+
 //----------------local api
 
 local_api::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port) {
@@ -153,4 +159,7 @@ void local_api::tx_check(const string&txb58, ostream&os) {
 	os << "Looks ok." << endl;
 }
 
+void local_api::pair(const pub_t& pk, ostream&os) {
+    
+}
 

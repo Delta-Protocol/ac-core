@@ -11,12 +11,6 @@ signal_handler.o: signal_handler.cpp signal_handler.h
 
 libusgov.so: deps signal_handler.o
 	g++ -shared -O0 -g -std=c++17 -pthread -lsecp256k1 -I../.. ${OBJS} signal_handler.o -o libusgov.so
-#	g++ -shared -O0 -g -std=c++17 -pthread -lcryptopp -lsecp256k1 -I../.. ${OBJS} signal_handler.o -o libusgov.so
-#	g++ -O0 -g -std=c++17 -pthread -lcryptopp -lgmp -lgmpxx -lsecp256k1 -I../..${OBJS} main.cpp signal_handler.cpp  -o bitcoin++
-
-
-#wallet: wallet.cpp deps
-#	g++ -O0 -g -std=c++17 -pthread -lcryptopp -lgmp -lgmpxx -lsecp256k1 -I../.. -I../..wallet.cpp signal_handler.cpp ${OBJS} -o wallet
 
 deps:
 	@for a in $$(ls); do \
