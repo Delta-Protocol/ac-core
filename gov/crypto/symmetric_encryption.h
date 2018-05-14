@@ -6,7 +6,14 @@ namespace us { namespace gov {
 namespace crypto {
 using namespace std;
 
+    class SymmetricEncryption {
+	public:
+        void runAES();
+    };
+
+    
 }
 }}
-
 #endif
+
+

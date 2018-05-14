@@ -17,5 +17,5 @@ bool test(const string& input, const string& expected ) {
 }
 
 void testing_symmetric_encryption(){
-
+	us::gov::crypto::runAES();
 }
