@@ -2,6 +2,6 @@
 #define TEST_SOCKET_FUNCTION_H
 
 
-void call_datagram();
+void testing_socket_datagram();
 
 #endif
