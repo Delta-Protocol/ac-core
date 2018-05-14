@@ -2,6 +2,7 @@
 #include "protocol.h"
 #include <sstream>
 #include <us/gov/socket/datagram.h>
+#include <us/gov/cash.h>
 
 using namespace us::wallet;
 
@@ -87,15 +88,21 @@ void rpc_api::tx_check(const string&txb58, ostream&os) {
 	ask(us::wallet::protocol::tx_check_query,txb58,os);
 }
 
-void rpc_api::pair(const pub_t& pk, ostream&os) {
+void rpc_api::pair(const pub_t& pk, const string& name, ostream&os) {
+	ostringstream si;
+	si << pk << ' ' << name;
+	ask(us::wallet::protocol::pair_query,si.str(),os);
+}
+
+void rpc_api::unpair(const pub_t& pk, ostream&os) {
 	ostringstream si;
 	si << pk;
-	ask(us::wallet::protocol::pair_query,si.str(),os);
+	ask(us::wallet::protocol::unpair_query,si.str(),os);
 }
 
 //----------------local api
 
-local_api::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port) {
+local_api::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port), pairing(homedir) {
 }
 
 local_api::~local_api() {
@@ -133,7 +140,7 @@ void local_api::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream&os) {
 }
 
 void local_api::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) {
-    pair<string,cash::tx> tx=wallet::tx_sign(txb58,sigcodei,sigcodeo);
+    auto tx=wallet::tx_sign(txb58,sigcodei,sigcodeo);
 	if (tx.first.empty())
 	    os << tx.second << endl;
 	else
@@ -159,7 +166,13 @@ void local_api::tx_check(const string&txb58, ostream&os) {
 	os << "Looks ok." << endl;
 }
 
-void local_api::pair(const pub_t& pk, ostream&os) {
-    
+void local_api::pair(const pub_t& pk, const string& name, ostream&os) {
+    devices.pair(pk,name);    
+	os << "done." << endl;
+}
+
+void local_api::unpair(const pub_t& pk, ostream&os) {
+    devices.unpair(pk);    
+	os << "done." << endl;
 }
 
