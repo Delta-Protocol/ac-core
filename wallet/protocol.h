@@ -20,6 +20,7 @@ namespace protocol {
 	static constexpr uint16_t tx_check_query{wallet_base+9};
 	static constexpr uint16_t pair_query{wallet_base+10};
 	static constexpr uint16_t unpair_query{wallet_base+11};
+	static constexpr uint16_t list_devices_query{wallet_base+12};
 
 
 	static constexpr uint16_t response{wallet_base+0};

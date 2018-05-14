@@ -30,6 +30,7 @@ struct api {
 	virtual void tx_check(const string&txb58, ostream&os)=0;
 	virtual void pair(const pub_t&, const string& name, ostream&os)=0;
 	virtual void unpair(const pub_t&, ostream&os)=0;
+	virtual void list_devices(ostream&os)=0;
 
 	void gen_keys(ostream&os);
 
@@ -50,6 +51,7 @@ struct rpc_api:api {
 	virtual void tx_check(const string&txb58, ostream&os) override;
 	virtual void pair(const pub_t&, const string& name, ostream&os);
 	virtual void unpair(const pub_t&, ostream&os);
+	virtual void list_devices(ostream&os);
 
 
 private:
@@ -78,6 +80,7 @@ struct local_api:api, wallet, pairing {
 	virtual void tx_check(const string&txb58, ostream&os) override;
 	virtual void pair(const pub_t&, const string& name, ostream&os);
 	virtual void unpair(const pub_t&, ostream&os);
+	virtual void list_devices(ostream&os);
 
 private:
 };

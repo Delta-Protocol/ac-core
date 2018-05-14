@@ -100,6 +100,10 @@ void rpc_api::unpair(const pub_t& pk, ostream&os) {
 	ask(us::wallet::protocol::unpair_query,si.str(),os);
 }
 
+void rpc_api::list_devices(ostream&os) {
+	ask(us::wallet::protocol::list_devices_query,os);
+}
+
 //----------------local api
 
 local_api::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port), pairing(homedir) {
@@ -174,5 +178,9 @@ void local_api::pair(const pub_t& pk, const string& name, ostream&os) {
 void local_api::unpair(const pub_t& pk, ostream&os) {
     devices.unpair(pk);    
 	os << "done." << endl;
+}
+
+void local_api::list_devices(ostream&os) {
+    devices.dump(os);    
 }
 

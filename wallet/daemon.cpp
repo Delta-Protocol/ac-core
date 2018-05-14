@@ -121,6 +121,12 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
+		case us::wallet::protocol::list_devices_query: {
+			ostringstream ans;
+			local_api::list_devices(ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
 		default: break;
 	}
 	return false;

@@ -81,6 +81,10 @@ void help(const params& p, ostream& os=cout) {
 	os << " tx send <tx_b58>" << endl;
 	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
 	os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
+    os << " pair <pubkey> <name>   authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
+    os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
+    os << " list_devices           Show currently paired devices." << endl;
+
 }
 
 
@@ -260,6 +264,19 @@ int main(int argc, char** argv) {
 	}
 	else if (command=="gen_keys") {
 		wapi.gen_keys(cout);
+	}
+	else if (command=="pair") {
+		api::pub_t pub=args.next<api::pub_t>();
+	    auto name=args.next<string>();
+cout << "-- " << name << endl;
+		wapi.pair(pub,name,cout);
+	}
+	else if (command=="unpair") {
+		api::pub_t pub=args.next<api::pub_t>();
+		wapi.unpair(pub,cout);
+	}
+	else if (command=="list_devices") {
+		wapi.list_devices(cout);
 	}
 	else {
 		help(p);
