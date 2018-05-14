@@ -4,6 +4,7 @@
 #include <secp256k1.h>
 #include <iostream>
 #include <vector>
+#include <array>
 #include "double_sha256.h"
 
 namespace us { namespace gov {
