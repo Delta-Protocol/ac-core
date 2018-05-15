@@ -85,14 +85,13 @@ void test_3(int serviceNumber , string payloadString){
 
 //...:::-1-:::....
 
-bool test_data_1(const int& init_num, const int& dend, const int& size,  const int& service , const int& error , const int& complete){ 
+bool test_data_1(const int& init_num, const int& dend, const int& size,  const int& service , const int& error ,const string& hash ,const int& complete ){ 
 	
 	us::gov::socket::datagram d(init_num);
-	
-	if( d.dend != dend && d.size()!= size && d.service != service && d.error != error && d.completed() != complete)  {  	 
+
+	if( d.dend != dend || d.size()!= size || d.service != service || d.error != error ||  d.compute_hash().to_b58() != hash || d.completed() != complete){ 
 		assert (false);
 	 }
-	cout << d.compute_hash() << endl;
 return true;
 }
 
@@ -103,7 +102,7 @@ bool test_data_2(const int& init_num1,const int& init_num2,  const int& dend, co
 	
 	us::gov::socket::datagram d(init_num1, init_num2);
 	
-	if(  d.dend != dend && d.size()!= size &&  d.service != service && d.error != error && d.parse_uint16()!=parse_uint16 && d.completed() != complete)  {  	 
+	if(  d.dend != dend || d.size()!= size ||  d.service != service || d.error != error || d.parse_uint16()!=parse_uint16 || d.completed() != complete)  {  	 
 		assert (false);
 	 }
 	cout << d.compute_hash() << endl;
@@ -118,13 +117,13 @@ bool test_data_3(const int& init_num1,const string& init_num2, const int& dend, 
 	
 	us::gov::socket::datagram d(init_num1, init_num2);
 	
-	if(  d.dend != dend && d.size()!= size && d.service != service && d.error != error && 
-					init_num2.size()!=payload_size &&  d.parse_string()!= parse_string && d.completed() != complete)  {  	 
+	if(  d.dend != dend || d.size()!= size || d.service != service || d.error != error || init_num2.size()!=payload_size ||  d.parse_string()!= parse_string || d.completed() != complete)  {  	 
 		assert (false);
 	 }
-	cout << d.compute_hash() << endl;
+	
 return true;
 }
+
 
 
 
@@ -133,8 +132,9 @@ return true;
  void testing_socket_datagram(){
 
 	        //init_num ,dend,size ,service, error,complete
-	test_data_1(0      , 6 , 6       ,0       ,0     ,1);	
-	test_data_1(1,6,6,1,0,1);
+	test_data_1(0      , 6 , 6       ,0       ,0     , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN" , 1  );	
+	
+	//test_data_1(1,6,6,1,0,1);
  
 
 	//......1...
@@ -148,7 +148,7 @@ return true;
 
 
 	//init_num1, init_num2 ,dend,size ,service, error,parse_uint16 ,complete
-	test_data_2(0,   0     , 8,   8    , 1,        0  ,    5        ,   1  );
+	//test_data_2(0,   0     , 8,   8    , 1,        0  ,    5        ,   1  );
 
 	
 	//......2.....
@@ -161,7 +161,7 @@ return true;
 
 
 	//init_num1, init_num2 ,dend,size,  ,service, error , payload_size , parse_string , complete
-	 test_data_3(0, ""     ,  6 , 6    , 0     , 0    ,       0       ,       ""    ,     1  );	
+	// test_data_3(0, ""     ,  6 , 6    , 0     , 0    ,       0       ,       ""    ,     1  );	
 
 	//......3........
 	//test_3(0,"");
