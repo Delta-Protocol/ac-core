@@ -138,9 +138,9 @@ class TestDatagram {
 	
 	us::gov::socket::datagram d;
   
-      bool test_data(const int& dend)//, const int& size,  const int& service , const int& error ,const string& hash ,const int& complete )
+      bool test_data(const int& dend, const int& size,  const int& service , const int& error ,const string& hash ,const int& complete )
 	{ 
-		if( d.dend != dend )//|| d.size()!= size || d.service != service || d.error != error ||  d.compute_hash().to_b58() != hash || d.completed() != complete)
+		if( d.dend != dend || d.size()!= size || d.service != service || d.error != error ||  d.compute_hash().to_b58() != hash || d.completed() != complete)
 		{ 
 			assert (false);
 		}
@@ -188,18 +188,68 @@ class TestPayloadString : public TestDatagram {
  void testing_socket_datagram(){
 
 
-
+//	  int_num	    dend  size   service error    	     hash
 	TestDatagram a(0);
-		//a.test_data( 6  ,  6   ,   0   ,   0  , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,   1 );
+		a.test_data( 6  ,  6   ,   0   ,   0  , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,   1 );
+	TestDatagram b(1);
+		b.test_data( 6  ,  6   ,   1   ,   0  , "3Z28rsteneYa98hvxR2ReLxP9jW"  ,   1 );		
+	TestDatagram c(10);
+		c.test_data( 6  ,  6   ,   10  ,   0  , "N5V1hPddzeWtKbTHECoPEYBijn6"  ,   1 );
+	TestDatagram d(100);
+		d.test_data( 6  ,  6   ,   100 ,   0  , "2fJEMgiNAhGwa6SPD8MK3wyhDCn8"  ,   1 );
+	TestDatagram e(1000);
+		e.test_data( 6  ,  6   ,   1000,   0  , "3eHUfaBJoEDae8oSvHwemt2vraMB"  ,   1 );
+	TestDatagram f(65535);
+		f.test_data( 6  ,  6   ,  65535,   0  , "3xperfdBSJ6cthKMQLN5Mwa2jdJ5"  ,   1 );
+	TestDatagram g(65536);
+		g.test_data( 6  ,  6   ,    0  ,   0  , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,   1 );
 
 
-	Uint16 b(1,5);
-		b.test_data(8  );//,   8   ,  1    ,   0  , "2LSq1houFKj1fPBZmnHDPCLusjDN"  ,   1 );
+	TestDatagram a2(0,0);
+		a2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
+	TestDatagram b2(1,2);
+		b2.test_data(8  ,   8   ,  1    ,   0  , "3FYZb9H4K2tkzZUgypqGAFnoPfAr"  ,   1 );
+	TestDatagram c2(100,0);
+		c2.test_data(8  ,   8   ,  100  ,   0  , "2VpyaUEEgz4Yo38hX1MvvrRpFkgb"  ,   1 );
+	TestDatagram d2(1000,1000);
+		d2.test_data(8  ,   8   ,  1000 ,   0  , "2D2PNV2j1y7xjjNiKJ3YvqtsbZTR"  ,   1 );
+	TestDatagram e2(65536,65535);
+		e2.test_data(8  ,   8   ,  0    ,   0  , "1BrDi8KcT7ocoCx4rJhYEXRmGFX"  ,   1 );
+	TestDatagram f2(65536,65536);
+		f2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
+	TestDatagram g2(0,65536);
+		g2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
 	//b.test_uint16(0);
 
-	TestPayloadString c(0, "");
-	//c.test_data( 6 , 6    , 0     , 0    , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  , 1);
-	//c.test_payloadString(0,"");
+              TestDatagram a3(0, "zz");
+                           a3.test_data( 8 , 8    , 0     , 0    , "7cU4a99HHJWAD5grBsjYAVsXqJW"  ,   1);
+              TestPayloadString a3b(0, "zz");         
+                           a3b.test_payloadString(2, "zz");
+              TestDatagram b3(100, "");
+                           b3.test_data( 6 , 6    , 100     , 0    , "2fJEMgiNAhGwa6SPD8MK3wyhDCn8"  ,   1);
+              TestPayloadString b3b(100, "");         
+                           b3b.test_payloadString(0, "");
+              TestDatagram c3(65537, "");
+                           c3.test_data( 6 , 6    , 1     , 0    , "3Z28rsteneYa98hvxR2ReLxP9jW"  ,   1);
+              TestPayloadString c3b(65537, "");         
+                           c3b.test_payloadString(0, "");
+              TestDatagram d3(65536, "");
+                           d3.test_data( 6 , 6    , 0     , 0    , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,   1);
+              TestPayloadString d3b(65536, "");         
+                           d3b.test_payloadString(0, "");
+              TestDatagram e3(0, "abcdefghijklmnop");
+                           e3.test_data( 22 , 22    , 0     , 0    , "4en91amD8tQhTYmyYbL2doWYDJB"  ,   1);
+              TestPayloadString e3b(0, "abcdefghijklmnop");         
+                           e3b.test_payloadString(16, "abcdefghijklmnop");
+              TestDatagram f3(111, "a");
+                           f3.test_data( 7 , 7    , 111     , 0    , "yydr76MzZdEERbHnWth2udEgZ99"  ,   1);
+              TestPayloadString f3b(111, "a");         
+                           f3b.test_payloadString(1, "a");
+              TestDatagram g3(65536, "0");
+                           g3.test_data( 7 , 7    , 0     , 0    , "fC8m731SsLTfdfZR4XWQ8Goupq5"  ,   1);
+              TestPayloadString g3b(65536, "0");         
+                           g3b.test_payloadString(1, "0");
+
 	
 
 	
@@ -234,9 +284,12 @@ class TestPayloadString : public TestDatagram {
 	
 	//......2.....
 	//test_2(0,0);
-	test_2(1,5);
-	//test_2(10,25);
-	//test_2(100,105);
+	//test_2(1,2);
+	//test_2(100,0);
+	//test_2(1000,1000);
+	//test_2(65536,65535);
+	//test_2(65536,65536);
+	//test_2(0,65536);
 
 
 
@@ -245,12 +298,13 @@ class TestPayloadString : public TestDatagram {
 	// test_data_3(0, ""     ,  6 , 6    , 0     , 0    ,       0       ,       ""    ,     1  );	
 
 	//......3........
-	//test_3(0,"");
-	//test_3(0,"z");	
-	//test_3(1,"zz");
-	//test_3(10,"KKK");
-	//test_3(101,"KkKK");
-
+	/*test_3(0,"zz");
+	test_3(100,"");	
+	test_3(65537,"");
+	test_3(65536,"");
+	test_3(0,"abcdefghijklmnop");
+	test_3(111,"a");
+	test_3(65536,"0");*/
 }
 
 
