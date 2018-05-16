@@ -144,6 +144,7 @@ void testing_socket_datagram(){
 
 
 //	         int_num  |dend |size | service | error|   	     hash             |  complete
+	//---3---
 	TestDatagram a(0);
 		a.test_data( 6  ,  6   ,   0   ,   0  , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,  1);
 	TestDatagram b(1);
@@ -159,38 +160,37 @@ void testing_socket_datagram(){
 	TestDatagram g(65536);
 		g.test_data( 6  ,  6   ,    0  ,   0  , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,  1);
 
-
+	//---2---
 	TestDatagram a2(0,0);
-                              a2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
-        Uint16 a2b(0,0);
-               a2b.test_uint16(0);
-               TestDatagram b2(1,2);
-                              b2.test_data(8  ,   8   ,  1    ,   0  , "3FYZb9H4K2tkzZUgypqGAFnoPfAr"  ,   1 );
-        Uint16 b2b(1,2);
-               b2b.test_uint16(2);
-               TestDatagram c2(100,0);
-                              c2.test_data(8  ,   8   ,  100  ,   0  , "2VpyaUEEgz4Yo38hX1MvvrRpFkgb"  ,   1 );
-        Uint16 c2b(100,0);
-               c2b.test_uint16(0);
-               TestDatagram d2(1000,1000);
-                              d2.test_data(8  ,   8   ,  1000 ,   0  , "2D2PNV2j1y7xjjNiKJ3YvqtsbZTR"  ,   1 );
-        Uint16 d2b(1000,1000);
-               d2b.test_uint16(1000);
-               TestDatagram e2(65536,65535);
-                              e2.test_data(8  ,   8   ,  0    ,   0  , "1BrDi8KcT7ocoCx4rJhYEXRmGFX"  ,   1 );
-        Uint16 e2b(65536,65535);
-               e2b.test_uint16(65535);
-               TestDatagram f2(65536,65536);
-                              f2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
-        Uint16 f2b(65536,65536);
-               f2b.test_uint16(0);
-               TestDatagram g2(0,65536);
-                              g2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
-        Uint16 g2b(0,65536);
-               g2b.test_uint16(0);
+		a2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
+        		Uint16 a2b(0,0);
+               			a2b.test_uint16(0);
+	TestDatagram b2(1,2);
+		b2.test_data(8  ,   8   ,  1    ,   0  , "3FYZb9H4K2tkzZUgypqGAFnoPfAr"  ,   1 );
+		        Uint16 b2b(1,2);
+               			b2b.test_uint16(2);
+	TestDatagram c2(100,0);
+		c2.test_data(8  ,   8   ,  100  ,   0  , "2VpyaUEEgz4Yo38hX1MvvrRpFkgb"  ,   1 );
+        		Uint16 c2b(100,0);
+               			c2b.test_uint16(0);
+	TestDatagram d2(1000,1000);
+		d2.test_data(8  ,   8   ,  1000 ,   0  , "2D2PNV2j1y7xjjNiKJ3YvqtsbZTR"  ,   1 );
+        		Uint16 d2b(1000,1000);
+               			d2b.test_uint16(1000);
+	TestDatagram e2(65536,65535);
+		e2.test_data(8  ,   8   ,  0    ,   0  , "1BrDi8KcT7ocoCx4rJhYEXRmGFX"  ,   1 );
+        		Uint16 e2b(65536,65535);
+               			e2b.test_uint16(65535);
+	TestDatagram f2(65536,65536);
+		f2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
+        		Uint16 f2b(65536,65536);
+               			f2b.test_uint16(0);
+	TestDatagram g2(0,65536);
+		g2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
+        		Uint16 g2b(0,65536);
+               			g2b.test_uint16(0);
 
-	
-
+	//---3---
 	TestDatagram a3(0, "zz");
 		a3.test_data( 8 , 8    , 0     ,0,"7cU4a99HHJWAD5grBsjYAVsXqJW",1);
 			TestPayloadString a3b(0, "zz");         
