@@ -3,5 +3,6 @@
 
 
 void testing_socket_datagram();
+void testing_socket_communication();
 
 #endif

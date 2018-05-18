@@ -3,6 +3,10 @@
 #include "socket.h"//testing socket h
 #include <us/gov/socket/datagram.h>
 
+//#include <us/gov/socket/server.h>//---
+//#include <us/gov/socket/client.h>//--
+#include <us/gov/blockchain/daemon.h>
+
 using namespace std;
 
 
@@ -143,8 +147,8 @@ class TestPayloadString : public TestDatagram {
 void testing_socket_datagram(){
 
 
+//---1--------------------------------------------------------------------------------------------
 //	         int_num  |dend |size | service | error|   	     hash             |  complete
-	//---3---
 	TestDatagram a(0);
 		a.test_data( 6  ,  6   ,   0   ,   0  , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,  1);
 	TestDatagram b(1);
@@ -160,7 +164,8 @@ void testing_socket_datagram(){
 	TestDatagram g(65536);
 		g.test_data( 6  ,  6   ,    0  ,   0  , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,  1);
 
-	//---2---
+//---2---------------------------------------------------------------------------------------------
+//	                  int_num  |dend |size | service | error|   	     hash       |  complete
 	TestDatagram a2(0,0);
 		a2.test_data(8  ,   8   ,  0    ,   0  , "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
         		Uint16 a2b(0,0);
@@ -190,7 +195,8 @@ void testing_socket_datagram(){
         		Uint16 g2b(0,65536);
                			g2b.test_uint16(0);
 
-	//---3---
+//---3---------------------------------------------------------------------------------------------
+//	         int_num  |dend |size | service | error|   	     hash             |  complete
 	TestDatagram a3(0, "zz");
 		a3.test_data( 8 , 8    , 0     ,0,"7cU4a99HHJWAD5grBsjYAVsXqJW",1);
 			TestPayloadString a3b(0, "zz");         
@@ -221,9 +227,6 @@ void testing_socket_datagram(){
 				g3b.test_payloadString(1, "0");
 
 
-}
-
-
 	//......1...
 	//test_1(0);
 	//test_1(1);
@@ -250,4 +253,84 @@ void testing_socket_datagram(){
 	test_3(0,"abcdefghijklmnop");
 	test_3(111,"a");
 	test_3(65536,"0");*/
+}
+
+
+
+
+#include <thread>
+using namespace us::gov;
+
+struct test_client: socket::client {
+
+	virtual bool process_work(datagram* d) override { 
+		delete d;
+		//create response datagram
+		send
+		return true; 
+	}
+
+
+};
+
+struct test_server: socket::server {
+
+	bool c::receive_and_process(client*c) override {
+		//do stuff here
+		socket::server(c);
+	}
+	
+	client* create_client(int sock) override {
+		return new test_client(sock);
+	}
+
+};
+
+
+void testing_socket_communication(){
+
+	socket::server s(1000);
+
+	thread t(&socket::server::run,&s);
+
+		
+	socket::client c;
+	c.connect(localhost,1000);
+	
+	datagram d;
+	datagram* r=c.send_recv(d);
+	check(*r==d)
+	delete r;
+
+	t.join();
+
+
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
