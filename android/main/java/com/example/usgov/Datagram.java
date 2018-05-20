@@ -29,6 +29,13 @@ public class Datagram {
         dend=0;
         error=0;
     }
+    Datagram(int service) {
+        int size=6;
+        bytes= new byte[size];
+        encode_size(size);
+        encode_service(service);
+        dend=bytes.length;
+    }
     Datagram(int service, String msg) {
         int size=6+msg.length();
         bytes= new byte[size];

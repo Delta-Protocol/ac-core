@@ -7,6 +7,8 @@ if [ -d android_studio ]; then
 	exit 1
 fi
 
+pwd=`pwd`
+
 mkdir android_studio
 cd android_studio
 
@@ -18,11 +20,12 @@ ln -s ../../android/getdeps
 rm build.gradle
 ln -s ../../android/build.gradle
 
-
-
-cd app/src/
+cd app
+cat $pwd/sdk/java/build.gradle.snippet >> build.gradle
+cd src/
 rm main -r
 ln -s ../../../../android/main
+
 cd ../..
 
 

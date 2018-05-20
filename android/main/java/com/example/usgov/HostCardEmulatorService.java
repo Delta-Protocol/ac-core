@@ -7,12 +7,39 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-public class HostCardEmulatorService extends HostApduService {
+import java.util.Arrays;
 
+public class HostCardEmulatorService extends HostApduService {
 
     public HostCardEmulatorService() {
 
     }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "onCreate");
+
+        //mIntent = new Intent(this, MyActivity.class);
+        //mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //startActivity(mIntent);
+    }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        // Check if intent has extras
+        if(intent.getExtras() != null){
+
+            // Get message
+            message = intent.getExtras().getString("message");
+            Log.d("INTENT", message);
+        }
+
+        return START_NOT_STICKY;
+    }
+
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -22,6 +49,7 @@ public class HostCardEmulatorService extends HostApduService {
         }
         return data;
     }
+
     public static String ByteArrayToHexString(byte[] bytes) {
         final char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
         char[] hexChars = new char[bytes.length * 2]; // Each byte has two hex characters (nibbles)
@@ -45,10 +73,12 @@ public class HostCardEmulatorService extends HostApduService {
     public static byte LE = (byte)0x00;
     public static int MIN_APDU_LENGTH = 10;
 
+
     @Override
     public void onDeactivated(int reason) {
         Log.d(TAG, "Deactivated: " + reason);
     }
+
 
     boolean checkAID(byte[] commandApdu) {
         for (int i=0; i<AID.length; ++i) {
@@ -56,7 +86,7 @@ public class HostCardEmulatorService extends HostApduService {
         }
         return true;
     }
-
+/*
     String parseAddr(byte[] commandApdu) {
         byte l=commandApdu[4];
         l-=AID.length;
@@ -67,6 +97,8 @@ public class HostCardEmulatorService extends HostApduService {
         }
         return addr;
     }
+*/
+    String message=""; //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 10000 PAY";
 
 
     @Override
@@ -90,11 +122,11 @@ public class HostCardEmulatorService extends HostApduService {
 
         if (!checkAID(commandApdu)) return STATUS_FAILED;
 
-        String addr=parseAddr(commandApdu);
+        //String addr=parseAddr(commandApdu);
 
-        Log.d(TAG, "address "+addr);
+//        Log.d(TAG, "address "+addr);
 
-        return STATUS_SUCCESS;
+        return concatArrays(message.getBytes(),STATUS_SUCCESS);
 /*
         if (aid == AID)  {
         } else {
@@ -102,4 +134,20 @@ public class HostCardEmulatorService extends HostApduService {
         }
 */
     }
+
+    public static byte[] concatArrays(byte[] first, byte[]... rest) {
+        int totalLength = first.length;
+        for (byte[] array : rest) {
+            totalLength += array.length;
+        }
+        byte[] result = Arrays.copyOf(first, totalLength);
+        int offset = first.length;
+        for (byte[] array : rest) {
+            System.arraycopy(array, 0, result, offset, array.length);
+            offset += array.length;
+        }
+        return result;
+    }
+
+
 }
