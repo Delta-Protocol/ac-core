@@ -3,9 +3,10 @@
 #include "socket.h"//testing socket h
 #include <us/gov/socket/datagram.h>
 
-//#include <us/gov/socket/server.h>//---
-//#include <us/gov/socket/client.h>//--
+#include <us/gov/socket/server.h>//---
+#include <us/gov/socket/client.h>//--
 #include <us/gov/blockchain/daemon.h>
+#include <thread>
 
 using namespace std;
 
@@ -258,28 +259,51 @@ void testing_socket_datagram(){
 
 
 
-#include <thread>
-using namespace us::gov;
+//using namespace us::gov;
 
-struct test_client: socket::client {
+
+struct test_client: us::gov::socket::client {
+
+
+	test_client(uint16_t p): port(p)
+	{
+		
+	}
+ 
 
 	virtual bool process_work(datagram* d) override { 
 		delete d;
 		//create response datagram
-		send
-		return true; 
+	//	send
+
+
 	}
-
-
 };
 
-struct test_server: socket::server {
+struct base {
+	base(int a) {
+	}
+
+}:
+
+
+struct derived:base {
+	
+	derived(int a):base(a){
+	}
+}:
+
+
+struct test_server: us::gov::socket::server {
+
+	//--> 9constructor here	
 
 	bool c::receive_and_process(client*c) override {
 		//do stuff here
-		socket::server(c);
+		//socket::server(c);
+
 	}
-	
+
 	client* create_client(int sock) override {
 		return new test_client(sock);
 	}
@@ -288,24 +312,33 @@ struct test_server: socket::server {
 
 
 void testing_socket_communication(){
-
-	socket::server s(1000);
-
-	thread t(&socket::server::run,&s);
-
-		
-	socket::client c;
-	c.connect(localhost,1000);
 	
+	us::gov::socket::datagram d;
+
+	
+	test_server s(1001);
+	s.run();
+
+	//map
+	//thread t(&socket::server::run,&s);
+	
+
+
+
+	
+	
+
+	//c.connect(localhost , 1000 . false);
+	
+	
+/*	
 	datagram d;
-	datagram* r=c.send_recv(d);
+	datagram*   r = c.send_recv(d);
 	check(*r==d)
 	delete r;
-
-	t.join();
-
-
 	
+	t.join();
+*/	
 }
 
 
