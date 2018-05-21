@@ -37,6 +37,7 @@
         android:imeOptions="actionDone"
         android:inputType="number"
         android:singleLine="true"
+        android:text="100"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.504"
@@ -78,14 +79,14 @@
     <ImageView
         android:id="@+id/contactless_logo"
         android:layout_width="279dp"
-        android:layout_height="141dp"
+        android:layout_height="140dp"
         android:layout_marginEnd="30dp"
         android:layout_marginStart="75dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="60dp"
         android:scaleType="fitXY"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pay"
         app:srcCompat="@drawable/ic_universal_contactless_card_symbol" />
@@ -103,18 +104,20 @@
 
     <TextView
         android:id="@+id/action"
-        android:layout_width="278dp"
-        android:layout_height="47dp"
+        android:layout_width="361dp"
+        android:layout_height="42dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:height="30sp"
-        android:gravity="center"
-        android:text="xxxx"
+        android:text="TextView"
         android:textAlignment="center"
         android:textSize="30sp"
-        android:typeface="monospace"
-        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pay"
-        tools:layout_editor_absoluteX="74dp"
-        tools:visibility="invisible" />
+        app:layout_constraintVertical_bias="0.0" />
 
 </android.support.constraint.ConstraintLayout>

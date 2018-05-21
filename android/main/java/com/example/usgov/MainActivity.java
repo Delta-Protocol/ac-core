@@ -1,13 +1,29 @@
 package com.example.usgov;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.nfc.NdefRecord;
+import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
+import android.nfc.NfcAdapter.CreateNdefMessageCallback;
+import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
+
+import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
 import android.os.Handler;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -18,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import android.widget.Toast;
 
 import org.spongycastle.asn1.*;
 import org.spongycastle.asn1.x9.X9ECParameters;
@@ -43,11 +60,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import java.util.Locale;
 import java.util.Random;
 
 import android.view.inputmethod.InputMethodManager;
@@ -56,6 +75,163 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    boolean bounded;
+    HostCardEmulatorService svc;
+
+    public class smartCardReader implements NfcAdapter.ReaderCallback { // CreateNdefMessageCallback, OnNdefPushCompleteCallback {
+        Activity a;
+        NfcAdapter mNfcAdapter;
+        boolean reading=false;
+        String verb;
+
+
+        boolean is_reading() {
+            return reading;
+        }
+
+        smartCardReader(Activity ac) {
+            a=ac;
+            mNfcAdapter = NfcAdapter.getDefaultAdapter(a);
+            if (mNfcAdapter == null) {
+                Toast.makeText(a, "NFC is not available", Toast.LENGTH_LONG).show();
+//                finish();
+                return;
+            }
+            // Register callback
+            //mNfcAdapter.setNdefPushMessageCallback(this, a);
+        }
+
+        boolean nfc_available() {
+            return mNfcAdapter != null;
+        }
+
+        /*
+        void processIntent(Intent intent) {
+            Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+            // only one message sent during the beam
+            NdefMessage msg = (NdefMessage) rawMsgs[0];
+            // record 0 contains the MIME type, record 1 is the AAR, if present
+            Toast.makeText(a, new String(msg.getRecords()[0].getPayload()), Toast.LENGTH_LONG).show();
+
+        }
+*/
+/*
+https://medium.com/the-almanac/how-to-build-a-simple-smart-card-emulator-reader-for-android-7975fae4040f
+
+HEADER:00-A4-04-00
+CLA: the Class byte is used to indicate to what extent the command complies with the ISO7816, and if so, what kind of “Secure Messaging” will be used. To keep things simple, we will not be using this byte in our example and we will be passing `00` all the time.
+INS: the Instruction byte is used to indicate what method we want to execute, this can be a variety of methods like: `A4` to Select a File or Applet, `B0` to Read a Binary, `D0` to Write a Binary … (see full list of Instructions http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-4_5_basic_organizations.aspx#table11)
+P1 & P2: these two Parameter bytes are used for further customization of the Instruction, they depend on what custom commands the card specifies. Click here for the list of the possible cases
+
+ */
+
+        byte[] APDUCommand(String payload) {
+            int sz=4+1+HostCardEmulatorService.AID.length+payload.length()+1;
+            byte[] r=new byte[sz];
+            r[0]=HostCardEmulatorService.CLA;
+            r[1]=HostCardEmulatorService.INS;
+            r[2]=(byte)0x04;
+            r[3]=(byte)0x00;
+
+            r[4]=(byte)(HostCardEmulatorService.AID.length+payload.length());
+            for (int i=0; i<HostCardEmulatorService.AID.length; ++i) {
+                r[5+i]=HostCardEmulatorService.AID[i];
+            }
+            byte p[]=payload.getBytes();
+            for (int i=0; i<p.length; ++i) {
+                    r[5+HostCardEmulatorService.AID.length+i]=p[i];
+            }
+            r[sz-1]=HostCardEmulatorService.LE;
+            return r;
+        }
+
+
+
+
+        @Override
+        public void onTagDiscovered(Tag tag) {
+            Log.d("usgov", "onTagDiscovered "+tag.toString());
+            //1-2673/com.example.usgov D/usgov: onTagDiscovered TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcA]
+
+            //String addr="23TeQWLmU5MUruhZc4SQuXhv6kHa";
+            String addr="";
+            Log.d("usgov", "APDUCommand "+HostCardEmulatorService.ByteArrayToHexString(APDUCommand(addr)));
+            try {
+                IsoDep isoDep = IsoDep.get(tag);
+                isoDep.connect();
+
+
+
+                //00A4040007A0000002471001
+                final byte[] response = isoDep.transceive(APDUCommand(addr));
+                runOnUiThread(new Thread(new Runnable() {
+                    public void run() {
+                        Log.d("usgov","CardResponse: " + Utils.Companion.toHex(response));
+                        //05-17 08:22:26.946 2431-2431/com.example.usgov D/usgov: CardResponse: 6A82
+                    }
+                }));
+                isoDep.close();
+            }
+            catch(IOException e) {
+                Log.d("usgov", "onTagDiscovered "+tag.toString()+ "crashed "+e.getMessage());
+            }
+        }
+
+/*
+        public NdefRecord createMimeRecord(String payload) {
+            NdefRecord mimeRecord = new NdefRecord(
+                    NdefRecord.TNF_MIME_MEDIA ,
+                    "application/com.example.usgov".getBytes(Charset.forName("US-ASCII")),
+                    new byte[0], payload.getBytes(Charset.forName("US-ASCII")));
+            return mimeRecord;
+        }
+        public NdefRecord createAR() {
+            return NdefRecord.createApplicationRecord("com.example.usgov");
+        }
+
+        @Override
+        public NdefMessage createNdefMessage(NfcEvent event) {
+            Toast.makeText(a, "nfc_cb callback createNdefMessage", Toast.LENGTH_LONG).show();
+
+            NdefMessage msg = new NdefMessage(
+                    new NdefRecord[]{
+                            createMimeRecord("A abcdefabcdef"),
+                            createAR()
+                    });
+            return msg;
+        }
+
+*/
+        public void no_intent() {
+            if (!nfc_available()) return;
+            if (reading) {
+                Log.d("ZZZ","no_intent. stop reading");
+                mNfcAdapter.disableReaderMode(a);
+                reading = false;
+                verb="";
+            }
+        }
+
+
+        public void pay_intent(String v, String amount) {
+            if (!nfc_available()) return;
+            if (!reading) {
+                Log.d("ZZZ","pay_intent. start reading");
+                mNfcAdapter.enableReaderMode(a, this, NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, null);
+                reading = true;
+            }
+            verb=v;
+        }
+/*
+        @Override
+        public void onNdefPushComplete(NfcEvent event) {
+            Toast.makeText(a, "onNdefPushComplete", Toast.LENGTH_LONG).show();
+        }
+        */
+    }
+
+    private smartCardReader reader;
+
     private static final SecureRandom secureRandom;
 
     public static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
@@ -109,6 +285,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+/*
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+        }
+        */
+        //Log.d("XXX","calling UpdateControls from onConfigurationChanged");
+        //updateControls();
+    }
+
     public static boolean isAndroidRuntime() {
             final String runtime = System.getProperty("java.runtime.name");
             return runtime != null && runtime.equals("Android Runtime");
@@ -125,6 +316,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
     }
 
+    void constructor() {
+
+    }
+
+    int state=0;
+    void transition_state(int st) {
+        if (st==state) return;
+        state=st;
+        switch (state) {
+            case 0:
+                reader.no_intent();
+                break;
+            case 1: {
+                EditText a = (EditText) findViewById(R.id.amount);
+                reader.pay_intent("Charge", a.getText().toString());
+            }
+                break;
+            case 2: {
+                EditText a = (EditText) findViewById(R.id.amount);
+                reader.pay_intent("Pay", a.getText().toString());
+            }
+                break;
+
+        }
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle astate) {
+        super.onSaveInstanceState(astate);
+        Button balance = (Button) findViewById(R.id.balance);
+        astate.putString("balancelbl", balance.getText().toString());
+        astate.putInt("state", state);
+        EditText a = (EditText) findViewById(R.id.amount);
+        astate.putString("amount", a.getText().toString());
+
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (isAndroidRuntime()) new LinuxSecureRandom(); //Asserts /dev/urandom is ok
 
         setContentView(R.layout.activity_main);
+
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 
@@ -204,7 +435,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //toggleContactless("AA");
 
         Button balance = (Button) findViewById(R.id.balance);
-        balance.setText("balance");
+        if(savedInstanceState != null) {
+            balance.setText(savedInstanceState.getString("balancelbl"));
+        }
+        else {
+            balance.setText("balance");
+        }
         balance.setOnClickListener(this);
 
         final String flog=log;
@@ -221,7 +457,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleContactless("Pay");
+                if (reader.is_reading()) {
+                    transition_state(0);
+                }
+                else {
+                    transition_state(2);
+                }
+                Log.d("XXX","calling UpdateControls from pay onclick");
+                updateControls();
             }
         });
 
@@ -229,7 +472,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         get_paid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleContactless("Charge ");
+                Log.d("XXX","calling UpdateControls from getpaid onclick");
+                updateControls();
+                transition_state(1);
 
             }
         });
@@ -265,7 +510,66 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
 
+        reader=new smartCardReader(this);
+        if(savedInstanceState != null) {
+            balance.setText(savedInstanceState.getString("balancelbl"));
+            transition_state(savedInstanceState.getInt("state"));
+        }
+        else {
+            balance.setText("balance");
+            transition_state(0);
+        }
+        Log.d("XXX","calling UpdateControls from onCreate");
+
+        updateControls();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent mIntent = new Intent(this, HostCardEmulatorService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
+    };
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(bounded) {
+            unbindService(mConnection);
+            bounded = false;
+        }
+    };
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Toast.makeText(MainActivity.this, "Service is disconnected", 1000).show();
+            bounded = false;
+            svc = null;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Toast.makeText(Client.this, "Service is connected", 1000).show();
+            bounded = true;
+            HostCardEmulatorService.LocalBinder mLocalBinder = (HostCardEmulatorService.LocalBinder)service;
+            svc = mLocalBinder.getInstance();
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("XXX","calling UpdateControls from onResume");
+        updateControls();
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("XXX","calling UpdateControls from onPause");
+        updateControls();
+    }
+
 
     public String sign(String msg) {
         return "AN1rKvtbihLRkX6Utv2FjxLfehr43uqZr4eFUDvkZuNxmdjuecmSRmag3YFiXNu5HV8XiAkbERjmyCad1V556GqRLTmutYA5S";
@@ -303,23 +607,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //relay to the other mobile via NFC
     }
 
-    public void toggleContactless(String verb) {
+    //String verb=new String();
+
+    public void updateControls() {
+        boolean r=reader.is_reading();
+Log.d("XXXXXXXX-UpdateControls",""+r);
         EditText a = (EditText) findViewById(R.id.amount);
         TextView action = (TextView) findViewById(R.id.action);
+        action.setText(reader.verb+" " +cash_human.show(a.getText().toString()));
+        findViewById(R.id.amount).setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        findViewById(R.id.contactless_logo).setVisibility(r ? View.VISIBLE : View.INVISIBLE);
+        action.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.get_paid).setVisibility(r ? View.INVISIBLE : View.VISIBLE);
         Button p = (Button) findViewById(R.id.pay);
-        action.setText(verb+" " +a.getText());
-        findViewById(R.id.amount).setVisibility(findViewById(R.id.amount).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        findViewById(R.id.action).setVisibility(findViewById(R.id.action).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        findViewById(R.id.contactless_logo).setVisibility(findViewById(R.id.contactless_logo).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-
-        findViewById(R.id.get_paid).setVisibility(findViewById(R.id.get_paid).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        if (findViewById(R.id.get_paid).getVisibility() == View.VISIBLE)
-            p.setText("PAY");
-        else
+        if (reader.reading) {
             p.setText("CANCEL");
+            findViewById(R.id.get_paid).setEnabled(true);
+            findViewById(R.id.pay).setEnabled(true);
+        }
+        else {
+            p.setText("PAY");
+            if (a.getText().length()==0) {
+                findViewById(R.id.get_paid).setEnabled(false);
+                findViewById(R.id.pay).setEnabled(false);
 
+            } else {
+                findViewById(R.id.get_paid).setEnabled(true);
+                findViewById(R.id.pay).setEnabled(true);
 
+            }
+        }
     }
+
 
     String nodeAddress() {
         return "11.11.11.11";
