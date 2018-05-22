@@ -266,13 +266,15 @@ using namespace us::gov::socket;
 
 struct test_client: client {
 	
-	test_client(int sock){
-
-}
+	test_client(int sock):client(sock) {
+   	}
 
 	virtual void on_connect() override {
 		cout << "connected" << endl;
 	}
+
+
+
 
 };
 
@@ -291,73 +293,65 @@ struct test_server: server {
 			if (d) delete d;
 			server::receive_and_process(c);
 			return true;
-		}
+			}
 		if (!d->completed()) { 
 			cout << "socket: daemon: recv partial datagram. returning to listen pool" << endl;
 			server::receive_and_process(c);
 			return true;
-		}
-		//do something with a complete datagram
-		//cout << d << endl;
-		
+			}
+		//---do something with a complete datagram
+		//---
+		//---
 		delete d;
-
 		server::receive_and_process(c);
 	}
 
-
 	client* create_client(int sock) override {
 		return new test_client(sock);
-	}
-
+		}
 };
 
 
 
 //#include <map>
+#include<chrono>
+using namespace std::chrono_literals;
 
 void testing_socket_communication(){
 	
-	
-
 
 
 	//---create a server
-	test_server s(1059);
+	test_server s(1060);
 	
-	//---run thread
+	//---run server thread
 	thread t(&server::run,  &s);	
 	
+	this_thread::sleep_for(100ms);
 
 	//---client connected with server
-	test_client c();
-	//c.connect("127.0.0.1" , 1059);//localhost
-
+	test_client c(1060);
+	c.connect("localhost",1060,false);
 	
 
 
 	
 
-	//---send a datagram
-	//c.send(1059 , "k");
-	
+
 
 
 	t.join();
 }
 
 
-
-
-
-/*	
-	thread t(&socket::server::run,&s);	
-
-	c.connect(localhost , 1000 );
+/*
+	//---send a datagram
+	//c.send(1059 , "k");
 	
+
 	
 	datagram d;
-	datagram*   r = c.send_recv(d);
+	datagram*   r = c.send_recv(d);             
 	check(*r==d)
 	delete r;
 	
@@ -366,16 +360,5 @@ void testing_socket_communication(){
 
 	t.join();
 */	
-
-
-
-
-
-
-
-
-
-
-
 
 
