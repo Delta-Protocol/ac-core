@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">usgov - cash</string>
+    <string name="app_name">cash</string>
     <string name="action_settings">Settings</string>
     <string name="servicedesc">apdu service</string>
     <string name="aiddescription">aid description</string>
