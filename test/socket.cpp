@@ -259,50 +259,52 @@ void testing_socket_datagram(){
 
 
 
-//using namespace us::gov;
 
 
-struct test_client: us::gov::socket::client {
+using namespace us::gov::socket;
 
 
-	test_client(uint16_t p): port(p)
-	{
-		
+struct test_client: client {
+	
+	test_client(int sock){
+
+}
+
+	virtual void on_connect() override {
+		cout << "connected" << endl;
 	}
- 
 
-	virtual bool process_work(datagram* d) override { 
-		delete d;
-		//create response datagram
-	//	send
-
-
-	}
 };
 
-struct base {
-	base(int a) {
+
+
+
+struct test_server: server {
+
+	test_server(uint16_t port): server(port){} 
+
+
+	bool receive_and_process(client*c) override {
+		datagram* d=c->complete_datagram();
+		if (!d || d->error!=0) {
+			cout << "socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
+			if (d) delete d;
+			server::receive_and_process(c);
+			return true;
+		}
+		if (!d->completed()) { 
+			cout << "socket: daemon: recv partial datagram. returning to listen pool" << endl;
+			server::receive_and_process(c);
+			return true;
+		}
+		//do something with a complete datagram
+		//cout << d << endl;
+		
+		delete d;
+
+		server::receive_and_process(c);
 	}
 
-}:
-
-
-struct derived:base {
-	
-	derived(int a):base(a){
-	}
-}:
-
-
-struct test_server: us::gov::socket::server {
-
-	//--> 9constructor here	
-
-	bool c::receive_and_process(client*c) override {
-		//do stuff here
-		//socket::server(c);
-
-	}
 
 	client* create_client(int sock) override {
 		return new test_client(sock);
@@ -311,49 +313,59 @@ struct test_server: us::gov::socket::server {
 };
 
 
+
+//#include <map>
+
 void testing_socket_communication(){
 	
-	us::gov::socket::datagram d;
-
-	
-	test_server s(1001);
-	s.run();
-
-	//map
-	//thread t(&socket::server::run,&s);
 	
 
 
 
+	//---create a server
+	test_server s(1059);
 	
+	//---run thread
+	thread t(&server::run,  &s);	
 	
 
-	//c.connect(localhost , 1000 . false);
+	//---client connected with server
+	test_client c();
+	//c.connect("127.0.0.1" , 1059);//localhost
+
 	
+
+
 	
-/*	
-	datagram d;
-	datagram*   r = c.send_recv(d);
-	check(*r==d)
-	delete r;
+
+	//---send a datagram
+	//c.send(1059 , "k");
 	
+
+
 	t.join();
-*/	
 }
 
 
 
 
 
+/*	
+	thread t(&socket::server::run,&s);	
+
+	c.connect(localhost , 1000 );
+	
+	
+	datagram d;
+	datagram*   r = c.send_recv(d);
+	check(*r==d)
+	delete r;
+	
+	//map to check if the port doesn't change
 
 
-
-
-
-
-
-
-
+	t.join();
+*/	
 
 
 

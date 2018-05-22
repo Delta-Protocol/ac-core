@@ -47,20 +47,6 @@ bool c::ping() {
 	return send(protocol::ping,"ping");
 }
 
-datagram* c::complete_datagram() {
-	if (!curd) curd=new datagram();
-	if (!curd->recv(sock)) {
-		delete curd;
-		curd=0;
-		return 0;
-	}
-	if (curd->completed()) {
-		auto t=curd;
-		curd=0;
-		return t;
-	}
-	return curd;
-}
 
 bool c::is_slow() const {
 	using namespace std::chrono_literals;

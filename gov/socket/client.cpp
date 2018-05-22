@@ -153,6 +153,23 @@ bool c::send(char d) const {
 	return io::send(sock,d); 
 }
 
+datagram* c::complete_datagram() {
+	if (!curd) curd=new datagram();
+	if (!curd->recv(sock)) {
+		delete curd;
+		curd=0;
+		return 0;
+	}
+	if (curd->completed()) {
+		auto t=curd;
+		curd=0;
+		return t;
+	}
+	return curd;
+}
+
+
+
 bool c::send(datagram* d) const { 
 	if (!sock) {
 		cout << "socket: client: cannot send, sock is 0" << endl;

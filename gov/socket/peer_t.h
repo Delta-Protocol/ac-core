@@ -14,7 +14,6 @@ namespace socket {
 		peer_t();
 		peer_t(int sock);
 		virtual ~peer_t();
-		datagram* complete_datagram();
 		virtual bool process_work(datagram* d) { return false; }
 		static datagram* send_recv(const string&addr, uint16_t port, datagram*d);
 		virtual void ready() override;
@@ -22,7 +21,6 @@ namespace socket {
 		virtual void on_connect() override;
 		
 		daemon* parent{0};
-		datagram* curd{0};
 	};
 }
 }}

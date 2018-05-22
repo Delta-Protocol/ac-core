@@ -39,6 +39,9 @@ namespace socket {
 
 		void dump(ostream& os) const;
 
+		datagram* complete_datagram();
+		datagram* curd{0};
+
 		int sock;
 		mutable string msg;
 		string addr;
