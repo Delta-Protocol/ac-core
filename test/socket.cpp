@@ -204,7 +204,7 @@ void testing_socket_datagram(){
 				a3b.test_payloadString(2, "zz");
 	TestDatagram b3(100, "");
 		b3.test_data( 6 , 6    , 100    ,0,"2fJEMgiNAhGwa6SPD8MK3wyhDCn8",1);
-			TestPayloadString b3b(100, "");         
+			TestPayloadString b3b(100,  "");         
 				b3b.test_payloadString(0, "");
 	TestDatagram c3(65537, "");
 		c3.test_data( 6 , 6    , 1     , 0,"3Z28rsteneYa98hvxR2ReLxP9jW",1);
@@ -299,16 +299,21 @@ struct test_server: server {
 			server::receive_and_process(c);
 			return true;
 			}
+		cout<<"--->Complete datagram here<---"<<endl;
+		TestDatagram z(d);
 		//---do something with a complete datagram
 		//---
 		//---
+		
 		delete d;
 		server::receive_and_process(c);
+
 	}
 
 	client* create_client(int sock) override {
 		return new test_client(sock);
 		}
+
 };
 
 
@@ -333,32 +338,34 @@ void testing_socket_communication(){
 	test_client c(1060);
 	c.connect("localhost",1060,false);
 	
+	datagram d(1060,"stuff in here");
+	c.send(d);
+	cout<<"My input----------------> "<<d.service<<" "<<d.parse_string()<<endl;
 
 
-	
-
-
+	/*datagram *r = c.send_recv(d);
+	if(*r == d){cout<<"They match!"<<endl;} else {cout<<"They don't match!"<<endl;}
+	delete r;*/
 
 
 	t.join();
 }
 
 
-/*
+
 	//---send a datagram
-	//c.send(1059 , "k");
+	
 	
 
 	
-	datagram d;
-	datagram*   r = c.send_recv(d);             
-	check(*r==d)
-	delete r;
+	//datagram d;
+	//datagram*   r = c.send_recv(d);             
+	//check(*r==d)
+	//delete r;
 	
 	//map to check if the port doesn't change
 
 
-	t.join();
-*/	
+	
 
 
