@@ -6,14 +6,7 @@ wallet/libuswallet.so
 walletd/us-walletd
 .idea/*
 */**/.idea/*
-<<<<<<< HEAD
-<<<<<<< HEAD
 test/a.out
-=======
-android_studio/
->>>>>>> 058c42e6c249272f55950e326cdd23dfdeb5e069
-=======
 test/unit_tests
 android_studio/
->>>>>>> eec51288a247d974dcd5dd13339d11f489fd0d09
 

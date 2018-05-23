@@ -7,12 +7,13 @@ using std::cerr;
 #include <string>
 using std::string;
 
+#include <iterator>
+using std::begin;
+using std::end;
+
 #include <cryptopp/hex.h>
 using CryptoPP::HexEncoder;
 using CryptoPP::HexDecoder;
-
-#include <cryptopp/osrng.h>
-using CryptoPP::AutoSeededRandomPool;
 
 #include <cryptopp/cryptlib.h>
 using CryptoPP::BufferedTransformation;
@@ -25,78 +26,58 @@ using CryptoPP::StringSource;
 using CryptoPP::AuthenticatedEncryptionFilter;
 using CryptoPP::AuthenticatedDecryptionFilter;
 
-#include <cryptopp/aes.h>
-using CryptoPP::AES;
-
 #include <cryptopp/gcm.h>
 using CryptoPP::GCM;
-
-#include "assert.h"
-
 
 using namespace us::gov::crypto;
 using namespace std;
 
-typedef us::gov::crypto::SymmetricEncryption c;
+typedef us::gov::crypto::symmetric_encryption c;
 
-void c::runAES(){
-    // The test vectors use both ADATA and PDATA. However,
-    //  as a drop in replacement for older modes such as
-    //  CBC, we only exercise (and need) plain text.
-
-    AutoSeededRandomPool prng;
-
-    CryptoPP::byte key[ AES::DEFAULT_KEYLENGTH ];
-    prng.GenerateBlock( key, sizeof(key) );
-
-    CryptoPP::byte iv[ AES::BLOCKSIZE ];
-    prng.GenerateBlock( iv, sizeof(iv) );    
-
-    const int TAG_SIZE = 12;
-
-    // Plain text
-    string pdata="Authenticated Encryption";
-
-    // Encrypted, with Tag
-    string cipher, encoded;
-
-    // Recovered plain text
-    string rpdata;
+c::symmetric_encryption(){
+    
+    //count of events. Need to change IV each time.
+};
+c::~symmetric_encryption(){};
 
 
-    encoded.clear();
-    StringSource( key, sizeof(key), true,
-        new HexEncoder(
-            new StringSink( encoded )
-        ) // HexEncoder
-    ); // StringSource
-    cout << "key: " << encoded << endl;
+void c::setKey(unsigned char* key, size_t length){
+    
+    // add logic to validate key and return false if fails.
+    std::copy(key, key+length, c::key);
+    
+}
 
-    // Pretty print
-    encoded.clear();
-    StringSource( iv, sizeof(iv), true,
-        new HexEncoder(
-            new StringSink( encoded )
-        ) // HexEncoder
-    ); // StringSource
-    cout << " iv: " << encoded << endl;
+void c::generateKey(){
+    
+    c::prng.GenerateBlock( c::key, sizeof(c::key) );
+   
+}
 
-    cout << endl;
+void c::generateIV(){
+
+    prng.GenerateBlock( c::iv, sizeof(c::iv) );    
+    
+}
+
+bool c::encrypt(const string& plaintext, string& ciphertext, const int TAG_SIZE){
+    
+    //IV should be changed for each message.
+    c::generateIV();
 
 
     try
     {
-        cout << "plain text: " << pdata << endl;
+        cout << "plain text: " << plaintext << endl;
 
         GCM< AES >::Encryption e;
         e.SetKeyWithIV( key, sizeof(key), iv, sizeof(iv) );
-        // e.SpecifyDataLengths( 0, pdata.size(), 0 );
-
-        StringSource( pdata, true,
+        
+        StringSource( plaintext, true,
             new AuthenticatedEncryptionFilter( e,
-                new StringSink( cipher ), false, TAG_SIZE
-            ) // AuthenticatedEncryptionFilter
-        ); // StringSource
+                new StringSink( ciphertext ), false, TAG_SIZE
+            ) 
+        ); 
     }
     catch( CryptoPP::InvalidArgument& e )
     {
@@ -110,25 +91,18 @@ void c::runAES(){
         cerr << e.what() << endl;
         cerr << endl;
     }
+    //maybe iv should be appended using filter
+    //also put in test for cast (check there is null termination)
+    
+    //ciphertext = string(reinterpret_cast<char *>(c::iv), AES::BLOCKSIZE) + ciphertext;
 
 
-    // Pretty print
-    encoded.clear();
-    StringSource( cipher, true,
-        new HexEncoder(
-            new StringSink( encoded )
-        ) // HexEncoder
-    ); // StringSource
-    cout << "cipher text: " << encoded << endl;
+    return true;
 
-    // Attack the first and last byte
-    //if( cipher.size() > 1 )
-    //{
-    // cipher[ 0 ] |= 0x0F;
-    // cipher[ cipher.size()-1 ] |= 0x0F;
-    //}
+}
 
-
+bool c::decrypt(const string& ciphertext, string& plaintext, const int TAG_SIZE){
+    
     try
     {
         GCM< AES >::Decryption d;
@@ -136,7 +110,7 @@ void c::runAES(){
         // d.SpecifyDataLengths( 0, cipher.size()-TAG_SIZE, 0 );
 
         AuthenticatedDecryptionFilter df( d,
-            new StringSink( rpdata ),
+            new StringSink( plaintext ),
             AuthenticatedDecryptionFilter::DEFAULT_FLAGS,
             TAG_SIZE
         ); // AuthenticatedDecryptionFilter
@@ -148,16 +122,15 @@ void c::runAES(){
         //  the DecryptionFilter, we must use a redirector
         //  or manually Put(...) into the filter without
         //  using a StringSource.
-        StringSource( cipher, true,
+        StringSource( ciphertext, true,
             new Redirector( df) //PASS EVERYTHING
         ); // StringSource
 
         // If the object does not throw, here's the only
         //  opportunity to check the data's integrity
         bool b = df.GetLastResult();
-        assert( true == b );
+        //assert( true == b );
 
-        cout << "recovered text: " << rpdata << endl;
     }
     catch( CryptoPP::HashVerificationFilter::HashVerificationFailed& e )
     {
@@ -177,7 +150,13 @@ void c::runAES(){
         cerr << e.what() << endl;
         cerr << endl;
     }
+    return true;
+
 }
+
+
+
+
 
 
 
