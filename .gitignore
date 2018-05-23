@@ -9,3 +9,4 @@ walletd/us-walletd
 test/unit_tests
 android_studio/
 
+*.out

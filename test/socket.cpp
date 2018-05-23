@@ -209,7 +209,7 @@ void testing_socket_datagram(){
 				a3b.test_payloadString(2, "zz");
 	TestDatagram b3(100, "");
 		b3.test_data( 6 , 6    , 100    ,0,"2fJEMgiNAhGwa6SPD8MK3wyhDCn8",1);
-			TestPayloadString b3b(100, "");         
+			TestPayloadString b3b(100,  "");         
 				b3b.test_payloadString(0, "");
 	TestDatagram c3(65537, "");
 		c3.test_data( 6 , 6    , 1     , 0,"3Z28rsteneYa98hvxR2ReLxP9jW",1);
@@ -295,6 +295,7 @@ struct test_server: server {
 			server::receive_and_process(c);
 			return true;
 			}
+
 		//--------------------
 		//-Completed datagrams
 		//--------------------
@@ -326,12 +327,15 @@ struct test_server: server {
 
 		
 		delete d;                                       
+
 		server::receive_and_process(c);
+
 	}
 
 	client* create_client(int sock) override {
 		return new test_client(sock);
 		}
+
 };
 
 
@@ -356,18 +360,22 @@ void testing_socket_communication(){
 
 
 
+
 	//------------------send datagram------
 	datagram d1(10);
 	c.send(d1);
 
+
 	datagram d2(100,12);
 	c.send(d2);
-	
+
 	datagram d3(105, "atlas");
 	c.send(d3);
 
 
 	t.join();
 }
+
+
 
 
