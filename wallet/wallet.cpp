@@ -1,9 +1,9 @@
 #include "wallet.h"
 #include "protocol.h"
 
-using namespace uswallet;
+using namespace us::wallet;
 using namespace std;
-typedef uswallet::wallet c;
+typedef us::wallet::wallet c;
 
 
 c::wallet(const string& datapath, const string& backend_host, uint16_t backend_port):datapath(datapath), backend_host(backend_host), backend_port(backend_port){
@@ -193,7 +193,7 @@ void c::input_accounts_t::dump(ostream& os) const {
 	os << "total withdraw: " << get_withdraw_amount() << endl;
 }
 
-#include <gov/cash/locking_programs/p2pkh.h>
+#include <us/gov/cash/locking_programs/p2pkh.h>
 
 
 void c::send(const cash::tx& t) const {

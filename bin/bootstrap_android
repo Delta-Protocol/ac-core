@@ -7,6 +7,8 @@ if [ -d android_studio ]; then
 	exit 1
 fi
 
+pwd=`pwd`
+
 mkdir android_studio
 cd android_studio
 
@@ -14,15 +16,29 @@ tar -xzf ../android/androidstudio_basic_activity.tgz
 
 cd usgov
 ln -s ../../android/getdeps
-./getdeps
+#./getdeps
 rm build.gradle
 ln -s ../../android/build.gradle
 
+cd gradle/wrapper
+rm gradle-wrapper.properties
+ln -s ../../../../android/gradle-wrapper.properties
+cd ../..
+
+cd app
+cat $pwd/sdk/java/build.gradle.snippet >> build.gradle
+#echo "dependencies { implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar' }" >> build.gradle
+
+sed -i "s/org.jetbrains.kotlin:kotlin-stdlib-jre7/org.jetbrains.kotlin:kotlin-stdlib-jdk7/" build.gradle
+
+echo "dependencies { implementation 'com.google.zxing:core:3.2.0' }" >> build.gradle
+echo "dependencies { implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar' }" >> build.gradle
 
 
-cd app/src/
+cd src/
 rm main -r
 ln -s ../../../../android/main
+
 cd ../..
 
 

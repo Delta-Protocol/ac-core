@@ -1,22 +1,22 @@
 #ifndef USGOV_33de4fece6646b4a064a30507e7a1a35c3b5bcd4dc9c1c87059904e7ac05e335
 #define USGOV_33de4fece6646b4a064a30507e7a1a35c3b5bcd4dc9c1c87059904e7ac05e335
 
-#include <gov/auth.h>
-#include <gov/blockchain.h>
+#include <us/gov/auth.h>
+#include <us/gov/blockchain.h>
 
 #include <vector>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <gov/signal_handler.h>
-#include <gov/crypto/crypto.h>
+#include <us/gov/signal_handler.h>
+#include <us/gov/crypto/crypto.h>
 //#include <blockchain/block.h>
 #include "protocol.h"
 #include <chrono>
 #include <cassert>
 #include <map>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace cash {
 	using namespace std;
 	using socket::datagram;
@@ -152,7 +152,7 @@ static istream& operator >> (istream&is, cash::tx::sigcode_t& t) {
 	return is;
 }
 
-}
+}}
 
 #endif
 

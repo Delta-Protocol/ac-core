@@ -1,12 +1,12 @@
 #ifndef USGOV_1a04abafd244aa56917030342d01e6017e089433f96dd01ee598fed0d91162dd
 #define USGOV_1a04abafd244aa56917030342d01e6017e089433f96dd01ee598fed0d91162dd
 
-#include <gov/net.h>
-#include <gov/auth.h>
+#include <us/gov/net.h>
+#include <us/gov/auth.h>
 #include <iostream>
 #include <vector>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace dfs { //distributed file system
 	using namespace std;
 	typedef auth::peer_t peer_t;
@@ -34,6 +34,7 @@ namespace dfs { //distributed file system
 
 }
 
-}
+}}
+
 #endif
 

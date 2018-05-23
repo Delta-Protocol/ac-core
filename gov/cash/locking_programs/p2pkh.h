@@ -1,9 +1,9 @@
 #ifndef USGOV_a19083e9bc17d9b21b0e176de704d07cf9a659bc3bbe63f95d79e1696df47467
 #define USGOV_a19083e9bc17d9b21b0e176de704d07cf9a659bc3bbe63f95d79e1696df47467
 
-#include <gov/cash/app.h>
+#include <us/gov/cash/app.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace cash {
 
 	struct p2pkh {
@@ -31,7 +31,7 @@ namespace cash {
 */
 
 }
-}
+}}
 
 
 #endif

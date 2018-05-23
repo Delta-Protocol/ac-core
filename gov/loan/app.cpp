@@ -1,12 +1,12 @@
 #include "app.h"
-#include <gov/peer.h>
+#include <us/gov/peer.h>
 #include <thread>
 #include <chrono>
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 
-typedef usgov::loan::app c;
-using namespace usgov;
-using namespace usgov::loan;
+typedef us::gov::loan::app c;
+using namespace us::gov;
+using namespace us::gov::loan;
 using namespace std;
 
 constexpr const char* c::name;
@@ -494,7 +494,7 @@ bool c::process(const tx& t) {
 	return true;
 }
 */
-void usgov::loan::local_delta::to_stream(ostream& os) const {
+void us::gov::loan::local_delta::to_stream(ostream& os) const {
 /*
 	os << accounts.size() << " ";
 	for (auto& i:accounts) {
@@ -505,7 +505,7 @@ void usgov::loan::local_delta::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
-void usgov::loan::local_delta::from_stream(istream& is) {
+void us::gov::loan::local_delta::from_stream(istream& is) {
 /*
 	int n;
 	is >> n;
@@ -521,7 +521,7 @@ void usgov::loan::local_delta::from_stream(istream& is) {
 	b::from_stream(is);
 }
 
-void usgov::loan::delta::to_stream(ostream& os) const {
+void us::gov::loan::delta::to_stream(ostream& os) const {
 /*
 	os << to_hall.size() << " ";
 	for (auto& i:to_hall) {
@@ -536,7 +536,7 @@ void usgov::loan::delta::to_stream(ostream& os) const {
 
 }
 
-delta* usgov::loan::delta::from_stream(istream& is) {
+delta* us::gov::loan::delta::from_stream(istream& is) {
 	delta* g=new delta();
 /*
 	{
@@ -569,7 +569,7 @@ delta* usgov::loan::delta::from_stream(istream& is) {
 
 
 /*
-void usgov::cash::tx::to_stream(ostream& os) const {
+void us::gov::cash::tx::to_stream(ostream& os) const {
 //	os << transition << " " << pubkey << " " << address << endl;
 	os << inputs.size() << endl;
 	for (auto& i:inputs) {
@@ -581,7 +581,7 @@ void usgov::cash::tx::to_stream(ostream& os) const {
 	}
 }
 
-void usgov::cash::tx::from_stream(istream& is, end_t& dest) {
+void us::gov::cash::tx::from_stream(istream& is, end_t& dest) {
 	size_t n;
 	{
 	is >> n;
@@ -600,14 +600,14 @@ void usgov::cash::tx::from_stream(istream& is, end_t& dest) {
 	}
 }
 
-tx* usgov::cash::tx::from_stream(istream& is) {
+tx* us::gov::cash::tx::from_stream(istream& is) {
 	tx*t=new tx();
 	from_stream(is,t->inputs);
 	from_stream(is,t->outputs);
 	return t;
 }
 
-uint64_t usgov::cash::tx::fee() const {
+uint64_t us::gov::cash::tx::fee() const {
 	uint64_t ti=0;
 	for (auto&i:inputs) ti+=i.second;
 	uint64_t to=0;

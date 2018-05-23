@@ -44,19 +44,6 @@
         app:layout_constraintTop_toBottomOf="@+id/balance" />
 
     <Button
-        android:id="@+id/get_paid"
-        android:layout_width="352dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:text="Get Paid"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/amount" />
-
-    <Button
         android:id="@+id/pay"
         android:layout_width="352dp"
         android:layout_height="0dp"
@@ -66,7 +53,7 @@
         android:text="Pay"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/get_paid" />
+        app:layout_constraintTop_toBottomOf="@+id/amount" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
@@ -75,20 +62,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="20dp" />
 
-    <ImageView
-        android:id="@+id/contactless_logo"
-        android:layout_width="279dp"
-        android:layout_height="141dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginStart="75dp"
-        android:layout_marginTop="48dp"
-        android:scaleType="fitXY"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pay"
-        app:srcCompat="@drawable/ic_universal_contactless_card_symbol" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -103,36 +76,132 @@
 
     <TextView
         android:id="@+id/action"
-        android:layout_width="278dp"
-        android:layout_height="47dp"
+        android:layout_width="361dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:height="30sp"
-        android:gravity="center"
-        android:text="xxxx"
+        android:text="TextView"
         android:textAlignment="center"
         android:textSize="30sp"
-        android:typeface="monospace"
-        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pay" />
+
+
+    <ImageView
+        android:id="@+id/qrCode"
+        android:layout_width="217dp"
+        android:layout_height="220dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pay"
-        tools:layout_editor_absoluteX="74dp"
-        tools:visibility="invisible" />
+        app:srcCompat="@android:color/darker_gray" />
+
+    <LinearLayout
+        android:id="@+id/acquire_addr"
+        android:layout_width="251dp"
+        android:layout_height="188dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pay">
+
+        <LinearLayout
+            android:id="@+id/nfc_set"
+            android:layout_width="184dp"
+            android:layout_height="69dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/action">
+
+            <TextView
+                android:id="@+id/tap_label"
+                android:layout_width="52dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:ems="10"
+                android:text="TAP"
+                android:textAlignment="viewEnd"
+                app:layout_constraintStart_toStartOf="@+id/nfc_set"
+                tools:layout_editor_absoluteY="365dp" />
+
+            <ImageView
+                android:id="@+id/contactless_logo"
+                android:layout_width="100dp"
+                android:layout_height="67dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="fitXY"
+                app:layout_constraintBottom_toBottomOf="@+id/nfc_set"
+                app:layout_constraintEnd_toEndOf="@+id/nfc_set"
+                app:layout_constraintHorizontal_bias="0.62"
+                app:layout_constraintStart_toEndOf="@+id/editText"
+                app:layout_constraintTop_toTopOf="@+id/nfc_set"
+                app:srcCompat="@drawable/ic_universal_contactless_card_symbol" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/or_label"
+            android:layout_width="361dp"
+            android:layout_height="42dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="or"
+            android:textAlignment="center"
+            android:textSize="30sp" />
+
+
+        <Button
+            android:id="@+id/scan"
+            android:layout_width="232dp"
+            android:layout_height="52dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="scan recipient address"
+            android:textSize="14sp" />
+
+
+    </LinearLayout>
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="51dp"
+        android:id="@+id/newaddress"
+        android:layout_width="221dp"
         android:layout_height="wrap_content"
-        android:text="TAP"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="368dp" />
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="generate new address"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pay"
+        app:layout_constraintVertical_bias="0.071" />
 
-    <EditText
-        android:id="@+id/nodeaddr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="NodeAddress"
-        tools:layout_editor_absoluteX="28dp"
-        tools:layout_editor_absoluteY="516dp" />
 
 </android.support.constraint.ConstraintLayout>

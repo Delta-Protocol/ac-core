@@ -1,12 +1,13 @@
-#include <gov/auth.h>
-#include <gov/blockchain.h>
-#include <gov/cash.h>
-#include <gov/rep.h>
-#include <gov/signal_handler.h>
-#include <gov/socket/datagram.h>
-#include <gov/blockchain/protocol.h>
+#include <us/gov/auth.h>
+#include <us/gov/blockchain.h>
+#include <us/gov/cash.h>
+#include <us/gov/rep.h>
+#include <us/gov/signal_handler.h>
+#include <us/gov/socket/datagram.h>
+#include <us/gov/blockchain/protocol.h>
 
-using namespace usgov; using namespace std;
+using namespace us::gov;
+using namespace std;
 using socket::datagram;
 
 void sig_handler(int s) {
@@ -167,10 +168,10 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 	return true;
 }
 
-#include <gov/crypto.h>
+#include <us/gov/crypto.h>
 #include <string.h>
 #include <iomanip>
-#include <gov/cfg.h>
+#include <us/gov/cfg.h>
 
 struct cfg: filesystem::cfg {
 	typedef crypto::ec::keys keys_t;
@@ -275,7 +276,7 @@ void shell_echo(thinfo* info) {
 			if (demon.peerd.process_work_sysop(&cli,d)) {
 				continue;
 			}
-			if (d->service!=usgov::protocol::sysop) {
+			if (d->service!=us::gov::protocol::sysop) {
 				delete d;
 				continue;
 			}
@@ -292,7 +293,7 @@ void shell_echo(thinfo* info) {
 	cv22.notify_all();
 }
 
-#include <gov/blockchain/protocol.h>
+#include <us/gov/blockchain/protocol.h>
 
 void open_shell(thinfo& i) {
 	blockchain::peer_t cli(0);
@@ -335,8 +336,8 @@ void open_shell(thinfo& i) {
 //			cout << ".." << endl;
 			break;
 		}
-		datagram* d=new datagram(usgov::protocol::sysop,line);
-//cout << "sending " << usgov::protocol::sysop << " " <<line << endl;
+		datagram* d=new datagram(us::gov::protocol::sysop,line);
+//cout << "sending " << us::gov::protocol::sysop << " " <<line << endl;
 		cli.send(d);
 		{
 		unique_lock<mutex> lock(mx22);
@@ -357,7 +358,7 @@ void open_shell(thinfo& i) {
 }
 
 #include <cstdlib>
-#include <gov/crypto.h>
+#include <us/gov/crypto.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>

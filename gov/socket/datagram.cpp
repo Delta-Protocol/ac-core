@@ -17,11 +17,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <gov/net/os.h>
+#include <us/gov/net/os.h>
 #include "server.h"
 
 using namespace std;
-using namespace usgov::socket;
+using namespace us::gov::socket;
 
 constexpr size_t datagram::h;
 constexpr size_t datagram::maxsize;

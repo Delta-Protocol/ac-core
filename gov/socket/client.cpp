@@ -17,11 +17,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <gov/signal_handler.h>
+#include <us/gov/signal_handler.h>
 
-typedef usgov::socket::client c;
+typedef us::gov::socket::client c;
 using namespace std;
-using namespace usgov::socket;
+using namespace us::gov::socket;
 
 
 c::client():sock(0) {

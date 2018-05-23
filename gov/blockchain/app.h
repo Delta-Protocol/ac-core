@@ -1,18 +1,18 @@
 #ifndef USGOV_ab4c3f8b32c28ebe389cd176419697be221f06c33dafc174ba9b3c3cf56ff3fe
 #define USGOV_ab4c3f8b32c28ebe389cd176419697be221f06c33dafc174ba9b3c3cf56ff3fe
 
-#include <gov/peer.h>
-#include <gov/socket.h>
+#include <us/gov/peer.h>
+#include <us/gov/socket.h>
 
 
 #include <vector>
 #include <cassert>
 #include <thread>
 #include <chrono>
-#include <gov/crypto.h>
+#include <us/gov/crypto.h>
 
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using socket::datagram;
@@ -231,8 +231,7 @@ namespace blockchain {
 			return v;
 		}		
 	};
+}}
 }
-}
-
 #endif
 

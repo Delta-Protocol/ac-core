@@ -10,10 +10,10 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
-#include <gov/net.h>
-#include <gov/crypto/ripemd160.h>
+#include <us/gov/net.h>
+#include <us/gov/crypto/ripemd160.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	using namespace std;
 	struct datagram:vector<uint8_t> {
@@ -44,7 +44,6 @@ namespace socket {
 		bool recv(int sock);
 		bool recv(int sock, int timeout_seconds);
 
-
 		vector<string> parse_strings() const;
 		string parse_string() const;
 		uint16_t parse_uint16() const;
@@ -55,7 +54,7 @@ namespace socket {
 		int error;
 	};
 }
-}
+}}
 
 #endif
 

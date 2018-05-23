@@ -4,8 +4,8 @@
 #include "diff.h"
 
 
-using namespace usgov::blockchain;
-typedef usgov::blockchain::app c;
+using namespace us::gov::blockchain;
+typedef us::gov::blockchain::app c;
 
 //unsigned int c::rng_seed{0};
 diff::hash_t c::last_block_imported{0};
@@ -19,8 +19,8 @@ unsigned int c::get_seed() {
 */
 #include "auth_app.h"
 #include "policies.h"
-#include <gov/cash/app.h>
-#include <gov/rep/app.h>
+#include <us/gov/cash/app.h>
+#include <us/gov/rep/app.h>
 
 
 uint64_t c::delta::merge(local_delta* other) {

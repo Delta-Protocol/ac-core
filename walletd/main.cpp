@@ -1,17 +1,17 @@
-#include <gov/cash.h>
-#include <gov/crypto.h>
+#include <us/gov/cash.h>
+#include <us/gov/crypto.h>
 #include <string>
 #include <chrono>
 #include <thread>
-#include <gov/cash/locking_programs/p2pkh.h>
-#include <gov/cash/tx.h>
-#include <gov/signal_handler.h>
-#include <wallet/wallet.h>
-#include <wallet/daemon.h>
+#include <us/gov/cash/locking_programs/p2pkh.h>
+#include <us/gov/cash/tx.h>
+#include <us/gov/signal_handler.h>
+#include <us/wallet/wallet.h>
+#include <us/wallet/daemon.h>
 #include "args.h"
 
-using namespace uswallet;
-//using namespace usgov;
+using namespace us::wallet;
+
 using namespace std;
 
 
@@ -81,6 +81,10 @@ void help(const params& p, ostream& os=cout) {
 	os << " tx send <tx_b58>" << endl;
 	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
 	os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
+    os << " pair <pubkey> <name>   authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
+    os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
+    os << " list_devices           Show currently paired devices." << endl;
+
 }
 
 
@@ -96,7 +100,7 @@ void run_daemon(const params& p) {
 	d.run();
 }
 
-#include <wallet/protocol.h>
+#include <us/wallet/protocol.h>
 
 
 string parse_options(args_t& args, params& p) {
@@ -211,7 +215,7 @@ void tx(api& wapi, args_t& args, const params& p) {
 	}
 }
 
-#include <wallet/api.h>
+#include <us/wallet/api.h>
 
 int main(int argc, char** argv) {
 	args_t args(argc,argv);
@@ -260,6 +264,19 @@ int main(int argc, char** argv) {
 	}
 	else if (command=="gen_keys") {
 		wapi.gen_keys(cout);
+	}
+	else if (command=="pair") {
+		api::pub_t pub=args.next<api::pub_t>();
+	    auto name=args.next<string>();
+cout << "-- " << name << endl;
+		wapi.pair(pub,name,cout);
+	}
+	else if (command=="unpair") {
+		api::pub_t pub=args.next<api::pub_t>();
+		wapi.unpair(pub,cout);
+	}
+	else if (command=="list_devices") {
+		wapi.list_devices(cout);
 	}
 	else {
 		help(p);

@@ -1,11 +1,11 @@
 #include "daemon.h"
 #include "protocol.h"
 #include "peer_t.h"
-#include <gov/signal_handler.h>
+#include <us/gov/signal_handler.h>
 
-typedef usgov::socket::daemon c;
-using namespace usgov;
-using namespace usgov::socket;
+typedef us::gov::socket::daemon c;
+using namespace us::gov;
+using namespace us::gov::socket;
 using namespace std;
 
 c::daemon():pool(0) {

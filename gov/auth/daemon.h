@@ -1,12 +1,13 @@
 #ifndef USGOV_c487b00055e53547e15c0855b22f83a7c8fb4700de16953d93bac9768cf373a9
 #define USGOV_c487b00055e53547e15c0855b22f83a7c8fb4700de16953d93bac9768cf373a9
 
-#include <gov/peer.h>
+#include <us/gov/peer.h>
 #include "peer_t.h"
-#include <gov/socket.h>
+#include <us/gov/socket.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace auth {
+
 using namespace std;
 
 struct daemon:peer::daemon {
@@ -31,6 +32,7 @@ struct daemon:peer::daemon {
 };
 
 
+}
 }
 }
 

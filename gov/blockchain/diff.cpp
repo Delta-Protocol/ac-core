@@ -2,10 +2,10 @@
 #include "app.h"
 #include <cassert>
 
-using namespace usgov::blockchain;
+using namespace us::gov::blockchain;
 using namespace std;
 
-typedef usgov::blockchain::diff c;
+typedef us::gov::blockchain::diff c;
 
 
 #include <iomanip>
@@ -96,7 +96,7 @@ const c::bucket& c::get_app_guts(int id) const {
 }
 */
 
-#include<gov/likely.h>
+#include<us/gov/likely.h>
 void c::to_stream(ostream& os) const {
 	os << prev << " ";
 //cout << "WRITING prev " << prev << endl;
@@ -214,7 +214,7 @@ void block::hash(unsigned char hash[crypto::double_hash256::OUTPUT_SIZE]) const 
 	h.finalize(hash);
 }
 */
-#include <gov/crypto/base58.h>
+#include <us/gov/crypto/base58.h>
 
 const c::hash_t& c::hash() const {
 //h=false;

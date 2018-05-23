@@ -11,12 +11,12 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
-#include <gov/signal_handler.h>
-#include <gov/net.h>
+#include <us/gov/signal_handler.h>
+#include <us/gov/net.h>
 #include "client.h"
 #include "datagram.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace socket {
 	struct datagram;
 	struct server: signal_handler::callback {
@@ -105,7 +105,7 @@ namespace socket {
 	};
 
 }
-}
+}}
 
 #endif
 

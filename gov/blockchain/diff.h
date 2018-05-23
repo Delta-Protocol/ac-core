@@ -5,15 +5,15 @@
 #include <cassert>
 #include <unordered_map>
 #include <thread>
-#include <gov/socket.h>
-#include <gov/auth.h>
+#include <us/gov/socket.h>
+#include <us/gov/auth.h>
 #include <map>
-#include <gov/crypto/hash.h>
-#include <gov/crypto/ec.h>
+#include <us/gov/crypto/hash.h>
+#include <us/gov/crypto/ec.h>
 #include "app.h"
 #include "signed_data.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using socket::datagram;
@@ -128,7 +128,7 @@ namespace blockchain {
 
 	};
 
-}
+}}
 }
 
 #endif

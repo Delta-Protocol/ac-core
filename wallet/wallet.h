@@ -2,15 +2,15 @@
 #define USGOV_7d0dac324059aa8fa70622923a29506fe6d9689a9cc3e3072571557fe53e03f1
 
 #include <unordered_map>
-#include <gov/cash.h>
-#include <gov/crypto.h>
-#include <gov/cfg.h>
+#include <us/gov/cash.h>
+#include <us/gov/crypto.h>
+#include <us/gov/cfg.h>
 #include <fstream>
 #include <unordered_map>
 
-namespace uswallet {
+namespace us { namespace wallet {
 using namespace std;
-using namespace usgov;
+using namespace us::gov;
 
 struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	wallet(const string& datapath, const string& backend_host, uint16_t backend_port);
@@ -85,7 +85,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	mutable bool need_save{false};
 };
 
-}
+}}
 
 #endif
 

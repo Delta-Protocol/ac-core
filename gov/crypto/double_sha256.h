@@ -6,11 +6,11 @@
 #include <string>
 #include <cassert>
 #include <cstring>
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 #include "sha256.h"
 #include "ripemd160.h"
 
-namespace usgov {
+namespace us { namespace gov {
 namespace crypto {
 using namespace std;
 
@@ -31,6 +31,7 @@ using namespace std;
 
 	};
 
+}
 }}
 
 #endif

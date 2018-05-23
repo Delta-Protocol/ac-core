@@ -19,10 +19,10 @@
 #include <arpa/inet.h>
 #include "datagram.h"
 #include "server.h"
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 
 using namespace std;
-using namespace usgov::socket;
+using namespace us::gov::socket;
 
 bool io::send(int sock, datagram*d) {
 	auto b=d->send(sock);

@@ -1,13 +1,13 @@
 #include "double_sha256.h"
 #include "endian_rw.h"
 #include "base58.h"
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 #include <cstring>
 
-using namespace usgov::crypto;
+using namespace us::gov::crypto;
 using namespace std;
 
-typedef usgov::crypto::double_sha256 c;
+typedef us::gov::crypto::double_sha256 c;
 
 void c::finalize(unsigned char hash[output_size]) {
 	unsigned char buf[sha.output_size];

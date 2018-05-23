@@ -1,14 +1,35 @@
 package com.example.usgov;
 
+import java.io.FileNotFoundException;
+import java.util.Timer;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.nfc.NdefRecord;
+import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
+import android.nfc.NfcAdapter.CreateNdefMessageCallback;
+import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
+
+import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
 import android.os.Handler;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -17,6 +38,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.spongycastle.asn1.*;
 import org.spongycastle.asn1.x9.X9ECParameters;
@@ -42,70 +66,66 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import java.util.Locale;
 import java.util.Random;
+import java.util.TimerTask;
 
 import android.view.inputmethod.InputMethodManager;
 import android.app.Activity;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ImageView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final SecureRandom secureRandom;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import android.graphics.Bitmap;
 
-    public static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
-    public static final ECDomainParameters curve; // The parameters of the secp256k1 curve that Bitcoin uses.
-    static {
-        //if (Utils.isAndroidRuntime()) new LinuxSecureRandom();
-        FixedPointUtil.precompute(curve_params.getG(), 12);
-        curve= new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
-        secureRandom = new SecureRandom();
-    }
+//import com.google.zxing.integration.android.IntentIntegrator;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-    public BigInteger priv;
-    public ECPoint pub;
-    String log="";
 
-    public String convertStreamToString(InputStream is) throws Exception { //1 line
-        log+=";A";
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        log+=";B";
 
-        StringBuilder sb = new StringBuilder();
-        log+=";C";
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            log+=";D";
-            sb.append(line);
-            log+=";E";
-            break;
+public class MainActivity extends AppCompatActivity {
+    boolean bounded;
+    HostCardEmulatorService svc;
+
+    private Button scanButton;
+    private Button pay;
+    private ImageView qrcode;
+    private EditText amount;
+    private Button balance;
+    private Button newaddress;
+    private TextView action;
+//    private ImageView nfc_logo;
+    private LinearLayout acquire_addr;
+
+    private final String balance_button_text="check balance";
+
+    SmartCardReader reader;
+
+    Wallet w;
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+/*
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
         }
-        log+=";F";
-        reader.close();
-        log+=";G";
-        return sb.toString();
-    }
-
-    public String getStringFromFile (File fl) {
-        log+=";1";
-        try {
-            FileInputStream fin = new FileInputStream(fl);
-            log+=";2";
-            String ret = convertStreamToString(fin);
-            log+=";3";
-            //Make sure you close all streams.
-            fin.close();
-            log+=";4";
-            return ret;
-        }
-        catch(Exception e) {
-            log+=";5 "+e.getMessage();
-            return "";//e.getStackTrace().toString();
-        }
+        */
+        //Log.d("XXX","calling UpdateControls from onConfigurationChanged");
+        updateControls();
     }
 
     public static boolean isAndroidRuntime() {
@@ -113,15 +133,69 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return runtime != null && runtime.equals("Android Runtime");
     }
 
-    public static ECPoint publicPointFromPrivate(BigInteger privKey) {
-        /*
-         * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group order,
-         * but that could change in future versions.
-         */
-        if (privKey.bitLength() > curve.getN().bitLength()) {
-            privKey = privKey.mod(curve.getN());
+
+    public enum State {
+        NONE, CHARGE, PAY
+    }
+
+    State state=State.NONE;
+
+    String getVerb() {
+        switch (state) {
+            case NONE:
+                return "NONE";
+            case CHARGE:
+                return "CHARGE";
+            case PAY:
+                return "PAY";
         }
-        return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
+        return "";
+    }
+
+    void transition_state(State st) {
+        if (st==state) return;
+        state=st;
+        switch (state) {
+            case NONE:
+                //reader.no_intent();
+                break;
+            case CHARGE: {
+                //EditText a = (EditText) findViewById(R.id.amount);
+                //reader.pay_intent("Charge", a.getText().toString());
+            }
+                break;
+            case PAY: {
+                //EditText a = (EditText) findViewById(R.id.amount);
+                //reader.pay_intent("Pay", a.getText().toString());
+            }
+            break;
+
+        }
+        updateControls();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle astate) {
+        super.onSaveInstanceState(astate);
+        astate.putString("balancelbl", balance.getText().toString());
+        astate.putInt("state", state.ordinal());
+        EditText a = (EditText) findViewById(R.id.amount);
+        astate.putString("amount", a.getText().toString());
+
+    }
+
+
+    void setBalance(String b) {
+        final String B=b;
+        Log.d("ZZZZZZZZZxxZ",B);
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                balance.setText(cash_human.show(B));
+            }
+        }));
+
+
     }
 
     @Override
@@ -131,83 +205,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (isAndroidRuntime()) new LinuxSecureRandom(); //Asserts /dev/urandom is ok
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        scanButton = (Button) findViewById(R.id.scan);
+        pay = (Button) findViewById(R.id.pay);
+        qrcode = (ImageView) findViewById(R.id.qrCode);
+        amount = (EditText) findViewById(R.id.amount);
+        balance = (Button) findViewById(R.id.balance);
+        action = (TextView) findViewById(R.id.action);
+        acquire_addr =  (LinearLayout) findViewById(R.id.acquire_addr);
+        newaddress= (Button) findViewById(R.id.newaddress);
+
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+
+  //      FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
         //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
 
 
+        try {
+            w = new Wallet(this);
+        }
+        catch(IOException e) {
+            Toast.makeText(MainActivity.this, e.getMessage(), 30000).show();
 
-        String filename = "k";
+        }
 
 
-   //     log="files dir:"+getFilesDir();
 
-        File file = new File(getFilesDir(),filename);
-        if(!file.exists()) {
-            file.getParentFile().mkdirs();
-            try {
-                file.createNewFile();
-            }
-            catch(Exception e) {
-                log+=";EXCEPRT";
-            }
- //           log+=";new file";
-//            if (!file.mkdirs()) {
-  //              //Log.e(LOG_TAG, "Directory not created");
-    //            log+=";Directory not created";
-      //      }
-            ECKeyPairGenerator generator = new ECKeyPairGenerator();
-            ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curve, secureRandom);
-            generator.init(keygenParams);
-            AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
-            ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-            ECPublicKeyParameters pubParams = (ECPublicKeyParameters) keypair.getPublic();
-            priv = privParams.getD();
-            String fileContents = priv.toString();
-    //log+=";"+fileContents.length();
-            FileOutputStream outputStream;
-
-            try {
-                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write(fileContents.getBytes());
-                outputStream.write('\n');
-                outputStream.close();
-                log+=";wrote "+fileContents.getBytes().length;
-                        /*
-                        File file2 = new File(filename);
-                        if(!file2.exists()) {
-                            log += ";file does not exist2";
-                        }
-                        */
-            } catch (Exception e) {
-                log+=e.getMessage();
-            }
-
+        if(savedInstanceState != null) {
+            balance.setText(savedInstanceState.getString("balancelbl"));
         }
         else {
-            log+=";file exists+";
-
-             String content = getStringFromFile(file);
-            log+="+;content "+content;
-            priv=new BigInteger(content);
-            //log+="read: " + priv.toString();
-
+            balance.setText(balance_button_text);
         }
-        //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
-        pub = publicPointFromPrivate(priv);
-    //log=pub.getEncoded(true).toString();
-        //pub=new LazyECPoint(priv);
-        toggleContactless("AA");
+        balance.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               if (balance.getText() == balance_button_text) {
+                   balance.setText("...");
+                   //final Handler handler = new Handler();
+                   Thread thread = new Thread(new Runnable() {
+                       @Override
+                       public void run() {
+                           final String b = w.balance(false);
+                           setBalance(b);
+                           /*
+                           Log.d("ZZZZZZZZZZZZ",b);
+                           handler.post(new Runnable() {
+                               @Override
+                               public void run() {
 
-        Button balance = (Button) findViewById(R.id.balance);
-        balance.setText("balance");
-        balance.setOnClickListener(this);
+                               }
+                           });
+                           */
+                       }
+                   });
 
-        final String flog=log;
+                   thread.start();
 
+               } else {
+                   balance.setText(balance_button_text);
+               }
+
+           }
+       }
+       );
+
+
+
+/*
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -215,35 +282,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setAction("Action", null).show();
             }
         });
-
-        Button pay = (Button) findViewById(R.id.pay);
+*/
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleContactless("Pay");
+                if (state==State.NONE) {
+                    transition_state(State.PAY);
+                }
+                else { //Cancel
+                    transition_state(State.NONE);
+                }
+                Log.d("XXX","calling UpdateControls from pay onclick");
+//                updateControls();
             }
         });
-
+/*
         Button get_paid = (Button) findViewById(R.id.get_paid);
         get_paid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleContactless("Charge ");
+                Log.d("XXX","calling UpdateControls from getpaid onclick");
+                transition_state(State.CHARGE);
 
             }
         });
-
-        Button tap = (Button) findViewById(R.id.tap);
-        pay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                on_tap();
-            }
-        });
-
-
-
-        findViewById(R.id.amount).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+*/
+        amount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
@@ -252,13 +316,220 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+  //      findViewById(R.id.get_paid).setEnabled(false);
+        pay.setEnabled(false);
 
+        amount.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (amount.getText().length()==0) {
+//                    findViewById(R.id.get_paid).setEnabled(false);
+                    pay.setEnabled(false);
+
+                } else {
+  //                  findViewById(R.id.get_paid).setEnabled(true);
+                    pay.setEnabled(true);
+                }
+                return false;
+            }
+        });
+
+
+        reader=new SmartCardReader(this);
+
+        if(savedInstanceState != null) {
+            balance.setText(savedInstanceState.getString("balancelbl"));
+            transition_state(State.values()[savedInstanceState.getInt("state")]);
+        }
+        else {
+            balance.setText(balance_button_text);
+            transition_state(State.NONE);
+        }
+        Log.d("XXX","calling UpdateControls from onCreate");
+
+
+
+        newaddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newaddress.setEnabled(false);
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        w.renew_address();
+                        onnewaddress();
+
+                           /*
+                           Log.d("ZZZZZZZZZZZZ",b);
+                           handler.post(new Runnable() {
+                               @Override
+                               public void run() {
+
+                               }
+                           });
+                           */
+                    }
+                });
+
+                thread.start();
+
+
+
+            }
+        });
+
+
+        qrcode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("address", w.my_address);
+                clipboard.setPrimaryClip(clip);
+                newaddress.setEnabled(true);
+                newaddress.setVisibility(View.VISIBLE);
+                Timer timer=new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        hidenewaddr();
+                    }
+                }, 2*1000);
+
+                Toast.makeText(MainActivity.this, "My address "+w.my_address+" has been copied to the clipboard.", 3000).show();
+            }
+        });
+
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                // start scanning
+                IntentIntegrator intentIntegrator = new IntentIntegrator(MainActivity.this);
+                intentIntegrator.initiateScan();
+
+            }
+        });
+        publish_myaddress();
+
+        updateControls();
     }
+
+    void onnewaddress() {
+        publish_myaddress();
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                newaddress.setVisibility(View.INVISIBLE);
+                updateControls();
+                Toast.makeText(MainActivity.this, "My new address is "+w.my_address+".", 3000).show();
+            }
+        }));
+    }
+
+    void hidenewaddr() {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                if (newaddress.isEnabled()) //dont do anything until the new address arrives
+                    newaddress.setVisibility(View.INVISIBLE);
+            }
+        }));
+    }
+
+    public void sendDataToNFCService(String data){
+        Context context = getApplicationContext();
+        Intent intent = new Intent(context, HostCardEmulatorService.class);
+        intent.putExtra("message",data);
+        context.startService(intent);
+    }
+
+    boolean isValidAddress(String addr) {
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (scanResult != null) {
+            Log.i("SCAN", "scan result: " + scanResult);
+            dopay(scanResult.getContents());
+        } else {
+            Toast.makeText(MainActivity.this, "Sorry, the scan was unsuccessful", 1000).show();
+            Log.e("SCAN", "Sorry, the scan was unsuccessful...");
+        }
+    }
+
+    void deliver_address_from_NFC(String rcpt_address) {
+        dopay(rcpt_address);
+    }
+
+
+    void dopay(String rcpt_address) {
+        if (!isValidAddress(rcpt_address)) {
+            Toast.makeText(MainActivity.this, "Invalid address "+rcpt_address, 6000).show();
+            return;
+        }
+        String am=amount.getText().toString();
+        String tx=w.pay(am,rcpt_address);
+        Toast.makeText(MainActivity.this, "PAYING "+cash_human.show(am)+" to "+rcpt_address, 6000).show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+/*
+        Intent mIntent = new Intent(this, HostCardEmulatorService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);-
+        */
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        /*
+        if(bounded) {
+            unbindService(mConnection);
+            bounded = false;
+        }
+        */
+    };
+/*
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Toast.makeText(MainActivity.this, "Service is disconnected", 1000).show();
+            bounded = false;
+            svc = null;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            //            Toast.makeText(Client.this, "Service is connected", 1000).show();
+            bounded = true;
+            HostCardEmulatorService.LocalBinder mLocalBinder = (HostCardEmulatorService.LocalBinder)service;
+            svc = mLocalBinder.getInstance();
+
+        }
+    };
+*/
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("XXX","calling UpdateControls from onResume");
+        updateControls();
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("XXX","calling UpdateControls from onPause");
+        updateControls();
+    }
+
 
     public String sign(String msg) {
         return "AN1rKvtbihLRkX6Utv2FjxLfehr43uqZr4eFUDvkZuNxmdjuecmSRmag3YFiXNu5HV8XiAkbERjmyCad1V556GqRLTmutYA5S";
     }
-
+/*
     public void on_tap() {
         boolean isPay=findViewById(R.id.get_paid).getVisibility() == View.VISIBLE;
         //pay protocol:
@@ -273,48 +544,90 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // *        *                              *                               * ---tx------>*          *
         // *        *                              *                               *             * -relay-> *
 
-        String amount=
+        //String amount=
 
         //Send to payee a message PAY_INTENT with the amount
-        String msg = "PAY_INTENT " + findViewById(R.id.amount).getText();
+        EditText a = (EditText) findViewById(R.id.amount);
+        String msg = "PAY_INTENT " + a.getText();
         //Send and receive NFC
         String rcptAddress="jGdHCR7xLb33dkAp7JcEu7bwu6g";
         //Send and receive to node
 
-        String msg = "TRANSFER_CASH " + rcptAddress + " " + amount + " " + pub.getEncoded(true).toString();
-        String signature=sign(msg);
+        String msg2 = "TRANSFER_CASH " + rcptAddress + " " + a.getText() + " " + pub.getEncoded(true).toString();
+        String signature=sign(msg2);
         msg+=" "+signature;
 
         //received this transaction from the node
         String signedTx="2SEZqt5m9xFmSAa4cjKQPvRwCEd2YSVxifKAbQP3Ht1ubJH55zcHifq3JtQkP2nieHRVguJi7bE4sZCWpyrXcwfKaMrYK63Kr6mEU4aGpLg454sLdc4iXQ2aJH5CjN6v2LBPfGHUJBEQBQejH8GaJhz2sbeABjczsR2nKcrG61aKg9z5JPVRkLHtgoQatBhbGNqJ2c6GNi2kMPiDVgR1DorRTmjWsNmLH9zqzvfSEytkiN1KWdMVWN4n18aq9ZwL999WvoRucKkD2QT6shirc9zaLn5vNdEQ55m7uqDvtiVjgouL2dgE4HdJfDpsztQrsMqtQvWaxPLgDcK1HWXcbemsbDKT64CtnqdKyfrtkSDLwtps2FSedewbWotzEMybgcjZA88kYySmyno9mX6vGXzKVzWnZspFEG5h9KDHtGXisLQushWE7o1oD7X46q1qy6XvhcBQgF";
         //relay to the other mobile via NFC
     }
+*/
+    //String verb=new String();
 
-    public void toggleContactless(String verb) {
-        EditText a = (EditText) findViewById(R.id.amount);
-        TextView action = (TextView) findViewById(R.id.action);
-        Button p = (Button) findViewById(R.id.pay);
-        action.setText(verb+" " +a.getText());
-        findViewById(R.id.amount).setVisibility(findViewById(R.id.amount).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        findViewById(R.id.action).setVisibility(findViewById(R.id.action).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        findViewById(R.id.contactless_logo).setVisibility(findViewById(R.id.contactless_logo).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
+    public void updateControls() {
+        boolean r=state!=State.NONE;
+//        boolean r=reader.is_reading();
+Log.d("XXXXXXXX-UpdateControls",""+r);
+        amount.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        qrcode.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
 
-        findViewById(R.id.get_paid).setVisibility(findViewById(R.id.get_paid).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        if (findViewById(R.id.get_paid).getVisibility() == View.VISIBLE)
-            p.setText("PAY");
-        else
-            p.setText("CANCEL");
+        action.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
+        acquire_addr.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
+        newaddress.setVisibility(View.INVISIBLE);
+//        findViewById(R.id.get_paid).setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        if (r) {
+            action.setText(getVerb()+" " +cash_human.show(amount.getText().toString()));
+            pay.setText("CANCEL");
+//            findViewById(R.id.get_paid).setEnabled(true);
+            pay.setEnabled(true);
+        }
+        else {
+            pay.setText("PAY");
+            pay.setEnabled(amount.getText().length()!=0);
+        }
+        paintQR();
+        switch(state) {
+            case NONE:
+                reader.disable();
+                break;
+            case PAY:
+                reader.enable();
+                break;
+            case CHARGE:
+                reader.enable();
+                break;
 
+        }
 
     }
 
-    String nodeAddress() {
-        EditText a = (EditText) findViewById(R.id.nodeaddr);
-        return a.getText().toString();
+
+    public void paintQR() {
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try {
+            String txt=getQRtext();
+            if (txt.isEmpty()) txt="-";
+            BitMatrix bitMatrix = multiFormatWriter.encode(txt, BarcodeFormat.QR_CODE, 200, 200);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+            qrcode.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
     }
-    int nodePort() {
-        return 16673;
+
+
+    public String getQRtext() {
+//        String am=amount.getText().toString();
+//        return myaddr+" "+am+" "+getVerb();
+        return w.my_address;
     }
+
+    void publish_myaddress() {
+        sendDataToNFCService(w.my_address);
+    }
+
+
 
 
     public void hideKeyboard(View view) {
@@ -322,56 +635,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    public static final int wallet_base = 0;
 
-    public static final int protocol_balance_query = wallet_base+1;
-    public static final int protocol_dump_query = wallet_base+2;
-    public static final int protocol_new_address_query = wallet_base+3;
-    public static final int protocol_add_address_query = wallet_base+4;
-    public static final int tx_make_p2pkh_query = wallet_base+5;
-    public static final int tx_sign_query = wallet_base+6;
-    public static final int tx_send_query = wallet_base+7;
-    public static final int tx_decode_query = wallet_base+8;
-    public static final int tx_check_query = wallet_base+9;
-
-    public static final int protocol_response = wallet_base+0;
-
-    private String seq;
-    
-
-    String querySeq() {
-        seq = "";
-        final Handler handler = new Handler();
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Socket s = new Socket(nodeAddress(), nodePort());
-                    boolean b11 = s.isClosed();
-                    boolean b12 = s.isConnected();
-                    Datagram d = new Datagram(protocol_seq_query);
-                    d.send(s);
-
-                    boolean b11_2 = s.isClosed();
-                    boolean b12_2 = s.isConnected();
-
-                    String st;
-                    Datagram r = new Datagram();
-                    if (!r.recv(s)) {
-                        s.close();
-                        return;
-                    }
-                    s.close();
-                    if (r.service!=protocol_seq_response) return;
-                    seq = r.parse_string();
-                } catch (IOException e) {
-                }
-            }
-        });
-
-        thread.start();
-    }
-
+/*
     String queryCashAddress() {
         final Handler handler = new Handler();
         Thread thread = new Thread(new Runnable() {
@@ -423,72 +688,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId()) {
-
-            case R.id.balance:
-                Button balance = (Button) findViewById(R.id.balance);
-                if (balance.getText()=="balance") {
-                    balance.setText("...");
-                    final Handler handler = new Handler();
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String signature = "";
-                            try {
-                                Socket s = new Socket(nodeAddress(), nodePort());
-                                boolean b11 = s.isClosed();
-                                boolean b12 = s.isConnected();
-                                String msg = "BALANCE " + pub.getEncoded(true).toString() + " " + signature;
-                                Datagram d = new Datagram(0, msg);
-                                d.send(s);
-
-                                boolean b11_2 = s.isClosed();
-                                boolean b12_2 = s.isConnected();
-
-                                String st;
-                                Datagram r = new Datagram();
-                                if (r.recv(s)) {
-                                    st = r.parse_string();
-                                } else {
-                                    st = "?";
-                                }
-                                boolean b11_3 = s.isClosed();
-                                boolean b12_3 = s.isConnected();
-                                final String stf = st;
-
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Button balance = (Button) findViewById(R.id.balance);
-                                        balance.setText(cash_human.show(stf));
-                                    }
-                                });
-
-                                //output.close();
-                                //out.close();
-                                s.close();
-                            } catch (IOException e) {
-                                //e.printStackTrace();
-                            }
-                        }
-                    });
-
-                    thread.start();
-                }
-                else {
-                    balance.setText("balance");
-                }
-
-
-                break;
-        }
-    }
-
-
+*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

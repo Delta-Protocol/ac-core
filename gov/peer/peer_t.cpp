@@ -2,11 +2,11 @@
 #include "daemon.h"
 #include "protocol.h"
 
-using namespace usgov::peer;
+using namespace us::gov::peer;
 using namespace std;
 using namespace chrono_literals;
 
-typedef usgov::peer::peer_t c;
+typedef us::gov::peer::peer_t c;
 
 constexpr array<const char*,peer_t::num_stages> peer_t::stagestr;
 constexpr array<const char*,2> peer_t::modestr;

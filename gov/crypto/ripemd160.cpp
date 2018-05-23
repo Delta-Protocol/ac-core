@@ -1,13 +1,13 @@
 #include "ripemd160.h"
 #include "base58.h"
 #include "endian_rw.h"
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 #include <cstring>
 
-using namespace usgov::crypto;
+using namespace us::gov::crypto;
 using namespace std;
 
-typedef usgov::crypto::ripemd160 c;
+typedef us::gov::crypto::ripemd160 c;
 
 namespace {
 

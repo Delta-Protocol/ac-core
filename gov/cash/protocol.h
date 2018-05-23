@@ -2,16 +2,16 @@
 #define USGOV_d99aa614ace853bcae148b472d209a4651c9b4bcdd2773e1d531e579bde9ba9c
 
 #include <stdint.h>
-#include <gov/peer/protocol.h>
+#include <us/gov/peer/protocol.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace protocol {
 
 	static constexpr uint16_t cash_base{500};
 	static constexpr uint16_t cash_tx{((cash_base+1)<<2)+evidence_suffix};
 	static constexpr uint16_t cash_query{((cash_base+2)<<2)+query_suffix};
 	static constexpr uint16_t cash_response{((cash_base+3)<<2)+query_suffix};
-}
+}}
 }
 
 #endif

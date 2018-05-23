@@ -1,16 +1,17 @@
 #ifndef USGOV_49e5fff0395fac385e48353d91ae777f7b0ba92baa74a883f127855ad412c9e0
 #define USGOV_49e5fff0395fac385e48353d91ae777f7b0ba92baa74a883f127855ad412c9e0
 
-#include <gov/auth.h>
-#include <gov/blockchain.h>
+#include <us/gov/auth.h>
+#include <us/gov/blockchain.h>
 
 #include <vector>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <gov/signal_handler.h>
-#include <gov/crypto/crypto.h>
-#include <gov/blockchain/diff.h>
+#include <us/gov/socket/datagram.h>
+#include <us/gov/signal_handler.h>
+#include <us/gov/crypto/crypto.h>
+#include <us/gov/blockchain/diff.h>
 #include "protocol.h"
 #include <chrono>
 #include <cassert>
@@ -19,7 +20,7 @@
 #include "tx.h"
 
 
-namespace usgov {
+namespace us { namespace gov {
 namespace cash {
 	using namespace std;
 	using socket::datagram;
@@ -252,7 +253,7 @@ namespace cash {
   nblock_pool::get_block() based on head
   add it to my local blockchain
 */
-}
+}}
 }
 
 

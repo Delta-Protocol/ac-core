@@ -7,9 +7,9 @@
 #include <cassert>
 #include <cstring>
 #include <array>
-#include <gov/likely.h>
+#include <us/gov/likely.h>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace crypto {
 using namespace std;
 
@@ -64,25 +64,26 @@ using namespace std;
 	};
 
 
-	inline ostream& operator << (ostream& os, const usgov::crypto::sha256::value_type& v) {
+	inline ostream& operator << (ostream& os, const us::gov::crypto::sha256::value_type& v) {
 		os << v.to_b58();
 		return os;
 	}
-	inline istream& operator >> (istream& is, const usgov::crypto::sha256::value_type& v) {
+	inline istream& operator >> (istream& is, const us::gov::crypto::sha256::value_type& v) {
 		string s;
 		is >> s;
 		v.from_b58(s);
 		return is;
 	}
 
+}
 }}
 
 
 namespace std {
 
   template <>
-  struct hash<usgov::crypto::sha256::value_type> {
-	size_t operator()(const usgov::crypto::sha256::value_type& k) const {
+  struct hash<us::gov::crypto::sha256::value_type> {
+	size_t operator()(const us::gov::crypto::sha256::value_type& k) const {
 		return *reinterpret_cast<const size_t*>(&k[0]);
 
 	}

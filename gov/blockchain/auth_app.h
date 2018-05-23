@@ -6,14 +6,14 @@
 #include "policies.h"
 //#include "diff.h"
 #include <string>
-#include <gov/crypto/hash.h>
+#include <us/gov/crypto/hash.h>
 #include <map>
 #include <set>
 #include <mutex>
 #include <random>
 #include <unordered_set>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace blockchain {
 
 struct peer_t;
@@ -330,7 +330,7 @@ namespace auth { //blockchain network support, this service is free
 
 
 }
-}
+}}
 }
 #endif
 

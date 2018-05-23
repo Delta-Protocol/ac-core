@@ -3,10 +3,10 @@
 
 #include <string>
 #include <sstream>
-#include <gov/cash.h>
-#include <gov/crypto.h>
+#include <us/gov/cash.h>
+#include <us/gov/crypto.h>
 
-namespace uswallet {
+namespace us { namespace wallet {
 using namespace std;
 
 template<typename T>
@@ -18,13 +18,14 @@ T convert(const string& s) {
 }
 
 template<> string convert(const string& s);
-template<> usgov::cash::tx::sigcode_t convert(const string& s);
-template<> usgov::crypto::ec::keys::priv_t convert(const string& s);
+template<> us::gov::cash::tx::sigcode_t convert(const string& s);
+template<> us::gov::crypto::ec::keys::priv_t convert(const string& s);
 
 
 
 struct args_t {	
 	args_t(int argc, char** argv):argc(argc), argv(argv) {
+        //for (int i=0; i<argc; ++i) cout << argv[i] << endl;
 	}
 	template<typename T>
 	T next() {
@@ -49,6 +50,6 @@ struct args_t {
 };
 
 
-}
+}}
 
 #endif
