@@ -126,15 +126,20 @@ class Uint16 : public TestDatagram {
 class TestPayloadString : public TestDatagram {
    public:
 
-	TestPayloadString(int svc, string init_string):d(svc,init_string) ,payload(init_string){}
+	TestPayloadString(int svc, string init_string):d(svc,init_string) ,payload(init_string){
+
+	cout << "-->" << payload.size() << " " <<   d.parse_string()<< " " <<  endl;
+	}
 	
 	us::gov::socket::datagram d;
 	string payload;
 
-	bool test_payloadString(const int& payload_size , const string& parse_string)
+	bool test_payloadString(const size_t& payload_size , const string& parse_string)
 	{ 
 		if( payload.size()!=payload_size ||  d.parse_string()!= parse_string)
 		{ 
+	cout << payload.size() << " " << payload_size << " " <<   d.parse_string()<< " " <<  parse_string << endl;
+	
 			assert (false);
 		}
 	return true;
@@ -143,7 +148,7 @@ class TestPayloadString : public TestDatagram {
 
 
 
-//......................................................:::::Main Function:::::...........................................	
+
  
 void testing_socket_datagram(){
 
@@ -236,7 +241,6 @@ void testing_socket_datagram(){
 	//test_1(1000);
 	//test_1(13515);
 
-
 	//......2.....
 	//test_2(0,0);
 	//test_2(1,2);
@@ -260,9 +264,7 @@ void testing_socket_datagram(){
 
 
 
-
 using namespace us::gov::socket;
-
 
 struct test_client: client {
 	
@@ -272,13 +274,7 @@ struct test_client: client {
 	virtual void on_connect() override {
 		cout << "connected" << endl;
 	}
-
-
-
-
 };
-
-
 
 
 struct test_server: server {
@@ -287,7 +283,7 @@ struct test_server: server {
 
 
 	bool receive_and_process(client*c) override {
-		datagram* d=c->complete_datagram();
+		datagram* d = c-> complete_datagram();
 		if (!d || d->error!=0) {
 			cout << "socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 			if (d) delete d;
@@ -299,10 +295,37 @@ struct test_server: server {
 			server::receive_and_process(c);
 			return true;
 			}
-		//---do something with a complete datagram
-		//---
-		//---
-		delete d;
+		//--------------------
+		//-Completed datagrams
+		//--------------------
+		cout << d->size() << endl;
+		//TestDatagram ts0(10);
+		//	ts0.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());
+		
+		//-working
+		//TestDatagram td0(100,12);
+		//	td0.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());
+		//		Uint16 tda0(100,12);
+		//			tda0.test_uint16( d->parse_uint16());	
+		
+		//-NOT Working	
+		TestDatagram td1(105, "atlas");
+		td1.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());
+
+
+
+		TestPayloadString tda1(105, "atlas");
+		cout << d->h + d->size() << endl;
+		size_t sz=d->h + d->size();
+		cout << "+> " << d->h<< endl;
+		cout << "+> " << d->size() << " " << endl;
+		cout << "+> " << sz << endl;
+
+		tda1.test_payloadString(  5 , d->parse_string());
+
+
+		
+		delete d;                                       
 		server::receive_and_process(c);
 	}
 
@@ -313,52 +336,38 @@ struct test_server: server {
 
 
 
-//#include <map>
 #include<chrono>
 using namespace std::chrono_literals;
 
 void testing_socket_communication(){
-	
 
-
-	//---create a server
+	//---create a server---
 	test_server s(1060);
 	
-	//---run server thread
+	//---run server thread---
 	thread t(&server::run,  &s);	
 	
 	this_thread::sleep_for(100ms);
 
-	//---client connected with server
-	test_client c(1060);
-	c.connect("localhost",1060,false);
+	//---client connected with server---
+	test_client c( 1060 );
+	c.connect( "localhost", 1060 , false );
 	
 
 
+
+	//------------------send datagram------
+	datagram d1(10);
+	c.send(d1);
+
+	datagram d2(100,12);
+	c.send(d2);
 	
-
-
+	datagram d3(105, "atlas");
+	c.send(d3);
 
 
 	t.join();
 }
-
-
-/*
-	//---send a datagram
-	//c.send(1059 , "k");
-	
-
-	
-	datagram d;
-	datagram*   r = c.send_recv(d);             
-	check(*r==d)
-	delete r;
-	
-	//map to check if the port doesn't change
-
-
-	t.join();
-*/	
 
 
