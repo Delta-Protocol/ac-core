@@ -18,6 +18,7 @@ import org.spongycastle.math.ec.FixedPointUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,19 +31,21 @@ import android.content.ContextWrapper;
 
 public class Wallet {
 
-    public BigInteger priv;
-    public ECPoint pub;
+    private BigInteger priv;
+    private ECPoint pub;
+    public String my_address;
+
     private static final SecureRandom secureRandom;
 
-    public static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
-    public static final ECDomainParameters curve; // The parameters of the secp256k1 curve that Bitcoin uses.
+    private static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
+    private static final ECDomainParameters curve; // The parameters of the secp256k1 curve that Bitcoin uses.
     static {
         //if (Utils.isAndroidRuntime()) new LinuxSecureRandom();
         FixedPointUtil.precompute(curve_params.getG(), 12);
         curve= new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
         secureRandom = new SecureRandom();
     }
-    Context ctx;
+    private Context ctx;
 
     //must be in sync with the c++ master file wallet/protocol.h
     public static final int wallet_base = 0;
@@ -61,23 +64,17 @@ public class Wallet {
 
     public static final int protocol_response = wallet_base+0;
 
-
-    public Wallet(Context ctx_) {
-        ctx=ctx_;
-
+    void setup_keys() throws IOException, FileNotFoundException {
         String filename = "k";
-
-
-        //     log="files dir:"+getFilesDir();
 
         File file = new File(ctx.getFilesDir(),filename);
         if(!file.exists()) {
             file.getParentFile().mkdirs();
-            try {
+    //        try {
                 file.createNewFile();
-            }
-            catch(Exception e) {
-            }
+      //      }
+        //    catch(Exception e) {
+          //  }
             //           log+=";new file";
 //            if (!file.mkdirs()) {
             //              //Log.e(LOG_TAG, "Directory not created");
@@ -94,14 +91,14 @@ public class Wallet {
             //log+=";"+fileContents.length();
             FileOutputStream outputStream;
 
-            try {
+           // try {
                 outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
                 outputStream.write(fileContents.getBytes());
                 outputStream.write('\n');
                 outputStream.close();
-            } catch (Exception e) {
-                Log.d("Wallet",e.getMessage());
-            }
+          //  } catch (Exception e) {
+ //               Log.d("Wallet",e.getMessage());
+          //  }
 
         }
         else {
@@ -110,14 +107,35 @@ public class Wallet {
             priv=new BigInteger(content);
 
         }
-        //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
         pub = publicPointFromPrivate(priv);
-        //log=pub.getEncoded(true).toString();
-        //pub=new LazyECPoint(priv);
-        //toggleContactless("AA");
-
     }
-    public static ECPoint publicPointFromPrivate(BigInteger privKey) {
+
+    public Wallet(Context ctx_) throws IOException, FileNotFoundException {
+        ctx=ctx_;
+        setup_keys();
+        setup_addr();
+    }
+
+    void setup_addr() throws IOException, FileNotFoundException {
+        String filename = "a";
+
+        File file = new File(ctx.getFilesDir(),filename);
+        if(!file.exists()) {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+            FileOutputStream outputStream;
+
+            String addr=new_address();
+            outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(addr.getBytes());
+            outputStream.write('\n');
+            outputStream.close();
+
+        }
+        my_address=getStringFromFile(file);
+    }
+
+    private static ECPoint publicPointFromPrivate(BigInteger privKey) {
         /*
          * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group order,
          * but that could change in future versions.
@@ -162,6 +180,7 @@ public class Wallet {
     }
 
     String pay(String amount, String rcpt_address) {
+
         return "";
     }
 
@@ -189,15 +208,22 @@ public class Wallet {
     }
 
     String ask(int service, String args) {
+        Log.d("Wallet","ask "+args);
         Datagram d=new Datagram(service,args);
         Datagram r=send_recv(d);
         if (r==null) return "?";
         String st;
         st = r.parse_string();
+        Log.d("Wallet","ans "+st);
         return st;
+    }
+    void renew_address() {
+        my_address=new_address();
     }
 
     String balance(boolean detailed) {
         return ask(protocol_balance_query,detailed?"1":"0");
+    }
+    String new_address() { return ask(protocol_new_address_query,"");
     }
 }

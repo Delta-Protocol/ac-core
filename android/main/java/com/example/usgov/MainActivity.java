@@ -1,5 +1,7 @@
 package com.example.usgov;
 
+import java.io.FileNotFoundException;
+import java.util.Timer;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -72,6 +74,7 @@ import java.nio.file.Paths;
 
 import java.util.Locale;
 import java.util.Random;
+import java.util.TimerTask;
 
 import android.view.inputmethod.InputMethodManager;
 import android.app.Activity;
@@ -99,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView qrcode;
     private EditText amount;
     private Button balance;
+    private Button newaddress;
     private TextView action;
 //    private ImageView nfc_logo;
     private LinearLayout acquire_addr;
@@ -182,6 +186,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    void setBalance(String b) {
+        final String B=b;
+        Log.d("ZZZZZZZZZxxZ",B);
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                balance.setText(cash_human.show(B));
+            }
+        }));
+
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -197,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
         balance = (Button) findViewById(R.id.balance);
         action = (TextView) findViewById(R.id.action);
         acquire_addr =  (LinearLayout) findViewById(R.id.acquire_addr);
+        newaddress= (Button) findViewById(R.id.newaddress);
 
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
@@ -206,7 +223,14 @@ public class MainActivity extends AppCompatActivity {
         //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
 
 
-        w=new Wallet(this);
+        try {
+            w = new Wallet(this);
+        }
+        catch(IOException e) {
+            Toast.makeText(MainActivity.this, e.getMessage(), 30000).show();
+
+        }
+
 
 
         if(savedInstanceState != null) {
@@ -220,17 +244,21 @@ public class MainActivity extends AppCompatActivity {
            public void onClick(View view) {
                if (balance.getText() == balance_button_text) {
                    balance.setText("...");
-                   final Handler handler = new Handler();
+                   //final Handler handler = new Handler();
                    Thread thread = new Thread(new Runnable() {
                        @Override
                        public void run() {
                            final String b = w.balance(false);
+                           setBalance(b);
+                           /*
+                           Log.d("ZZZZZZZZZZZZ",b);
                            handler.post(new Runnable() {
                                @Override
                                public void run() {
-                                   balance.setText(cash_human.show(b));
+
                                }
                            });
+                           */
                        }
                    });
 
@@ -320,14 +348,55 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.d("XXX","calling UpdateControls from onCreate");
 
+
+
+        newaddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newaddress.setEnabled(false);
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        w.renew_address();
+                        onnewaddress();
+
+                           /*
+                           Log.d("ZZZZZZZZZZZZ",b);
+                           handler.post(new Runnable() {
+                               @Override
+                               public void run() {
+
+                               }
+                           });
+                           */
+                    }
+                });
+
+                thread.start();
+
+
+
+            }
+        });
+
+
         qrcode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("USC address", myaddr);
+                ClipData clip = ClipData.newPlainText("address", w.my_address);
                 clipboard.setPrimaryClip(clip);
+                newaddress.setEnabled(true);
+                newaddress.setVisibility(View.VISIBLE);
+                Timer timer=new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        hidenewaddr();
+                    }
+                }, 2*1000);
 
-                Toast.makeText(MainActivity.this, "My address "+myaddr+" has been copied to the clipboard.", 3000).show();
+                Toast.makeText(MainActivity.this, "My address "+w.my_address+" has been copied to the clipboard.", 3000).show();
             }
         });
 
@@ -341,9 +410,29 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        publish_myaddress("3sfcxXdbfBwYjEKn8gHGyunCCnWY");
+        publish_myaddress();
 
         updateControls();
+    }
+
+    void onnewaddress() {
+        publish_myaddress();
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                newaddress.setVisibility(View.INVISIBLE);
+                updateControls();
+                Toast.makeText(MainActivity.this, "My new address is "+w.my_address+".", 3000).show();
+            }
+        }));
+    }
+
+    void hidenewaddr() {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                if (newaddress.isEnabled()) //dont do anything until the new address arrives
+                    newaddress.setVisibility(View.INVISIBLE);
+            }
+        }));
     }
 
     public void sendDataToNFCService(String data){
@@ -484,6 +573,7 @@ Log.d("XXXXXXXX-UpdateControls",""+r);
 
         action.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
         acquire_addr.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
+        newaddress.setVisibility(View.INVISIBLE);
 //        findViewById(R.id.get_paid).setVisibility(r ? View.INVISIBLE : View.VISIBLE);
         if (r) {
             action.setText(getVerb()+" " +cash_human.show(amount.getText().toString()));
@@ -515,7 +605,9 @@ Log.d("XXXXXXXX-UpdateControls",""+r);
     public void paintQR() {
         MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
         try {
-            BitMatrix bitMatrix = multiFormatWriter.encode(getQRtext(), BarcodeFormat.QR_CODE,200,200);
+            String txt=getQRtext();
+            if (txt.isEmpty()) txt="-";
+            BitMatrix bitMatrix = multiFormatWriter.encode(txt, BarcodeFormat.QR_CODE, 200, 200);
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
             Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
             qrcode.setImageBitmap(bitmap);
@@ -524,17 +616,15 @@ Log.d("XXXXXXXX-UpdateControls",""+r);
         }
     }
 
-    String myaddr="";
 
     public String getQRtext() {
 //        String am=amount.getText().toString();
 //        return myaddr+" "+am+" "+getVerb();
-        return myaddr;
+        return w.my_address;
     }
 
-    void publish_myaddress(String addr) {
-        myaddr=addr;
-        sendDataToNFCService(myaddr);
+    void publish_myaddress() {
+        sendDataToNFCService(w.my_address);
     }
 
 

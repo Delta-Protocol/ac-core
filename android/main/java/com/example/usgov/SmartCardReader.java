@@ -108,7 +108,7 @@ P1 & P2: these two Parameter bytes are used for further customization of the Ins
                     }));
                 }
             }
-            Log.d("SmartCardReader","CardResponse: " + Utils.Companion.toHex(response));
+            Log.d("SmartCardReader","CardResponse: " + HostCardEmulatorService.ByteArrayToHexString(response));
             /*
             */
             isoDep.close();
