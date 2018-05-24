@@ -245,7 +245,6 @@ public class MainActivity extends AppCompatActivity {
                        public void run() {
                            final String b = w.balance(false);
                            setBalance(b);
-dopay(w.my_address);
                            /*
                            Log.d("ZZZZZZZZZZZZ",b);
                            handler.post(new Runnable() {
