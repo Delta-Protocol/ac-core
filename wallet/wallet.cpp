@@ -278,7 +278,7 @@ pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t&
     return move(ret);
 }
 
-pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
+pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) { //non-empty first means error
         pair<string,cash::tx> ret;
         cash::tx& t=ret.second;
 
@@ -289,7 +289,10 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
 			ret.first="no inputs";
 			return move(ret);
 		}
-		assert(input_accounts.get_withdraw_amount()==i.amount+i.fee);
+		if(input_accounts.get_withdraw_amount()!=i.amount+i.fee) {
+			ret.first="Failed amounts check";
+            return move(ret);
+        }
 
 		t.parent_block=input_accounts.parent_block;
 		t.inputs.reserve(input_accounts.size());
@@ -297,8 +300,11 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
 			t.add_input(i.address, i.balance, i.withdraw_amount);
 		}
 		t.add_output(i.rcpt_addr, i.amount, cash::p2pkh::locking_program_hash);
-		if (!t.check()) {
-			ret.first="Failed check";
+        auto fee=t.check();
+    	if (fee<1) { //TODO
+            ostringstream err;
+            err << "Failed check. fees are " << fee;
+			ret.first=err.str();
 			return move(ret);
 		}
 		if (likely(cash::tx::same_sigmsg_across_inputs(sigcodes))) {
@@ -319,7 +325,7 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
 
 		if (i.sendover) {
 			send(t);
-			cout << "sent." << endl;
+//			cout << "sent." << endl;
 		}
 
         return move(ret);

@@ -311,8 +311,9 @@ c::value_type c::value_type::from_b58(const string& s) {
 	value_type k;
 	vector<unsigned char> v;
 	if (unlikely(!b58::decode(s,v))) {
-		cout << "Error reading ripemd, invalid b58 encoding." << endl;
-		exit(1);//todo
+        cout << "Error reading ripemd, invalid b58 encoding. -->" << s << "<--" << endl;
+        k.zero();
+        return k;
 	}
 	if (unlikely(v.size()!=output_size)) { k.zero(); return k; }
 	for (int i=0; i<output_size; ++i) k[i]=v[i]; 
@@ -322,8 +323,9 @@ c::value_type c::value_type::from_b58(const string& s) {
 void c::value_type::set_b58(const string& s) {
 	vector<unsigned char> v;
 	if (unlikely(!b58::decode(s,v))) {
-		cout << "Error reading ripemd, invalid b58 encoding." << endl;
-		exit(1);//todo
+        cout << "Error reading ripemd, invalid b58 encoding. -->" << s << "<--" << endl;
+        zero();
+        return;
 	}
 	if (unlikely(v.size()!=output_size)) { zero(); return; }
 	for (int i=0; i<output_size; ++i) (*this)[i]=v[i]; 

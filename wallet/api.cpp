@@ -127,12 +127,12 @@ void local_api::dump(ostream&os) {
 }
 
 void local_api::new_address(ostream&os) {
-	os << "Address: " << wallet::new_address() << endl;
+	os << wallet::new_address() << endl;
 }
 
 void local_api::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	auto a=wallet::add_address(privkey);
-	os << "Address: " << a << endl;
+	os << a << endl;
 }
 
 void local_api::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream&os) {

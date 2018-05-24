@@ -222,16 +222,7 @@ public class MainActivity extends AppCompatActivity {
 
         //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
 
-
-        try {
-            w = new Wallet(this);
-        }
-        catch(IOException e) {
-            Toast.makeText(MainActivity.this, e.getMessage(), 30000).show();
-
-        }
-
-
+        initWallet();
 
         if(savedInstanceState != null) {
             balance.setText(savedInstanceState.getString("balancelbl"));
@@ -242,6 +233,10 @@ public class MainActivity extends AppCompatActivity {
         balance.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
+               if (w==null) {
+                   Toast.makeText(MainActivity.this, "Wallet is not OK", 6000).show();
+                   return;
+               }
                if (balance.getText() == balance_button_text) {
                    balance.setText("...");
                    //final Handler handler = new Handler();
@@ -250,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
                        public void run() {
                            final String b = w.balance(false);
                            setBalance(b);
+dopay(w.my_address);
                            /*
                            Log.d("ZZZZZZZZZZZZ",b);
                            handler.post(new Runnable() {
@@ -353,12 +349,21 @@ public class MainActivity extends AppCompatActivity {
         newaddress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (w==null) {
+                    Toast.makeText(MainActivity.this, "Wallet is not OK", 6000).show();
+                    return;
+                }
                 newaddress.setEnabled(false);
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        w.renew_address();
-                        onnewaddress();
+                        try {
+                            w.renew_address();
+                            onnewaddress();
+                        }
+                        catch(IOException e) {
+                            onFailNewAddress(e.getMessage());
+                        }
 
                            /*
                            Log.d("ZZZZZZZZZZZZ",b);
@@ -410,9 +415,18 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        publish_myaddress();
 
         updateControls();
+    }
+
+    void onFailNewAddress(final String error) {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                newaddress.setVisibility(View.INVISIBLE);
+                updateControls();
+                Toast.makeText(MainActivity.this, error, 30000).show();
+            }
+        }));
     }
 
     void onnewaddress() {
@@ -446,6 +460,42 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    void WalletInitError(final String what) {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                Toast.makeText(MainActivity.this, what, 30000).show();
+            }
+        }));
+    }
+    void onWalletInitSuccess() {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                publish_myaddress();
+                updateControls();
+            }
+        }));
+    }
+
+    void initWallet() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    w = new Wallet(MainActivity.this);
+                    onWalletInitSuccess();
+                }
+                catch(IOException e) {
+                    WalletInitError(e.getMessage());
+                }
+            }
+        });
+
+        thread.start();
+
+
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -463,14 +513,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void dopay(String rcpt_address) {
+    void dopay(final String rcpt_address) {
         if (!isValidAddress(rcpt_address)) {
             Toast.makeText(MainActivity.this, "Invalid address "+rcpt_address, 6000).show();
             return;
         }
-        String am=amount.getText().toString();
-        String tx=w.pay(am,rcpt_address);
-        Toast.makeText(MainActivity.this, "PAYING "+cash_human.show(am)+" to "+rcpt_address, 6000).show();
+        if (w==null) {
+            Toast.makeText(MainActivity.this, "Wallet is not OK", 6000).show();
+            return;
+        }
+        final String am=amount.getText().toString();
+        final String fee="1";
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String tx=w.pay(am,fee,rcpt_address);
+                onTxCompleted(tx);
+            }
+        });
+
+        thread.start();
+
+
+
+    }
+
+    void onTxCompleted(final String tx) {
+        Log.d("CASH","Tx completed: "+tx);
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                Toast.makeText(MainActivity.this, "transaction is: "+tx, 6000).show();
+            }
+        }));
+
     }
 
     @Override
@@ -569,7 +645,12 @@ public class MainActivity extends AppCompatActivity {
 //        boolean r=reader.is_reading();
 Log.d("XXXXXXXX-UpdateControls",""+r);
         amount.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
-        qrcode.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        if (w==null) {
+            qrcode.setVisibility(View.INVISIBLE);
+        }
+        else {
+            qrcode.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        }
 
         action.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
         acquire_addr.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
@@ -603,9 +684,12 @@ Log.d("XXXXXXXX-UpdateControls",""+r);
 
 
     public void paintQR() {
+        if (w==null) {
+            return;
+        }
         MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
         try {
-            String txt=getQRtext();
+            String txt=w.my_address;
             if (txt.isEmpty()) txt="-";
             BitMatrix bitMatrix = multiFormatWriter.encode(txt, BarcodeFormat.QR_CODE, 200, 200);
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
@@ -617,13 +701,11 @@ Log.d("XXXXXXXX-UpdateControls",""+r);
     }
 
 
-    public String getQRtext() {
-//        String am=amount.getText().toString();
-//        return myaddr+" "+am+" "+getVerb();
-        return w.my_address;
-    }
 
     void publish_myaddress() {
+        if (w==null) {
+            return;
+        }
         sendDataToNFCService(w.my_address);
     }
 

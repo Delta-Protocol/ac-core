@@ -87,7 +87,7 @@ uint16_t datagram::decode_service() const {
 }
 
 bool datagram::completed() const {
-	return !empty() && dend==size();
+	return dend==size() && !empty();
 }
 
 bool datagram::recv(int sock, int timeout_seconds) {

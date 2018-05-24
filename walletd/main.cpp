@@ -246,10 +246,12 @@ int main(int argc, char** argv) {
 	else if (command=="address") {
 		command=args.next<string>();
 		if (command=="new") {
+            cout << "Address: ";
 			wapi.new_address(cout);
 		}
 		else if (command=="add") {
 			crypto::ec::keys::priv_t k=args.next<crypto::ec::keys::priv_t>();
+            cout << "Address: ";
 			wapi.add_address(k,cout);
 		}
 		else {
