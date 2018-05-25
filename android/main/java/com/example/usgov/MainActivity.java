@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.media.MediaPlayer;
 import android.nfc.NdefRecord;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
@@ -644,20 +645,20 @@ public class MainActivity extends AppCompatActivity {
 
     void onTxCompleted(final String tx) {
         Log.d("CASH","Tx completed: "+tx);
-        if (!isTxValid(tx)) {
-            try {
-                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                r.play();
-            } catch (Exception e) {
-                //   e.printStackTrace();
-            }
-            hidegifs();
-            Toast.makeText(MainActivity.this, "Received an indecipherable transaction  : "+tx, Toast.LENGTH_LONG).show();
-            return;
-        }
+        final boolean b=isTxValid(tx);
         runOnUiThread(new Thread(new Runnable() {
             public void run() {
+                if (!b) {
+                    try {
+                        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.error);
+                        mp.start();
+                    } catch (Exception e) {
+                        //   e.printStackTrace();
+                    }
+                    hidegifs();
+                    Toast.makeText(MainActivity.this, "Received an indecipherable transaction  : "+tx, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 //Toast.makeText(MainActivity.this, "transaction is: "+tx, 6000).show();
                 Toast.makeText(MainActivity.this, "transaction sent successfully :)", Toast.LENGTH_LONG).show();
                 try {
@@ -671,7 +672,6 @@ public class MainActivity extends AppCompatActivity {
                 showgif(carlton);
 
                 //qrcode.g setContentView(new gifView(MainActivity.this) );
-
             }
         }));
 
