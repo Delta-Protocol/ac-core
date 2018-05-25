@@ -1,6 +1,7 @@
 package com.example.usgov;
 
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.Timer;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -15,14 +16,20 @@ import android.nfc.NfcEvent;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.nfc.NfcAdapter.OnNdefPushCompleteCallback;
 
+import android.media.RingtoneManager;
+import android.media.Ringtone;
+import android.net.Uri;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import android.os.Build;
 import android.os.Handler;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +39,8 @@ import android.view.View;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import java.io.BufferedReader;
@@ -104,8 +113,10 @@ public class MainActivity extends AppCompatActivity {
     private Button balance;
     private Button newaddress;
     private TextView action;
-//    private ImageView nfc_logo;
+    private pl.droidsonroids.gif.GifImageView carlton;
+    private pl.droidsonroids.gif.GifImageView wait;
     private LinearLayout acquire_addr;
+    private ImageView share;
 
     private final String balance_button_text="check balance";
 
@@ -214,6 +225,11 @@ public class MainActivity extends AppCompatActivity {
         action = (TextView) findViewById(R.id.action);
         acquire_addr =  (LinearLayout) findViewById(R.id.acquire_addr);
         newaddress= (Button) findViewById(R.id.newaddress);
+        carlton=(pl.droidsonroids.gif.GifImageView)findViewById(R.id.carlton);
+        wait=(pl.droidsonroids.gif.GifImageView)findViewById(R.id.wait);
+
+        share=(ImageView)findViewById(R.id.share);
+
 
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
@@ -247,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
                            setBalance(b);
                            /*
                            Log.d("ZZZZZZZZZZZZ",b);
+                           handler.post(new Runnable() {
                            handler.post(new Runnable() {
                                @Override
                                public void run() {
@@ -357,8 +374,12 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            w.renew_address();
-                            onnewaddress();
+                            if (w.renew_address()) {
+                                onnewaddress();
+                            }
+                            else {
+                                onFailNewAddress("Not an address");
+                            }
                         }
                         catch(IOException e) {
                             onFailNewAddress(e.getMessage());
@@ -407,6 +428,7 @@ public class MainActivity extends AppCompatActivity {
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                scanButton.setEnabled(false);
 
                 // start scanning
                 IntentIntegrator intentIntegrator = new IntentIntegrator(MainActivity.this);
@@ -414,6 +436,24 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        carlton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                carlton.setVisibility(View.INVISIBLE);
+                updateControls();
+
+            }
+        });
+        wait.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wait.setVisibility(View.INVISIBLE);
+                updateControls();
+
+            }
+        });
+
 
         updateControls();
     }
@@ -444,6 +484,15 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 if (newaddress.isEnabled()) //dont do anything until the new address arrives
                     newaddress.setVisibility(View.INVISIBLE);
+            }
+        }));
+    }
+    void hidegifs() {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                carlton.setVisibility(View.INVISIBLE);
+                wait.setVisibility(View.INVISIBLE);
+                updateControls();
             }
         }));
     }
@@ -494,13 +543,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void vibrate() {
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (!v.hasVibrator()) return;
+        // Vibrate for 500 milliseconds
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(500,VibrationEffect.DEFAULT_AMPLITUDE));
+        }else{
+            //deprecated in API 26
+            v.vibrate(500);
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
             Log.i("SCAN", "scan result: " + scanResult);
-            dopay(scanResult.getContents());
+            String c=scanResult.getContents();
+            if (c!=null) {
+                dopay(c);
+            }
         } else {
             Toast.makeText(MainActivity.this, "Sorry, the scan was unsuccessful", 1000).show();
             Log.e("SCAN", "Sorry, the scan was unsuccessful...");
@@ -512,22 +575,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void dopay(final String rcpt_address) {
+    boolean dopay(final String rcpt_address) {
+        int am = 0;
+        try {
+            am = Integer.parseInt(amount.getText().toString());
+        } catch (NumberFormatException e) {
+            Toast.makeText(MainActivity.this, "Invalid amount"+amount.getText().toString(), 6000).show();
+            return false;
+        }
+        return dopay(rcpt_address,am,1);
+    }
+
+    boolean dopay(final String rcpt_address, final int amount, final int fee) {
         if (!isValidAddress(rcpt_address)) {
             Toast.makeText(MainActivity.this, "Invalid address "+rcpt_address, 6000).show();
-            return;
+            return false;
         }
         if (w==null) {
             Toast.makeText(MainActivity.this, "Wallet is not OK", 6000).show();
-            return;
+            return false;
         }
-        final String am=amount.getText().toString();
-        final String fee="1";
+        vibrate();
+        hidegifs();
+        showgif(wait);
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                String tx=w.pay(am,fee,rcpt_address);
+                String tx=w.pay(amount,fee,rcpt_address);
                 onTxCompleted(tx);
             }
         });
@@ -535,16 +610,78 @@ public class MainActivity extends AppCompatActivity {
         thread.start();
 
 
+        return true;
+    }
 
+    void showgif(View v) {
+        transition_state(State.NONE);
+        pay.setVisibility(View.INVISIBLE);
+        v.setVisibility(View.VISIBLE);
+        ViewGroup.LayoutParams params=v.getLayoutParams();
+        params.width=MainActivity.this.findViewById(android.R.id.content).getWidth();
+        params.height=MainActivity.this.findViewById(android.R.id.content).getHeight();
+        v.setLayoutParams(params);
+        v.bringToFront();
+
+    }
+
+    boolean isTxValid(String tx) {
+        Log.d("B58","verifying Tx: "+tx);
+        try {
+            byte[] decoded=Base58.decode(tx);
+            Log.d("B58","decoded:"+new String(decoded,"UTF-8"));
+            return decoded.length>0;
+        }
+        catch(Base58.AddressFormatException e) {
+            Log.d("B58","NOPES");
+            return false;
+        }
+        catch(UnsupportedEncodingException e) {
+            Log.d("B58","NOPES wrong UTF8 encoding");
+            return false;
+        }
     }
 
     void onTxCompleted(final String tx) {
         Log.d("CASH","Tx completed: "+tx);
+        if (!isTxValid(tx)) {
+            try {
+                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                r.play();
+            } catch (Exception e) {
+                //   e.printStackTrace();
+            }
+            hidegifs();
+            Toast.makeText(MainActivity.this, "Received an indecipherable transaction  : "+tx, Toast.LENGTH_LONG).show();
+            return;
+        }
         runOnUiThread(new Thread(new Runnable() {
             public void run() {
-                Toast.makeText(MainActivity.this, "transaction is: "+tx, 6000).show();
+                //Toast.makeText(MainActivity.this, "transaction is: "+tx, 6000).show();
+                Toast.makeText(MainActivity.this, "transaction sent successfully :)", Toast.LENGTH_LONG).show();
+                try {
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                    r.play();
+                } catch (Exception e) {
+                 //   e.printStackTrace();
+                }
+                hidegifs();
+                showgif(carlton);
+
+                //qrcode.g setContentView(new gifView(MainActivity.this) );
+
             }
         }));
+
+        Timer timer=new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hidegifs();
+            }
+        }, 5*1000);
 
     }
 
@@ -650,10 +787,13 @@ Log.d("XXXXXXXX-UpdateControls",""+r);
         else {
             qrcode.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
         }
+        pay.setVisibility(View.VISIBLE);
 
         action.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
         acquire_addr.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
         newaddress.setVisibility(View.INVISIBLE);
+        scanButton.setEnabled(true);
+
 //        findViewById(R.id.get_paid).setVisibility(r ? View.INVISIBLE : View.VISIBLE);
         if (r) {
             action.setText(getVerb()+" " +cash_human.show(amount.getText().toString()));

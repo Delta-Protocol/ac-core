@@ -15,8 +15,8 @@ void c::dump_sigcodes(ostream&os) {
 	os << sigcodestr[sigcode_all] << ' ' << sigcodestr[sigcode_none] << ' ' << sigcodestr[sigcode_this] << ' ';
 }
 
-bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount/*, const spend_code_t& spend_code*/) {
-	inputs.push_back(input_t(addr/*,spend_code*/,prev_balance,amount));
+bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount) {
+	inputs.push_back(input_t(addr,prev_balance,amount));
 	return true;
 }
 

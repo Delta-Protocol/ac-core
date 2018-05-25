@@ -52,22 +52,27 @@ public class Wallet {
         public static final int sigcode_none=1;
         public static final int sigcode_this=2;
 
-        public tx_make_p2pkh_input(String rcpt_addr0, String amount0, String fee0, int sigcode_inputs0, int sigcode_outputs0, boolean sendover0) {
+        public tx_make_p2pkh_input(String rcpt_addr0, int amount0, int fee0, int sigcode_inputs0, int sigcode_outputs0, boolean sendover0) {
             rcpt_addr=rcpt_addr0;
             amount=amount0;
-            if (amount.isEmpty()) amount="0";
             fee=fee0;
+            if (amount<1) amount=0;
+            if (fee<1) fee=0;
             sigcode_inputs=sigcode_inputs0;
             sigcode_outputs=sigcode_outputs0;
             sendover=sendover0;
         }
 
         String rcpt_addr;
-        String amount;
-        String fee;
+        int amount;
+        int fee;
         int sigcode_inputs;
         int sigcode_outputs;
         boolean sendover;
+
+        boolean check() {
+            return fee>0 && amount>0 && !rcpt_addr.isEmpty();
+        }
 
         String to_string() {
             return rcpt_addr+" "+amount+" "+fee+" "+sigcode_all+" "+sigcode_all+" "+(sendover?"1":"0");
@@ -195,8 +200,10 @@ public class Wallet {
         return 16673;
     }
 
-    String pay(String amount, String fee, String rcpt_address) {
+    String pay(int amount, int fee, String rcpt_address) {
         tx_make_p2pkh_input i=new tx_make_p2pkh_input(rcpt_address,amount,fee,tx_make_p2pkh_input.sigcode_all,tx_make_p2pkh_input.sigcode_all,true);
+        if (!i.check()) return "Error: Invalid input data";
+
         String args=i.to_string();
         Log.d("Wallet","Pay order "+args);
 
@@ -256,8 +263,22 @@ public class Wallet {
         Log.d("Wallet","ans "+st);
         return st.trim();
     }
-    void renew_address()throws IOException {
-        my_address=new_address();
+    boolean isAddressValid(String addr) {
+        try {
+            byte[] decoded=Base58.decode(addr);
+            return decoded.length>0;
+        }
+        catch(Base58.AddressFormatException e) {
+            return false;
+        }
+    }
+
+    boolean renew_address()throws IOException {
+        String addr=new_address();
+        if (!isAddressValid(addr)) {
+            return false;
+        }
+        my_address=addr;
 
         String filename = "a";
         File file = new File(ctx.getFilesDir(),filename);
@@ -268,7 +289,7 @@ public class Wallet {
         outputStream.write(my_address.getBytes());
         outputStream.write('\n');
         outputStream.close();
-
+        return true;
     }
 
     String balance(boolean detailed) {

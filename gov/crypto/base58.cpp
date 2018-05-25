@@ -12,6 +12,8 @@
 #include <string.h>
 #include <vector>
 #include <string>
+#include <us/gov/likely.h>
+
 //#include <boost/variant/apply_visitor.hpp>
 //#include <boost/variant/static_visitor.hpp>
 
@@ -46,8 +48,7 @@ bool decode(const char* psz, std::vector<unsigned char>& vch) {
     while (*psz && !isspace(*psz)) {
         // Decode base58 character
         const char* ch = strchr(pszBase58, *psz);
-        if (ch == NULL)
-            return false;
+        if (ch==0) return false;
         // Apply "b256 = b256 * 58 + ch".
         int carry = ch - pszBase58;
         for (std::vector<unsigned char>::reverse_iterator it = b256.rbegin(); it != b256.rend(); it++) {
@@ -55,16 +56,13 @@ bool decode(const char* psz, std::vector<unsigned char>& vch) {
             *it = carry % 256;
             carry /= 256;
         }
-        assert(carry == 0);
+        if(unlikely(carry != 0)) return false;
         psz++;
     }
     // Skip trailing spaces.
-    while (isspace(*psz))
-        psz++;
-    if (*psz != 0)
-        return false;
-    // Skip leading zeroes in b256.
-    std::vector<unsigned char>::iterator it = b256.begin();
+    while (isspace(*psz)) psz++;
+    if (unlikely(*psz!=0)) return false;
+    std::vector<unsigned char>::iterator it = b256.begin(); // Skip leading zeroes in b256.
     while (it != b256.end() && *it == 0)
         it++;
     // Copy result into output vector.

@@ -2,6 +2,7 @@
 #include "base58.h"
 #include "endian_rw.h"
 #include <us/gov/likely.h>
+#include <us/gov/likely.h>
 #include <cstring>
 
 using namespace us::gov::crypto;
@@ -320,15 +321,17 @@ c::value_type c::value_type::from_b58(const string& s) {
 	return move(k);
 }
 
-void c::value_type::set_b58(const string& s) {
+
+
+bool c::value_type::set_b58(const string& s) {
 	vector<unsigned char> v;
 	if (unlikely(!b58::decode(s,v))) {
-        cout << "Error reading ripemd, invalid b58 encoding. -->" << s << "<--" << endl;
-        zero();
-        return;
+        return false;
 	}
-	if (unlikely(v.size()!=output_size)) { zero(); return; }
-	for (int i=0; i<output_size; ++i) (*this)[i]=v[i]; 
+	if (unlikely(size()!=output_size)) { return false; }
+    memcpy(&(*this)[0],&v[0],output_size);
+//	for (int i=0; i<output_size; ++i) (*this)[i]=v[i]; 
+    return true;
 }
 
 c::value_type c::value_type::from_hex(const string& s) {
