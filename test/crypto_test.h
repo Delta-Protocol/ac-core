@@ -3,6 +3,7 @@
 
 namespace us { namespace test {
 namespace cryptotest {
+    
     bool testing_symmetric_encryption();
 }}}
 

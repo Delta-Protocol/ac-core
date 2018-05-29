@@ -29,49 +29,28 @@ using CryptoPP::AuthenticatedDecryptionFilter;
 #include <cryptopp/gcm.h>
 using CryptoPP::GCM;
 
+#include <vector.h>
+
 using namespace us::gov::crypto;
 using namespace std;
 
 typedef us::gov::crypto::symmetric_encryption c;
 
-c::symmetric_encryption(){
-    
-    //count of events. Need to change IV each time.
-};
-c::~symmetric_encryption(){};
 
 
-void c::setKey(unsigned char* key, size_t length){
-    
-    // add logic to validate key and return false if fails.
-    std::copy(key, key+length, c::key);
-    
-}
-
-void c::generateKey(){
-    
-    c::prng.GenerateBlock( c::key, sizeof(c::key) );
-   
-}
-
-void c::generateIV(){
-
-    prng.GenerateBlock( c::iv, sizeof(c::iv) );    
-    
-}
-
-bool c::encrypt(const string& plaintext, string& ciphertext, const int TAG_SIZE){
-    
-    //IV should be changed for each message.
-    c::generateIV();
+string c::encrypt(const string& plaintext)
+{
+    //we need a new iv for each message that is encrypted with the same key.
+    prng.GenerateBlock(&iv[0],iv.size());
 
 
+    string ciphertext;
     try
     {
         cout << "plain text: " << plaintext << endl;
 
-        GCM< AES >::Encryption e;
-        e.SetKeyWithIV( key, sizeof(key), iv, sizeof(iv) );
+        GCM< AES>::Encryption e;
+        e.SetKeyWithIV( &key[0], key.size(), &iv[0], iv.size() );
         
         StringSource( plaintext, true,
             new AuthenticatedEncryptionFilter( e,
@@ -94,19 +73,27 @@ bool c::encrypt(const string& plaintext, string& ciphertext, const int TAG_SIZE)
     //maybe iv should be appended using filter
     //also put in test for cast (check there is null termination)
     
-    //ciphertext = string(reinterpret_cast<char *>(c::iv), AES::BLOCKSIZE) + ciphertext;
-
-
-    return true;
+    return string(reinterpret_cast<char *>(c::iv), iv.size() + ciphertext;
+    
 
 }
 
-bool c::decrypt(const string& ciphertext, string& plaintext, const int TAG_SIZE){
+string splitIVCiphertext(string ivCiphertext)
+{
+    iv.clear();
+    //iv.push_back(ivCiphertext.)
     
+    return "";
+}
+
+string c::decrypt(const string& ivCiphertext){
+    
+    string ciphertext = splitIVCiphertext(ivCiphertext);
+    string plaintext;
     try
     {
         GCM< AES >::Decryption d;
-        d.SetKeyWithIV( key, sizeof(key), iv, sizeof(iv) );
+        d.SetKeyWithIV( &key[0], key.size(), &iv[0], iv.size() );
         // d.SpecifyDataLengths( 0, cipher.size()-TAG_SIZE, 0 );
 
         AuthenticatedDecryptionFilter df( d,
@@ -150,7 +137,7 @@ bool c::decrypt(const string& ciphertext, string& plaintext, const int TAG_SIZE)
         cerr << e.what() << endl;
         cerr << endl;
     }
-    return true;
+    return plaintext;
 
 }
 

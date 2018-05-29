@@ -29,9 +29,10 @@ using namespace std;
             void setKey(unsigned char* key, size_t length);
             void generateKey();
             void generateIV();
+            int GetKeySize();
             
-            bool encrypt(const string& plaintext, string& ciphertext, const int TAG_SIZE = 12);
-            bool decrypt(const string& ciphertext, string& plaintext, const int TAG_SIZE = 12);
+            string encrypt(const string& plaintext, const unsigned char* key, const unsigned char* iv, const int TAG_SIZE = 12);
+            string decrypt(const string& ciphertext, const unsigned char* key, const unsigned char* iv, const int TAG_SIZE = 12);
         };
 
     

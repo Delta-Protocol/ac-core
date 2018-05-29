@@ -7,23 +7,26 @@
 
 using namespace std;
 typedef us::test::cryptotest t;
+typedef us::gov::crypto c
 
 
-bool test(const string& input, const string& expected ) {
+bool t::test(const string& input, const string& expected ) {
 	
-	//if( us::gov::crypto::daemon::resolve_filename(input) != expected )  {  	 
-		//assert (false);
-	 //}
-  // return true;
-//}
+	
+	if( t:resolve_filename(input) != expected )  {  	 
+		assert (false);
+	 }
+   return true;
+}
 
 bool testing_symmetric_encryption(){
-
+	
+	test_encrypt_decrypt()
 	
 }
 
 bool debugging_symmetric_encryption(){
-	us::gov::crypto::symmetric_encryption s_e;
+	c::symmetric_encryption s_e;
 
 	string plaintext = "encrypt this";
 	string ciphertext = "";
@@ -36,7 +39,46 @@ bool debugging_symmetric_encryption(){
 	return true;
 }
 
-bool test_encrypt(){
-
+bool test_encrypt_decrypt(string plaintext){
+	c::symmetric_encryption s_e;
+	string ciphertext;
+	s_e.generateKey();
+	s_e.encrypt(plaintext,ciphertext);
+	string decodedtext;
+	s_e.decrypt(ciphertext,decodedtext);
+	assert(plaintext==decodedtext);
 }
+
+string get_encrypted_text(string plaintext)
+	c::symmetric_encryption s_e;
+	string ciphertext;
+	s_e.generateKey();
+	s_e.encrypt(plaintext,ciphertext);
+	return ciphertext;
+
+bool test decrypt()
+
+
+//test encrypt+decrypt gives original result
+//test ciphertest different to plaintext
+//test decoded text different to ciphertext
+//test with setting key and generating key.
+//test that it won't run without key set.
+//test that it doesn't decode successfully with the wrong key.
+//test with short string and long string and empty string.
+
+
+//test key generation spread?
+//test that iv is different?
+//test with other tag lengths?
+
+//different strings
+
+//different key gens
+
+//
+
+
+
+
 
