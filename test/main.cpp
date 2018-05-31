@@ -9,12 +9,15 @@ using namespace std;
 int main() {
 
 
-	//testing_split_function(); //dfs
+	//testing_split_function(); //dfs --works!
 	
 
-	//testing_socket_datagram(); //socket
-	testing_socket_communication();
+	//testing_socket_datagram(); //socket --works!
+	//testing_socket_communication(); --frozen
 
+	
+	//testing_wallet_api();
+	
 	exit(0);
 }
 

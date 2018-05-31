@@ -29,7 +29,7 @@ void testing_split_function(){
 	test("/43/gfF/","/4/3//gf/F/");
 	test("/4 3/gf F/","/4/ 3//g/f /F/");
 	test("XbNzrbauge4avou2GSJaeXYti9f","Xb/Nz/rb/au/ge/4a/vo/u2/GS/Ja/eX/Yt/i9/f");
-	test("wWhf4YYacvxDxy4zMJDCPUrcT2","wW/hf/4Y/Ya/cv/xD/xy/4z/MJ/DC/PU/rc/T2");
+	test("wWhf4YYacvxDxy4zMJDCPUrcT2" ,"wW/hf/4Y/Ya/cv/xD/xy/4z/MJ/DC/PU/rc/T2"  );
 	test("Wwg5W8aJ9z2ZMkuGJTwirWo1jmP","Ww/g5/W8/aJ/9z/2Z/Mk/uG/JT/wi/rW/o1/jm/P");
 	test("WVN8wmzwZA8ju2YpyD3zBzRfJJr","WV/N8/wm/zw/ZA/8j/u2/Yp/yD/3z/Bz/Rf/JJ/r");
 	test("wkw9kTEkpruFoJcvPfrWkbP7z7B","wk/w9/kT/Ek/pr/uF/oJ/cv/Pf/rW/kb/P7/z7/B");

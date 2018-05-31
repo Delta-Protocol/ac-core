@@ -10,9 +10,6 @@
 
 using namespace std;
 
-
-
-
 /*                  
 void test_1(int serviceNumber){
 	us::gov::socket::datagram d(serviceNumber);
@@ -88,7 +85,7 @@ class TestDatagram {
    public:
 	TestDatagram(){}
 	
-	TestDatagram(int init_num):d(init_num) {}
+	TestDatagram(int svc):d(svc) {}
 	TestDatagram(int svc, int init_num):d(svc,init_num) {}
 	TestDatagram(int svc, string init_string):d(svc,init_string) {}
 	
@@ -105,7 +102,7 @@ class TestDatagram {
 };
 
 
-class Uint16 : public TestDatagram {
+class Uint16 {//: public TestDatagram {
    public:
 
 	Uint16(int svc, int init_num):d(svc,init_num) {}
@@ -123,14 +120,13 @@ class Uint16 : public TestDatagram {
 };
 
 
-class TestPayloadString : public TestDatagram {
+class TestPayloadString {//: public TestDatagram {
    public:
 
-	TestPayloadString(int svc, string init_string):d(svc,init_string) ,payload(init_string){
-
-	cout << "-->" << payload.size() << " " <<   d.parse_string()<< " " <<  endl;
-	}
+	TestPayloadString(int svc, string init_string):d(svc,init_string) ,payload(init_string){}
 	
+		
+
 	us::gov::socket::datagram d;
 	string payload;
 
@@ -138,12 +134,13 @@ class TestPayloadString : public TestDatagram {
 	{ 
 		if( payload.size()!=payload_size ||  d.parse_string()!= parse_string)
 		{ 
-	cout << payload.size() << " " << payload_size << " " <<   d.parse_string()<< " " <<  parse_string << endl;
-	
 			assert (false);
 		}
 	return true;
-	}		
+	}
+
+	//using TestDatagram::TestDatagram(int svc, string init_string):d(svc,init_string) {}
+			
 };
 
 
@@ -263,8 +260,8 @@ void testing_socket_datagram(){
 
 
 
-
 using namespace us::gov::socket;
+
 
 struct test_client: client {
 	
@@ -280,8 +277,8 @@ struct test_client: client {
 struct test_server: server {
 
 	test_server(uint16_t port): server(port){} 
-
-
+	
+		
 	bool receive_and_process(client*c) override {
 		datagram* d = c-> complete_datagram();
 		if (!d || d->error!=0) {
@@ -296,41 +293,14 @@ struct test_server: server {
 			return true;
 			}
 
-		//--------------------
-		//-Completed datagrams
-		//--------------------
-		cout << d->size() << endl;
-		//TestDatagram ts0(10);
-		//	ts0.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());
-		
-		//-working
-		//TestDatagram td0(100,12);
-		//	td0.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());
-		//		Uint16 tda0(100,12);
-		//			tda0.test_uint16( d->parse_uint16());	
-		
-		//-NOT Working	
-		TestDatagram td1(105, "atlas");
-		td1.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());
+		//---Completed datagram---
 
-
-
-		TestPayloadString tda1(105, "atlas");
-		cout << d->h + d->size() << endl;
-		size_t sz=d->h + d->size();
-		cout << "+> " << d->h<< endl;
-		cout << "+> " << d->size() << " " << endl;
-		cout << "+> " << sz << endl;
-
-		tda1.test_payloadString(  5 , d->parse_string());
-
-
-		
+		//check_received_datagram(*d);
 		delete d;                                       
-
 		server::receive_and_process(c);
-
 	}
+
+	virtual void check_received_datagram(datagram* data)=0;
 
 	client* create_client(int sock) override {
 		return new test_client(sock);
@@ -340,41 +310,70 @@ struct test_server: server {
 
 
 
+			// class      datagram
+struct tests:vector<pair<TestDatagram,datagram>>, test_server {
+	
+	typedef pair<TestDatagram,datagram> td;
+	thread t;
+	
+	//---run server thread---
+	tests():test_server(1060) {
+		thread t(&server::run, &s);//----------------------> 	error
+		this_thread::sleep_for(100ms);
+	}
+
+	~tests() {
+		t.join();
+	}
+
+
+	void test(td& d)
+	{
+		//---client connected with server---
+		test_client c( 1060 );
+		c.connect( "localhost", 1060 , false );
+		current = &d;
+		c.send(d.second);  //-------------------------->  error
+	}
+
+	
+	td* current;
+
+	virtual void check_received_datagram(datagram* data) { //datagram& data) override {
+		datagram* d = data;
+		//datagram* d = d-> complete_datagram();
+
+		current->first.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());	
+	}
+
+
+	void run(){
+		for (auto&d:*this) {
+		test(d);
+		}
+	}
+};
+
+
+
+
 #include<chrono>
 using namespace std::chrono_literals;
 
 void testing_socket_communication(){
 
-	//---create a server---
-	test_server s(1060);
-	
-	//---run server thread---
-	thread t(&server::run,  &s);	
-	
-	this_thread::sleep_for(100ms);
+//	tests i(s);
+//	i.push_back(pair<datagram,TestDatagram>(TestDatagram(100,12), datagram(100,12)));
+/*	i.push_back(pair<datagram,TestDatagram>(TestDatagram(100,12), datagram(100,12)));
+	i.push_back(pair<datagram,TestDatagram>(TestDatagram(100,12), datagram(100,12)));
+*/
 
-	//---client connected with server---
-	test_client c( 1060 );
-	c.connect( "localhost", 1060 , false );
-	
+//	i.run();
 
-
-
-
-	//------------------send datagram------
-	datagram d1(10);
-	c.send(d1);
-
-
-	datagram d2(100,12);
-	c.send(d2);
-
-	datagram d3(105, "atlas");
-	c.send(d3);
-
-
-	t.join();
 }
+
+// --> emeina sto simeio opou exw error ( vlepe panw ) vasika tipote en doulefkei..., na ksanadw ton kwdika apo tin arxi
+
 
 
 
