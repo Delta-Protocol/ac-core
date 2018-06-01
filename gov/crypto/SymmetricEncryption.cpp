@@ -1,4 +1,4 @@
-#include "symmetric_encryption.h"
+#include "SymmetricEncryption.h"
 
 #include <iostream>
 using std::cout;
@@ -29,19 +29,34 @@ using CryptoPP::AuthenticatedDecryptionFilter;
 #include <cryptopp/gcm.h>
 using CryptoPP::GCM;
 
-#include <vector.h>
 
-using namespace us::gov::crypto;
-using namespace std;
-
-typedef us::gov::crypto::symmetric_encryption c;
 
 
 
-string c::encrypt(const string& plaintext)
+using namespace us::gov::crypto;
+
+
+typedef us::gov::crypto::SymmetricEncryption c;
+
+c::SymmetricEncryption(const keys::priv_t privkeyA, const keys::pub_t pubkeyB){
+    SetAgreedKeyValue(privkeyA,pubkeyB);
+}
+
+void c::SetAgreedKeyValue(const keys::priv_t privkeyA, const keys::pub_t pubkeyB)
+{
+    
+    if(secp256k1_ecdh(ec::instance.ctx,key_,&pubkeyB,&privkeyA[0])!=1)
+    {
+        cerr << "Could not create shared secret";
+    } 
+    //implement later
+     //std::copy(key, key+length, c::key);
+}
+
+string c::Encrypt(const string& plaintext)
 {
     //we need a new iv for each message that is encrypted with the same key.
-    prng.GenerateBlock(&iv[0],iv.size());
+    prng_.GenerateBlock(iv_,sizeof(iv_));
 
 
     string ciphertext;
@@ -50,7 +65,7 @@ string c::encrypt(const string& plaintext)
         cout << "plain text: " << plaintext << endl;
 
         GCM< AES>::Encryption e;
-        e.SetKeyWithIV( &key[0], key.size(), &iv[0], iv.size() );
+        e.SetKeyWithIV( key_, sizeof(key_), iv_, sizeof(iv_) );
         
         StringSource( plaintext, true,
             new AuthenticatedEncryptionFilter( e,
@@ -71,29 +86,32 @@ string c::encrypt(const string& plaintext)
         cerr << endl;
     }
     //maybe iv should be appended using filter
-    //also put in test for cast (check there is null termination)
-    
-    return string(reinterpret_cast<char *>(c::iv), iv.size() + ciphertext;
-    
 
+    return string(reinterpret_cast<char *>(iv_), sizeof(iv_)) + ciphertext;
+    
+    
 }
 
-string splitIVCiphertext(string ivCiphertext)
+string c::RetrieveCiphertextAndSetIv(string ivCiphertext)
 {
-    iv.clear();
-    //iv.push_back(ivCiphertext.)
+    int s = sizeof(iv_);
+    string ciphertext = ivCiphertext.substr(s);
     
-    return "";
+    for(int i = 0; i< s; i++){
+        iv_[i]=ivCiphertext[i];
+    }
+    
+    return ciphertext;
 }
 
-string c::decrypt(const string& ivCiphertext){
+string c::Decrypt(const string& ivCiphertext){
     
-    string ciphertext = splitIVCiphertext(ivCiphertext);
+    string ciphertext = RetrieveCiphertextAndSetIv(ivCiphertext);
     string plaintext;
     try
     {
         GCM< AES >::Decryption d;
-        d.SetKeyWithIV( &key[0], key.size(), &iv[0], iv.size() );
+        d.SetKeyWithIV( key_, sizeof(key_), iv_, sizeof(key_) );
         // d.SpecifyDataLengths( 0, cipher.size()-TAG_SIZE, 0 );
 
         AuthenticatedDecryptionFilter df( d,

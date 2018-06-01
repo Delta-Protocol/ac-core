@@ -4,7 +4,7 @@
 #include <us/gov/socket/datagram.h>
 
 #include "crypto_test.h"
-#include <us/gov/crypto/symmetric_encryption.h>
+#include <us/gov/crypto/SymmetricEncryption.h>
 
 using namespace std;
 
@@ -13,7 +13,7 @@ int main() {
 
 
 	testing_split_function(); //dfs
-	testing_symmetric_encryption();
+	TestSymmetricEncryption();
 
 
 	
