@@ -1,4 +1,4 @@
-#include "SymmetricEncryption.h"
+#include "symmetric_encryption.h"
 
 #include <iostream>
 using std::cout;
@@ -36,24 +36,22 @@ using CryptoPP::GCM;
 using namespace us::gov::crypto;
 
 
-typedef us::gov::crypto::SymmetricEncryption c;
+typedef us::gov::crypto::symmetric_encryption c;
 
-c::SymmetricEncryption(const keys::priv_t privkeyA, const keys::pub_t pubkeyB){
-    SetAgreedKeyValue(privkeyA,pubkeyB);
+c::symmetric_encryption(const keys::priv_t priv_key_a, const keys::pub_t pub_key_b){
+    set_agreed_key_value(priv_key_a,pub_key_b);
 }
 
-void c::SetAgreedKeyValue(const keys::priv_t privkeyA, const keys::pub_t pubkeyB)
+void c::set_agreed_key_value(const keys::priv_t priv_key_a, const keys::pub_t pub_key_b)
 {
-    
-    if(secp256k1_ecdh(ec::instance.ctx,key_,&pubkeyB,&privkeyA[0])!=1)
+    if(secp256k1_ecdh(ec::instance.ctx,key_,&pub_key_b,&priv_key_a[0])!=1)
     {
         cerr << "Could not create shared secret";
     } 
-    //implement later
-     //std::copy(key, key+length, c::key);
+  
 }
 
-string c::Encrypt(const string& plaintext)
+string c::encrypt(const string& plaintext)
 {
     //we need a new iv for each message that is encrypted with the same key.
     prng_.GenerateBlock(iv_,sizeof(iv_));
@@ -92,21 +90,21 @@ string c::Encrypt(const string& plaintext)
     
 }
 
-string c::RetrieveCiphertextAndSetIv(string ivCiphertext)
+string c::retrieve_ciphertext_and_set_iv(string iv_ciphertext)
 {
     int s = sizeof(iv_);
-    string ciphertext = ivCiphertext.substr(s);
+    string ciphertext = iv_ciphertext.substr(s);
     
     for(int i = 0; i< s; i++){
-        iv_[i]=ivCiphertext[i];
+        iv_[i]=iv_ciphertext[i];
     }
     
     return ciphertext;
 }
 
-string c::Decrypt(const string& ivCiphertext){
+string c::decrypt(const string& iv_ciphertext){
     
-    string ciphertext = RetrieveCiphertextAndSetIv(ivCiphertext);
+    string ciphertext = retrieve_ciphertext_and_set_iv(iv_ciphertext);
     string plaintext;
     try
     {

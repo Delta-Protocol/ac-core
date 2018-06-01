@@ -19,24 +19,21 @@ namespace crypto {
 
 typedef crypto::ec::keys keys;
 
-    class SymmetricEncryption{
+    class symmetric_encryption{
 
         AutoSeededRandomPool prng_;
         unsigned char key_[AES::DEFAULT_KEYLENGTH];
         unsigned char iv_[ AES::BLOCKSIZE ];
         const int TAG_SIZE = 12;
-        void SetKey(unsigned char* key, size_t length);
-        void GenerateKey();
-        void SetAgreedKeyValue(const keys::priv_t privkA, const keys::pub_t pubkeyB);
-        string RetrieveCiphertextAndSetIv(string ivCiphertext);
+        void set_agreed_key_value(const keys::priv_t priv_key_A, const keys::pub_t pub_key_B);
+        string retrieve_ciphertext_and_set_iv(string ivCiphertext);
         
         public:
             
-            SymmetricEncryption(const keys::priv_t privkeyA, const keys::pub_t pubkeyB);
-            // ~symmetric_encryption();
+            symmetric_encryption(const keys::priv_t priv_key_A, const keys::pub_t pub_key_B);
             
-            string Encrypt(const string& plaintext);
-            string Decrypt(const string& ciphertext);
+            string encrypt(const string& plaintext);
+            string decrypt(const string& ciphertext);
         };
 
     
