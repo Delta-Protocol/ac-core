@@ -9,6 +9,7 @@
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
 #include "args.h"
+#include "fcgi.h"
 
 using namespace us::wallet;
 
@@ -38,6 +39,7 @@ struct params {
         os << "walletd: " << walletd_host << ":" << walletd_port << endl;
     }
 	bool daemon{false};
+    bool fcgi{false};
     string homedir;
     bool offline{false};
 	string backend_host{"localhost"}; uint16_t backend_port{16672};
@@ -66,6 +68,7 @@ void help(const params& p, ostream& os=cout) {
 	    os << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
     }
     os << endl;
+	os << " -fcgi     Run as fast-cgi. [" << (p.fcgi?"yes":"no") << "]" << endl;
     os << "commands are:" << endl;
 	os << " balance [0|1]          Displays the spendable amount." << endl;
 	os << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
@@ -89,6 +92,36 @@ void help(const params& p, ostream& os=cout) {
 
 
 
+
+void error_log(const char* msg) {
+   using namespace std;
+/*
+//   using namespace boost;
+   static std::ofstream error;
+   if(!error.is_open())
+   {
+      error.open("/tmp/errlog", ios_base::out | ios_base::app);
+      error.imbue(locale(error.getloc(), new posix_time::time_facet()));
+   }
+   error << '[' << posix_time::second_clock::local_time() << "] " << msg << endl;
+*/
+}
+
+void run_fcgi(const params& p) {
+   //engine::init(); 
+//   e=new engine("/var/cex",wcerr);
+   //e->add_sample_liquidity(wcerr);
+   try {
+      Fastcgipp::Manager<w3api::fcgi_t> fcgi;
+      fcgi.start();
+      fcgi.join();
+      cerr << "us-wallet fast-cgi initiated normally" << endl;
+   }
+   catch(std::exception& ex) {
+      cerr << ex.what() << endl;
+   }
+//   delete e;
+}
 
 
 void run_daemon(const params& p) {
@@ -127,6 +160,9 @@ string parse_options(args_t& args, params& p) {
         }
         else if (cmd=="-d") {
         	p.daemon=true;
+        }
+        else if (cmd=="-fcgi") {
+        	p.fcgi=true;
         }
         else {
             break;
@@ -222,8 +258,17 @@ int main(int argc, char** argv) {
 	params p;
 	string command=parse_options(args,p);
 
+    if (p.daemon && p.fcgi) {
+        cerr << "-d and -fcgi options are incompatible" << endl;
+        return 1;
+    }
+
     if (p.daemon) {
         run_daemon(p);
+        return 0;
+    }
+    if (p.fcgi) {
+        run_fcgi(p);
         return 0;
     }
 

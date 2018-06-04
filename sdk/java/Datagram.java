@@ -165,19 +165,52 @@ catch(Exception e) {
         return recv(sock);
     }
 */
+/*
+    boolean recv(Socket s, int timeout_secs) {
+        public <C extends SelectableChannel & ReadableByteChannel>byte[]
+        receive(C chan) throws IOException
+        {
+            logger.debug(TAG + " Client Recieving...");
+            try
+            {
+                Selector sel = Selector.open();
+                SelectionKey key = chan.register(sel, SelectionKey.OP_READ);
+                ByteBuffer inputData = ByteBuffer.allocate(1024);
+                long timeout = TIMEOUT;
+                while (inputData.hasRemaining()) {
+                    if (timeout < 0L) {
+                        throw new IOException(String.format("Timed out, %d of %d bytes read", inputData.position(), inputData.limit()));
+                    }
+                    long startTime = System.nanoTime();
+                    sel.select(timeout);
+                    long endTime = System.nanoTime();
+                    timeout -= TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+                    if (sel.selectedKeys().contains(key)) {
+                        chan.read(inputData);
+                    }
+                    sel.selectedKeys().clear();
+                }
+                return inputData.array();
+            } catch (Exception e)
+            {
+                throw new Exception(TAG + " Couldnt receive data from modem: " + e.getMessage());
+            }
+        }
+
+*/
     boolean recv(Socket s) {
         Log.i("usgov","recv");
         try {
 //cout << "datagram::recv " << dend << " " << h << " " << size() << endl;
         //BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
         DataInputStream input = new DataInputStream(s.getInputStream());
-            Log.i("usgov","dend "+String.valueOf(dend));
+        Log.i("usgov","dend "+String.valueOf(dend));
 
         if (dend < h) {
 //cout << "A" << endl;
             //cout << "socket: datagram: recv1" << endl;
             Log.i("usgov","H");
-
+            s.setSoTimeout(3000);
             int nread = input.read(bytes, dend, h - dend); //blocks
 
             Log.d("usgov","nread "+String.valueOf(nread));

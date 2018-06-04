@@ -145,6 +145,7 @@ public class Wallet {
         ctx=ctx_;
         setup_keys();
         setup_addr();
+        setup_walletd_host();
     }
 
     void setup_addr() throws IOException  {
@@ -154,6 +155,30 @@ public class Wallet {
             renew_address();
         }
         my_address=getStringFromFile(file);
+    }
+
+    void setup_walletd_host() throws IOException  {
+        String filename = "n";
+        File file = new File(ctx.getFilesDir(),filename);
+        if(!file.exists()) {
+            Log.d("Wallet","Walletd address file does not exist.");
+            return;
+        }
+        walletdAddress=getStringFromFile(file);
+        Log.d("Wallet","Read walletd address from file."+walletdAddress);
+    }
+
+    void set_walletd_host(String addr) throws IOException {
+        String filename = "n";
+        File file = new File(ctx.getFilesDir(),filename);
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        FileOutputStream outputStream;
+        outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+        outputStream.write(addr.getBytes());
+        outputStream.write('\n');
+        outputStream.close();
+        walletdAddress=getStringFromFile(file);
     }
 
     private static ECPoint publicPointFromPrivate(BigInteger privKey) {
@@ -191,9 +216,10 @@ public class Wallet {
         reader.close();
         return sb.toString();
     }
+    private String walletdAddress="";
 
     String walletd_host() {
-        return "92.51.240.61";
+        return walletdAddress;
     }
 
     int walletd_port() {
@@ -230,19 +256,30 @@ public class Wallet {
 
     public synchronized Datagram send_recv(Datagram d) {
         try {
+            Log.d("Wallet","Connecting to "+walletd_host()+":"+walletd_port());
             Socket s = new Socket(walletd_host(), walletd_port());
-            boolean b11 = s.isClosed();
-            boolean b12 = s.isConnected();
+            Log.d("Wallet","before send - isClosed "+s.isClosed());
+            Log.d("Wallet","before send - isConnected "+s.isConnected());
+            Log.d("Wallet","about to send datagram - length "+d.bytes.length);
+            Log.d("Wallet","about to send datagram - str "+d.parse_string());
+
             d.send(s);
-            boolean b11_2 = s.isClosed();
-            boolean b12_2 = s.isConnected();
+            Log.d("Wallet","after send - isClosed "+s.isClosed());
+            Log.d("Wallet","after send - isConnected "+s.isConnected());
 
             Datagram r=null;
             while (true) {
                 r=complete_datagram(s);
-                if (r!=null) break;
+                if (r==null) break;
+                if (r.completed()) break;
+                Log.d("Wallet", "waiting for datagram " + r.bytes.length);
             }
-            Log.d("Datagram","Received datagram "+r.bytes.length);
+            if (r==null) {
+                Log.d("Wallet", "Received null datagram ");
+            }
+            else {
+                Log.d("Wallet", "Received datagram " + r.bytes.length);
+            }
             s.close();
             return r;
         } catch (IOException e) {
@@ -254,7 +291,7 @@ public class Wallet {
     }
 
     String ask(short service, String args) {
-        Log.d("Wallet","ask "+args);
+        Log.d("Wallet","ask "+service+" " +args);
         Datagram d=new Datagram(service,args);
         Datagram r=send_recv(d);
         if (r==null) return "?";
