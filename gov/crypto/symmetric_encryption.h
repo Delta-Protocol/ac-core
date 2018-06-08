@@ -31,7 +31,7 @@ typedef crypto::ec::keys keys;
         string retrieve_ciphertext_and_set_iv(string);
         template<typename T>
         void set_iv_from_ciphertext(T);
-        string prepend_iv_to_ciphertext(string&);
+        void prepend_iv_to_ciphertext(string&);
         vector<unsigned char> prepend_iv_to_ciphertext(vector<unsigned char>);
         
         public:

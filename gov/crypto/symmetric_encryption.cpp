@@ -64,12 +64,11 @@ string c::encrypt(const string& plaintext){
     //we need a new iv for each message that is encrypted with the same key.
     prng_.GenerateBlock(c::iv_,sizeof(iv_));
 
-    prepend_iv_to_ciphertext(ciphertext);
     GCM<AES>::Encryption e;
     e.SetKeyWithIV(key_, sizeof(key_), iv_, sizeof(iv_));
     
     StringSource(plaintext, true, new AuthenticatedEncryptionFilter(e, new StringSink(ciphertext),false,tag_size_));
-    
+    prepend_iv_to_ciphertext(ciphertext);
     return ciphertext;
 }
 
@@ -93,8 +92,8 @@ void c::set_iv_from_ciphertext(T ciphertext){
     }
 }
 
-string c::prepend_iv_to_ciphertext(string& ciphertext){
-    return string(reinterpret_cast<char *>(iv_), sizeof(iv_)) + ciphertext;
+void c::prepend_iv_to_ciphertext(string& ciphertext){
+    ciphertext = string(reinterpret_cast<char *>(iv_), sizeof(iv_)) + ciphertext;
 }
 
 vector<unsigned char> c::prepend_iv_to_ciphertext(vector<unsigned char> ciphertext){
