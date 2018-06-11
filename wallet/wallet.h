@@ -79,10 +79,32 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
     pair<string,cash::tx> tx_sign(const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
 
 
+    struct nova_reading_input {
+        cash::hash_t compartiment;
+        chrono::time_point ts;
+	int t,p,h,lon,lat;
+        bool sendover;
+
+	void to_stream(ostream&) const;
+	static nova_reading_input from_stream(istream&);
+
+    };
+
+
+    pair<string,nova::ev_load> nova_load(const hash_t& item, const hash_t& compartiment);
+    pair<string,nova::ev_reading> nova_reading(const nova_reading_input& i);
+    pair<string,nova::ev_unload> nova_unload(const hash_t& item);
+
+
+
 	void dump(ostream& os) const;
 	accounts_query_t data;
 	string datapath;
 	mutable bool need_save{false};
+
+
+
+
 };
 
 }}

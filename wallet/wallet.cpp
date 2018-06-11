@@ -255,7 +255,7 @@ pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t&
 	for (auto&i:ret.second.inputs) {
 		auto b=bases.find(i.address);
 		if(b==bases.end()) {
-			cerr << "No such address " << i.address << endl;	
+			cerr << "No such address " << i.address << endl;
 			exit(1);
 		}
 		const cash::app::account_t& src=b->second;
@@ -347,4 +347,28 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 	return move(i);
 }
 
+pair<string,nova::ev_load> c::nova_load(const hash_t& item, const hash_t& compartiment) {
+}
 
+pair<string,nova::ev_reading> c::nova_reading(const nova_reading_input& i) {
+}
+
+pair<string,nova::ev_unload> c::nova_unload(const hash_t& item) {
+}
+
+void c::nova_reading_input::to_stream(ostream& os) const {
+	os << compartiment << ' ' << ts << ' ' << t << ' ' << p << ' ' << h << ' ' << lon << ' ' << lat << ' ' << (sendover?'1':'0');
+}
+
+c::nova_reading_input c::nova_reading_input::from_stream(istream& is) {
+	nova_reading_input i;
+	is >> i.compartiment;
+	is >> i.ts;
+	is >> i.t;
+	is >> i.p;
+	is >> i.h;
+	is >> i.lon;
+	is >> i.lat;
+	is >> i.sendover;
+	return move(i);
+}

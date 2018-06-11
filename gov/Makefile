@@ -1,5 +1,5 @@
 #https://gist.github.com/xuhdev/1873316
-OBJS :=  crypto/crypto.o net/net.o socket/socket.o peer/peer.o dfs/dfs.o blockchain/blockchain.o auth/auth.o cash/cash.o rep/rep.o loan/loan.o
+OBJS :=  crypto/crypto.o net/net.o socket/socket.o peer/peer.o dfs/dfs.o blockchain/blockchain.o auth/auth.o cash/cash.o rep/rep.o loan/loan.o nova/nova.o
 CXXFLAGS := -fPIC ${CXXFLAGS}
 
 .PHONY: all
