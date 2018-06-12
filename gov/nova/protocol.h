@@ -8,7 +8,8 @@ namespace usgov {
 namespace protocol {
 
 	static constexpr uint16_t nova_base{800};
-	static constexpr uint16_t nova_evidence{((nova_base+1)<<2)+evidence_suffix};
+	static constexpr uint16_t nova_evidence_load{((nova_base+1)<<2)+evidence_suffix};
+	static constexpr uint16_t nova_evidence_track{((nova_base+2)<<2)+evidence_suffix};
 //	static constexpr uint16_t nova_reading{((nova_base+2)<<2)+evidence_suffix};
 //	static constexpr uint16_t nova_unload{((nova_base+3)<<2)+evidence_suffix};
 	static constexpr uint16_t nova_compartiment_query{((nova_base+4)<<2)+query_suffix};

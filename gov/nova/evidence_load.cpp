@@ -6,15 +6,16 @@
 #include <gov/crypto/base58.h>
 #include <gov/likely.h>
 
-typedef usgov::nova::evidence c;
+typedef usgov::nova::evidence_load c;
 using namespace usgov;
 using namespace usgov::nova;
 using namespace std;
 
 c c::read(istream& is) {
-	evidence t;
+	c t;
 	is >> t.item;
 	is >> t.compartiment;
+    is >> t.load;
 	is >> t.parent_block;
 	return move(t);
 }
@@ -22,6 +23,7 @@ c c::read(istream& is) {
 void c::write_sigmsg(ec::sigmsg_hasher_t& h) const {
 	h.write(item);
 	h.write(compartiment);
+	h.write(load);
 	h.write(parent_block);
 }
 
@@ -30,12 +32,14 @@ void c::write_pretty(ostream& os) const {
 	os << "  parent_block: " << parent_block << endl;
 	os << "  item: " << item << endl;
 	os << "  compartiment: " << compartiment << endl;
+	os << "  action: " << (load?"":"un") << "load." << endl;
 	os << "-/-transaction---------------" << endl;
 }
 
 void c::write(ostream& os) const {
 	os << item << ' ';
 	os << compartiment << ' ';
+	os << load << ' ';
 	os << parent_block << ' ';
 }
 
@@ -65,7 +69,7 @@ ec::sigmsg_hasher_t::value_type c::get_hash() const {
 }
 
 datagram* c::get_datagram() const {
-	return new socket::datagram(protocol::nova_evidence,to_b58());
+	return new socket::datagram(protocol::nova_evidence_load,to_b58());
 }
 
 

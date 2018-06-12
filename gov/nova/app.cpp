@@ -553,7 +553,7 @@ bool c::unlock(const hash_t& address/*, const size_t& this_index*/, const hash_t
 		if (unlikely(locking_program==0)) {
 			return true;
 		}
-return true;/TODO
+return true;//TODO
 //		else if (locking_program==p2pkh::locking_program_hash) {
 //			return p2pkh::check_input(address, t,this_index, locking_program_input);
 //		}
@@ -606,7 +606,7 @@ cout << "SGT-03-Acc state " << " not in db " << endl;
 			}
 			else { //ref in pool
 cout << "SGT-03-Acc state " << " in pool " << endl; 
-				acc=*p;
+				acc=p->second;
 				//acc.locking_program=p->second.locking_program;
 				//acc.balance=p->second.balance;
 			}
@@ -670,9 +670,9 @@ cout << "SGT-02-tx.Input #" << j << " compartiment_state returned false.DENIED "
 			return false;
 		}
 
-cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
+//cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
 		if (!unlock(i.address,state.locking_program, i.locking_program_input, t)) {
-cout << "SGT-02-tx.Input #" << j << " UNABLE TO UNLOCK. denied." << endl; 
+//cout << "SGT-02-tx.Input #" << j << " UNABLE TO UNLOCK. denied." << endl; 
 			return false;
 		}
 
