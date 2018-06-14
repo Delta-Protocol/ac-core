@@ -11,8 +11,6 @@ namespace us { namespace wallet {
 
 using namespace std;
 
-namespace cash {
-
 struct api {
 	typedef gov::crypto::ec::keys::priv_t priv_t;
 	typedef gov::crypto::ec::keys::pub_t pub_t;
@@ -37,15 +35,13 @@ struct api {
 	void gen_keys(ostream&os);
 
 	typedef wallet::nova_reading_input nova_reading_input;
-	virtual void load(const hash_t& item, const hash_t& compartiment, ostream&)=0;
-	virtual void reading(const nova_reading_input&, ostream&)=0;
-	virtual void unload(const hash_t& item, ostream&)=0;
+	virtual void nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action, ostream&)=0;
+	virtual void nova_reading(const nova_reading_input&, ostream&)=0;
 };
 
 
-};
 
-struct rpc_api:cash::api, nova::api {
+struct rpc_api:api {
 	rpc_api(const string& walletd_host, uint16_t walletd_port);
 	virtual ~rpc_api();
 
@@ -62,9 +58,8 @@ struct rpc_api:cash::api, nova::api {
 	virtual void unpair(const pub_t&, ostream&os);
 	virtual void list_devices(ostream&os);
 
-	virtual void nova_load(const hash_t& item, const hash_t& compartiment, ostream&) override;
+	virtual void nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action, ostream&) override;
 	virtual void nova_reading(const nova_reading_input&, ostream&) override;
-	virtual void nova_unload(const hash_t& item, ostream&) override;
 
 private:
 	void ask(int service, ostream&os);
@@ -94,9 +89,8 @@ struct local_api:api, wallet, pairing {
 	virtual void unpair(const pub_t&, ostream&os);
 	virtual void list_devices(ostream&os);
 
-	virtual void nova_load(const hash_t& item, const hash_t& compartiment, ostream&) override;
-	virtual void nova_reading(const nova_reading_input&, ostream&) override;
-	virtual void nova_unload(const hash_t& item, ostream&) override;
+	virtual void nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action, ostream&) override;
+	virtual void nova_reading(const api::nova_reading_input&, ostream&) override;
 
 private:
 };

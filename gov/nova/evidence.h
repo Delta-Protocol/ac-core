@@ -33,51 +33,25 @@ namespace nova {
 	typedef ripemd160 hasher_t;
 	typedef hasher_t::value_type hash_t;
 
-	struct evidence_load {
+	struct evidence {
+
+		static void read(evidence&, istream&);
+
 		ec::sigmsg_hasher_t::value_type get_hash() const;
-		static evidence_load read(istream&);
 
-		void write(ostream&) const;
-		void write_sigmsg(ec::sigmsg_hasher_t&) const;
-		void write_pretty(ostream& os) const;
+		virtual void write(ostream&) const;
+		virtual void write_sigmsg(ec::sigmsg_hasher_t&) const;
+		virtual void write_pretty(ostream& os) const;
 		string to_b58() const;
-		static evidence_load from_b58(const string&);
-
-		datagram* get_datagram() const;
-
-		hash_t item;
-		hash_t compartiment;
-		blockchain::diff::hash_t parent_block;
-
-	};
-
-	struct evidence_track {
-		ec::sigmsg_hasher_t::value_type get_hash() const;
-		static evidence_track read(istream&);
-
-		void write(ostream&) const;
-		void write_sigmsg(ec::sigmsg_hasher_t&) const;
-		void write_pretty(ostream& os) const;
-		string to_b58() const;
-		static evidence_track from_b58(const string&);
-
-		datagram* get_datagram() const;
 
 		hash_t compartiment;
-		string data;
+
+        string locking_program_input;
 		blockchain::diff::hash_t parent_block;
+    };
 
-	};
 
-}
 
-static ostream& operator << (ostream&os, const nova::evidence_load& t) {
-	os << t.to_b58() << endl;
-	return os;
-}
-static ostream& operator << (ostream&os, const nova::evidence_track& t) {
-	os << t.to_b58() << endl;
-	return os;
 }
 
 

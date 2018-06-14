@@ -263,8 +263,20 @@ void c::write(const string& data) {
 	write(reinterpret_cast<const unsigned char*>(&data[0]), data.size());
 }
 
-void c::write(const uint64_t& data) {
+void c::write(const uint64_t& data) { //not endian friendly! TODO
 	write(reinterpret_cast<const unsigned char*>(&data), sizeof(data));
+}
+
+void c::write(bool data) {
+	write(reinterpret_cast<const unsigned char*>(&data), sizeof(data));
+}
+
+void c::write(const double& v) {
+	write(reinterpret_cast<const unsigned char*>(&v), sizeof(v)); //TODO endian 
+}
+
+void c::write(const int64_t& v) {
+	write(reinterpret_cast<const unsigned char*>(&v), sizeof(v)); //TODO endian 
 }
 
 const unsigned char c::pad[64] = {0x80};

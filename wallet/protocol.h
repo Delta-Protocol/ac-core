@@ -24,7 +24,6 @@ namespace protocol {
 
 	static constexpr uint16_t nova_load{wallet_base+6}; //item is associated with a compartiment
 	static constexpr uint16_t nova_reading{wallet_base+7}; // compartiment status
-	static constexpr uint16_t nova_unload{wallet_base+8}; //item is unloaded from its compartiment
 
 	static constexpr uint16_t response{wallet_base+0};
 

@@ -1,4 +1,4 @@
-#include "evidence.h"
+#include "evidence_load.h"
 #include <gov/peer.h>
 #include "protocol.h"
 #include <thread>
@@ -14,40 +14,31 @@ using namespace std;
 c c::read(istream& is) {
 	c t;
 	is >> t.item;
-	is >> t.compartiment;
     is >> t.load;
-	is >> t.parent_block;
+    b::read(t,is);
 	return move(t);
 }
 
 void c::write_sigmsg(ec::sigmsg_hasher_t& h) const {
 	h.write(item);
-	h.write(compartiment);
 	h.write(load);
-	h.write(parent_block);
+    b::write_sigmsg(h);
 }
+
 
 void c::write_pretty(ostream& os) const {
 	os << "---transaction---------------" << endl;
-	os << "  parent_block: " << parent_block << endl;
-	os << "  item: " << item << endl;
-	os << "  compartiment: " << compartiment << endl;
-	os << "  action: " << (load?"":"un") << "load." << endl;
+	os << "  item: " << item << ' ' << (load?"":"un") << "load." << endl;
+    b::write_pretty(os);
 	os << "-/-transaction---------------" << endl;
 }
 
 void c::write(ostream& os) const {
 	os << item << ' ';
-	os << compartiment << ' ';
 	os << load << ' ';
-	os << parent_block << ' ';
+    b::write(os);
 }
 
-string c::to_b58() const {
-	ostringstream os;
-	write(os);
-	return crypto::b58::encode(os.str());
-}
 
 c c::from_b58(const string& s) {
 	string txt=crypto::b58::decode(s);
@@ -59,14 +50,6 @@ c c::from_b58(const string& s) {
 #include <sys/types.h>
 #include <sys/wait.h>
 
-ec::sigmsg_hasher_t::value_type c::get_hash() const {
-	ec::sigmsg_hasher_t h;
-	write_sigmsg(h);
-	ec::sigmsg_hasher_t::value_type v;
-	h.finalize(v);
-//cout << "sighash for index " << this_index << " sigcodes " << (int)sc << " " << v << endl;
-	return move(v);
-}
 
 datagram* c::get_datagram() const {
 	return new socket::datagram(protocol::nova_evidence_load,to_b58());

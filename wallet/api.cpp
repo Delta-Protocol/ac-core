@@ -105,9 +105,9 @@ void rpc_api::list_devices(ostream&os) {
 }
 
 
-void rpc_api::nova_load(const hash_t& item, const hash_t& compartiment, ostream& os) {
+void rpc_api::nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action, ostream& os) {
 	ostringstream k;
-	k << item << ' ' << compartiment;
+	k << item << ' ' << action << ' ' << compartiment;
 	ask(protocol::wallet::nova_load,k.str(),os);
 }
 
@@ -117,11 +117,6 @@ void rpc_api::nova_reading(const nova_reading_input& i, ostream& os) {
 	ask(protocol::wallet::nova_reading,si.str(),os);
 }
 
-void rpc_api::nova_unload(const hash_t& item, ostream& os) {
-	ostringstream k;
-	k << item;
-	ask(protocol::wallet::nova_unload,k.str(),os);
-}
 
 //----------------local api
 
@@ -203,27 +198,20 @@ void local_api::list_devices(ostream&os) {
     devices.dump(os);    
 }
 
-void local_api::nova_load(const hash_t& item, const hash_t& compartiment, ostream& os) {
-    auto tx=wallet::nova_load(item,compartiment);
+void local_api::nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action, ostream& os) {
+    auto tx=wallet::nova_load(item,compartiment,action);
     if (tx.first.empty())
     	os << tx.second << endl;
     else 
     	os << tx.first << endl;
 }
 
-void local_api::nova_reading(const nova_reading_input& i, ostream& os) {
-    auto tx=wallet::nova_reading(i);
+void local_api::nova_reading(const api::nova_reading_input& i, ostream& os) {
+    auto tx=wallet::nova_track(i);
     if (tx.first.empty())
     	os << tx.second << endl;
     else 
     	os << tx.first << endl;
 }
 
-void local_api::nova_unload(const hash_t& item, ostream& os) {
-    auto tx=wallet::nova_unload(item);
-    if (tx.first.empty())
-    	os << tx.second << endl;
-    else 
-    	os << tx.first << endl;
-}
 

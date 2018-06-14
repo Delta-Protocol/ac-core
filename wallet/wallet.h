@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <us/gov/cash.h>
+#include <us/gov/nova.h>
 #include <us/gov/crypto.h>
 #include <us/gov/cfg.h>
 #include <fstream>
@@ -80,21 +81,18 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 
 
     struct nova_reading_input {
-        cash::hash_t compartiment;
-        chrono::time_point ts;
-	int t,p,h,lon,lat;
+        nova::hash_t compartiment;
+        string data;
         bool sendover;
 
-	void to_stream(ostream&) const;
-	static nova_reading_input from_stream(istream&);
+    	void to_stream(ostream&) const;
+    	static nova_reading_input from_stream(istream&);
 
     };
 
 
-    pair<string,nova::ev_load> nova_load(const hash_t& item, const hash_t& compartiment);
-    pair<string,nova::ev_reading> nova_reading(const nova_reading_input& i);
-    pair<string,nova::ev_unload> nova_unload(const hash_t& item);
-
+    pair<string,nova::evidence_load> nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action);
+    pair<string,nova::evidence_track> nova_track(const nova_reading_input& i);
 
 
 	void dump(ostream& os) const;

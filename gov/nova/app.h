@@ -17,7 +17,8 @@
 #include <cassert>
 #include <map>
 #include <atomic>
-#include "evidence.h"
+#include "evidence_load.h"
+#include "evidence_track.h"
 
 
 namespace usgov {
@@ -68,20 +69,28 @@ namespace nova {
 			virtual void to_stream(ostream&) const override;
 			virtual void from_stream(istream&) override;
 
-			struct logbook_entry:string {
-
-			};
-			struct item: string {
-			};
 			typedef chrono::system_clock::time_point time_point;
-			struct logbook_t:map<time_point,logbook_entry> {
-				unordered_map<hash_t,item> items;
+			struct logbook_t:vector<string> {
+				unordered_set<hash_t> items;
 				void dump(ostream& os) const {
 					os << size() << " logentries; " << items.size() << " items";
 				}
+                void rm(const hash_t& item) {
+                    auto i=items.find(item);
+                    if (i==items.end()) return;
+                    items.erase(i);
+                }
+                void add(const hash_t& item) {
+                    auto i=items.find(item);
+                    if (i!=items.end()) return;
+                    items.emplace(item);
+                }
 //				logbook_t& operator+=(const logbook_t& other) {
 //
 //				}
+                void compute_hash(hasher_t&) const;
+				void to_stream(ostream& os) const;
+				static logbook_t from_stream(istream& is);
 			};
 
 			struct compartiment_t {  //account_t
@@ -90,6 +99,8 @@ namespace nova {
 
 				hash_t locking_program;
 				logbook_t logbook;
+
+    			void compute_hash(hasher_t&) const;
 
 				void dump(ostream& os) const;
 				void to_stream(ostream& os) const;
@@ -109,6 +120,8 @@ namespace nova {
 
 				//bool add_input(tx& t, const hash_t& addr, const cash_t& amount);
 				//bool add_output(tx& t, const hash_t& addr, const cash_t& amount, const hash_t& locking_program);
+    			void compute_hash(hasher_t&) const;
+
 				
 				void dump(ostream& os) const;
 				//bool pay(const hash_t& k, const cash_t& amount);
@@ -184,7 +197,7 @@ namespace nova {
 		virtual bool process_query(peer_t *, datagram*) override;
 
 		virtual bool process_evidence(peer_t *, datagram*) override;
-		bool process_tx(peer_t *, datagram*);
+//		bool process_tx(peer_t *, datagram*);
 		void compartiment_query(peer_t *, datagram*);
 
 		virtual void import(const blockchain::app::delta&, const blockchain::pow_t&) override;
@@ -196,12 +209,13 @@ namespace nova {
 
 
 
-		bool compartiment_state(const local_delta::batch_t& batch, const hash_t& address, compartiment_t& acc) const;
+		bool fetch_compartiment(const local_delta::batch_t& batch, const hash_t& address, compartiment_t& acc) const;
 
 		bool checksig(const string& locking_program_input, const evidence&) const;
 		static bool unlock(const hash_t& address, const hash_t& locking_program, const string& locking_program_input, const evidence&);
 
-		bool process(const evidence&);
+		bool process(const evidence_load&);
+		bool process(const evidence_track&);
 
 		struct db_t {
 			db_t();

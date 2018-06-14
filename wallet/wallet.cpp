@@ -347,28 +347,26 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 	return move(i);
 }
 
-pair<string,nova::ev_load> c::nova_load(const hash_t& item, const hash_t& compartiment) {
+pair<string,nova::evidence_load> c::nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action) { //load/unload
 }
 
-pair<string,nova::ev_reading> c::nova_reading(const nova_reading_input& i) {
+pair<string,nova::evidence_track> c::nova_track(const nova_reading_input& i) {
 }
 
-pair<string,nova::ev_unload> c::nova_unload(const hash_t& item) {
-}
 
 void c::nova_reading_input::to_stream(ostream& os) const {
-	os << compartiment << ' ' << ts << ' ' << t << ' ' << p << ' ' << h << ' ' << lon << ' ' << lat << ' ' << (sendover?'1':'0');
+	os << compartiment << ' ' << crypto::b58::encode(data.empty()?"-":data) << ' ' << (sendover?'1':'0');
 }
 
 c::nova_reading_input c::nova_reading_input::from_stream(istream& is) {
 	nova_reading_input i;
+
 	is >> i.compartiment;
-	is >> i.ts;
-	is >> i.t;
-	is >> i.p;
-	is >> i.h;
-	is >> i.lon;
-	is >> i.lat;
+
+    is >> i.data;
+	i.data=crypto::b58::decode(i.data);
+    if (i.data=="-") i.data.clear();
+
 	is >> i.sendover;
 	return move(i);
 }
