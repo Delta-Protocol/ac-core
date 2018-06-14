@@ -1,11 +1,11 @@
 #include "single_signature.h"
 #include <sstream>
-#include <gov/crypto/crypto.h>
+#include <us/gov/crypto/crypto.h>
 
 
-typedef usgov::nova::single_signature c;
-using namespace usgov;
-using namespace usgov::nova;
+typedef us::gov::nova::single_signature c;
+using namespace us::gov;
+using namespace us::gov::nova;
 using namespace std;
 
 hash_t c::locking_program_hash{1};

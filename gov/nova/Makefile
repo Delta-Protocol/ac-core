@@ -2,7 +2,7 @@ OBJ := nova
 CPPS := $(wildcard *.cpp)
 OBJS := $(patsubst %.cpp, %.o, $(CPPS))
 HS := $(wildcard *.h)
-INC := ../..
+INC := ../../..
 CXXFLAGS = -fPIC -O0 -g -std=c++17
 
 ${OBJ}.o: ${OBJS} locking.o

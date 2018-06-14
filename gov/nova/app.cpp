@@ -3,12 +3,12 @@
 #include "protocol.h"
 #include <thread>
 #include <chrono>
-#include <gov/crypto/base58.h>
-#include <gov/likely.h>
+#include <us/gov/crypto/base58.h>
+#include <us/gov/likely.h>
 
-typedef usgov::nova::app c;
-using namespace usgov;
-using namespace usgov::nova;
+typedef us::gov::nova::app c;
+using namespace us::gov;
+using namespace us::gov::nova;
 using namespace std;
 
 constexpr const char* c::name;
@@ -22,15 +22,15 @@ constexpr array<const char*,app::policies_traits::num_params> app::policies_trai
 namespace std {
 
   template <>
-  struct hash<usgov::nova::app::local_delta> {
-	size_t operator()(const usgov::nova::app::local_delta&) const;
+  struct hash<us::gov::nova::app::local_delta> {
+	size_t operator()(const us::gov::nova::app::local_delta&) const;
   };
 
 }
 
 
-size_t std::hash<usgov::nova::app::local_delta>::operator() (const usgov::nova::app::local_delta&g) const {
-	return *reinterpret_cast<const size_t*>(&g.get_hash()[0]);
+size_t std::hash<us::gov::nova::app::local_delta>::operator() (const us::gov::nova::app::local_delta&g) const {
+	return *reinterpret_cast<const size_t*>(&g.get_hash()[0]); //TODO LE endian
 }
 /*
 bool c::local_delta::compartiments_t::add_input(tx& t, const hash_t& addr, const cash_t& amount) {

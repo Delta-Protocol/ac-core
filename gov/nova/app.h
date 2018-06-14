@@ -1,17 +1,17 @@
 #ifndef USGOV_d73b1f5d97d3c08f466bf17e137750c217c3d4e354dab33d3a54a1f45657d8fa
 #define USGOV_d73b1f5d97d3c08f466bf17e137750c217c3d4e354dab33d3a54a1f45657d8fa
 
-#include <gov/auth.h>
-#include <gov/blockchain.h>
+#include <us/gov/auth.h>
+#include <us/gov/blockchain.h>
 
 #include <vector>
 #include <thread>
 #include <chrono>
 #include <unordered_map>
 #include <unordered_set>
-#include <gov/signal_handler.h>
-#include <gov/crypto/crypto.h>
-#include <gov/blockchain/diff.h>
+#include <us/gov/signal_handler.h>
+#include <us/gov/crypto/crypto.h>
+#include <us/gov/blockchain/diff.h>
 #include "protocol.h"
 #include <chrono>
 #include <cassert>
@@ -21,7 +21,7 @@
 #include "evidence_track.h"
 
 
-namespace usgov {
+namespace us{ namespace gov {
 namespace nova {
 	using namespace std;
 	using socket::datagram;
@@ -260,7 +260,7 @@ namespace nova {
 
 
 }
-}
+}}
 
 #endif
 

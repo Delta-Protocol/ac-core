@@ -138,7 +138,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case protocol::wallet::nova_load: {
+		case us::wallet::protocol::nova_load: {
 			istringstream is(d->parse_string());
            	const nova::hash_t item;
             const nova::hash_t compartiment;

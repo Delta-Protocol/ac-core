@@ -1,14 +1,14 @@
 #include "evidence_load.h"
-#include <gov/peer.h>
+#include <us/gov/peer.h>
 #include "protocol.h"
 #include <thread>
 #include <chrono>
-#include <gov/crypto/base58.h>
-#include <gov/likely.h>
+#include <us/gov/crypto/base58.h>
+#include <us/gov/likely.h>
 
-typedef usgov::nova::evidence_load c;
-using namespace usgov;
-using namespace usgov::nova;
+typedef us::gov::nova::evidence_load c;
+using namespace us::gov;
+using namespace us::gov::nova;
 using namespace std;
 
 c c::read(istream& is) {

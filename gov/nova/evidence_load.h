@@ -1,23 +1,23 @@
 #ifndef USGOV_6d99739c50fa99bb398415cd2fdf9ab718b483010322b4471e8d174c2e9abb36
 #define USGOV_6d99739c50fa99bb398415cd2fdf9ab718b483010322b4471e8d174c2e9abb36
 
-#include <gov/auth.h>
-#include <gov/blockchain.h>
+#include <us/gov/auth.h>
+#include <us/gov/blockchain.h>
 #include "evidence.h"
 
 #include <vector>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <gov/signal_handler.h>
-#include <gov/crypto/crypto.h>
+#include <us/gov/signal_handler.h>
+#include <us/gov/crypto/crypto.h>
 //#include <blockchain/block.h>
 #include "protocol.h"
 #include <chrono>
 #include <cassert>
 #include <map>
 
-namespace usgov {
+namespace us { namespace gov {
 namespace nova {
 	using namespace std;
 
@@ -45,7 +45,7 @@ static ostream& operator << (ostream&os, const nova::evidence_load& t) {
 }
 
 
-}
+}}
 
 #endif
 

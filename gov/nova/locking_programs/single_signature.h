@@ -1,9 +1,9 @@
 #ifndef USGOV_2842d9be08f4c6ffe9bcb224695c3a52eda5808d21b6160fb9c3660681963bd0
 #define USGOV_2842d9be08f4c6ffe9bcb224695c3a52eda5808d21b6160fb9c3660681963bd0
 
-#include <gov/nova/app.h>
+#include <us/gov/nova/app.h>
 
-namespace usgov {
+namespace us{ namespace gov {
 namespace nova {
 
 	struct single_signature {
@@ -31,7 +31,7 @@ namespace nova {
 */
 
 }
-}
+}}
 
 
 #endif

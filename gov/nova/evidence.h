@@ -1,33 +1,34 @@
-#ifndef USGOV_7b76d8aadd7eb71bb498e2024c52966f72d21af3e24c96427a872e2f631a6daa
-#define USGOV_7b76d8aadd7eb71bb498e2024c52966f72d21af3e24c96427a872e2f631a6daa
+#ifndef USGOV_7b76d8aadd7eb71bb498e2024c52966f72d21af3e24c96427a872e2f631a6dab
+#define USGOV_7b76d8aadd7eb71bb498e2024c52966f72d21af3e24c96427a872e2f631a6dab
 
-#include <gov/auth.h>
-#include <gov/blockchain.h>
+#include <us/gov/auth.h>
+#include <us/gov/blockchain.h>
+#include <us/gov/socket.h>
 
 #include <vector>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <gov/signal_handler.h>
-#include <gov/crypto/crypto.h>
+#include <us/gov/signal_handler.h>
+#include <us/gov/crypto/crypto.h>
 //#include <blockchain/block.h>
 #include "protocol.h"
 #include <chrono>
 #include <cassert>
 #include <map>
 
-namespace usgov {
+namespace us{ namespace gov {
 namespace nova {
 	using namespace std;
+	using namespace us::gov;
 	using socket::datagram;
-//	using blockchain::signature;
 	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using crypto::ec;
 	using blockchain::peer_t;
 
 	typedef int64_t cash_t;
-	typedef crypto::ec::keys keys;
+	typedef us::gov::crypto::ec::keys keys;
 	typedef keys::pub_t pubkey_t;
 
 	typedef ripemd160 hasher_t;
@@ -55,7 +56,7 @@ namespace nova {
 }
 
 
-}
+}}
 
 #endif
 

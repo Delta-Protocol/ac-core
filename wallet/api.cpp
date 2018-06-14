@@ -108,13 +108,13 @@ void rpc_api::list_devices(ostream&os) {
 void rpc_api::nova_load(const nova::hash_t& item, const nova::hash_t& compartiment, bool action, ostream& os) {
 	ostringstream k;
 	k << item << ' ' << action << ' ' << compartiment;
-	ask(protocol::wallet::nova_load,k.str(),os);
+	ask(us::wallet::protocol::nova_load,k.str(),os);
 }
 
 void rpc_api::nova_reading(const nova_reading_input& i, ostream& os) {
 	ostringstream si;
 	i.to_stream(si);
-	ask(protocol::wallet::nova_reading,si.str(),os);
+	ask(us::wallet::protocol::nova_reading,si.str(),os);
 }
 
 
