@@ -4,6 +4,7 @@
 #include "crypto.h"
 #include <fstream>
 #include <sys/stat.h>
+#include <cstdlib>
 
 namespace us { namespace gov {
 namespace filesystem {
@@ -27,7 +28,12 @@ struct cfg {
 	}
 	static bool ensure_dir(const string& d) {
 		if (!exists_dir(d)) {
-			return mkdir(d);
+            const int dir_err = system(string("mkdir -p ")+d);
+            if (dir_err == -1) {
+                cerr << "Error creating directory " << d << endl;
+                return false;
+            }
+			return true;
 		}
 	    return true;
 	}
