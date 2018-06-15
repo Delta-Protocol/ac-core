@@ -44,6 +44,9 @@ struct args_t {
 		string i=argv[n++];
 		return convert<T>(i);
 	}
+    int args_left() const {
+        return argc-n;
+    }
 	int argc;
 	char** argv;
 	int n{1};

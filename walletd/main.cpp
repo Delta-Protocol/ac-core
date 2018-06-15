@@ -99,6 +99,7 @@ void help(const params& p, ostream& os=cout) {
     os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
     os << " nova track <compartiment id> <sensors> [<send>]." << endl;
     os << " nova sim_sensors" << endl;
+    os << " nova decode <txb58>" << endl;
 
 }
 
@@ -241,10 +242,21 @@ string sim_sensors() {
 void nova_app(api& wapi, args_t& args, const params& p) {
 	string command=args.next<string>();
 	if (command=="move") {
+        if (args.args_left()<3) {
+            help(p);
+            return;
+        }
         wallet::nova_move_input i;
         i.compartiment=args.next<nova::hash_t>();
         i.item=args.next<string>();
-        i.load=args.next<bool>();
+        auto s=args.next<string>();
+        if (s=="load") i.load=true;
+        else if (s=="unload") i.load=false;
+        else {
+            cerr << "Please specify either load or unload" << endl;
+            help(p);
+            return;
+        }
         i.sendover=args.next<string>("nopes")=="send";
         wapi.nova_move(i,cout);
 //    os << " nova move <compartiment pubkey> <item pubkey> <load|unload> [<send>]   ." << endl;
@@ -276,6 +288,11 @@ void nova_app(api& wapi, args_t& args, const params& p) {
 
 
 
+    }
+    else if (command=="decode") {
+    	string txb58=args.next<string>();
+	    nova::evidence_load t=nova::evidence_load::from_b58(txb58);
+	    t.write_pretty(cout);
     }
 	else {
 		help(p);

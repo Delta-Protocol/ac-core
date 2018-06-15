@@ -42,6 +42,7 @@ void c::write(ostream& os) const {
 
 c c::from_b58(const string& s) {
 	string txt=crypto::b58::decode(s);
+cout << txt << endl;
 	istringstream is(txt);
 	return read(is);
 }
