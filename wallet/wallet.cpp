@@ -273,6 +273,7 @@ string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::valu
 			return "";
 		}
 		else if (locking_program==1) {
+cout << "-------" << endl; 
 			const crypto::ec::keys* k=get_keys(compartiment);
 			if (k==0) return "";
 			return nova::single_signature::create_input(msg, k->priv);

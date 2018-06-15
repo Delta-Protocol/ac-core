@@ -674,8 +674,9 @@ bool c::process(const evidence_load& e) {
 //		auto& i=t.inputs[j];
 //
 		if (!fetch_compartiment(batch,e.compartiment,state)) {
-cout << "SGT-02-ev_load " << " fetch_compartiment returned false.DENIED " << endl; 
-			return false;
+//cout << "SGT-02-ev_load " << " fetch_compartiment returned false.DENIED " << endl; 
+//			return false;
+            state.locking_program=1;
 		}
 
 //cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
