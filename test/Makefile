@@ -1,7 +1,7 @@
 CPPS := $(wildcard *.cpp)
 HS := $(wildcard *.h)
 INC := ../..
-CXXFLAGS = -O0 -ggdb -std=c++17
+CXXFLAGS = -O0 -g -std=c++17
 
 .PHONY: all
 

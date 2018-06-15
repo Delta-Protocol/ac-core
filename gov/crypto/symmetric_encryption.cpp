@@ -1,6 +1,5 @@
 #include "symmetric_encryption.h"
 
-#include <string>
 #include <iterator>
 
 #include <cryptopp/hex.h>
@@ -25,9 +24,10 @@ using CryptoPP::GCM;
 
 #include <secp256k1_ecdh.h>
 
+#include <cassert>
+
 
 using namespace us::gov::crypto;
-using namespace std;
 
 typedef us::gov::crypto::symmetric_encryption c;
 
@@ -37,118 +37,86 @@ c::symmetric_encryption(const keys::priv_t& priv_key_a, const keys::pub_t& pub_k
 
 void c::set_agreed_key_value(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b){
     
-    if(secp256k1_ecdh(ec::instance.ctx,key_,&pub_key_b,&priv_key_a[0])!=1){
+    if(!secp256k1_ecdh(ec::instance.ctx,key_,&pub_key_b,&priv_key_a[0])){
         cerr << "Could not create shared secret";
     } 
 }
 
-vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext){
+const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext){
     
-    vector<unsigned char> ciphertext(sizeof(iv_) + plaintext.size() + AES::BLOCKSIZE);
+    vector<unsigned char> ciphertext(size_iv + plaintext.size() + AES::BLOCKSIZE);
+    
     //we need a new iv for each message that is encrypted with the same key.
-    prng_.GenerateBlock(c::iv_,sizeof(iv_));
+    prng_.GenerateBlock(c::iv_, size_iv);
 
     GCM<AES>::Encryption enc;
-    enc.SetKeyWithIV(key_, sizeof(key_), iv_, sizeof(iv_));
+    enc.SetKeyWithIV(key_, sizeof(key_), iv_, size_iv);
 
     ArraySink cs(&ciphertext[0], ciphertext.size());
 
     ArraySource(plaintext.data(), plaintext.size(), true, new AuthenticatedEncryptionFilter(enc, new Redirector(cs),false,tag_size_));
     
-    // Set cipher text length now that its known
+    // Set cipher text length now that its known, and append the iv
+    /*size_t ciphertext_length= cs.TotalPutLength()+size_iv;
+    ciphertext.resize(ciphertext_length);
+    for(size_t i = 0; i < size_iv; i++){
+        ciphertext[i+cs.TotalPutLength()] = iv_[i];
+    }*/
     ciphertext.resize(cs.TotalPutLength());
+    ciphertext.insert(ciphertext.end(), begin(iv_), end(iv_));
+    return move(ciphertext);
+
 }
 
-string c::encrypt(const string& plaintext){
-    string ciphertext;
-    //we need a new iv for each message that is encrypted with the same key.
-    prng_.GenerateBlock(c::iv_,sizeof(iv_));
-
-    GCM<AES>::Encryption e;
-    e.SetKeyWithIV(key_, sizeof(key_), iv_, sizeof(iv_));
+void c::set_iv_from_ciphertext(const vector<unsigned char>& ciphertext){
     
-    StringSource(plaintext, true, new AuthenticatedEncryptionFilter(e, new StringSink(ciphertext),false,tag_size_));
-    prepend_iv_to_ciphertext(ciphertext);
-    return ciphertext;
-}
-
-
-string c::retrieve_ciphertext_and_set_iv(string iv_ciphertext){
-    size_t s= sizeof(iv_);
-    string ciphertext = iv_ciphertext.substr(s);
-    
-    for(size_t i = 0; i< s; i++){
-        iv_[i]=iv_ciphertext[i];
-    }
-    return ciphertext;
-}
-
-template<typename T>
-void c::set_iv_from_ciphertext(T ciphertext){
-    size_t s= sizeof(iv_);
-    
-    for(size_t i = 0; i< s; i++){
-        iv_[i]=ciphertext[i];
+    size_t iv_start = ciphertext.size() - size_iv;
+    for(size_t i = 0; i < size_iv; i++){
+        iv_[i] = ciphertext[i+iv_start];
     }
 }
 
-void c::prepend_iv_to_ciphertext(string& ciphertext){
-    ciphertext = string(reinterpret_cast<char *>(iv_), sizeof(iv_)) + ciphertext;
-}
-
-vector<unsigned char> c::prepend_iv_to_ciphertext(vector<unsigned char> ciphertext){
-   size_t s= sizeof(iv_);
+const vector<unsigned char> c::decrypt(const vector<unsigned char>& ciphertext){
     
-    for(size_t i = 0; i< s; i++){
-        ciphertext[i]=iv_[i];
+    if(ciphertext.size()<size_iv){
+        cerr << "The ciphertext does not have sufficient length to contain the iv (initialisation vector) which should have been appended.\n" << endl;
+        return vector<unsigned char>();
     }
-
-    return ciphertext;
-}
-
-
-vector<unsigned char> c::decrypt(const vector<unsigned char>& ciphertext){
-    
-    vector<unsigned char> recoveredtext(ciphertext.size());
-    c::set_iv_from_ciphertext(ciphertext);
+    vector<unsigned char> decryptedtext(ciphertext.size());
+    set_iv_from_ciphertext(ciphertext);
 
     try{
         GCM< AES >::Decryption d;
-        d.SetKeyWithIV( key_, sizeof(key_), iv_, sizeof(iv_) );
+        d.SetKeyWithIV( key_, sizeof(key_), iv_, size_iv );
        
-        ArraySink rs(recoveredtext.data(), recoveredtext.size());
-
-        StringSource(&ciphertext[sizeof(iv_)], ciphertext.size()-sizeof(iv_), true,new AuthenticatedDecryptionFilter(d, new Redirector(rs)));
+        ArraySink sink(decryptedtext.data(), decryptedtext.size());
+        AuthenticatedDecryptionFilter filter(d, new Redirector(sink),AuthenticatedDecryptionFilter::DEFAULT_FLAGS, tag_size_);
+        ArraySource(ciphertext.data(), ciphertext.size()-size_iv, true, new Redirector(filter));
 
         // Set recovered text length now that its known
-        recoveredtext.resize(rs.TotalPutLength());
-
-
+        decryptedtext.resize(sink.TotalPutLength());
     }
-    catch( CryptoPP::HashVerificationFilter::HashVerificationFailed& e ){
-        cerr << "Caught HashVerificationFailed..." << endl;
-        cerr << e.what() << endl;
-        cerr << endl;
+    catch(const CryptoPP::HashVerificationFilter::HashVerificationFailed& e){
+        cerr << "Caught HashVerificationFailed...\n" << e.what() << "\n" << endl;
+        return vector<unsigned char>();
     }
-    catch( CryptoPP::InvalidArgument& e ){
-        cerr << "Caught InvalidArgument..." << endl;
-        cerr << e.what() << endl;
-        cerr << endl;
+    catch(const CryptoPP::InvalidArgument& e ){
+        cerr << "Caught InvalidArgument...\n" << e.what() << "\n" << endl;
+        return vector<unsigned char>();
     }
-    catch( CryptoPP::Exception& e ){
-        cerr << "Caught Exception..." << endl;
-        cerr << e.what() << endl;
-        cerr << endl;
+    catch(const CryptoPP::Exception& e ){
+        cerr << "Caught Exception...\n" << e.what() << "\n" << endl;
+        return vector<unsigned char>();
     }
 
-    return recoveredtext;
-
+    return move(decryptedtext);
 }
 
-string c::decrypt(const string& ciphertext){
+
+/*std::string c::decrypt(const std::string& ciphertext){
     
-    c::set_iv_from_ciphertext(ciphertext);
-    string plaintext;
+    set_iv_from_ciphertext(ciphertext);
+    std::string plaintext;
     try{
         GCM< AES >::Decryption d;
         d.SetKeyWithIV( key_, sizeof(key_), iv_, sizeof(key_) );
@@ -177,7 +145,7 @@ string c::decrypt(const string& ciphertext){
         cerr << endl;
     }
     return plaintext;
-}
+}*/
 
 /*string c::decrypt(const string& iv_ciphertext){
     
@@ -231,39 +199,6 @@ string c::decrypt(const string& ciphertext){
     }
     return plaintext;
 
-}*/
-
-/*string c::encrypt(const string& plaintext)
-{
-    //we need a new iv for each message that is encrypted with the same key.
-    prng_.GenerateBlock(iv_,sizeof(iv_));
-
-
-    string ciphertext;
-    try
-    {
-
-        GCM< AES>::Encryption e;
-        e.SetKeyWithIV( key_, sizeof(key_), iv_, sizeof(iv_) );
-        
-        StringSource( plaintext, true, new AuthenticatedEncryptionFilter( e, new StringSink( ciphertext ), false, TAG_SIZE)); 
-    }
-    catch( CryptoPP::InvalidArgument& e )
-    {
-        cerr << "Caught InvalidArgument..." << endl;
-        cerr << e.what() << endl;
-        cerr << endl;
-    }
-    catch( CryptoPP::Exception& e )
-    {
-        cerr << "Caught Exception..." << endl;
-        cerr << e.what() << endl;
-        cerr << endl;
-    }
-
-    return ciphertext;
-    
-    
 }*/
 
 
