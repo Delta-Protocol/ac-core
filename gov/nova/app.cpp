@@ -1019,7 +1019,7 @@ c::local_delta::logbook_t c::local_delta::logbook_t::from_stream(istream& is) {
     for (int i=0; i<n; ++i) {
         item_t v;
         is >> v;
-        items.insert(v);
+        ians.items.insert(v);
     }
     return move(ans);
 }
