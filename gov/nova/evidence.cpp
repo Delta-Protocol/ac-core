@@ -31,6 +31,7 @@ void c::write_sigmsg(ec::sigmsg_hasher_t& h) const {
 void c::write_pretty(ostream& os) const {
 	os << "  compartiment: " << compartiment << endl;
 	os << "  parent_block: " << parent_block << endl;
+	os << "  locking-program input: " << locking_program_input << endl;
 }
 
 void c::write(ostream& os) const {
