@@ -89,7 +89,7 @@ cout << "SGT-01-RECEIVED EVIDENCE" << endl; //settlement go throught
 	switch(d->service) {
 		case protocol::nova_evidence_load: {
 			string payload=d->parse_string();
-cout << "SGT-01-CASH TX " << payload << endl; 
+cout << "SGT-01-NOVA TX MOVE " << payload << endl; 
 			delete d;
 			evidence_load t=evidence_load::from_b58(payload);
 t.write_pretty(cout);
@@ -98,7 +98,7 @@ t.write_pretty(cout);
 		} break;
 		case protocol::nova_evidence_track: {
 			string payload=d->parse_string();
-cout << "SGT-01-CASH TX " << payload << endl; 
+cout << "SGT-01-NOVA TX TRACK " << payload << endl; 
 			delete d;
 			evidence_track t=evidence_track::from_b58(payload);
 t.write_pretty(cout);
@@ -130,7 +130,7 @@ c::query_compartiments_t c::query_compartiments_t::from_datagram(datagram*d) {
 }
 
 void c::compartiment_query(peer_t *c, datagram*d) {
-cout << "CASH_QUERY" << endl;
+cout << "COMPARTIMENT_QUERY" << endl;
 	query_compartiments_t q=query_compartiments_t::from_datagram(d);
 
 	ostringstream os;
@@ -275,7 +275,7 @@ void c::local_delta::compartiments_t::dump(ostream& os) const {
 }
 
 void c::db_t::dump(ostream& os) const {
-	cout << "cash app db dump" << endl;
+	cout << "nova app db dump" << endl;
 	lock_guard<mutex> lock(mx);
 	compartiments->dump(os);
 	//cout << "supply_left " << supply_left << " block_reward " << block_reward << endl;
@@ -472,7 +472,7 @@ cash_t c::db_t::get_newcash() { //db lock must be acquired
 }
 */
 void c::import(const blockchain::app::delta& gg, const blockchain::pow_t& w) {
-cout << "cash: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
+cout << "nova: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(mx_policies);
@@ -900,10 +900,10 @@ string c::shell_command(const string& cmdline) {
 	string cmd;
 	is >> cmd;
 	if (cmd=="hello") {
-		os << "cash shell. type h for help." << endl;
+		os << "nova shell. type h for help." << endl;
 	}
 	else if (cmd=="h" || cmd=="help") {
-		os << "Cash shell." << endl;
+		os << "Nova shell." << endl;
 		os << "h|help              Shows this help." << endl;
 		os << "p|policies [id vote]          ." << endl;
 		os << "mempool           Dumps the mempool." << endl;
