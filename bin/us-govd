@@ -1,4 +1,4 @@
 #!/bin/sh
-#LD_LIBRARY_PATH=gov gdb --args govd/us-govd -ds $@
-LD_LIBRARY_PATH=gov govd/us-govd -ds $@
+LD_LIBRARY_PATH=gov gdb --args govd/us-govd -ds $@
+#LD_LIBRARY_PATH=gov govd/us-govd -ds $@
 
