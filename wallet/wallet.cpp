@@ -14,6 +14,7 @@ c::wallet(const string& datapath, const string& backend_host, uint16_t backend_p
 }
 
 c::~wallet() {
+//cout << "deleting wallet" << endl;
 	save();
 }
 
@@ -40,8 +41,11 @@ bool c::load() {
 }
 
 bool c::save() const {
+//cout << "saving wallet" << endl;
+
 	if (!need_save) return true;
 	auto file=filename();
+//cout << "saving wallet! " << file << " " << size() << endl;
 	ofstream f(file);
 	for (auto&i:*this) {
 		f << i.second.priv << ' ';
@@ -118,6 +122,34 @@ c::accounts_query_t c::query_accounts(const cash::app::query_accounts_t& address
 	return move(ret);
 }
 
+c::compartiments_query_t c::query_compartiments(const nova::app::query_compartiments_t& addresses) const {
+	compartiments_query_t ret;
+	socket::datagram* d=addresses.get_datagram();
+	if (!d) return ret;
+
+	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
+	if (!response_datagram) return move(ret);
+	auto r=response_datagram->parse_string();
+	delete response_datagram;
+
+	istringstream is(r);
+	int code;
+	is >> code;
+	if (code!=0) {	
+		string err;
+		is >> err;
+		cerr << err << endl;
+	}
+	else {
+		for (auto&i:addresses) {
+			nova::app::compartiment_t a=nova::app::compartiment_t::from_stream(is);
+			ret.emplace(i,move(a));
+		}
+		is >> ret.parent_block;
+	}
+	return move(ret);
+}
+
 void c::refresh() {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
@@ -166,6 +198,12 @@ void c::accounts_query_t::dump(ostream& os) const {
 	b::dump(os);
 	os << "parent block: " << parent_block << endl;
 }
+void c::compartiments_query_t::dump(ostream& os) const {
+	b::dump(os);
+	os << "parent block: " << parent_block << endl;
+}
+
+
 
 c::input_account_t::input_account_t(const hash_t& address,const b& acc, const cash_t& withdraw_amount):b(acc),address(address),withdraw_amount(withdraw_amount) {
 }
@@ -194,7 +232,26 @@ void c::input_accounts_t::dump(ostream& os) const {
 }
 
 #include <us/gov/cash/locking_programs/p2pkh.h>
+#include <us/gov/nova/locking_programs/single_signature.h>
 
+
+void c::send(const nova::evidence_load& t) const {
+	socket::peer_t cli;
+	if (!cli.connect(backend_host,backend_port,true)) {
+		cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
+		exit(1);
+	}
+	cli.send(t.get_datagram());
+}
+
+void c::send(const nova::evidence_track& t) const {
+	socket::peer_t cli;
+	if (!cli.connect(backend_host,backend_port,true)) {
+		cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
+		exit(1);
+	}
+	cli.send(t.get_datagram());
+}
 
 void c::send(const cash::tx& t) const {
 	auto fee=t.check();
@@ -208,6 +265,20 @@ void c::send(const cash::tx& t) const {
 		exit(1);
 	}
 	cli.send(t.get_datagram());
+}
+
+string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const nova::hash_t& compartiment, const nova::hash_t& locking_program) {
+	if (likely(locking_program<nova::min_locking_program)) {
+		if (unlikely(locking_program==0)) {
+			return "";
+		}
+		else if (locking_program==1) {
+			const crypto::ec::keys* k=get_keys(compartiment);
+			if (k==0) return "";
+			return nova::single_signature::create_input(msg, k->priv);
+		}
+	}
+	return "";
 }
 
 string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
@@ -238,6 +309,7 @@ string c::generate_locking_program_input(const cash::tx& t, size_t this_index, c
 	return "";
 }
 
+
 pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
 	auto sigcodes=cash::tx::combine(sigcodei,sigcodeo);
 
@@ -255,7 +327,7 @@ pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t&
 	for (auto&i:ret.second.inputs) {
 		auto b=bases.find(i.address);
 		if(b==bases.end()) {
-			cerr << "No such address " << i.address << endl;	
+			cerr << "No such address " << i.address << endl;
 			exit(1);
 		}
 		const cash::app::account_t& src=b->second;
@@ -278,7 +350,7 @@ pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t&
     return move(ret);
 }
 
-pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
+pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) { //non-empty first means error
         pair<string,cash::tx> ret;
         cash::tx& t=ret.second;
 
@@ -289,7 +361,10 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
 			ret.first="no inputs";
 			return move(ret);
 		}
-		assert(input_accounts.get_withdraw_amount()==i.amount+i.fee);
+		if(input_accounts.get_withdraw_amount()!=i.amount+i.fee) {
+			ret.first="Failed amounts check";
+            return move(ret);
+        }
 
 		t.parent_block=input_accounts.parent_block;
 		t.inputs.reserve(input_accounts.size());
@@ -297,8 +372,11 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
 			t.add_input(i.address, i.balance, i.withdraw_amount);
 		}
 		t.add_output(i.rcpt_addr, i.amount, cash::p2pkh::locking_program_hash);
-		if (!t.check()) {
-			ret.first="Failed check";
+        auto fee=t.check();
+    	if (fee<1) { //TODO
+            ostringstream err;
+            err << "Failed check. fees are " << fee;
+			ret.first=err.str();
 			return move(ret);
 		}
 		if (likely(cash::tx::same_sigmsg_across_inputs(sigcodes))) {
@@ -319,7 +397,7 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) {
 
 		if (i.sendover) {
 			send(t);
-			cout << "sent." << endl;
+//			cout << "sent." << endl;
 		}
 
         return move(ret);
@@ -340,5 +418,68 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 	is >> i.sendover;
 	return move(i);
 }
+
+pair<string,nova::evidence_load> c::nova_move(const nova_move_input& i) {
+cout << "nova move" << endl;
+
+    pair<string,nova::evidence_load> ret;
+    nova::evidence_load& t=ret.second;
+
+	blockchain::diff::hash_t parent_block;
+
+	nova::app::query_compartiments_t compartiments;
+	compartiments.emplace_back(i.compartiment);
+
+	auto data=query_compartiments(compartiments);
+    if (data.size()!=1) {
+			ret.first="Compartiment not found";
+			return move(ret);
+    }
+
+	t.parent_block=data.parent_block;
+    
+
+	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
+	t.locking_program_input=generate_locking_program_input(h,i.compartiment, data.begin()->second.locking_program);
+
+	if (i.sendover) {
+		send(t);
+//			cout << "sent." << endl;
+	}
+
+    return move(ret);
+}
+
+pair<string,nova::evidence_track> c::nova_track(const nova_track_input& i) {
+
+}
+
+
+void c::nova_move_input::to_stream(ostream& os) const {
+	os << compartiment << ' ' << item << ' ' << (load?'1':'0') << ' ' << (sendover?'1':'0');
+}
+
+c::nova_move_input c::nova_move_input::from_stream(istream& is) {
+	nova_move_input i;
+	is >> i.compartiment;
+    is >> i.item;
+	is >> i.load;
+	is >> i.sendover;
+	return move(i);
+}
+
+void c::nova_track_input::to_stream(ostream& os) const {
+	os << compartiment << ' ' << data << ' ' << (sendover?'1':'0');
+}
+
+c::nova_track_input c::nova_track_input::from_stream(istream& is) {
+	nova_track_input i;
+	is >> i.compartiment;
+    is >> i.data;
+	is >> i.sendover;
+	return move(i);
+}
+
+
 
 

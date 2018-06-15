@@ -42,6 +42,11 @@ void c::write(const ripemd160::value_type& data) {
 	write(&data[0],ripemd160::output_size);
 }
 
+void c::write(bool data) {
+	write(reinterpret_cast<const unsigned char*>(&data),sizeof(data));
+}
+
+
 void c::reset() {
 	sha.reset();
 }

@@ -1,112 +1,101 @@
 package com.example.usgov;
 
-import android.os.Handler;
-import android.app.AlertDialog;
+import java.io.UnsupportedEncodingException;
+import java.util.Timer;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.media.MediaPlayer;
+
+import android.media.RingtoneManager;
+import android.media.Ringtone;
+import android.net.Uri;
+import android.os.Build;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.Button;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-
-import org.spongycastle.asn1.*;
-import org.spongycastle.asn1.x9.X9ECParameters;
-import org.spongycastle.asn1.x9.X9IntegerConverter;
-import org.spongycastle.crypto.AsymmetricCipherKeyPair;
-import org.spongycastle.crypto.digests.SHA256Digest;
-import org.spongycastle.crypto.ec.CustomNamedCurves;
-import org.spongycastle.crypto.generators.ECKeyPairGenerator;
-import org.spongycastle.crypto.params.*;
-import org.spongycastle.crypto.signers.ECDSASigner;
-import org.spongycastle.crypto.signers.HMacDSAKCalculator;
-import org.spongycastle.math.ec.ECAlgorithms;
-import org.spongycastle.math.ec.ECPoint;
-import org.spongycastle.math.ec.FixedPointCombMultiplier;
-import org.spongycastle.math.ec.FixedPointUtil;
-import org.spongycastle.math.ec.custom.sec.SecP256K1Curve;
-import org.spongycastle.util.Properties;
-import org.spongycastle.util.encoders.Base64;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.security.SecureRandom;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-import java.util.Random;
+import java.util.TimerTask;
 
 import android.view.inputmethod.InputMethodManager;
 import android.app.Activity;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ImageView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final SecureRandom secureRandom;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import android.graphics.Bitmap;
 
-    public static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
-    public static final ECDomainParameters curve; // The parameters of the secp256k1 curve that Bitcoin uses.
-    static {
-        //if (Utils.isAndroidRuntime()) new LinuxSecureRandom();
-        FixedPointUtil.precompute(curve_params.getG(), 12);
-        curve= new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
-        secureRandom = new SecureRandom();
+//import com.google.zxing.integration.android.IntentIntegrator;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+
+
+public class MainActivity extends AppCompatActivity implements AppListener {
+
+    app a;
+
+/*
+    public void sendMessage(View view) {
+        //EditText editText = (EditText) findViewById(R.id.editText);
+        //String message = editText.getText().toString();
+        //intent.putExtra(EXTRA_MESSAGE, "");
     }
+*/
 
-    public BigInteger priv;
-    public ECPoint pub;
-    String log="";
+    boolean bounded;
+    HostCardEmulatorService svc;
 
-    public String convertStreamToString(InputStream is) throws Exception { //1 line
-        log+=";A";
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        log+=";B";
+    private Button scanButton;
+    private Button pay;
+    private ImageView qrcode;
+    private EditText amount;
+    private Button balance;
+    private Button newaddress;
+    private TextView action;
+    private pl.droidsonroids.gif.GifImageView carlton;
+    private pl.droidsonroids.gif.GifImageView wait;
+    private LinearLayout acquire_addr;
+    private ImageView share;
+    private ImageView walletdconnect;
 
-        StringBuilder sb = new StringBuilder();
-        log+=";C";
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            log+=";D";
-            sb.append(line);
-            log+=";E";
-            break;
+
+    private final String balance_button_text="check balance";
+
+    SmartCardReader reader;
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+/*
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
         }
-        log+=";F";
-        reader.close();
-        log+=";G";
-        return sb.toString();
-    }
-
-    public String getStringFromFile (File fl) {
-        log+=";1";
-        try {
-            FileInputStream fin = new FileInputStream(fl);
-            log+=";2";
-            String ret = convertStreamToString(fin);
-            log+=";3";
-            //Make sure you close all streams.
-            fin.close();
-            log+=";4";
-            return ret;
-        }
-        catch(Exception e) {
-            log+=";5 "+e.getMessage();
-            return "";//e.getStackTrace().toString();
-        }
+        */
+        //Log.d("XXX","calling UpdateControls from onConfigurationChanged");
+        updateControls();
     }
 
     public static boolean isAndroidRuntime() {
@@ -114,16 +103,101 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return runtime != null && runtime.equals("Android Runtime");
     }
 
-    public static ECPoint publicPointFromPrivate(BigInteger privKey) {
-        /*
-         * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group order,
-         * but that could change in future versions.
-         */
-        if (privKey.bitLength() > curve.getN().bitLength()) {
-            privKey = privKey.mod(curve.getN());
-        }
-        return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
+
+    public enum State {
+        NONE, CHARGE, PAY
     }
+
+    State state=State.NONE;
+
+    String getVerb() {
+        switch (state) {
+            case NONE:
+                return "NONE";
+            case CHARGE:
+                return "CHARGE";
+            case PAY:
+                return "PAY";
+        }
+        return "";
+    }
+
+    void transition_state(State st) {
+        if (st==state) return;
+        state=st;
+        switch (state) {
+            case NONE:
+                //reader.no_intent();
+                break;
+            case CHARGE: {
+                //EditText a = (EditText) findViewById(R.id.amount);
+                //reader.pay_intent("Charge", a.getText().toString());
+            }
+                break;
+            case PAY: {
+                //EditText a = (EditText) findViewById(R.id.amount);
+                //reader.pay_intent("Pay", a.getText().toString());
+            }
+            break;
+
+        }
+        updateControls();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle astate) {
+        super.onSaveInstanceState(astate);
+        astate.putString("balancelbl", balance.getText().toString());
+        astate.putInt("state", state.ordinal());
+        EditText a = (EditText) findViewById(R.id.amount);
+        astate.putString("amount", a.getText().toString());
+
+    }
+
+
+    void setBalance(String b) {
+        final String B=b;
+        Log.d("ZZZZZZZZZxxZ",B);
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                balance.setText(cash_human.show(B));
+            }
+        }));
+
+
+    }
+
+
+    @Override
+    public void on_wallet_init_success() {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                Log.d("AAAA","AAA1");
+                if (a.w.walletd_host().trim().isEmpty()) {
+                    Log.d("AAAA","AAA2");
+                    Intent intent = new Intent(MainActivity.this, node_pairing.class);
+                    startActivity(intent);
+                }
+                Log.d("AAAA","AAA3 -->"+a.w.walletd_host()+"<--");
+                publish_myaddress();
+                updateControls();
+                Log.d("AAAA","AAA4");
+            }
+        }));
+    }
+
+    @Override
+    public void on_wallet_init_error(String error) {
+        final String what=error;
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                Toast.makeText(MainActivity.this, what, 30000).show();
+            }
+        }));
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +206,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (isAndroidRuntime()) new LinuxSecureRandom(); //Asserts /dev/urandom is ok
 
         setContentView(R.layout.activity_main);
+
+        a=(app) getApplication();
+
+
+        scanButton = (Button) findViewById(R.id.scan);
+        pay = (Button) findViewById(R.id.pay);
+        qrcode = (ImageView) findViewById(R.id.qrCode);
+        amount = (EditText) findViewById(R.id.amount);
+        balance = (Button) findViewById(R.id.balance);
+        action = (TextView) findViewById(R.id.action);
+        acquire_addr =  (LinearLayout) findViewById(R.id.acquire_addr);
+        newaddress= (Button) findViewById(R.id.newaddress);
+        carlton=(pl.droidsonroids.gif.GifImageView)findViewById(R.id.carlton);
+        wait=(pl.droidsonroids.gif.GifImageView)findViewById(R.id.wait);
+
+        share=(ImageView)findViewById(R.id.share);
+        walletdconnect=(ImageView)findViewById(R.id.walletdconnect);
+
+
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 
@@ -140,74 +233,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
 
 
-
-        String filename = "k";
-
-
-   //     log="files dir:"+getFilesDir();
-
-        File file = new File(getFilesDir(),filename);
-        if(!file.exists()) {
-            file.getParentFile().mkdirs();
-            try {
-                file.createNewFile();
-            }
-            catch(Exception e) {
-                log+=";EXCEPRT";
-            }
- //           log+=";new file";
-//            if (!file.mkdirs()) {
-  //              //Log.e(LOG_TAG, "Directory not created");
-    //            log+=";Directory not created";
-      //      }
-            ECKeyPairGenerator generator = new ECKeyPairGenerator();
-            ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curve, secureRandom);
-            generator.init(keygenParams);
-            AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
-            ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-            ECPublicKeyParameters pubParams = (ECPublicKeyParameters) keypair.getPublic();
-            priv = privParams.getD();
-            String fileContents = priv.toString();
-    //log+=";"+fileContents.length();
-            FileOutputStream outputStream;
-
-            try {
-                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write(fileContents.getBytes());
-                outputStream.write('\n');
-                outputStream.close();
-                log+=";wrote "+fileContents.getBytes().length;
-                        /*
-                        File file2 = new File(filename);
-                        if(!file2.exists()) {
-                            log += ";file does not exist2";
-                        }
-                        */
-            } catch (Exception e) {
-                log+=e.getMessage();
-            }
-
+        if(savedInstanceState != null) {
+            balance.setText(savedInstanceState.getString("balancelbl"));
         }
         else {
-            log+=";file exists+";
-
-             String content = getStringFromFile(file);
-            log+="+;content "+content;
-            priv=new BigInteger(content);
-            //log+="read: " + priv.toString();
-
+            balance.setText(balance_button_text);
         }
-        //pub = new LazyECPoint(curve.getCurve(), pubParams.getQ().getEncoded(true));
-        pub = publicPointFromPrivate(priv);
-    //log=pub.getEncoded(true).toString();
-        //pub=new LazyECPoint(priv);
-        //toggleContactless("AA");
+        balance.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               if (a.w==null) {
+                   Toast.makeText(MainActivity.this, "Wallet is not OK", 6000).show();
+                   return;
+               }
+               if (balance.getText() == balance_button_text) {
+                   balance.setText("...");
+                   //final Handler handler = new Handler();
+                   Thread thread = new Thread(new Runnable() {
+                       @Override
+                       public void run() {
+                           final String b = a.w.balance(false);
+                           setBalance(b);
+                           /*
+                           Log.d("ZZZZZZZZZZZZ",b);
+                           handler.post(new Runnable() {
+                           handler.post(new Runnable() {
+                               @Override
+                               public void run() {
 
-        Button balance = (Button) findViewById(R.id.balance);
-        balance.setText("balance");
-        balance.setOnClickListener(this);
+                               }
+                           });
+                           */
+                       }
+                   });
 
-        final String flog=log;
+                   thread.start();
+
+               } else {
+                   balance.setText(balance_button_text);
+               }
+
+           }
+       }
+       );
+
+
+
 /*
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -217,24 +288,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 */
-        Button pay = (Button) findViewById(R.id.pay);
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleContactless("Pay");
+                if (state==State.NONE) {
+                    transition_state(State.PAY);
+                }
+                else { //Cancel
+                    transition_state(State.NONE);
+                }
+                Log.d("XXX","calling UpdateControls from pay onclick");
+//                updateControls();
             }
         });
 
+        walletdconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, node_pairing.class);
+                startActivity(intent);
+            }
+        });
+
+
+/*
         Button get_paid = (Button) findViewById(R.id.get_paid);
         get_paid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleContactless("Charge ");
+                Log.d("XXX","calling UpdateControls from getpaid onclick");
+                transition_state(State.CHARGE);
 
             }
         });
-
-        findViewById(R.id.amount).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+*/
+        amount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
@@ -243,34 +331,393 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        findViewById(R.id.get_paid).setEnabled(false);
-        findViewById(R.id.pay).setEnabled(false);
+  //      findViewById(R.id.get_paid).setEnabled(false);
+        pay.setEnabled(false);
 
-        findViewById(R.id.amount).setOnKeyListener(new View.OnKeyListener() {
+        amount.setOnKeyListener(new View.OnKeyListener() {
             @Override
 
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                EditText a = (EditText) findViewById(R.id.amount);
-                if (a.getText().length()==0) {
-                    findViewById(R.id.get_paid).setEnabled(false);
-                    findViewById(R.id.pay).setEnabled(false);
+                if (amount.getText().length()==0) {
+//                    findViewById(R.id.get_paid).setEnabled(false);
+                    pay.setEnabled(false);
 
                 } else {
-                    findViewById(R.id.get_paid).setEnabled(true);
-                    findViewById(R.id.pay).setEnabled(true);
-
+  //                  findViewById(R.id.get_paid).setEnabled(true);
+                    pay.setEnabled(true);
                 }
                 return false;
             }
         });
 
 
+        reader=new SmartCardReader(this);
+
+        if(savedInstanceState != null) {
+            balance.setText(savedInstanceState.getString("balancelbl"));
+            transition_state(State.values()[savedInstanceState.getInt("state")]);
+        }
+        else {
+            balance.setText(balance_button_text);
+            transition_state(State.NONE);
+        }
+        Log.d("XXX","calling UpdateControls from onCreate");
+
+
+
+        newaddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (a.w==null) {
+                    Toast.makeText(MainActivity.this, "Wallet is not OK", 6000).show();
+                    return;
+                }
+                newaddress.setEnabled(false);
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (a.w.renew_address()) {
+                                onnewaddress();
+                            }
+                            else {
+                                onFailNewAddress("Not an address");
+                            }
+                        }
+                        catch(IOException e) {
+                            onFailNewAddress(e.getMessage());
+                        }
+
+                           /*
+                           Log.d("ZZZZZZZZZZZZ",b);
+                           handler.post(new Runnable() {
+                               @Override
+                               public void run() {
+
+                               }
+                           });
+                           */
+                    }
+                });
+
+                thread.start();
+
+
+
+            }
+        });
+
+
+        qrcode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("address", a.w.my_address);
+                clipboard.setPrimaryClip(clip);
+                newaddress.setEnabled(true);
+                newaddress.setVisibility(View.VISIBLE);
+                Timer timer=new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        hidenewaddr();
+                    }
+                }, 2*1000);
+
+                Toast.makeText(MainActivity.this, "My address "+a.w.my_address+" has been copied to the clipboard.", 3000).show();
+            }
+        });
+
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scanButton.setEnabled(false);
+
+                // start scanning
+                IntentIntegrator intentIntegrator = new IntentIntegrator(MainActivity.this);
+                intentIntegrator.initiateScan();
+
+            }
+        });
+
+        carlton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                carlton.setVisibility(View.INVISIBLE);
+                updateControls();
+
+            }
+        });
+        wait.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wait.setVisibility(View.INVISIBLE);
+                updateControls();
+
+            }
+        });
+
+
+        updateControls();
+
+        if (a.w==null)
+            on_wallet_init_error("");
+        else
+            on_wallet_init_success();
+        a.ml=this;
+
+
     }
+
+    void onFailNewAddress(final String error) {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                newaddress.setVisibility(View.INVISIBLE);
+                updateControls();
+                Toast.makeText(MainActivity.this, error, 30000).show();
+            }
+        }));
+    }
+
+    void onnewaddress() {
+        publish_myaddress();
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                newaddress.setVisibility(View.INVISIBLE);
+                updateControls();
+                Toast.makeText(MainActivity.this, "My new address is "+a.w.my_address+".", 3000).show();
+            }
+        }));
+    }
+
+    void hidenewaddr() {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                if (newaddress.isEnabled()) //dont do anything until the new address arrives
+                    newaddress.setVisibility(View.INVISIBLE);
+            }
+        }));
+    }
+    void hidegifs() {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                carlton.setVisibility(View.INVISIBLE);
+                wait.setVisibility(View.INVISIBLE);
+                updateControls();
+            }
+        }));
+    }
+
+    public void sendDataToNFCService(String data){
+        Context context = getApplicationContext();
+        Intent intent = new Intent(context, HostCardEmulatorService.class);
+        intent.putExtra("message",data);
+        context.startService(intent);
+    }
+
+    boolean isValidAddress(String addr) {
+        return true;
+    }
+
+
+    void vibrate() {
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (!v.hasVibrator()) return;
+        // Vibrate for 500 milliseconds
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(500,VibrationEffect.DEFAULT_AMPLITUDE));
+        }else{
+            //deprecated in API 26
+            v.vibrate(500);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (scanResult != null) {
+            Log.i("SCAN", "scan result: " + scanResult);
+            String c=scanResult.getContents();
+            if (c!=null) {
+                dopay(c);
+            }
+        } else {
+            Toast.makeText(MainActivity.this, "Sorry, the scan was unsuccessful", 1000).show();
+            Log.e("SCAN", "Sorry, the scan was unsuccessful...");
+        }
+    }
+
+    void deliver_address_from_NFC(String rcpt_address) {
+        dopay(rcpt_address);
+    }
+
+
+    boolean dopay(final String rcpt_address) {
+        int am = 0;
+        try {
+            am = Integer.parseInt(amount.getText().toString());
+        } catch (NumberFormatException e) {
+            Toast.makeText(MainActivity.this, "Invalid amount"+amount.getText().toString(), 6000).show();
+            return false;
+        }
+        return dopay(rcpt_address,am,1);
+    }
+
+    boolean dopay(final String rcpt_address, final int amount, final int fee) {
+        if (!isValidAddress(rcpt_address)) {
+            Toast.makeText(MainActivity.this, "Invalid address "+rcpt_address, 6000).show();
+            return false;
+        }
+        if (a.w==null) {
+            Toast.makeText(MainActivity.this, "Wallet is not OK", 6000).show();
+            return false;
+        }
+        vibrate();
+        hidegifs();
+        showgif(wait);
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String tx=a.w.pay(amount,fee,rcpt_address);
+                onTxCompleted(tx);
+            }
+        });
+
+        thread.start();
+
+
+        return true;
+    }
+
+    void showgif(View v) {
+        transition_state(State.NONE);
+        pay.setVisibility(View.INVISIBLE);
+        v.setVisibility(View.VISIBLE);
+        ViewGroup.LayoutParams params=v.getLayoutParams();
+        params.width=MainActivity.this.findViewById(android.R.id.content).getWidth();
+        params.height=MainActivity.this.findViewById(android.R.id.content).getHeight();
+        v.setLayoutParams(params);
+        v.bringToFront();
+
+    }
+
+    boolean isTxValid(String tx) {
+        Log.d("B58","verifying Tx: "+tx);
+        try {
+            byte[] decoded=Base58.decode(tx);
+            Log.d("B58","decoded:"+new String(decoded,"UTF-8"));
+            return decoded.length>0;
+        }
+        catch(Base58.AddressFormatException e) {
+            Log.d("B58","NOPES");
+            return false;
+        }
+        catch(UnsupportedEncodingException e) {
+            Log.d("B58","NOPES wrong UTF8 encoding");
+            return false;
+        }
+    }
+
+    void onTxCompleted(final String tx) {
+        Log.d("CASH","Tx completed: "+tx);
+        final boolean b=isTxValid(tx);
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                if (!b) {
+                    try {
+                        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.error);
+                        mp.start();
+                    } catch (Exception e) {
+                        //   e.printStackTrace();
+                    }
+                    hidegifs();
+                    Toast.makeText(MainActivity.this, "Received an indecipherable transaction  : "+tx, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                //Toast.makeText(MainActivity.this, "transaction is: "+tx, 6000).show();
+                Toast.makeText(MainActivity.this, "transaction sent successfully :)", Toast.LENGTH_LONG).show();
+                try {
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                    r.play();
+                } catch (Exception e) {
+                 //   e.printStackTrace();
+                }
+                hidegifs();
+                showgif(carlton);
+
+                //qrcode.g setContentView(new gifView(MainActivity.this) );
+            }
+        }));
+
+        Timer timer=new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hidegifs();
+            }
+        }, 5*1000);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+/*
+        Intent mIntent = new Intent(this, HostCardEmulatorService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);-
+        */
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        /*
+        if(bounded) {
+            unbindService(mConnection);
+            bounded = false;
+        }
+        */
+    };
+/*
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Toast.makeText(MainActivity.this, "Service is disconnected", 1000).show();
+            bounded = false;
+            svc = null;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            //            Toast.makeText(Client.this, "Service is connected", 1000).show();
+            bounded = true;
+            HostCardEmulatorService.LocalBinder mLocalBinder = (HostCardEmulatorService.LocalBinder)service;
+            svc = mLocalBinder.getInstance();
+
+        }
+    };
+*/
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("XXX","calling UpdateControls from onResume");
+        updateControls();
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("XXX","calling UpdateControls from onPause");
+        updateControls();
+    }
+
 
     public String sign(String msg) {
         return "AN1rKvtbihLRkX6Utv2FjxLfehr43uqZr4eFUDvkZuNxmdjuecmSRmag3YFiXNu5HV8XiAkbERjmyCad1V556GqRLTmutYA5S";
     }
-
+/*
     public void on_tap() {
         boolean isPay=findViewById(R.id.get_paid).getVisibility() == View.VISIBLE;
         //pay protocol:
@@ -302,52 +749,88 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String signedTx="2SEZqt5m9xFmSAa4cjKQPvRwCEd2YSVxifKAbQP3Ht1ubJH55zcHifq3JtQkP2nieHRVguJi7bE4sZCWpyrXcwfKaMrYK63Kr6mEU4aGpLg454sLdc4iXQ2aJH5CjN6v2LBPfGHUJBEQBQejH8GaJhz2sbeABjczsR2nKcrG61aKg9z5JPVRkLHtgoQatBhbGNqJ2c6GNi2kMPiDVgR1DorRTmjWsNmLH9zqzvfSEytkiN1KWdMVWN4n18aq9ZwL999WvoRucKkD2QT6shirc9zaLn5vNdEQ55m7uqDvtiVjgouL2dgE4HdJfDpsztQrsMqtQvWaxPLgDcK1HWXcbemsbDKT64CtnqdKyfrtkSDLwtps2FSedewbWotzEMybgcjZA88kYySmyno9mX6vGXzKVzWnZspFEG5h9KDHtGXisLQushWE7o1oD7X46q1qy6XvhcBQgF";
         //relay to the other mobile via NFC
     }
+*/
+    //String verb=new String();
 
-    public void toggleContactless(String verb) {
-        EditText a = (EditText) findViewById(R.id.amount);
-        TextView action = (TextView) findViewById(R.id.action);
-        Button p = (Button) findViewById(R.id.pay);
-        action.setText(verb+" " +a.getText());
-        findViewById(R.id.amount).setVisibility(findViewById(R.id.amount).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        findViewById(R.id.action).setVisibility(findViewById(R.id.action).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        findViewById(R.id.contactless_logo).setVisibility(findViewById(R.id.contactless_logo).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
+    public void updateControls() {
+        boolean r=state!=State.NONE;
+//        boolean r=reader.is_reading();
+Log.d("XXXXXXXX-UpdateControls",""+r);
+        amount.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        if (a.w==null) {
+            qrcode.setVisibility(View.INVISIBLE);
+        }
+        else {
+            qrcode.setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        }
+        pay.setVisibility(View.VISIBLE);
 
-        findViewById(R.id.get_paid).setVisibility(findViewById(R.id.get_paid).getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
-        if (findViewById(R.id.get_paid).getVisibility() == View.VISIBLE)
-            p.setText("PAY");
-        else
-            p.setText("CANCEL");
+        action.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
+        acquire_addr.setVisibility(r ? View.VISIBLE : View.INVISIBLE);
+        newaddress.setVisibility(View.INVISIBLE);
+        scanButton.setEnabled(true);
 
+//        findViewById(R.id.get_paid).setVisibility(r ? View.INVISIBLE : View.VISIBLE);
+        if (r) {
+            action.setText(getVerb()+" " +cash_human.show(amount.getText().toString()));
+            pay.setText("CANCEL");
+//            findViewById(R.id.get_paid).setEnabled(true);
+            pay.setEnabled(true);
+        }
+        else {
+            pay.setText("PAY");
+            pay.setEnabled(amount.getText().length()!=0);
+        }
+        paintQR();
+        switch(state) {
+            case NONE:
+                reader.disable();
+                break;
+            case PAY:
+                reader.enable();
+                break;
+            case CHARGE:
+                reader.enable();
+                break;
+
+        }
 
     }
 
-    String nodeAddress() {
-        return "11.11.11.11";
+
+    public void paintQR() {
+        if (a.w==null) {
+            return;
+        }
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try {
+            String txt=a.w.my_address;
+            if (txt.isEmpty()) txt="-";
+            BitMatrix bitMatrix = multiFormatWriter.encode(txt, BarcodeFormat.QR_CODE, 200, 200);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+            qrcode.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
     }
-    int nodePort() {
-        return 16673;
+
+
+
+    void publish_myaddress() {
+        if (a.w==null) {
+            return;
+        }
+        sendDataToNFCService(a.w.my_address);
     }
+
+
 
 
     public void hideKeyboard(View view) {
         InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
-
-    public static final int wallet_base = 0;
-
-    public static final int protocol_balance_query = wallet_base+1;
-    public static final int protocol_dump_query = wallet_base+2;
-    public static final int protocol_new_address_query = wallet_base+3;
-    public static final int protocol_add_address_query = wallet_base+4;
-    public static final int tx_make_p2pkh_query = wallet_base+5;
-    public static final int tx_sign_query = wallet_base+6;
-    public static final int tx_send_query = wallet_base+7;
-    public static final int tx_decode_query = wallet_base+8;
-    public static final int tx_check_query = wallet_base+9;
-
-    public static final int protocol_response = wallet_base+0;
-
 
 
 /*
@@ -403,71 +886,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 */
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId()) {
-
-            case R.id.balance:
-                Button balance = (Button) findViewById(R.id.balance);
-                if (balance.getText()=="balance") {
-                    balance.setText("...");
-                    final Handler handler = new Handler();
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String signature = "";
-                            try {
-                                Socket s = new Socket(nodeAddress(), nodePort());
-                                boolean b11 = s.isClosed();
-                                boolean b12 = s.isConnected();
-                                String msg = "BALANCE " + pub.getEncoded(true).toString() + " " + signature;
-                                Datagram d = new Datagram(0, msg);
-                                d.send(s);
-
-                                boolean b11_2 = s.isClosed();
-                                boolean b12_2 = s.isConnected();
-
-                                String st;
-                                Datagram r = new Datagram();
-                                if (r.recv(s)) {
-                                    st = r.parse_string();
-                                } else {
-                                    st = "?";
-                                }
-                                boolean b11_3 = s.isClosed();
-                                boolean b12_3 = s.isConnected();
-                                final String stf = st;
-
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Button balance = (Button) findViewById(R.id.balance);
-                                        balance.setText(cash_human.show(stf));
-                                    }
-                                });
-
-                                //output.close();
-                                //out.close();
-                                s.close();
-                            } catch (IOException e) {
-                                //e.printStackTrace();
-                            }
-                        }
-                    });
-
-                    thread.start();
-                }
-                else {
-                    balance.setText("balance");
-                }
-
-
-                break;
-        }
-    }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

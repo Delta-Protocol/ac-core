@@ -29,16 +29,19 @@ using namespace std;
 		string to_b58() const;
 		string to_hex() const;
 		static value_type from_b58(const string&);
-		void set_b58(const string&);
+		bool set_b58(const string&);
 		static value_type from_hex(const string&);
 
 	    };
 
 	    ripemd160();
 	    void write(const unsigned char* data, size_t len);
-	    void write(const value_type& data);
-	    void write(const string&data);
-	    void write(const uint64_t&data);
+	    void write(const value_type&);
+	    void write(const string&);
+	    void write(const uint64_t&);
+	    void write(const int64_t&);
+	    void write(bool);
+	    void write(const double&);
 
 	    void finalize(unsigned char hash[output_size]);
 	    void finalize(value_type&);
@@ -66,7 +69,7 @@ using namespace std;
   inline istream& operator >> (istream& is, us::gov::crypto::ripemd160::value_type& v) {
 	string s;
 	is >> s;
-	v.set_b58(s);
+	if (!v.set_b58(s)) is.setstate(ios_base::failbit);
 	return is;
   }
 

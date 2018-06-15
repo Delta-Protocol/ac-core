@@ -25,6 +25,7 @@ template<> us::gov::crypto::ec::keys::priv_t convert(const string& s);
 
 struct args_t {	
 	args_t(int argc, char** argv):argc(argc), argv(argv) {
+        //for (int i=0; i<argc; ++i) cout << argv[i] << endl;
 	}
 	template<typename T>
 	T next() {
@@ -43,6 +44,9 @@ struct args_t {
 		string i=argv[n++];
 		return convert<T>(i);
 	}
+    int args_left() const {
+        return argc-n;
+    }
 	int argc;
 	char** argv;
 	int n{1};

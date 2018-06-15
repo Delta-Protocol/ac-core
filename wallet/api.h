@@ -16,6 +16,10 @@ struct api {
 	typedef gov::crypto::ec::keys::pub_t pub_t;
     typedef cash::tx::sigcode_t sigcode_t;
 
+
+    virtual ~api() {
+    }
+
 	void priv_key(const priv_t& privkey, ostream&);
 
 	virtual void balance(bool detailed, ostream&)=0;
@@ -30,10 +34,17 @@ struct api {
 	virtual void tx_check(const string&txb58, ostream&os)=0;
 	virtual void pair(const pub_t&, const string& name, ostream&os)=0;
 	virtual void unpair(const pub_t&, ostream&os)=0;
+	virtual void list_devices(ostream&os)=0;
 
 	void gen_keys(ostream&os);
 
+	typedef wallet::nova_move_input nova_move_input;
+	typedef wallet::nova_track_input nova_track_input;
+	virtual void nova_move(const nova_move_input&, ostream&)=0;
+	virtual void nova_track(const nova_track_input&, ostream&)=0;
 };
+
+
 
 struct rpc_api:api {
 	rpc_api(const string& walletd_host, uint16_t walletd_port);
@@ -48,9 +59,12 @@ struct rpc_api:api {
 	virtual void tx_send(const string&txb58, ostream&os) override;
 	virtual void tx_decode(const string&txb58, ostream&os) override;
 	virtual void tx_check(const string&txb58, ostream&os) override;
-	virtual void pair(const pub_t&, const string& name, ostream&os);
-	virtual void unpair(const pub_t&, ostream&os);
+	virtual void pair(const pub_t&, const string& name, ostream&os) override;
+	virtual void unpair(const pub_t&, ostream&os) override;
+	virtual void list_devices(ostream&os) override;
 
+	virtual void nova_move(const nova_move_input&, ostream&) override;
+	virtual void nova_track(const nova_track_input&, ostream&) override;
 
 private:
 	void ask(int service, ostream&os);
@@ -76,8 +90,12 @@ struct local_api:api, wallet, pairing {
 	virtual void tx_send(const string&txb58, ostream&os) override;
 	virtual void tx_decode(const string&txb58, ostream&os) override;
 	virtual void tx_check(const string&txb58, ostream&os) override;
-	virtual void pair(const pub_t&, const string& name, ostream&os);
-	virtual void unpair(const pub_t&, ostream&os);
+	virtual void pair(const pub_t&, const string& name, ostream&os) override;
+	virtual void unpair(const pub_t&, ostream&os) override;
+	virtual void list_devices(ostream&os) override;
+
+	virtual void nova_move(const api::nova_move_input&, ostream&) override;
+	virtual void nova_track(const api::nova_track_input&, ostream&) override;
 
 private:
 };

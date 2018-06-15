@@ -13,10 +13,16 @@ c::wallet_daemon(uint16_t port, const string& home, const string&backend_host, u
 c::~wallet_daemon() {
 }
 
+bool c::send_error_response(peer_t *c, datagram*d, const string& error) {
+	c->send(us::wallet::protocol::response,"E "+error);
+	this_thread::sleep_for(500ms); //TODO check if we can do it better
+	delete d;
+	return true;
+}
 
 bool c::send_response(peer_t *c, datagram*d, const string& payload) {
 	c->send(us::wallet::protocol::response,payload);
-	this_thread::sleep_for(1s);
+	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	delete d;
 	return true;
 }
@@ -26,6 +32,10 @@ bool c::process_work(peer_t *c, datagram*d) {
 		case us::wallet::protocol::tx_make_p2pkh_query: {
 			istringstream is(d->parse_string());
 			wallet::tx_make_p2pkh_input i=wallet::tx_make_p2pkh_input::from_stream(is);
+            if (unlikely(is.fail())) {
+                return send_error_response(c,d,"Unacceptable input.");
+            }
+
 			ostringstream ans;
 			local_api::tx_make_p2pkh(i,ans);
 			return send_response(c,d,ans.str());
@@ -121,6 +131,37 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
+		case us::wallet::protocol::list_devices_query: {
+			ostringstream ans;
+			local_api::list_devices(ans);
+
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case us::wallet::protocol::nova_move: {
+			istringstream is(d->parse_string());
+			wallet::nova_move_input i=wallet::nova_move_input::from_stream(is);
+            if (unlikely(is.fail())) {
+                return send_error_response(c,d,"Unacceptable input.");
+            }
+
+			ostringstream ans;
+			local_api::nova_move(i,ans);
+			return send_response(c,d,ans.str());
+        }
+        break;
+		case us::wallet::protocol::nova_track: {
+			istringstream is(d->parse_string());
+			wallet::nova_track_input i=wallet::nova_track_input::from_stream(is);
+            if (unlikely(is.fail())) {
+                return send_error_response(c,d,"Unacceptable input.");
+            }
+
+			ostringstream ans;
+			local_api::nova_track(i,ans);
+			return send_response(c,d,ans.str());
+        }
+        break;
 		default: break;
 	}
 	return false;

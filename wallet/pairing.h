@@ -15,31 +15,38 @@ struct pairing {
 
     pairing(const string& homedir):devices(homedir) {
     }
+    virtual ~pairing() {
+    }
 
     struct device {
         device() {
         }
         device(const pub_t& pub, const string& name): pub(pub), name(name) {
         }
+        static string default_name;
 
         void to_stream(ostream&) const;
         static device from_stream(istream&);
+        void dump(ostream& os) const;
 
         string name;
         pub_t pub;
-        int seq{0}; //used to avoid replay attacks
+        //int seq{0}; //used to avoid replay attacks
     };
 
     struct devices_t: unordered_map<hash_t,device> {
         devices_t(const string& home);
+        static string not_found;
+
         void load();
         void save() const;
         void load_(); //caller needs to lock mx
         void save_() const;  //caller needs to lock mx
-        static string default_name;
         string file;
         mutable mutex mx;
         string home;
+
+        void dump(ostream& os) const;
 
         void pair(const pub_t& pub, const string& name);
         void unpair(const pub_t& pub);
