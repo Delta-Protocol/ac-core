@@ -992,13 +992,37 @@ c::local_delta::compartiment_t::compartiment_t() {
 
 c::local_delta::compartiment_t::compartiment_t(const hash_t& locking_program, const logbook_t& lb): locking_program(locking_program), logbook(lb) {
 }
-//-----------------------------
+
 void c::local_delta::logbook_t::to_stream(ostream& os) const {
+    os << size() << ' ';
+    for (auto&i:*this) {
+        os << i << ' ';
+    }
+    os << items.size() << ' ';
+    for (auto&i:items) {
+        os << i << ' ';
+    }
 }
 
 c::local_delta::logbook_t c::local_delta::logbook_t::from_stream(istream& is) {
+    logbook_t ans;
+
+    int n;
+    is >> n;
+    ans.reserve(n);
+    for (int i=0; i<n; ++i) {
+        string v;
+        is >> v;
+        ans.push_back(v);
+    }
+    is >> n;
+    for (int i=0; i<n; ++i) {
+        item_t v;
+        is >> v;
+        items.insert(v);
+    }
+    return move(ans);
 }
-//-----------------------------
 
 void c::local_delta::compartiment_t::to_stream(ostream& os) const {
 	os << locking_program << ' ';
