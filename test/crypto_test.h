@@ -11,8 +11,10 @@ using namespace std;
     bool test_symmetric_encryption();
     bool test_encrypt_decrypt_keys(string, const keys::priv_t&, const keys::pub_t&, const keys::priv_t&, const keys::pub_t&);
     bool test_encrypt_decrypt(string);
-
+    bool test_expected_result(string,string);
     bool test_encrypt_multiple(string);
+    bool test_decrypt_multiple(string);
+    bool test_decrypt_nulls(string);
    // bool test_decrypt_multiple(std::string);
    
 
