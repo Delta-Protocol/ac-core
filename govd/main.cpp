@@ -172,6 +172,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 #include <us/gov/crypto.h>
 #include <string.h>
 #include <iomanip>
+#include <fstream>
 #include <us/gov/cfg.h>
 
 struct cfg: filesystem::cfg {
