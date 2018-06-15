@@ -14,7 +14,7 @@ bool test_symmetric_encryption(){
 	keys b = keys::generate();
 	keys c = keys::generate();
 	
-	//test that encryption then decryption will retrieve original plaintext
+	//test that encryption then decryption will retrieve original plaintext.
 	test_encrypt_decrypt("encrypt this"																																);
 	assert(test_encrypt_decrypt(""																																	));
 	assert(test_encrypt_decrypt(",./;'#[]-=123456DFJLSKDFJERUEIUR  \n rtr"  																						));
@@ -28,10 +28,21 @@ bool test_symmetric_encryption(){
 	//test that same plaintext is encrypted to different ciphertexts.
 	assert(test_encrypt_multiple("The ciphertext should be different although the plaintext is the same"));
 
-	//test that message can't be decoded with the wrong key
+	//test that ciphertext is decrypted to the same plaintext.
+	assert(test_decrypt_multiple("The plaintext should be the same each time we decrypt"));
+
+	//test that message can't be decoded with the wrong key.
 	assert(!test_encrypt_decrypt_keys("encrypt this", a.priv,	a.pub, c.priv, b.pub));
 
+	//decrypting invalid ciphertext should return an empty vector.
+	assert(test_decrypt_nulls(""));
+	assert(test_decrypt_nulls("this string hasn't been encrypted so decryption will fail"));
+
 	return true;
+}
+
+void generateKeysAndCiphertexts(){
+	
 }
 
 bool test_encrypt_decrypt(string plaintext_string){
@@ -69,31 +80,47 @@ bool test_encrypt_multiple(string plaintext_string){
 	return ciphertext_1!=ciphertext_2;
 }
 
-bool testdecrypt(string ciphertext, string expected_result){
+bool test_decrypt_nulls(string ciphertext_string){
 	
+	keys a = keys::generate();
+	keys b = keys::generate();
+
+	vector<unsigned char> ciphertext(ciphertext_string.begin(),ciphertext_string.end());
+	symmetric_encryption se(a.priv,b.pub);
+	const vector<unsigned char> decryptedtext = se.decrypt(ciphertext);
+	return decryptedtext.empty();
+}
+
+bool test_decrypt_multiple(string plaintext_string){
+
 	keys a = keys::generate();
 	keys b = keys::generate();
 
 	vector<unsigned char> plaintext(plaintext_string.begin(),plaintext_string.end());
-
-
-}
-
-/*bool test_decrypt_multiple(string plaintext){
-
-	keys a = keys::generate();
-	keys b = keys::generate();
-
+	
 	symmetric_encryption se_a(a.priv,b.pub);
-	string ciphertext = se_a.encrypt(plaintext);
+	vector<unsigned char> ciphertext = se_a.encrypt(plaintext);
 
 	symmetric_encryption se_b(b.priv,a.pub);
-	string decodedtext1 = se_b.decrypt(ciphertext);
-	string decodedtext2 = se_b.decrypt(ciphertext);
+	const vector<unsigned char> decryptedtext1 = se_b.decrypt(plaintext);
+	const vector<unsigned char> decryptedtext2 = se_b.decrypt(plaintext);
 	
-	return decodedtext1.compare(decodedtext2)==0;
+	return decryptedtext1==decryptedtext2;
 	
-}*/
+}
+
+bool test_expected_result(string ciphertext_string, const keys::priv_t& priv_b, const keys::pub_t& pub_a, string expected_result){
+	
+	vector<unsigned char> ciphertext(ciphertext_string.begin(),ciphertext_string.end());
+	
+	symmetric_encryption se_b(priv_b,pub_a);
+	const vector<unsigned char> decryptedtext = se_b.decrypt(ciphertext);
+	string decryptedtext_string(decryptedtext.begin(),decryptedtext.end());
+
+	return decryptedtext_string==expected_result;
+}
+
+
 //other useful tests??
 //-test ciphertest different to plaintext
 //-test decoded text different to ciphertext
