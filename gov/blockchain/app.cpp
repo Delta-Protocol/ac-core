@@ -21,6 +21,7 @@ unsigned int c::get_seed() {
 #include "policies.h"
 #include <us/gov/cash/app.h>
 #include <us/gov/rep/app.h>
+#include <us/gov/nova/app.h>
 
 
 uint64_t c::delta::merge(local_delta* other) {
