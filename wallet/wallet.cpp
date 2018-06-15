@@ -425,7 +425,7 @@ cout << "nova move" << endl;
     pair<string,nova::evidence_load> ret;
     nova::evidence_load& t=ret.second;
 
-	blockchain::diff::hash_t parent_block;
+	//blockchain::diff::hash_t parent_block;
 
 	nova::app::query_compartiments_t compartiments;
 	compartiments.emplace_back(i.compartiment);
@@ -435,13 +435,15 @@ cout << "nova move" << endl;
 			ret.first="Compartiment not found";
 			return move(ret);
     }
-
+    t.compartiment=i.compartiment;
 	t.parent_block=data.parent_block;
-    
+    t.load=i.load;
+    t.item=i.item;
+//cout << "parent block " <<     t.parent_block << endl;
 
 	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
 	t.locking_program_input=generate_locking_program_input(h,i.compartiment, data.begin()->second.locking_program);
-
+t.write_pretty(cout);
 	if (i.sendover) {
 		send(t);
 //			cout << "sent." << endl;

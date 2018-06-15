@@ -28,7 +28,8 @@ void c::write_sigmsg(ec::sigmsg_hasher_t& h) const {
 
 void c::write_pretty(ostream& os) const {
 	os << "---transaction---------------" << endl;
-	os << "  item: " << item << ' ' << (load?"":"un") << "load." << endl;
+	os << "  item: " << item << endl;
+    os << "  action: " << (load?"":"un") << "load" << endl;
     b::write_pretty(os);
 	os << "-/-transaction---------------" << endl;
 }
@@ -42,7 +43,7 @@ void c::write(ostream& os) const {
 
 c c::from_b58(const string& s) {
 	string txt=crypto::b58::decode(s);
-cout << txt << endl;
+//cout << txt << endl;
 	istringstream is(txt);
 	return read(is);
 }
