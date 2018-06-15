@@ -28,17 +28,17 @@ bool c::check_input(const hash_t& compartiment, const evidence& e, const string&
 	}
 	return true;
 }
-/*
-string c::create_input(const tx& t, const size_t& this_index, const tx::sigcodes_t& sigcodes, const privkey_t& pk) {
-	ec::sigmsg_hasher_t::value_type h=t.get_hash(this_index, sigcodes);
-	return create_input(h,sigcodes,pk);
+
+string c::create_input(const evidence& t, const privkey_t& pk) {
+	ec::sigmsg_hasher_t::value_type h=t.get_hash();
+	return create_input(h,pk);
 }
 
-string c::create_input(const ec::sigmsg_hasher_t::value_type& h, const tx::sigcodes_t& sigcodes, const privkey_t& pk) {
+string c::create_input(const ec::sigmsg_hasher_t::value_type& h, const privkey_t& pk) {
 	ostringstream os;
-	os << ec::instance.sign_encode(pk,h) << ' ' << sigcodes << ' ' << keys::get_pubkey(pk);
+	os << ec::instance.sign_encode(pk,h) << ' ' << keys::get_pubkey(pk);
 	return os.str();
 }
-*/
+
 
 

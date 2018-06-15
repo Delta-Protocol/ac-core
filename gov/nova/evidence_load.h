@@ -23,6 +23,7 @@ namespace nova {
 
 	struct evidence_load: evidence {
         typedef evidence b;
+        typedef string item_t;
 
 		static evidence_load read(istream&);
 		static evidence_load from_b58(const string&);
@@ -33,7 +34,7 @@ namespace nova {
         datagram* get_datagram() const;
 
         bool load;
-		hash_t item;
+		item_t item;
 
 	};
 

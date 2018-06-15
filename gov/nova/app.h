@@ -70,17 +70,20 @@ namespace nova {
 			virtual void from_stream(istream&) override;
 
 			typedef chrono::system_clock::time_point time_point;
+             
 			struct logbook_t:vector<string> {
-				unordered_set<hash_t> items;
+                typedef evidence_load::item_t item_t;
+
+				unordered_set<item_t> items;
 				void dump(ostream& os) const {
 					os << size() << " logentries; " << items.size() << " items";
 				}
-                void rm(const hash_t& item) {
+                void rm(const item_t& item) {
                     auto i=items.find(item);
                     if (i==items.end()) return;
                     items.erase(i);
                 }
-                void add(const hash_t& item) {
+                void add(const item_t& item) {
                     auto i=items.find(item);
                     if (i!=items.end()) return;
                     items.emplace(item);

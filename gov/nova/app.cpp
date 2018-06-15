@@ -261,7 +261,7 @@ void c::local_delta::compartiment_t::dump(ostream& os) const {
 }
 
 void c::local_delta::compartiments_t::dump(ostream& os) const {
-	cout << size() << " p2sh compartiments:" << endl;
+	cout << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
 		cout << ' ' << i.first << ' ';
 		i.second.dump(os);

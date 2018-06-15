@@ -13,8 +13,8 @@ namespace nova {
 		static hash_t locking_program_hash;
 
 		static bool check_input(const hash_t& compartiment, const evidence&, const string& locking_program_input);
-//		static string create_input(const tx& t, const size_t& this_index, const tx::sigcodes_t&, const privkey_t&);
-//		static string create_input(const ec::sigmsg_hasher_t::value_type&, const tx::sigcodes_t&, const privkey_t&);
+		static string create_input(const evidence& t, const privkey_t&);
+		static string create_input(const ec::sigmsg_hasher_t::value_type&, const privkey_t&);
 	};
 /*
 	struct multisig {

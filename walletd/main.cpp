@@ -70,12 +70,16 @@ void help(const params& p, ostream& os=cout) {
     os << endl;
 	os << " -fcgi     Run as fast-cgi. [" << (p.fcgi?"yes":"no") << "]" << endl;
     os << "commands are:" << endl;
-	os << " balance [0|1]          Displays the spendable amount." << endl;
+    os << endl;
+    os << "KEYS application:" << endl;
 	os << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
 	os << " address add <privkey>  Imports a given private key in the wallet" << endl;
 	os << " dump                   Lists the keys/addresses managed by wallet" << endl;
 	os << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
 	os << " priv_key <private key> Gives information about the given private key." << endl;
+    os << endl;
+    os << "CASH application:" << endl;
+	os << " balance [0|1]          Displays the spendable amount." << endl;
 //	os << " tx base                Reports the current parent block for new transactions" << endl;
 //	os << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
 	os << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
@@ -84,9 +88,17 @@ void help(const params& p, ostream& os=cout) {
 	os << " tx send <tx_b58>" << endl;
 	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
 	os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
+    os << endl;
+    os << "PAIR application:" << endl;
     os << " pair <pubkey> <name>   authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
     os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
     os << " list_devices           Show currently paired devices." << endl;
+    os << endl;
+    os << "NOVA application:" << endl;
+	os << " nova new compartiment" << endl;
+    os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
+    os << " nova track <compartiment id> <sensors> [<send>]." << endl;
+    os << " nova sim_sensors" << endl;
 
 }
 
@@ -198,7 +210,77 @@ void tx_make(api& wapi, args_t& args, const params& p) {
 	cout << endl;
 }
 */
+#include <random>
 
+double rnd_reading(double mean,double stddev) {
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  default_random_engine generator(seed);
+  normal_distribution<double> distribution(mean,stddev);
+  return distribution(generator);
+}
+
+string sim_sensors() {
+    ostringstream os;
+    os << "Temperature: " << endl;
+    for (int i=0; i<3;++i) {
+         os << "  #" << i+1 << ": " << rnd_reading(4,2) << " °C" << endl;
+    }
+    os << "Pressure: " << endl;
+    for (int i=0; i<3;++i) {
+         os << "  #" << i+1 << ": " << rnd_reading(1,0.05) << " Bar" << endl;
+    }
+    os << "Humidity: " << endl;
+    for (int i=0; i<3;++i) {
+         os << "  #" << i+1 << ": " << rnd_reading(60,10) << " %" << endl;
+    }
+    os << "Longitude: " << rnd_reading(0,180) << " °" << endl;
+    os << "Latitude: " << rnd_reading(0,90) << " °" << endl;
+    return os.str();
+}
+
+void nova_app(api& wapi, args_t& args, const params& p) {
+	string command=args.next<string>();
+	if (command=="move") {
+        wallet::nova_move_input i;
+        i.compartiment=args.next<nova::hash_t>();
+        i.item=args.next<string>();
+        i.load=args.next<bool>();
+        i.sendover=args.next<string>("nopes")=="send";
+        wapi.nova_move(i,cout);
+//    os << " nova move <compartiment pubkey> <item pubkey> <load|unload> [<send>]   ." << endl;
+	}
+	else if (command=="track") {
+        wallet::nova_track_input i;
+        i.compartiment=args.next<nova::hash_t>();
+        i.data=args.next<string>();
+        i.sendover=args.next<string>("nopes")=="send";
+        wapi.nova_track(i,cout);
+//    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
+    }
+	else if (command=="new") {
+    	string cmd=args.next<string>();
+        if (cmd=="compartiment") {
+            cout << "Compartiment id: ";
+			wapi.new_address(cout);
+        }
+        else {
+    		help(p);
+        }
+
+//    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
+    }
+    else if (command=="sim_sensors") {
+        string raw=sim_sensors();
+        cout << raw << endl;
+        cout << crypto::b58::encode(raw) << endl;
+
+
+
+    }
+	else {
+		help(p);
+	}
+}
 
 
 void tx(api& wapi, args_t& args, const params& p) {
@@ -254,6 +336,7 @@ void tx(api& wapi, args_t& args, const params& p) {
 #include <us/wallet/api.h>
 
 int main(int argc, char** argv) {
+
 	args_t args(argc,argv);
 	params p;
 	string command=parse_options(args,p);
@@ -283,6 +366,9 @@ int main(int argc, char** argv) {
 
 	if (command=="tx") {
     	tx(wapi,args,p);
+	}
+	if (command=="nova") {
+    	nova_app(wapi,args,p);
 	}
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
@@ -315,7 +401,7 @@ int main(int argc, char** argv) {
 	else if (command=="pair") {
 		api::pub_t pub=args.next<api::pub_t>();
 	    auto name=args.next<string>();
-cout << "-- " << name << endl;
+//cout << "-- " << name << endl;
 		wapi.pair(pub,name,cout);
 	}
 	else if (command=="unpair") {
@@ -328,6 +414,7 @@ cout << "-- " << name << endl;
 	else {
 		help(p);
 	}
+//cout << "deleting" << endl;
 	delete papi;
 	return 0;
 }
