@@ -1,17 +1,20 @@
 #include "cfg.h"
 //#include "crypto.h"
+#include <string.h> //strerror
 #include <fstream>
+#include <sstream>
 #include <sys/stat.h>
 #include <cstdlib>
+#include <iostream>
 
 using namespace std;
-using namespace us::gov;
-typedef us::gov::cfg c;
+using namespace us::gov::filesystem;
+typedef us::gov::filesystem::cfg c;
 
 c::cfg() {
 }
 
-virtualc:: ~cfg() {
+c:: ~cfg() {
 }
 
 bool mkdir(const string& d) {
@@ -28,7 +31,9 @@ bool mkdir(const string& d) {
 
 bool c::ensure_dir(const string& d) {
 	if (!exists_dir(d)) {
-	        const int dir_err = system(string("mkdir -p ")+d);
+            ostringstream cmd;
+            cmd << "mkdir -p " << d;
+	        const int dir_err = system(cmd.str().c_str());
         	if (dir_err == -1) {
 	           cerr << "Error creating directory " << d << endl;
         	   return false;

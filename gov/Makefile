@@ -8,9 +8,12 @@ all: libusgov.so
 signal_handler.o: signal_handler.cpp signal_handler.h
 	g++ ${CXXFLAGS} -I../.. -c signal_handler.cpp
 
+cfg.o: cfg.cpp cfg.h
+	g++ ${CXXFLAGS} -I../.. -c cfg.cpp
 
-libusgov.so: deps signal_handler.o
-	g++ -shared -O0 -g -std=c++17 -pthread -lsecp256k1 -I../.. ${OBJS} signal_handler.o -o libusgov.so
+
+libusgov.so: deps signal_handler.o cfg.o
+	g++ -shared -O0 -g -std=c++17 -pthread -lsecp256k1 -I../.. ${OBJS} signal_handler.o cfg.o -o libusgov.so
 
 deps:
 	@for a in $$(ls); do \
