@@ -116,6 +116,11 @@ void rpc_api::nova_track(const nova_track_input& i, ostream& os) {
 	i.to_stream(si);
 	ask(us::wallet::protocol::nova_track,si.str(),os);
 }
+void rpc_api::nova_query(const nova::hash_t& i, ostream& os) {
+	ostringstream si;
+    si << i;
+	ask(us::wallet::protocol::nova_query,si.str(),os);
+}
 
 
 //----------------local api
@@ -214,5 +219,8 @@ void local_api::nova_track(const api::nova_track_input& i, ostream& os) {
     	os << tx.first << endl;
 }
 
+void local_api::nova_query(const nova::hash_t& i, ostream& os) {
+    os << wallet::nova_query(i) << endl;
+}
 
 

@@ -118,6 +118,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 
     pair<string,nova::evidence_load> nova_move(const nova_move_input& i);
     pair<string,nova::evidence_track> nova_track(const nova_track_input& i);
+    string nova_query(const nova::hash_t& compartiment);
 
 
 	void dump(ostream& os) const;

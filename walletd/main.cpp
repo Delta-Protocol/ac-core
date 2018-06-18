@@ -97,9 +97,10 @@ void help(const params& p, ostream& os=cout) {
     os << "NOVA application:" << endl;
 	os << " nova new compartiment" << endl;
     os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
-    os << " nova track <compartiment id> <sensors> [<send>]." << endl;
+    os << " nova track <compartiment id> <sensors|auto> [<send>]." << endl;
     os << " nova sim_sensors" << endl;
     os << " nova decode <txb58>" << endl;
+    os << " nova query <compartiment id>" << endl;
 
 }
 
@@ -265,6 +266,11 @@ void nova_app(api& wapi, args_t& args, const params& p) {
         wallet::nova_track_input i;
         i.compartiment=args.next<nova::hash_t>();
         i.data=args.next<string>();
+        if (i.data=="auto") {
+            i.data=crypto::b58::encode(sim_sensors());
+            cout << "sim sensors:" << endl;
+            cout << crypto::b58::decode(i.data) << endl;
+        }
         i.sendover=args.next<string>("nopes")=="send";
         wapi.nova_track(i,cout);
 //    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
@@ -293,6 +299,8 @@ void nova_app(api& wapi, args_t& args, const params& p) {
     	string txb58=args.next<string>();
 	    nova::evidence_load t=nova::evidence_load::from_b58(txb58);
 	    t.write_pretty(cout);
+    }
+	else if (command=="query") {
     }
 	else {
 		help(p);
