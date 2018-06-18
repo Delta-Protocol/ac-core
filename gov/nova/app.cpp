@@ -277,6 +277,21 @@ void c::local_delta::compartiments_t::dump(ostream& os) const {
 	p2sh.dump(os);
 */
 }
+void c::local_delta::compartiment_t::pretty_print(ostream& os) const {
+    os << "locking_program " << locking_program << "; data:" << endl;
+    logbook.pretty_print(os); // << "; spend code " << spend_code;
+}
+
+void c::local_delta::compartiments_t::pretty_print(ostream& os) const {
+	cout << size() << " compartiments:" << endl;
+	for (auto& i:*this) {
+		cout << "compartiment " << i.first << ' ';
+		i.second.pretty_print(os);
+		//os << endl;
+	}
+}
+
+
 void c::local_delta::compartiments_t::dump_brief(ostream& os) const {
 	cout << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
@@ -963,6 +978,22 @@ void c::local_delta::logbook_t::dump(ostream& os) const {
 //	os << size() << " logentries; " << items.size() << " items";
 
 }
+
+void c::local_delta::logbook_t::pretty_print(ostream& os) const {
+	os << size() << " log entries: " << endl;
+    int n=0;
+    for (auto&i:*this) {
+        os << "#" << n++ << ":" << endl;
+        os << crypto::b58::decode(i) << endl;
+        os << endl;
+    }
+	os << items.size() << " items: " << endl;
+    for (auto&i:items) {
+        os << i << ' ';
+    }
+    os << endl;
+}
+
 
 void c::local_delta::logbook_t::to_stream(ostream& os) const {
     os << size() << ' ';

@@ -77,6 +77,7 @@ namespace nova {
 				unordered_set<item_t> items;
 				void dump(ostream& os) const;
 				void dump_brief(ostream& os) const;
+				void pretty_print(ostream& os) const;
 
                 void rm(const item_t& item) {
                     auto i=items.find(item);
@@ -107,6 +108,8 @@ namespace nova {
 
 				void dump(ostream& os) const;
 				void dump_brief(ostream& os) const;
+				void pretty_print(ostream& os) const;
+
 				void to_stream(ostream& os) const;
 				static compartiment_t from_stream(istream& is);
 			};
@@ -129,6 +132,7 @@ namespace nova {
 				
 				void dump(ostream& os) const;
 				void dump_brief(ostream& os) const;
+				void pretty_print(ostream& os) const;
 				//bool pay(const hash_t& k, const cash_t& amount);
 				//bool withdraw(const hash_t& k, const cash_t& amount);
 			};
