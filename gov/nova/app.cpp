@@ -271,11 +271,7 @@ void c::local_delta::compartiments_t::dump(ostream& os) const {
 		i.second.dump(os);
 		//os << endl;
 	}
-/*
-	p2pkh.dump(os);
-	stdtx.dump(os);
-	p2sh.dump(os);
-*/
+
 }
 void c::local_delta::compartiment_t::pretty_print(ostream& os) const {
     os << "locking_program " << locking_program << "; data:" << endl;
@@ -304,7 +300,7 @@ void c::local_delta::compartiments_t::dump_brief(ostream& os) const {
 void c::db_t::dump(ostream& os) const {
 	cout << "nova app db dump" << endl;
 	lock_guard<mutex> lock(mx);
-	compartiments->dump(os);
+	compartiments->dump_brief(os);
 	//cout << "supply_left " << supply_left << " block_reward " << block_reward << endl;
 }
 
