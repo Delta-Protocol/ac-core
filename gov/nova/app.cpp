@@ -936,12 +936,12 @@ c::local_delta::compartiment_t::compartiment_t(const hash_t& locking_program, co
 void c::local_delta::logbook_t::dump(ostream& os) const {
 	os << size() << " logentries: " << endl;
     for (auto&i:*this) {
-        os << *i << endl;
+        os << i << endl;
         os << "---" << endl;
     }
 	os << items.size() << " items: " << endl;
     for (auto&i:items) {
-        os << *i << ' ';
+        os << i << ' ';
     }
     os << endl;
 
