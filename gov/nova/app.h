@@ -106,6 +106,7 @@ namespace nova {
     			void compute_hash(hasher_t&) const;
 
 				void dump(ostream& os) const;
+				void dump_brief(ostream& os) const;
 				void to_stream(ostream& os) const;
 				static compartiment_t from_stream(istream& is);
 			};

@@ -259,6 +259,10 @@ void c::local_delta::compartiment_t::dump(ostream& os) const {
  os << "locking_program " << locking_program << "; data:" << endl;
  logbook.dump(os); // << "; spend code " << spend_code;
 }
+void c::local_delta::compartiment_t::dump_brief(ostream& os) const {
+ os << "locking_program " << locking_program << "; data:" << endl;
+ logbook.dump_brief(os); // << "; spend code " << spend_code;
+}
 
 void c::local_delta::compartiments_t::dump(ostream& os) const {
 	cout << size() << " compartiments:" << endl;
