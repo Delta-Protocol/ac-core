@@ -455,7 +455,36 @@ t.write_pretty(cout);
 }
 
 pair<string,nova::evidence_track> c::nova_track(const nova_track_input& i) {
+cout << "nova move" << endl;
 
+    pair<string,nova::evidence_track> ret;
+    nova::evidence_track& t=ret.second;
+
+	//blockchain::diff::hash_t parent_block;
+
+	nova::app::query_compartiments_t compartiments;
+	compartiments.emplace_back(i.compartiment);
+
+	auto data=query_compartiments(compartiments);
+    if (data.size()!=1) {
+			ret.first="Compartiment not found";
+			return move(ret);
+    }
+    t.compartiment=i.compartiment;
+	t.parent_block=data.parent_block;
+    t.data=i.data;
+
+//cout << "parent block " <<     t.parent_block << endl;
+
+	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
+	t.locking_program_input=generate_locking_program_input(h,i.compartiment,data.begin()->second.locking_program==0?1:data.begin()->second.locking_program);
+t.write_pretty(cout);
+	if (i.sendover) {
+		send(t);
+//			cout << "sent." << endl;
+	}
+
+    return move(ret);
 }
 
 

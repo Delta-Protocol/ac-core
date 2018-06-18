@@ -643,93 +643,29 @@ bool c::process(const evidence_load& e) {
 		cout << "SGT-02-tx.rejected - base mismatch - " << e.parent_block << " != base:" << last_block_imported << endl; 
 		return false;
 	}
-/*
-	cash_t min_fee;
-	{
-	lock_guard<mutex> lock(mx_policies);
-	min_fee=policies[policies_traits::minimum_fee];
-	}
-*/
-//	if (min_fee<0) return false;
-//cout << "SGT-02-tx.check (I>O,fees) " << endl; 
-
-//	auto fee=t.check();
-//	if (fee<min_fee) return false;
-
-	//tx verification
-
-//	auto seed=parent->get_seed();
 
 	local_delta::batch_t batch;
 
-//	compartiments_t::undo_t undo;
-//	undo.reserve(t.inputs.size());
-
-//	hash_t lp;
-//	cash_t balance;
 	compartiment_t state; 
 
-//cout << "SGT-02-tx.I size " << t.inputs.size() << endl; 
-//	for (size_t j=0; j<t.inputs.size(); ++j) {
-//		auto& i=t.inputs[j];
-//
-		if (!fetch_compartiment(batch,e.compartiment,state)) {
-//cout << "SGT-02-ev_load " << " fetch_compartiment returned false.DENIED " << endl; 
-//			return false;
-            state.locking_program=1;
-		}
+	if (!fetch_compartiment(batch,e.compartiment,state)) {
+        state.locking_program=1;
+	}
 
-//cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
-		if (!unlock(e.compartiment,state.locking_program, e.locking_program_input, e)) {
+	if (!unlock(e.compartiment,state.locking_program, e.locking_program_input, e)) {
 cout << "SGT-02-tx.  UNABLE TO UNLOCK. denied." << endl; 
-			return false;
-		}
+		return false;
+	}
 cout << "SGT-03-tx.  UNLOCKED." << endl; 
 
-        if (e.load) {
-    		state.logbook.add(e.item);
-        }
-        else {
-    		state.logbook.rm(e.item);
-        }
-//cout << "SGT-02-tx.Input #" << j << " BATCH ADD.." << endl; 
-		batch.add(e.compartiment,state);
-//cout << "SGT-02-tx.Input #" << j << " final balance " << state.balance << endl; 
+    if (e.load) {
+		state.logbook.add(e.item);
+    }
+    else {
+		state.logbook.rm(e.item);
+    }
+	batch.add(e.compartiment,state);
 
-/*
-		if (!db.withdraw_(seed, i.spend_code, i.address, i.amount, undo)) {
-			db.compartiments.rollback(undo);
-			return false;
-		}
-*/
-//	}
-
-//cout << "SGT-02-tx.Output size " << t.outputs.size() << endl; 
-/*
-	for (size_t j=0; j<t.outputs.size(); ++j) {
-		auto& i=t.outputs[j];
-cout << "SGT-02-tx.Output #" << j << " addr " << i.address << endl; 
-		if (fetch_compartiment(batch,i.address,state)) { 
-			if (unlikely(state.balance!=0 && state.locking_program!=i.locking_program)) { //locking program can only be replaced when balance is 0
-cout << "SGT-02-tx.Output #" << j << " locking program can only be replaced when balance is 0. DENIED." << endl; 
-				return false;
-			}
-			state.balance+=i.amount;
-		}
-		else { //new output
-cout << "SGT-02-tx.Output #" << j << " NEW OUTPUT " << endl; 
-			state.locking_program=i.locking_program;
-			state.balance=i.amount;
-		}
-
-
-		batch.add(i.address,state);
-cout << "SGT-02-tx.Output #" << j << " added to batch." << endl; 
-	}
-*/
-//	pool->fees+=1;
-
-//cout << "SGT-02-tx ADD BATCH TO POOL; pool->fees=" << pool->fees << " fee=" << fee << endl;
 	pool->compartiments.add(batch);
 cout << "SGT-02-tx OK" << endl; 
 	return true;
@@ -754,8 +690,9 @@ bool c::process(const evidence_track& e) {
 	compartiment_t state; 
 
 	if (!fetch_compartiment(batch,e.compartiment,state)) {
-cout << "SGT-02-ev_load " << " fetch_compartiment returned false.DENIED " << endl; 
-		return false;
+cout << "SGT-02-ev_load " << " fetch_compartiment returned false.CREATING compartiment " << endl; 
+        state.locking_program=1;
+//		return false;
 	}
 
 //cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
