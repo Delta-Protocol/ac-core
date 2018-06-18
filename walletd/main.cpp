@@ -284,16 +284,11 @@ void nova_app(api& wapi, args_t& args, const params& p) {
         else {
     		help(p);
         }
-
-//    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
     }
     else if (command=="sim_sensors") {
         string raw=sim_sensors();
         cout << raw << endl;
         cout << crypto::b58::encode(raw) << endl;
-
-
-
     }
     else if (command=="decode") {
     	string txb58=args.next<string>();
@@ -301,6 +296,9 @@ void nova_app(api& wapi, args_t& args, const params& p) {
 	    t.write_pretty(cout);
     }
 	else if (command=="query") {
+        auto compartiment=args.next<nova::hash_t>();
+        wapi.nova_query(compartiment,cout);
+        
     }
 	else {
 		help(p);

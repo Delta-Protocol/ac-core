@@ -256,7 +256,7 @@ void c::compartiments_t::p2sh_t::dump(ostream& os) const {
 */
 
 void c::local_delta::compartiment_t::dump(ostream& os) const {
- os << "locking_program " << locking_program << "; data ";
+ os << "locking_program " << locking_program << "; data:" << endl;
  logbook.dump(os); // << "; spend code " << spend_code;
 }
 
@@ -931,6 +931,22 @@ c::local_delta::compartiment_t::compartiment_t() {
 }
 
 c::local_delta::compartiment_t::compartiment_t(const hash_t& locking_program, const logbook_t& lb): locking_program(locking_program), logbook(lb) {
+}
+
+void c::local_delta::logbook_t::dump(ostream& os) const {
+	os << size() << " logentries: " << endl;
+    for (auto&i:*this) {
+        os << *i << endl;
+        os << "---" << endl;
+    }
+	os << items.size() << " items: " << endl;
+    for (auto&i:items) {
+        os << *i << ' ';
+    }
+    os << endl;
+
+//	os << size() << " logentries; " << items.size() << " items";
+
 }
 
 void c::local_delta::logbook_t::to_stream(ostream& os) const {

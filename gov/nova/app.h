@@ -75,9 +75,8 @@ namespace nova {
                 typedef evidence_load::item_t item_t;
 
 				unordered_set<item_t> items;
-				void dump(ostream& os) const {
-					os << size() << " logentries; " << items.size() << " items";
-				}
+				void dump(ostream& os) const;
+
                 void rm(const item_t& item) {
                     auto i=items.find(item);
                     if (i==items.end()) return;
