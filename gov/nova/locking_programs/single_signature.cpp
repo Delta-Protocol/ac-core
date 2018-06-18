@@ -33,12 +33,18 @@ cout << "verify failed: " << pk << " " << h << " " << signature_der_b58 << endl;
 
 string c::create_input(const evidence& t, const privkey_t& pk) {
 	ec::sigmsg_hasher_t::value_type h=t.get_hash();
+cout << "XXX " << t.compartiment << " ==? " << keys::get_pubkey(pk) << endl;
 	return create_input(h,pk);
 }
 
 string c::create_input(const ec::sigmsg_hasher_t::value_type& h, const privkey_t& pk) {
 	ostringstream os;
+cout << "signing with privk " << pk << " pubk " << keys::get_pubkey(pk) << " hashmsg " << h << " signature " << ec::instance.sign_encode(pk,h) << endl;
 	os << ec::instance.sign_encode(pk,h) << ' ' << keys::get_pubkey(pk);
+
+    string input=os.str();
+    cout << "input: " << input << endl;
+
 	return os.str();
 }
 

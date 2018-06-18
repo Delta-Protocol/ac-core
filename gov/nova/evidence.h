@@ -46,6 +46,7 @@ namespace nova {
 		string to_b58() const;
 
 		hash_t compartiment;
+		hash_t locking_program;
 
         string locking_program_input;
 		blockchain::diff::hash_t parent_block;

@@ -440,10 +440,11 @@ cout << "nova move" << endl;
 	t.parent_block=data.parent_block;
     t.load=i.load;
     t.item=i.item;
+
 //cout << "parent block " <<     t.parent_block << endl;
 
 	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
-	t.locking_program_input=generate_locking_program_input(h,i.compartiment, data.begin()->second.locking_program==0?1:data.begin()->second.locking_program);
+	t.locking_program_input=generate_locking_program_input(h,i.compartiment,data.begin()->second.locking_program==0?1:data.begin()->second.locking_program);
 t.write_pretty(cout);
 	if (i.sendover) {
 		send(t);
