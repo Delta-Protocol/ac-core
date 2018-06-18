@@ -1144,6 +1144,7 @@ void c::db_t::clear() {
 }
 
 void c::dbhash(hasher_t&) const {
+assert(false);
 }
 
 void c::clear() {

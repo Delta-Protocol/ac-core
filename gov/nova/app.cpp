@@ -681,9 +681,10 @@ bool c::process(const evidence_load& e) {
 
 //cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
 		if (!unlock(e.compartiment,state.locking_program, e.locking_program_input, e)) {
-//cout << "SGT-02-tx.Input #" << j << " UNABLE TO UNLOCK. denied." << endl; 
+cout << "SGT-02-tx.  UNABLE TO UNLOCK. denied." << endl; 
 			return false;
 		}
+cout << "SGT-03-tx.  UNLOCKED." << endl; 
 
         if (e.load) {
     		state.logbook.add(e.item);
@@ -926,9 +927,9 @@ string c::shell_command(const string& cmdline) {
 		dump_policies(os);
 	}
 	else if (cmd=="mempool") {
+        os << "mempool:" << endl;
     	lock_guard<mutex> lock(mx_pool);
         pool->compartiments.dump(os);
-        //os << "fees: " << pool->fees << endl;
         
     }
 	else if (cmd=="exit") {
@@ -948,6 +949,7 @@ void c::db_t::clear() {
 }
 
 void c::dbhash(hasher_t&) const {
+assert(false);
 }
 
 void c::clear() {
