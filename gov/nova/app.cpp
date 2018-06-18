@@ -268,7 +268,7 @@ void c::local_delta::compartiments_t::dump(ostream& os) const {
 	cout << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
 		cout << ' ' << i.first << ' ';
-		i.second.dump_brief(os);
+		i.second.dump(os);
 		//os << endl;
 	}
 /*
@@ -276,6 +276,14 @@ void c::local_delta::compartiments_t::dump(ostream& os) const {
 	stdtx.dump(os);
 	p2sh.dump(os);
 */
+}
+void c::local_delta::compartiments_t::dump_brief(ostream& os) const {
+	cout << size() << " compartiments:" << endl;
+	for (auto& i:*this) {
+		cout << ' ' << i.first << ' ';
+		i.second.dump_brief(os);
+		//os << endl;
+	}
 }
 
 void c::db_t::dump(ostream& os) const {

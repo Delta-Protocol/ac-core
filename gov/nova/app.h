@@ -128,6 +128,7 @@ namespace nova {
 
 				
 				void dump(ostream& os) const;
+				void dump_brief(ostream& os) const;
 				//bool pay(const hash_t& k, const cash_t& amount);
 				//bool withdraw(const hash_t& k, const cash_t& amount);
 			};
