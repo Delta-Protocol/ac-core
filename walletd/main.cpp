@@ -222,7 +222,13 @@ double rnd_reading(double mean,double stddev) {
 }
 
 string sim_sensors() {
+    time_t now;
+    time(&now);
+    char buf[sizeof "2018-06-08T07:07:09Z"];
+    strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+
     ostringstream os;
+    os << "Time: " << buf << endl;
     os << "Temperature: " << endl;
     for (int i=0; i<3;++i) {
          os << "  #" << i+1 << ": " << rnd_reading(4,2) << " °C" << endl;
