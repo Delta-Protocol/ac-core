@@ -76,6 +76,7 @@ namespace nova {
 
 				unordered_set<item_t> items;
 				void dump(ostream& os) const;
+				void dump_brief(ostream& os) const;
 
                 void rm(const item_t& item) {
                     auto i=items.find(item);

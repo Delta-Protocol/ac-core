@@ -264,8 +264,8 @@ void c::local_delta::compartiments_t::dump(ostream& os) const {
 	cout << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
 		cout << ' ' << i.first << ' ';
-		i.second.dump(os);
-		os << endl;
+		i.second.dump_brief(os);
+		//os << endl;
 	}
 /*
 	p2pkh.dump(os);
@@ -933,6 +933,9 @@ c::local_delta::compartiment_t::compartiment_t() {
 c::local_delta::compartiment_t::compartiment_t(const hash_t& locking_program, const logbook_t& lb): locking_program(locking_program), logbook(lb) {
 }
 
+void c::local_delta::logbook_t::dump_brief(ostream& os) const {
+	os << size() << " logentries; " << items.size() << " items" << endl;
+}
 void c::local_delta::logbook_t::dump(ostream& os) const {
 	os << size() << " logentries: " << endl;
     for (auto&i:*this) {
