@@ -27,6 +27,7 @@ void c::write_sigmsg(ec::sigmsg_hasher_t& h) const {
 void c::write_pretty(ostream& os) const {
 	os << "---transaction---------------" << endl;
 	os << "  data: " << data << endl;
+	os << crypto::b58::decode(data) << endl;
     b::write_pretty(os);
 	os << "-/-transaction---------------" << endl;
 }

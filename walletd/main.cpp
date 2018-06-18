@@ -99,7 +99,8 @@ void help(const params& p, ostream& os=cout) {
     os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
     os << " nova track <compartiment id> <sensors|auto> [<send>]." << endl;
     os << " nova sim_sensors" << endl;
-    os << " nova decode <txb58>" << endl;
+    os << " nova decode_move <txb58>" << endl;
+    os << " nova decode_track <txb58>" << endl;
     os << " nova query <compartiment id>" << endl;
 
 }
@@ -296,9 +297,14 @@ void nova_app(api& wapi, args_t& args, const params& p) {
         cout << raw << endl;
         cout << crypto::b58::encode(raw) << endl;
     }
-    else if (command=="decode") {
+    else if (command=="decode_move") {
     	string txb58=args.next<string>();
 	    nova::evidence_load t=nova::evidence_load::from_b58(txb58);
+	    t.write_pretty(cout);
+    }
+    else if (command=="decode_track") {
+    	string txb58=args.next<string>();
+	    nova::evidence_track t=nova::evidence_track::from_b58(txb58);
 	    t.write_pretty(cout);
     }
 	else if (command=="query") {

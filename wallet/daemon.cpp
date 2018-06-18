@@ -162,6 +162,17 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
         }
         break;
+		case us::wallet::protocol::nova_query: {
+			string s=d->parse_string();
+            istringstream is(s);
+            nova::hash_t h;
+            is >> h;
+			ostringstream ans;
+			local_api::nova_query(h,ans);
+			return send_response(c,d,ans.str());
+        }
+        break;
+
 		default: break;
 	}
 	return false;
