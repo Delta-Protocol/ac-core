@@ -22,7 +22,7 @@ public class SymmetricEncryption {
         cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
         iv = new byte[iv_size];
         EllipticCryptography ellipticCryptography = EllipticCryptography.getInstance();
-        key = ellipticCryptography.GenerateSharedKey(privA,pubB);
+        key = ellipticCryptography.generateSharedKey(privA,pubB);
     }
   
     public byte[] encrypt(byte[] plaintext) throws Exception {

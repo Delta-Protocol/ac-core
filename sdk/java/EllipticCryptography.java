@@ -29,17 +29,20 @@ public class EllipticCryptography{
         secureRandom = new SecureRandom();
     }
 
-    public SecretKey GeneratePrivateKey(){
-        ECKeyPairGenerator generator = new ECKeyPairGenerator();
-            ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curve, secureRandom);
-            generator.init(keygenParams);
-            AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
+    public SecretKey generatePrivateKey(){
+            AsymmetricCipherKeyPair = generateKeyPair();
             ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-            
             return privParams.getD();
     }
 
-    public static SecretKey GenerateSharedKey(SecretKey privKeyA, ECPoint pubKeyB)
+    public AsymmetricCipherKeyPair generateKeyPair(){
+        ECKeyPairGenerator generator = new ECKeyPairGenerator();
+        ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curve, secureRandom);
+        generator.init(keygenParams);
+        return generator.generateKeyPair();
+    }
+
+    public static SecretKey generateSharedKey(SecretKey privKeyA, ECPoint pubKeyB)
             throws Exception {
                 KeyAgreement aKA = KeyAgreement.getInstance("ECDH", "SC");
                 aKA.init(privKeyA);
@@ -48,7 +51,7 @@ public class EllipticCryptography{
             return aKA.generateSecret();
     }
 
-    public static ECPoint PublicPointFromPrivate(BigInteger privKey) {
+    public static ECPoint publicPointFromPrivate(BigInteger privKey) {
         /*
          * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group order,
          * but that could change in future versions.

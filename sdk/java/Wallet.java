@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.SecureRandom;
-import android.content.Context;
 import android.content.ContextWrapper;
 
 public class Wallet {
@@ -74,7 +73,7 @@ public class Wallet {
             //      }
             
             EllipticCryptography ec = EllipticCryptography.getInstance();
-            String fileContents = ec.GeneratePrivateKey().toString();
+            String fileContents = ec.generatePrivateKey().toString();
             //log+=";"+fileContents.length();
             FileOutputStream outputStream;
 
