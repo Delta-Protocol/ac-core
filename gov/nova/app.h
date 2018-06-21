@@ -75,9 +75,10 @@ namespace nova {
                 typedef evidence_load::item_t item_t;
 
 				unordered_set<item_t> items;
-				void dump(ostream& os) const {
-					os << size() << " logentries; " << items.size() << " items";
-				}
+				void dump(ostream& os) const;
+				void dump_brief(ostream& os) const;
+				void pretty_print(ostream& os) const;
+
                 void rm(const item_t& item) {
                     auto i=items.find(item);
                     if (i==items.end()) return;
@@ -106,6 +107,9 @@ namespace nova {
     			void compute_hash(hasher_t&) const;
 
 				void dump(ostream& os) const;
+				void dump_brief(ostream& os) const;
+				void pretty_print(ostream& os) const;
+
 				void to_stream(ostream& os) const;
 				static compartiment_t from_stream(istream& is);
 			};
@@ -127,6 +131,8 @@ namespace nova {
 
 				
 				void dump(ostream& os) const;
+				void dump_brief(ostream& os) const;
+				void pretty_print(ostream& os) const;
 				//bool pay(const hash_t& k, const cash_t& amount);
 				//bool withdraw(const hash_t& k, const cash_t& amount);
 			};

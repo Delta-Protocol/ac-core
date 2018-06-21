@@ -97,9 +97,11 @@ void help(const params& p, ostream& os=cout) {
     os << "NOVA application:" << endl;
 	os << " nova new compartiment" << endl;
     os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
-    os << " nova track <compartiment id> <sensors> [<send>]." << endl;
+    os << " nova track <compartiment id> <sensors|auto> [<send>]." << endl;
     os << " nova sim_sensors" << endl;
-    os << " nova decode <txb58>" << endl;
+    os << " nova decode_move <txb58>" << endl;
+    os << " nova decode_track <txb58>" << endl;
+    os << " nova query <compartiment id>" << endl;
 
 }
 
@@ -221,7 +223,13 @@ double rnd_reading(double mean,double stddev) {
 }
 
 string sim_sensors() {
+    time_t now;
+    time(&now);
+    char buf[sizeof "2018-06-08T07:07:09Z"];
+    strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+
     ostringstream os;
+    os << "Time: " << buf << endl;
     os << "Temperature: " << endl;
     for (int i=0; i<3;++i) {
          os << "  #" << i+1 << ": " << rnd_reading(4,2) << " °C" << endl;
@@ -265,6 +273,11 @@ void nova_app(api& wapi, args_t& args, const params& p) {
         wallet::nova_track_input i;
         i.compartiment=args.next<nova::hash_t>();
         i.data=args.next<string>();
+        if (i.data=="auto") {
+            i.data=crypto::b58::encode(sim_sensors());
+            cout << "sim sensors:" << endl;
+            cout << crypto::b58::decode(i.data) << endl;
+        }
         i.sendover=args.next<string>("nopes")=="send";
         wapi.nova_track(i,cout);
 //    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
@@ -278,21 +291,26 @@ void nova_app(api& wapi, args_t& args, const params& p) {
         else {
     		help(p);
         }
-
-//    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
     }
     else if (command=="sim_sensors") {
         string raw=sim_sensors();
         cout << raw << endl;
         cout << crypto::b58::encode(raw) << endl;
-
-
-
     }
-    else if (command=="decode") {
+    else if (command=="decode_move") {
     	string txb58=args.next<string>();
 	    nova::evidence_load t=nova::evidence_load::from_b58(txb58);
 	    t.write_pretty(cout);
+    }
+    else if (command=="decode_track") {
+    	string txb58=args.next<string>();
+	    nova::evidence_track t=nova::evidence_track::from_b58(txb58);
+	    t.write_pretty(cout);
+    }
+	else if (command=="query") {
+        auto compartiment=args.next<nova::hash_t>();
+        wapi.nova_query(compartiment,cout);
+        
     }
 	else {
 		help(p);

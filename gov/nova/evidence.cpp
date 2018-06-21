@@ -14,6 +14,7 @@ using namespace std;
 
 void c::read(c& t, istream& is) {
 	is >> t.compartiment;
+	is >> t.locking_program;
 	string locking_program_input_b58;
 	is >> locking_program_input_b58;
 	t.locking_program_input=crypto::b58::decode(locking_program_input_b58);
@@ -23,18 +24,21 @@ void c::read(c& t, istream& is) {
 
 void c::write_sigmsg(ec::sigmsg_hasher_t& h) const {
 	h.write(compartiment);
-	h.write(locking_program_input);
+	h.write(locking_program);
 	h.write(parent_block);
 }
 
 
 void c::write_pretty(ostream& os) const {
 	os << "  compartiment: " << compartiment << endl;
+	os << "  locking_program: " << locking_program << endl;
 	os << "  parent_block: " << parent_block << endl;
+	os << "  locking-program input: " << locking_program_input << endl;
 }
 
 void c::write(ostream& os) const {
 	os << compartiment << ' ';
+	os << locking_program << ' ';
 	os << crypto::b58::encode(locking_program_input.empty()?"-":locking_program_input) << ' ';
 	os << parent_block << ' ';
 }

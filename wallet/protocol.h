@@ -24,6 +24,7 @@ namespace protocol {
 
 	static constexpr uint16_t nova_move{wallet_base+13}; //item is associated with a compartiment
 	static constexpr uint16_t nova_track{wallet_base+14}; // compartiment status
+	static constexpr uint16_t nova_query{wallet_base+15}; // compartiment status
 
 	static constexpr uint16_t response{wallet_base+0};
 

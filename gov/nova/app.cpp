@@ -89,7 +89,7 @@ cout << "SGT-01-RECEIVED EVIDENCE" << endl; //settlement go throught
 	switch(d->service) {
 		case protocol::nova_evidence_load: {
 			string payload=d->parse_string();
-cout << "SGT-01-CASH TX " << payload << endl; 
+cout << "SGT-01-NOVA TX MOVE " << payload << endl; 
 			delete d;
 			evidence_load t=evidence_load::from_b58(payload);
 t.write_pretty(cout);
@@ -98,7 +98,7 @@ t.write_pretty(cout);
 		} break;
 		case protocol::nova_evidence_track: {
 			string payload=d->parse_string();
-cout << "SGT-01-CASH TX " << payload << endl; 
+cout << "SGT-01-NOVA TX TRACK " << payload << endl; 
 			delete d;
 			evidence_track t=evidence_track::from_b58(payload);
 t.write_pretty(cout);
@@ -130,7 +130,7 @@ c::query_compartiments_t c::query_compartiments_t::from_datagram(datagram*d) {
 }
 
 void c::compartiment_query(peer_t *c, datagram*d) {
-cout << "CASH_QUERY" << endl;
+cout << "COMPARTIMENT_QUERY" << endl;
 	query_compartiments_t q=query_compartiments_t::from_datagram(d);
 
 	ostringstream os;
@@ -256,8 +256,12 @@ void c::compartiments_t::p2sh_t::dump(ostream& os) const {
 */
 
 void c::local_delta::compartiment_t::dump(ostream& os) const {
- os << "locking_program " << locking_program << "; data ";
+ os << "locking_program " << locking_program << "; data:" << endl;
  logbook.dump(os); // << "; spend code " << spend_code;
+}
+void c::local_delta::compartiment_t::dump_brief(ostream& os) const {
+ os << "locking_program " << locking_program << "; data:" << endl;
+ logbook.dump_brief(os); // << "; spend code " << spend_code;
 }
 
 void c::local_delta::compartiments_t::dump(ostream& os) const {
@@ -265,19 +269,38 @@ void c::local_delta::compartiments_t::dump(ostream& os) const {
 	for (auto& i:*this) {
 		cout << ' ' << i.first << ' ';
 		i.second.dump(os);
-		os << endl;
+		//os << endl;
 	}
-/*
-	p2pkh.dump(os);
-	stdtx.dump(os);
-	p2sh.dump(os);
-*/
+
+}
+void c::local_delta::compartiment_t::pretty_print(ostream& os) const {
+    os << "locking_program " << locking_program << "; data:" << endl;
+    logbook.pretty_print(os); // << "; spend code " << spend_code;
+}
+
+void c::local_delta::compartiments_t::pretty_print(ostream& os) const {
+	cout << size() << " compartiments:" << endl;
+	for (auto& i:*this) {
+		cout << "compartiment " << i.first << ' ';
+		i.second.pretty_print(os);
+		//os << endl;
+	}
+}
+
+
+void c::local_delta::compartiments_t::dump_brief(ostream& os) const {
+	cout << size() << " compartiments:" << endl;
+	for (auto& i:*this) {
+		cout << ' ' << i.first << ' ';
+		i.second.dump_brief(os);
+		//os << endl;
+	}
 }
 
 void c::db_t::dump(ostream& os) const {
-	cout << "cash app db dump" << endl;
+	cout << "nova app db dump" << endl;
 	lock_guard<mutex> lock(mx);
-	compartiments->dump(os);
+	compartiments->dump_brief(os);
 	//cout << "supply_left " << supply_left << " block_reward " << block_reward << endl;
 }
 
@@ -472,7 +495,7 @@ cash_t c::db_t::get_newcash() { //db lock must be acquired
 }
 */
 void c::import(const blockchain::app::delta& gg, const blockchain::pow_t& w) {
-cout << "cash: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
+cout << "nova: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(mx_policies);
@@ -643,91 +666,29 @@ bool c::process(const evidence_load& e) {
 		cout << "SGT-02-tx.rejected - base mismatch - " << e.parent_block << " != base:" << last_block_imported << endl; 
 		return false;
 	}
-/*
-	cash_t min_fee;
-	{
-	lock_guard<mutex> lock(mx_policies);
-	min_fee=policies[policies_traits::minimum_fee];
-	}
-*/
-//	if (min_fee<0) return false;
-//cout << "SGT-02-tx.check (I>O,fees) " << endl; 
-
-//	auto fee=t.check();
-//	if (fee<min_fee) return false;
-
-	//tx verification
-
-//	auto seed=parent->get_seed();
 
 	local_delta::batch_t batch;
 
-//	compartiments_t::undo_t undo;
-//	undo.reserve(t.inputs.size());
-
-//	hash_t lp;
-//	cash_t balance;
 	compartiment_t state; 
 
-//cout << "SGT-02-tx.I size " << t.inputs.size() << endl; 
-//	for (size_t j=0; j<t.inputs.size(); ++j) {
-//		auto& i=t.inputs[j];
-//
-		if (!fetch_compartiment(batch,e.compartiment,state)) {
-cout << "SGT-02-ev_load " << " fetch_compartiment returned false.DENIED " << endl; 
-			return false;
-		}
-
-//cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
-		if (!unlock(e.compartiment,state.locking_program, e.locking_program_input, e)) {
-//cout << "SGT-02-tx.Input #" << j << " UNABLE TO UNLOCK. denied." << endl; 
-			return false;
-		}
-
-        if (e.load) {
-    		state.logbook.add(e.item);
-        }
-        else {
-    		state.logbook.rm(e.item);
-        }
-//cout << "SGT-02-tx.Input #" << j << " BATCH ADD.." << endl; 
-		batch.add(e.compartiment,state);
-//cout << "SGT-02-tx.Input #" << j << " final balance " << state.balance << endl; 
-
-/*
-		if (!db.withdraw_(seed, i.spend_code, i.address, i.amount, undo)) {
-			db.compartiments.rollback(undo);
-			return false;
-		}
-*/
-//	}
-
-//cout << "SGT-02-tx.Output size " << t.outputs.size() << endl; 
-/*
-	for (size_t j=0; j<t.outputs.size(); ++j) {
-		auto& i=t.outputs[j];
-cout << "SGT-02-tx.Output #" << j << " addr " << i.address << endl; 
-		if (fetch_compartiment(batch,i.address,state)) { 
-			if (unlikely(state.balance!=0 && state.locking_program!=i.locking_program)) { //locking program can only be replaced when balance is 0
-cout << "SGT-02-tx.Output #" << j << " locking program can only be replaced when balance is 0. DENIED." << endl; 
-				return false;
-			}
-			state.balance+=i.amount;
-		}
-		else { //new output
-cout << "SGT-02-tx.Output #" << j << " NEW OUTPUT " << endl; 
-			state.locking_program=i.locking_program;
-			state.balance=i.amount;
-		}
-
-
-		batch.add(i.address,state);
-cout << "SGT-02-tx.Output #" << j << " added to batch." << endl; 
+	if (!fetch_compartiment(batch,e.compartiment,state)) {
+        state.locking_program=1;
 	}
-*/
-//	pool->fees+=1;
 
-//cout << "SGT-02-tx ADD BATCH TO POOL; pool->fees=" << pool->fees << " fee=" << fee << endl;
+	if (!unlock(e.compartiment,state.locking_program, e.locking_program_input, e)) {
+cout << "SGT-02-tx.  UNABLE TO UNLOCK. denied." << endl; 
+		return false;
+	}
+cout << "SGT-03-tx.  UNLOCKED." << endl; 
+
+    if (e.load) {
+		state.logbook.add(e.item);
+    }
+    else {
+		state.logbook.rm(e.item);
+    }
+	batch.add(e.compartiment,state);
+
 	pool->compartiments.add(batch);
 cout << "SGT-02-tx OK" << endl; 
 	return true;
@@ -752,8 +713,9 @@ bool c::process(const evidence_track& e) {
 	compartiment_t state; 
 
 	if (!fetch_compartiment(batch,e.compartiment,state)) {
-cout << "SGT-02-ev_load " << " fetch_compartiment returned false.DENIED " << endl; 
-		return false;
+cout << "SGT-02-ev_load " << " fetch_compartiment returned false.CREATING compartiment " << endl; 
+        state.locking_program=1;
+//		return false;
 	}
 
 //cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
@@ -900,10 +862,10 @@ string c::shell_command(const string& cmdline) {
 	string cmd;
 	is >> cmd;
 	if (cmd=="hello") {
-		os << "cash shell. type h for help." << endl;
+		os << "nova shell. type h for help." << endl;
 	}
 	else if (cmd=="h" || cmd=="help") {
-		os << "Cash shell." << endl;
+		os << "Nova shell." << endl;
 		os << "h|help              Shows this help." << endl;
 		os << "p|policies [id vote]          ." << endl;
 		os << "mempool           Dumps the mempool." << endl;
@@ -925,9 +887,9 @@ string c::shell_command(const string& cmdline) {
 		dump_policies(os);
 	}
 	else if (cmd=="mempool") {
+        os << "mempool:" << endl;
     	lock_guard<mutex> lock(mx_pool);
         pool->compartiments.dump(os);
-        //os << "fees: " << pool->fees << endl;
         
     }
 	else if (cmd=="exit") {
@@ -947,6 +909,7 @@ void c::db_t::clear() {
 }
 
 void c::dbhash(hasher_t&) const {
+assert(false);
 }
 
 void c::clear() {
@@ -992,6 +955,41 @@ c::local_delta::compartiment_t::compartiment_t() {
 
 c::local_delta::compartiment_t::compartiment_t(const hash_t& locking_program, const logbook_t& lb): locking_program(locking_program), logbook(lb) {
 }
+
+void c::local_delta::logbook_t::dump_brief(ostream& os) const {
+	os << size() << " logentries; " << items.size() << " items" << endl;
+}
+void c::local_delta::logbook_t::dump(ostream& os) const {
+	os << size() << " logentries: " << endl;
+    for (auto&i:*this) {
+        os << i << endl;
+        os << "---" << endl;
+    }
+	os << items.size() << " items: " << endl;
+    for (auto&i:items) {
+        os << i << ' ';
+    }
+    os << endl;
+
+//	os << size() << " logentries; " << items.size() << " items";
+
+}
+
+void c::local_delta::logbook_t::pretty_print(ostream& os) const {
+	os << size() << " log entries: " << endl;
+    int n=0;
+    for (auto&i:*this) {
+        os << "#" << n++ << ":" << endl;
+        os << crypto::b58::decode(i) << endl;
+        os << endl;
+    }
+	os << items.size() << " items: " << endl;
+    for (auto&i:items) {
+        os << i << ' ';
+    }
+    os << endl;
+}
+
 
 void c::local_delta::logbook_t::to_stream(ostream& os) const {
     os << size() << ' ';

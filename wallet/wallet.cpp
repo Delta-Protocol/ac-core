@@ -273,6 +273,7 @@ string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::valu
 			return "";
 		}
 		else if (locking_program==1) {
+cout << "-------" << endl; 
 			const crypto::ec::keys* k=get_keys(compartiment);
 			if (k==0) return "";
 			return nova::single_signature::create_input(msg, k->priv);
@@ -420,12 +421,12 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 }
 
 pair<string,nova::evidence_load> c::nova_move(const nova_move_input& i) {
-cout << "nova move" << endl;
+//cout << "nova move" << endl;
 
     pair<string,nova::evidence_load> ret;
     nova::evidence_load& t=ret.second;
 
-	blockchain::diff::hash_t parent_block;
+	//blockchain::diff::hash_t parent_block;
 
 	nova::app::query_compartiments_t compartiments;
 	compartiments.emplace_back(i.compartiment);
@@ -435,13 +436,17 @@ cout << "nova move" << endl;
 			ret.first="Compartiment not found";
 			return move(ret);
     }
-
+    t.compartiment=i.compartiment;
 	t.parent_block=data.parent_block;
-    
+    t.load=i.load;
+    t.item=i.item;
+    t.locking_program=data.begin()->second.locking_program==0?1:data.begin()->second.locking_program; 
+
+//cout << "parent block " <<     t.parent_block << endl;
 
 	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
-	t.locking_program_input=generate_locking_program_input(h,i.compartiment, data.begin()->second.locking_program);
-
+	t.locking_program_input=generate_locking_program_input(h,i.compartiment,t.locking_program);
+//t.write_pretty(cout);
 	if (i.sendover) {
 		send(t);
 //			cout << "sent." << endl;
@@ -451,9 +456,47 @@ cout << "nova move" << endl;
 }
 
 pair<string,nova::evidence_track> c::nova_track(const nova_track_input& i) {
+//cout << "nova move" << endl;
 
+    pair<string,nova::evidence_track> ret;
+    nova::evidence_track& t=ret.second;
+
+	//blockchain::diff::hash_t parent_block;
+
+	nova::app::query_compartiments_t compartiments;
+	compartiments.emplace_back(i.compartiment);
+
+	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
+    if (data.size()!=1) {
+			ret.first="Compartiment not found";
+			return move(ret);
+    }
+    t.compartiment=i.compartiment;
+	t.parent_block=data.parent_block;
+    t.data=i.data;
+    t.locking_program=data.begin()->second.locking_program==0?1:data.begin()->second.locking_program; 
+
+//cout << "parent block " <<     t.parent_block << endl;
+
+	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
+	t.locking_program_input=generate_locking_program_input(h,i.compartiment,t.locking_program);
+//t.write_pretty(cout);
+	if (i.sendover) {
+		send(t);
+//			cout << "sent." << endl;
+	}
+
+    return move(ret);
 }
 
+string c::nova_query(const nova::hash_t& compartiment) {
+	nova::app::query_compartiments_t compartiments;
+	compartiments.emplace_back(compartiment);
+	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
+    ostringstream os;
+    data.pretty_print(os);
+    return os.str();
+}
 
 void c::nova_move_input::to_stream(ostream& os) const {
 	os << compartiment << ' ' << item << ' ' << (load?'1':'0') << ' ' << (sendover?'1':'0');
@@ -479,6 +522,7 @@ c::nova_track_input c::nova_track_input::from_stream(istream& is) {
 	is >> i.sendover;
 	return move(i);
 }
+
 
 
 

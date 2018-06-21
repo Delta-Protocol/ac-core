@@ -340,7 +340,7 @@ bool c::value_type::set_b58(const string& s) {
 	if (unlikely(!b58::decode(s,v))) {
         return false;
 	}
-	if (unlikely(size()!=output_size)) { return false; }
+	if (unlikely(v.size()!=output_size)) { return false; }
     memcpy(&(*this)[0],&v[0],output_size);
 //	for (int i=0; i<output_size; ++i) (*this)[i]=v[i]; 
     return true;
