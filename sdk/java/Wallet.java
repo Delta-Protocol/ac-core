@@ -3,18 +3,6 @@ package com.example.usgov;
 import android.content.Context;
 import android.util.Log;
 
-import org.spongycastle.asn1.x9.X9ECParameters;
-import org.spongycastle.crypto.AsymmetricCipherKeyPair;
-import org.spongycastle.crypto.ec.CustomNamedCurves;
-import org.spongycastle.crypto.generators.ECKeyPairGenerator;
-import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.crypto.params.ECKeyGenerationParameters;
-import org.spongycastle.crypto.params.ECPrivateKeyParameters;
-import org.spongycastle.crypto.params.ECPublicKeyParameters;
-import org.spongycastle.math.ec.ECPoint;
-import org.spongycastle.math.ec.FixedPointCombMultiplier;
-import org.spongycastle.math.ec.FixedPointUtil;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,17 +22,6 @@ public class Wallet {
     private BigInteger priv;
     private ECPoint pub;
     public String my_address;
-
-    private static final SecureRandom secureRandom;
-
-    private static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
-    private static final ECDomainParameters curve; // The parameters of the secp256k1 curve that Bitcoin uses.
-    static {
-        //if (Utils.isAndroidRuntime()) new LinuxSecureRandom();
-        FixedPointUtil.precompute(curve_params.getG(), 12);
-        curve= new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
-        secureRandom = new SecureRandom();
-    }
     private Context ctx;
 
     public class tx_make_p2pkh_input {
@@ -78,22 +55,6 @@ public class Wallet {
             return rcpt_addr+" "+amount+" "+fee+" "+sigcode_all+" "+sigcode_all+" "+(sendover?"1":"0");
         }
     }
-    //must be in sync with the c++ master file wallet/protocol.h
-    public static final short wallet_base = 0;
-    public static final short protocol_balance_query = wallet_base+1;
-    public static final short protocol_dump_query = wallet_base+2;
-    public static final short protocol_new_address_query = wallet_base+3;
-    public static final short protocol_add_address_query = wallet_base+4;
-    public static final short protocol_tx_make_p2pkh_query = wallet_base+5;
-    public static final short protocol_tx_sign_query = wallet_base+6;
-    public static final short protocol_tx_send_query = wallet_base+7;
-    public static final short protocol_tx_decode_query = wallet_base+8;
-    public static final short protocol_tx_check_query = wallet_base+9;
-    public static final short protocol_pair_query = wallet_base+10;
-    public static final short protocol_unpair_query = wallet_base+11;
-    public static final short protocol_list_devices_query = wallet_base+12;
-
-    public static final short protocol_response = wallet_base+0;
 
     void setup_keys() throws IOException {
         String filename = "k";
@@ -111,14 +72,9 @@ public class Wallet {
             //              //Log.e(LOG_TAG, "Directory not created");
             //            log+=";Directory not created";
             //      }
-            ECKeyPairGenerator generator = new ECKeyPairGenerator();
-            ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curve, secureRandom);
-            generator.init(keygenParams);
-            AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
-            ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-            ECPublicKeyParameters pubParams = (ECPublicKeyParameters) keypair.getPublic();
-            priv = privParams.getD();
-            String fileContents = priv.toString();
+            
+            EllipticCryptography ec = EllipticCryptography.getInstance();
+            String fileContents = ec.GeneratePrivateKey().toString();
             //log+=";"+fileContents.length();
             FileOutputStream outputStream;
 
@@ -135,11 +91,30 @@ public class Wallet {
         else {
 
             String content = getStringFromFile(file);
-            priv=new BigInteger(content);
+            priv = new BigInteger(content);
 
         }
         pub = publicPointFromPrivate(priv);
-    }
+    }  
+
+    //must be in sync with the c++ master file wallet/protocol.h
+    public static final short wallet_base = 0;
+    public static final short protocol_balance_query = wallet_base+1;
+    public static final short protocol_dump_query = wallet_base+2;
+    public static final short protocol_new_address_query = wallet_base+3;
+    public static final short protocol_add_address_query = wallet_base+4;
+    public static final short protocol_tx_make_p2pkh_query = wallet_base+5;
+    public static final short protocol_tx_sign_query = wallet_base+6;
+    public static final short protocol_tx_send_query = wallet_base+7;
+    public static final short protocol_tx_decode_query = wallet_base+8;
+    public static final short protocol_tx_check_query = wallet_base+9;
+    public static final short protocol_pair_query = wallet_base+10;
+    public static final short protocol_unpair_query = wallet_base+11;
+    public static final short protocol_list_devices_query = wallet_base+12;
+
+    public static final short protocol_response = wallet_base+0;
+
+    
 
     public Wallet(Context ctx_) throws IOException {
         ctx=ctx_;
@@ -181,16 +156,6 @@ public class Wallet {
         walletdAddress=getStringFromFile(file);
     }
 
-    private static ECPoint publicPointFromPrivate(BigInteger privKey) {
-        /*
-         * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group order,
-         * but that could change in future versions.
-         */
-        if (privKey.bitLength() > curve.getN().bitLength()) {
-            privKey = privKey.mod(curve.getN());
-        }
-        return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
-    }
     public String getStringFromFile (File fl) {
         try {
             FileInputStream fin = new FileInputStream(fl);
@@ -216,6 +181,7 @@ public class Wallet {
         reader.close();
         return sb.toString();
     }
+
     private String walletdAddress="";
 
     String walletd_host() {
@@ -251,8 +217,6 @@ public class Wallet {
         }
         return curd;
     }
-
-
 
     public synchronized Datagram send_recv(Datagram d) {
         try {
@@ -335,4 +299,6 @@ public class Wallet {
     String new_address() {
         return ask(protocol_new_address_query,"");
     }
+
+
 }
