@@ -15,7 +15,7 @@ struct api {
 	virtual void balance(bool detailed, ostream&)=0;
 	virtual void dump(ostream&)=0;
 
-	void priv_key(const crypto::ec::keys::priv_t& privkey, ostream&);
+	static void priv_key(const crypto::ec::keys::priv_t& privkey, ostream&);
 	virtual void new_address(ostream&)=0;
 	virtual void add_address(const crypto::ec::keys::priv_t& privkey, ostream&)=0;
 	typedef wallet::tx_make_p2pkh_input tx_make_p2pkh_input;

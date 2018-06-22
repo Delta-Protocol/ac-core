@@ -23,6 +23,12 @@ using namespace std;
 		bool operator == (const value_type& other) const;  //result depends on endianness (different results in different archs),ok for local hash tables
 		bool operator != (const value_type& other) const;  //result depends on endianness (different results in different archs),ok for local hash tables
 		bool operator < (const value_type& other) const; //result depends on endianness (different results in different archs),ok for local hash tables
+
+		value_type& operator = (const string& b58) {
+			set_b58(b58);
+			return *this;
+		}
+
 		bool is_zero() const;
 		void zero();
 

@@ -46,10 +46,20 @@ struct ec {
 		};
 
 		struct priv_t: array<unsigned char,32> {
+			priv_t() {
+			}
+			priv_t(const string& b58) {
+				set_b58(b58);
+			}
+			priv_t(const char* b58) {
+				set_b58(b58);
+			}
 			string to_b58() const;
 			static priv_t from_b58(const string&);
 			bool set_b58(const string&);
 		};
+
+		
 
 		keys() {}
 		keys(const priv_t& pk);

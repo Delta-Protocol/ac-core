@@ -87,7 +87,7 @@ void rpc_api::tx_check(const string&txb58, ostream&os) {
 	ask(us::wallet::protocol::tx_check_query,txb58,os);
 }
 
-//----------------local api
+//----------------local api-----------------------------
 
 local_api::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port) {
 }
