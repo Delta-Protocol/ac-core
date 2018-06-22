@@ -15,6 +15,8 @@ struct pairing {
 
     pairing(const string& homedir):devices(homedir) {
     }
+    virtual ~pairing() {
+    }
 
     struct device {
         device() {

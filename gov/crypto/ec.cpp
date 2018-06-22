@@ -55,11 +55,18 @@ void c::keys::dump(ostream& os) const {
 }
 
 c::keys::pub_t::hash_t c::keys::pub_t::compute_hash() const {
+    unsigned char out[33];
+    size_t len=33;
+    secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED);
+
 	hasher_t hasher;
-	hasher.write(&data[0],64);
+//	hasher.write(&data[0],64); //only for LE platform TODO  
+	hasher.write(&out[0],33); //only for LE platform TODO  
 	hash_t v;
 	hasher.finalize(v);
 	return move(v);
+
+
 }
 
 string c::keys::to_hex(const priv_t& privkey) {

@@ -1,6 +1,7 @@
 #include <us/gov/auth.h>
 #include <us/gov/blockchain.h>
 #include <us/gov/cash.h>
+#include <us/gov/nova.h>
 #include <us/gov/signal_handler.h>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/blockchain/protocol.h>
@@ -170,6 +171,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 #include <us/gov/crypto.h>
 #include <string.h>
 #include <iomanip>
+#include <fstream>
 #include <us/gov/cfg.h>
 
 struct cfg: filesystem::cfg {
@@ -403,6 +405,7 @@ int main(int argc, char** argv) {
 		blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 		d.sysop_allowed=p.shell;
 		d.add(new cash::app());
+		d.add(new nova::app());
 
         if (p.genesis) {
             cout << "Adding genesis block with 1 node " << p.genesis_address << endl;

@@ -62,6 +62,11 @@ os << "Free Software licenced under GPL·" << endl;
 		os << "y|syncd     Dumps data sync info." << endl;
 		os << "apps        List apps." << endl;
 		os << "app <id>    Enter app shell." << endl;
+		os << "add_node <address>    connects to the specified node." << endl;
+		os << "seeds                 Display current seed nodes." << endl;
+		os << "home                  Display current home directory." << endl;
+		os << "mutate                Renew neighbours." << endl;
+
 	}
 	else {
 		os << "No help page for this level, sorry." << endl;

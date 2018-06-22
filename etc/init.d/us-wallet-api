@@ -1,0 +1,42 @@
+#!/bin/bash
+#copy this file into /etc/init.d/
+#update-rc.d curex-fcgi defaults
+
+USER=www-data
+
+PROG="/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-walletd -- -fcgi"
+RETVAL=0
+
+start() {
+      echo -n "Starting us-wallet-api on port 9000: "
+# 	  echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $PROG"
+      /sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $PROG
+      RETVAL=$?
+      echo "$API_NAME. $RETVAL"
+}
+
+stop() {
+      echo -n "Stopping us-wallet-api: "
+      killall -q -w -u $USER /usr/bin/spawn-fcgi
+      RETVAL=$?
+#      echo "$API_NAME."
+}
+
+case "$1" in
+    start)
+      start
+  ;;
+    stop)
+      stop
+  ;;
+    restart)
+      stop
+      start
+  ;;
+    *)
+      echo "Usage: us-wallet-api {start|stop|restart}"
+      exit 1
+  ;;
+esac
+exit $RETVAL
+

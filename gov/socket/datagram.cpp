@@ -56,7 +56,7 @@ datagram::datagram(uint16_t service, const string& payload):service(service), er
 
 void datagram::encode_size(uint32_t sz) {
 	assert(h==6);
-	assert(size()>=h);
+	assert(size()>=h); //This is little-endian
 	(*this)[0]=sz&0xff;
 	(*this)[1]=sz>>8&0xff;
 	(*this)[2]=sz>>16&0xff;
@@ -87,7 +87,7 @@ uint16_t datagram::decode_service() const {
 }
 
 bool datagram::completed() const {
-	return !empty() && dend==size();
+	return dend==size() && !empty();
 }
 
 bool datagram::recv(int sock, int timeout_seconds) {

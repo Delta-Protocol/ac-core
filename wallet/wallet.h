@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <us/gov/cash.h>
+#include <us/gov/nova.h>
 #include <us/gov/crypto.h>
 #include <us/gov/cfg.h>
 #include <fstream>
@@ -14,7 +15,7 @@ using namespace us::gov;
 
 struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	wallet(const string& datapath, const string& backend_host, uint16_t backend_port);
-	~wallet();
+	virtual ~wallet();
 	string backend_host;
 	uint16_t backend_port;
 
@@ -22,6 +23,13 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 
 	struct accounts_query_t:cash::app::accounts_t {
 		typedef cash::app::accounts_t b;
+		void dump(ostream& os) const;
+
+		blockchain::diff::hash_t parent_block;
+	};
+
+	struct compartiments_query_t:nova::app::compartiments_t {
+		typedef nova::app::compartiments_t b;
 		void dump(ostream& os) const;
 
 		blockchain::diff::hash_t parent_block;
@@ -55,12 +63,17 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	cash::cash_t balance() const;
 	void dump_balances(ostream& os) const;
 	accounts_query_t query_accounts(const cash::app::query_accounts_t& addresses) const;
+    compartiments_query_t query_compartiments(const nova::app::query_compartiments_t& addresses) const;
+
 	void refresh();
  
 	input_accounts_t select_sources(const cash::cash_t& amount);
 
     string generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
     string generate_locking_program_input(const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
+
+    string generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const nova::hash_t& compartiment, const nova::hash_t& locking_program);
+
     struct tx_make_p2pkh_input {
         cash::hash_t rcpt_addr;
         cash::cash_t amount;
@@ -73,16 +86,49 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	static tx_make_p2pkh_input from_stream(istream&);
 
     };
-    void send(const cash::tx& t) const;
+    void send(const cash::tx&) const;
+    void send(const nova::evidence_load&) const;
+    void send(const nova::evidence_track&) const;
 
     pair<string,cash::tx> tx_make_p2pkh(const tx_make_p2pkh_input& i);
     pair<string,cash::tx> tx_sign(const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
+
+
+    struct nova_move_input {
+        nova::hash_t compartiment;
+        nova::evidence_load::item_t item;
+        bool load;
+        bool sendover;
+
+    	void to_stream(ostream&) const;
+    	static nova_move_input from_stream(istream&);
+
+    };
+
+    struct nova_track_input {
+        nova::hash_t compartiment;
+        string data;
+        bool sendover;
+
+    	void to_stream(ostream&) const;
+    	static nova_track_input from_stream(istream&);
+
+    };
+
+
+    pair<string,nova::evidence_load> nova_move(const nova_move_input& i);
+    pair<string,nova::evidence_track> nova_track(const nova_track_input& i);
+    string nova_query(const nova::hash_t& compartiment);
 
 
 	void dump(ostream& os) const;
 	accounts_query_t data;
 	string datapath;
 	mutable bool need_save{false};
+
+
+
+
 };
 
 }}
