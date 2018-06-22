@@ -355,6 +355,10 @@ c::value_type::value_type() {
 }
 
 c::value_type::value_type(unsigned int i) {
+	set(i);
+}
+
+void c::value_type::set(unsigned int i) {
 	*reinterpret_cast<uint64_t*>(&(*this)[0])=*reinterpret_cast<uint64_t*>(&(*this)[8])=0;
 	*reinterpret_cast<uint32_t*>(&(*this)[16])=i;
 }
