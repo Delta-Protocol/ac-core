@@ -40,7 +40,6 @@ namespace socket {
 		bool recv(int sock);
 		bool recv(int sock, int timeout_seconds);
 
-
 		vector<string> parse_strings() const;
 		string parse_string() const;
 		uint16_t parse_uint16() const;

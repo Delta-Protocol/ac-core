@@ -28,39 +28,6 @@ struct wallet_daemon: socket::daemon, local_api {
 
 	bool send_response(peer_t *c, datagram*d, const string& payload);
 
-    struct device {
-        device() {
-        }
-        device(const pub_t& pub, const string& name): pub(pub), name(name) {
-        }
-
-        void to_stream(ostream&) const;
-        static device from_stream(istream&);
-
-        string name;
-        pub_t pub;
-        int seq{0}; //used to avoid replay attacks
-    };
-
-    struct devices_t: unordered_map<hash_t,device> {
-        devices_t(const string& home);
-        void load();
-        void save() const;
-        void load_(); //caller needs to lock mx
-        void save_() const;  //caller needs to lock mx
-        static string default_name;
-        string file;
-        mutable mutex mx;
-        string home;
-
-        void pair(const pub_t& pub, const string& name);
-        void unpair(const pub_t& pub);
-        const string& get_name(const pub_t& pub);
-    };
-
-    devices_t devices;
-
-
 
 };
 

@@ -7,6 +7,5 @@ walletd/us-walletd
 .idea/*
 */**/.idea/*
 test/unit_tests
-android_studio/
-
 *.out
+android_studio/
