@@ -11,16 +11,12 @@ using namespace std;
 
 int main() {
 
-
 	testing_split_function(); //dfs
 	test_symmetric_encryption();
 
-
-	
 	//instance of datagram && run it
 	// foo f;
 	// int y = f.get();	
-	
 
 	exit(0);
 }

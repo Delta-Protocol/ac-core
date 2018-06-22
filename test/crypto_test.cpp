@@ -42,7 +42,7 @@ bool test_symmetric_encryption(){
 }
 
 void generateKeysAndCiphertexts(){
-	
+	string expected = "";
 }
 
 bool test_encrypt_decrypt(string plaintext_string){
