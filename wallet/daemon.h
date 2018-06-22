@@ -27,6 +27,8 @@ struct wallet_daemon: socket::daemon, local_api {
   //  uint16_t backend_port;
 
 	bool send_response(peer_t *c, datagram*d, const string& payload);
+	bool send_error_response(peer_t *c, datagram*d, const string& error);
+
 
 
 };

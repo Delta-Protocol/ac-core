@@ -1,0 +1,14 @@
+#!/bin/sh
+
+dir=`mktemp`
+
+cd $dir
+git clone https://github.com/eddic/fastcgipp.git fastcgi++
+mkdir build
+cd build
+apt install cmake
+cmake -DCMAKE_BUILD_TYPE=RELEASE ../fastcgi++
+make
+make install
+
+rm $dir -r

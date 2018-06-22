@@ -27,6 +27,8 @@ using namespace std;
 	    void write(const string&data);
 	    void write(const value_type& data);
 	    void write(const ripemd160::value_type& data);
+	    void write(bool);
+
 	    void reset();
 
 	};

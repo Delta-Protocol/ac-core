@@ -9,6 +9,7 @@
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
 #include "args.h"
+#include "fcgi.h"
 
 using namespace us::wallet;
 
@@ -38,6 +39,7 @@ struct params {
         os << "walletd: " << walletd_host << ":" << walletd_port << endl;
     }
 	bool daemon{false};
+    bool fcgi{false};
     string homedir;
     bool offline{false};
 	string backend_host{"localhost"}; uint16_t backend_port{16672};
@@ -66,13 +68,18 @@ void help(const params& p, ostream& os=cout) {
 	    os << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
     }
     os << endl;
+	os << " -fcgi     Run as fast-cgi. [" << (p.fcgi?"yes":"no") << "]" << endl;
     os << "commands are:" << endl;
-	os << " balance [0|1]          Displays the spendable amount." << endl;
+    os << endl;
+    os << "KEYS application:" << endl;
 	os << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
 	os << " address add <privkey>  Imports a given private key in the wallet" << endl;
 	os << " dump                   Lists the keys/addresses managed by wallet" << endl;
 	os << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
 	os << " priv_key <private key> Gives information about the given private key." << endl;
+    os << endl;
+    os << "CASH application:" << endl;
+	os << " balance [0|1]          Displays the spendable amount." << endl;
 //	os << " tx base                Reports the current parent block for new transactions" << endl;
 //	os << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
 	os << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
@@ -81,14 +88,55 @@ void help(const params& p, ostream& os=cout) {
 	os << " tx send <tx_b58>" << endl;
 	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
 	os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
+    os << endl;
+    os << "PAIR application:" << endl;
     os << " pair <pubkey> <name>   authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
     os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
     os << " list_devices           Show currently paired devices." << endl;
+    os << endl;
+    os << "NOVA application:" << endl;
+	os << " nova new compartiment" << endl;
+    os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
+    os << " nova track <compartiment id> <sensors|auto> [<send>]." << endl;
+    os << " nova sim_sensors" << endl;
+    os << " nova decode_move <txb58>" << endl;
+    os << " nova decode_track <txb58>" << endl;
+    os << " nova query <compartiment id>" << endl;
 
 }
 
 
 
+
+void error_log(const char* msg) {
+   using namespace std;
+/*
+//   using namespace boost;
+   static std::ofstream error;
+   if(!error.is_open())
+   {
+      error.open("/tmp/errlog", ios_base::out | ios_base::app);
+      error.imbue(locale(error.getloc(), new posix_time::time_facet()));
+   }
+   error << '[' << posix_time::second_clock::local_time() << "] " << msg << endl;
+*/
+}
+
+void run_fcgi(const params& p) {
+   //engine::init(); 
+//   e=new engine("/var/cex",wcerr);
+   //e->add_sample_liquidity(wcerr);
+   try {
+      Fastcgipp::Manager<w3api::fcgi_t> fcgi;
+      fcgi.start();
+      fcgi.join();
+      cerr << "us-wallet fast-cgi initiated normally" << endl;
+   }
+   catch(std::exception& ex) {
+      cerr << ex.what() << endl;
+   }
+//   delete e;
+}
 
 
 void run_daemon(const params& p) {
@@ -128,6 +176,9 @@ string parse_options(args_t& args, params& p) {
         else if (cmd=="-d") {
         	p.daemon=true;
         }
+        else if (cmd=="-fcgi") {
+        	p.fcgi=true;
+        }
         else {
             break;
         }
@@ -162,7 +213,109 @@ void tx_make(api& wapi, args_t& args, const params& p) {
 	cout << endl;
 }
 */
+#include <random>
 
+double rnd_reading(double mean,double stddev) {
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  default_random_engine generator(seed);
+  normal_distribution<double> distribution(mean,stddev);
+  return distribution(generator);
+}
+
+string sim_sensors() {
+    time_t now;
+    time(&now);
+    char buf[sizeof "2018-06-08T07:07:09Z"];
+    strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+
+    ostringstream os;
+    os << "Time: " << buf << endl;
+    os << "Temperature: " << endl;
+    for (int i=0; i<3;++i) {
+         os << "  #" << i+1 << ": " << rnd_reading(4,2) << " °C" << endl;
+    }
+    os << "Pressure: " << endl;
+    for (int i=0; i<3;++i) {
+         os << "  #" << i+1 << ": " << rnd_reading(1,0.05) << " Bar" << endl;
+    }
+    os << "Humidity: " << endl;
+    for (int i=0; i<3;++i) {
+         os << "  #" << i+1 << ": " << rnd_reading(60,10) << " %" << endl;
+    }
+    os << "Longitude: " << rnd_reading(0,180) << " °" << endl;
+    os << "Latitude: " << rnd_reading(0,90) << " °" << endl;
+    return os.str();
+}
+
+void nova_app(api& wapi, args_t& args, const params& p) {
+	string command=args.next<string>();
+	if (command=="move") {
+        if (args.args_left()<3) {
+            help(p);
+            return;
+        }
+        wallet::nova_move_input i;
+        i.compartiment=args.next<nova::hash_t>();
+        i.item=args.next<string>();
+        auto s=args.next<string>();
+        if (s=="load") i.load=true;
+        else if (s=="unload") i.load=false;
+        else {
+            cerr << "Please specify either load or unload" << endl;
+            help(p);
+            return;
+        }
+        i.sendover=args.next<string>("nopes")=="send";
+        wapi.nova_move(i,cout);
+//    os << " nova move <compartiment pubkey> <item pubkey> <load|unload> [<send>]   ." << endl;
+	}
+	else if (command=="track") {
+        wallet::nova_track_input i;
+        i.compartiment=args.next<nova::hash_t>();
+        i.data=args.next<string>();
+        if (i.data=="auto") {
+            i.data=crypto::b58::encode(sim_sensors());
+            cout << "sim sensors:" << endl;
+            cout << crypto::b58::decode(i.data) << endl;
+        }
+        i.sendover=args.next<string>("nopes")=="send";
+        wapi.nova_track(i,cout);
+//    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
+    }
+	else if (command=="new") {
+    	string cmd=args.next<string>();
+        if (cmd=="compartiment") {
+            cout << "Compartiment id: ";
+			wapi.new_address(cout);
+        }
+        else {
+    		help(p);
+        }
+    }
+    else if (command=="sim_sensors") {
+        string raw=sim_sensors();
+        cout << raw << endl;
+        cout << crypto::b58::encode(raw) << endl;
+    }
+    else if (command=="decode_move") {
+    	string txb58=args.next<string>();
+	    nova::evidence_load t=nova::evidence_load::from_b58(txb58);
+	    t.write_pretty(cout);
+    }
+    else if (command=="decode_track") {
+    	string txb58=args.next<string>();
+	    nova::evidence_track t=nova::evidence_track::from_b58(txb58);
+	    t.write_pretty(cout);
+    }
+	else if (command=="query") {
+        auto compartiment=args.next<nova::hash_t>();
+        wapi.nova_query(compartiment,cout);
+        
+    }
+	else {
+		help(p);
+	}
+}
 
 
 void tx(api& wapi, args_t& args, const params& p) {
@@ -218,12 +371,22 @@ void tx(api& wapi, args_t& args, const params& p) {
 #include <us/wallet/api.h>
 
 int main(int argc, char** argv) {
+
 	args_t args(argc,argv);
 	params p;
 	string command=parse_options(args,p);
 
+    if (p.daemon && p.fcgi) {
+        cerr << "-d and -fcgi options are incompatible" << endl;
+        return 1;
+    }
+
     if (p.daemon) {
         run_daemon(p);
+        return 0;
+    }
+    if (p.fcgi) {
+        run_fcgi(p);
         return 0;
     }
 
@@ -239,6 +402,9 @@ int main(int argc, char** argv) {
 	if (command=="tx") {
     	tx(wapi,args,p);
 	}
+	if (command=="nova") {
+    	nova_app(wapi,args,p);
+	}
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
 		wapi.priv_key(privkey,cout);
@@ -246,10 +412,12 @@ int main(int argc, char** argv) {
 	else if (command=="address") {
 		command=args.next<string>();
 		if (command=="new") {
+            cout << "Address: ";
 			wapi.new_address(cout);
 		}
 		else if (command=="add") {
 			crypto::ec::keys::priv_t k=args.next<crypto::ec::keys::priv_t>();
+            cout << "Address: ";
 			wapi.add_address(k,cout);
 		}
 		else {
@@ -268,7 +436,7 @@ int main(int argc, char** argv) {
 	else if (command=="pair") {
 		api::pub_t pub=args.next<api::pub_t>();
 	    auto name=args.next<string>();
-cout << "-- " << name << endl;
+//cout << "-- " << name << endl;
 		wapi.pair(pub,name,cout);
 	}
 	else if (command=="unpair") {
@@ -281,6 +449,7 @@ cout << "-- " << name << endl;
 	else {
 		help(p);
 	}
+//cout << "deleting" << endl;
 	delete papi;
 	return 0;
 }

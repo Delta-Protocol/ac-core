@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 public class Datagram {
@@ -29,14 +31,14 @@ public class Datagram {
         dend=0;
         error=0;
     }
-    Datagram(int service) {
+    Datagram(short service) {
         int size=6;
         bytes= new byte[size];
         encode_size(size);
         encode_service(service);
         dend=bytes.length;
     }
-    Datagram(int service, String msg) {
+    Datagram(short service, String msg) {
         int size=6+msg.length();
         bytes= new byte[size];
         encode_size(size);
@@ -45,33 +47,79 @@ public class Datagram {
         dend=bytes.length;
     }
 
+    boolean completed() {
+        return dend==bytes.length && bytes.length>0;
+    }
+
     void encode_size(int sz) {
         assert h==6;
         assert(sz>=h);
+        byte[] t=new byte[4];
+        ByteBuffer bb = ByteBuffer.wrap(t);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.asIntBuffer().put(sz);
+        bytes[0]=t[0];
+        bytes[1]=t[1];
+        bytes[2]=t[2];
+        bytes[3]=t[3];
+
+        /*
         bytes[0]=(byte)(sz&0xff);
         bytes[1]=(byte)(sz>>8&0xff);
         bytes[2]=(byte)(sz>>16&0xff);
         bytes[3]=(byte)(sz>>24&0xff);
+        */
     }
     int decode_size() {
         assert bytes.length>3;
+        byte[] t=new byte[4];
+        t[0]=bytes[0];
+        t[1]=bytes[1];
+        t[2]=bytes[2];
+        t[3]=bytes[3];
+        ByteBuffer bb = ByteBuffer.wrap(t);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        return bb.getInt();
+        /*
         int sz=bytes[0];
+        Log.d("Datagram","decode size byte 0 = "+bytes[0]+" sz="+sz);
         sz|=bytes[1]<<8;
+        Log.d("Datagram","decode size byte 1 = "+bytes[1]+" sz="+sz);
         sz|=bytes[2]<<16;
+        Log.d("Datagram","decode size byte 2 = "+bytes[2]+" sz="+sz);
         sz|=bytes[3]<<24;
+        Log.d("Datagram","decode size byte 3 = "+bytes[3]+" sz="+sz);
         return sz;
+        */
     }
-    void encode_service(int svc) {
+    void encode_service(short svc) {
         assert h==6;
         assert(bytes.length>=h);
-        bytes[4]=(byte)(svc&0xff);
-        bytes[5]=(byte)(svc>>8&0xff);
+
+        byte[] t=new byte[2];
+        ByteBuffer bb = ByteBuffer.wrap(t);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.asShortBuffer().put(svc);
+        bytes[4+0]=t[0];
+        bytes[4+1]=t[1];
+
+//        bytes[4]=(byte)(svc&0xff);
+//        bytes[5]=(byte)(svc>>8&0xff);
     }
-    int decode_service() {
+    short decode_service() {
         assert bytes.length>5;
+        byte[] t=new byte[2];
+        t[0]=bytes[4+0];
+        t[1]=bytes[4+1];
+        ByteBuffer bb = ByteBuffer.wrap(t);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        return bb.getShort();
+/*
+
         int svc=bytes[4];
         svc|=bytes[5]<<8;
         return svc;
+*/
     }
 
     public void send(Socket s) {
@@ -104,7 +152,7 @@ try {
     //dOut.close();
 }
 catch(Exception e) {
-
+    Log.d("Datagram","Exception "+e.getMessage());
 }
 }
 
@@ -117,22 +165,55 @@ catch(Exception e) {
         return recv(sock);
     }
 */
+/*
+    boolean recv(Socket s, int timeout_secs) {
+        public <C extends SelectableChannel & ReadableByteChannel>byte[]
+        receive(C chan) throws IOException
+        {
+            logger.debug(TAG + " Client Recieving...");
+            try
+            {
+                Selector sel = Selector.open();
+                SelectionKey key = chan.register(sel, SelectionKey.OP_READ);
+                ByteBuffer inputData = ByteBuffer.allocate(1024);
+                long timeout = TIMEOUT;
+                while (inputData.hasRemaining()) {
+                    if (timeout < 0L) {
+                        throw new IOException(String.format("Timed out, %d of %d bytes read", inputData.position(), inputData.limit()));
+                    }
+                    long startTime = System.nanoTime();
+                    sel.select(timeout);
+                    long endTime = System.nanoTime();
+                    timeout -= TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+                    if (sel.selectedKeys().contains(key)) {
+                        chan.read(inputData);
+                    }
+                    sel.selectedKeys().clear();
+                }
+                return inputData.array();
+            } catch (Exception e)
+            {
+                throw new Exception(TAG + " Couldnt receive data from modem: " + e.getMessage());
+            }
+        }
+
+*/
     boolean recv(Socket s) {
         Log.i("usgov","recv");
         try {
 //cout << "datagram::recv " << dend << " " << h << " " << size() << endl;
         //BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
         DataInputStream input = new DataInputStream(s.getInputStream());
-            Log.i("usgov","dend "+String.valueOf(dend));
+        Log.i("usgov","dend "+String.valueOf(dend));
 
         if (dend < h) {
 //cout << "A" << endl;
             //cout << "socket: datagram: recv1" << endl;
             Log.i("usgov","H");
+            s.setSoTimeout(3000);
+            int nread = input.read(bytes, dend, h - dend); //blocks
 
-            int nread = input.read(bytes, dend, h - dend);
-
-            Log.i("usgov","nread "+String.valueOf(nread));
+            Log.d("usgov","nread "+String.valueOf(nread));
 
 
             //ssize_t nread = server::os->recv(sock, &(*this)[dend], h-dend, 0);
@@ -142,10 +223,8 @@ catch(Exception e) {
                 return false;
             }
             dend += nread;
-//cout << "nread " << nread  << endl;
             if (dend < h) return true;
             int sz = decode_size();
-//cout << "sz " << sz << endl;
             if (sz > maxsize) {
                 error = 3;
                 Log.i("usgov","FALSE");
@@ -161,14 +240,10 @@ catch(Exception e) {
             }
         }
         Log.i("usgov","body ");
-//cout << "datagram::recv 2 - " << dend << " " << size() << endl;
-        //cout << "socket: datagram: recv2" << endl;
         int nread = input.read(bytes, dend, bytes.length - dend);
-        //ssize_t nread = server::os->recv(sock, &(*this)[dend], size()-dend,0);
         Log.i("usgov","nread "+String.valueOf(nread));
         if (nread <= 0) {
             error = nread == 0 ? 1 : 2;
-//		error=nread==0?1:2;
             Log.i("usgov","FALSE");
             return false;
         }
@@ -176,8 +251,6 @@ catch(Exception e) {
         Log.i("usgov","dend "+String.valueOf(dend));
         Log.i("usgov","TRUE");
         return true;
-
-
     }
     catch(Exception e) {
         Log.i("usgov","Except "+e.getMessage());

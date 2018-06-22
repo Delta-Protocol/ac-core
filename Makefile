@@ -1,5 +1,5 @@
 STDFLAGS:=-std=c++17
-
+PREFIX:=/usr/local
 DEBUGFLAGS:=-g -O0 ${STDFLAGS} -DDEBUG
 RELEASEFLAGS:=-O3 ${STDFLAGS}
 
@@ -26,6 +26,16 @@ walletd-release: walletd
 
 govd: govd/us-govd
 walletd: walletd/us-walletd
+
+install: release
+	install gov/libusgov.so ${PREFIX}/lib
+	install wallet/libuswallet.so ${PREFIX}/lib
+	install walletd/us-walletd ${PREFIX}/bin
+	install etc/init.d/us-wallet-api /etc/init.d
+	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
+	ldconfig
+
+
 
 gov/libusgov.so:
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C gov;
