@@ -1,7 +1,6 @@
 #include <us/gov/auth.h>
 #include <us/gov/blockchain.h>
 #include <us/gov/cash.h>
-#include <us/gov/rep.h>
 #include <us/gov/signal_handler.h>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/blockchain/protocol.h>
@@ -404,7 +403,6 @@ int main(int argc, char** argv) {
 		blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 		d.sysop_allowed=p.shell;
 		d.add(new cash::app());
-		d.add(new rep::app());
 
         if (p.genesis) {
             cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
