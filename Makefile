@@ -44,7 +44,7 @@ install: release
 	ldconfig
 	systemctl daemon-reload
 
-cryptos-install: cryptos
+cryptos-install: cryptos-release
 	install gov/libusgov.so ${PREFIX}/lib
 	install wallet/libuswallet.so ${PREFIX}/lib
 	install govx/us-gov ${PREFIX}/bin
