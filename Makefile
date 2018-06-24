@@ -16,7 +16,10 @@ debug: all
 release: export CXXFLAGS:=${RELEASEFLAGS}
 release: all
 
-all: gov/libusgov.so wallet/libuswallet.so govx/us-gov walletx/us-wallet
+pi: export CXXFLAGS:=${RELEASEFLAGS}
+cryptos: gov/libusgov.so wallet/libuswallet.so govx/us-gov
+
+all: gov/libusgov.so wallet/libuswallet.so govx/us-gov wallet/us-wallet
 
 wallet-debug: export CXXFLAGS:=${DEBUGFLAGS}
 wallet-debug: wallet
@@ -36,6 +39,14 @@ install: release
 	install etc/init.d/us-gov /etc/init.d/
 	ldconfig
 	systemctl daemon-reload
+
+install-cryptos: cryptos
+        install gov/libusgov.so ${PREFIX}/lib
+        install wallet/libuswallet.so ${PREFIX}/lib
+        install govx/us-gov ${PREFIX}/bin
+        install cryptos/etc/init.d/us-wallet /etc/init.d/
+        install cryptos/etc/cryptos/init.d/us-gov /etc/init.d/
+	ldconfig
 
 install-nginx:
 	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
