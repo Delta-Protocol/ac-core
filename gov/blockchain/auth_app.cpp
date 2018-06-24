@@ -19,13 +19,19 @@ c::~app() {
 }
 
 us::gov::blockchain::peer_t::stage_t c::my_stage() const {
-	if (cache_my_stage!=peer_t::unknown) return cache_my_stage;
+//	if (cache_my_stage!=peer_t::unknown) return cache_my_stage;
 	auto k=node_pubkey.hash();
+cout << k << endl;
+cout << db.nodes.size() << endl;
+cout << endl;
+cout << db.hall.size() << endl;
 	if (db.nodes.find(k)!=db.nodes.end()) {
 		cache_my_stage=peer_t::node;
+cout << "SET node" << endl;
 	}
 	else if (db.hall.find(k)!=db.hall.end()) {
 		cache_my_stage=peer_t::hall;
+cout << "SET hall" << endl;
 	}
 	else {
 		cache_my_stage=peer_t::out;
