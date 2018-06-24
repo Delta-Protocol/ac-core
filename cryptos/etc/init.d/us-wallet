@@ -29,10 +29,10 @@ start() {
       echo -n "Starting us-wallet: "
 #     echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env $PROG"
 
-/sbin/start-stop-daemon --start  --background -q -o \
+/sbin/start-stop-daemon --start  --background -q \
   --pidfile $PIDFILE --make-pidfile \
   --chuid $USER \
-  --startas /usr/bin/pipexec -- -k \
+  --exec /usr/bin/pipexec -- -k \
   -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:2>L:0}' '{D:1>L:0}'
 
 

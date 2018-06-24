@@ -8,10 +8,10 @@ CXXFLAGS = -g -O0 -std=c++17 -DDEBUG
 all: us-wallet
 
 us-wallet-fcgi: ${CPPS} ${HS}
-	g++ -DFCGI ${CXXFLAGS} -pthread ${LIBS} ${FCGILIBS} -L../gov -L../wallet -I../.. ${CPPS} -o us-wallet
+	g++ -DFCGI ${CXXFLAGS} ${CPPS} -pthread ${LIBS} ${FCGILIBS} -L../gov -L../wallet -I../.. -o us-wallet
 
 us-wallet: ${CPPS} ${HS}
-	g++ ${CXXFLAGS} -pthread ${LIBS} -L../gov -L../wallet -I../.. ${CPPS} -o us-wallet
+	g++ ${CXXFLAGS} ${CPPS} -pthread ${LIBS} -L../gov -L../wallet -I../.. -o us-wallet
 
 clean:
 	rm -f us-wallet
