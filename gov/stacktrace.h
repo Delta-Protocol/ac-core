@@ -1,6 +1,10 @@
 #ifndef USGOV_49d1d337b2a0fc5c7d3988c513a828859517ba9520f1dbc3182719bf4ee878d6
 #define USGOV_49d1d337b2a0fc5c7d3988c513a828859517ba9520f1dbc3182719bf4ee878d6
 #ifdef DEBUG
+#ifdef CRYPTOS
+	static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 10) {
+	}
+#else
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -106,5 +110,6 @@ static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames 
     free(funcname);
     free(symbollist);
 }
+#endif
 #endif
 #endif

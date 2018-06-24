@@ -103,7 +103,7 @@ void c::add_growth_transactions(unsigned int seed) {
 		if (s<min_growth) s=min_growth;
 		if (s>nh) s=nh;
 		maxr=nh-1;
-		//cout << "grow the network with " << s << " nodes." << endl;
+	cout << "grow the network with " << s << " nodes." << endl;
 	}
 	else {
 		size_t nn=db.nodes.size();
@@ -111,9 +111,10 @@ void c::add_growth_transactions(unsigned int seed) {
 		src=&db.nodes;
 		dst=&db.hall;
 		maxr=nn-1;
-		//cout << "shrink the network with " << s << " nodes." << endl;
+	cout << "shrink the network with " << s << " nodes." << endl;
 	}
 	uniform_int_distribution<size_t> distribution(0,maxr);
+cout << s << " " << maxr << endl;
 	for (size_t i=0; i<s; ++i) { ///move s from hall to nodes
 		auto p=src->begin();
 		size_t r;
@@ -126,6 +127,7 @@ void c::add_growth_transactions(unsigned int seed) {
 		advance(p,r);
 		dst->emplace(*p);
 		src->erase(p);
+cout << "dddooone" << endl;
 	}
 }
 

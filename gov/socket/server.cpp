@@ -427,8 +427,9 @@ void c::run() {
 				cerr << "data arrived for an unknown fd " << i << endl;
 				continue;
 			}
-			clients.hold(c->second);
-			receive_and_process(c->second);
+			auto p=c->second;
+			clients.hold(p);
+			receive_and_process(p);
 		}
 	}
 	signal_handler::_this.remove(this);
