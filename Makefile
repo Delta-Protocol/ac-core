@@ -44,7 +44,7 @@ cryptos-install: cryptos
 	install wallet/libuswallet.so ${PREFIX}/lib
 	install govx/us-gov ${PREFIX}/bin
 	install cryptos/etc/init.d/us-wallet /etc/init.d/
-	cryptos/etc/cryptos/init.d/us-gov /etc/init.d/
+	install cryptos/etc/init.d/us-gov /etc/init.d/
 	ldconfig
 
 install-nginx:
