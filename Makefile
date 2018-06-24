@@ -46,6 +46,7 @@ cryptos-install: cryptos-release
 	install gov/libusgov.so ${PREFIX}/lib
 	install wallet/libuswallet.so ${PREFIX}/lib
 	install govx/us-gov ${PREFIX}/bin
+	install walletx/us-wallet ${PREFIX}/bin
 	install cryptos/etc/init.d/us-wallet /etc/init.d/
 	install cryptos/etc/init.d/us-gov /etc/init.d/
 	ldconfig /usr/local/lib
