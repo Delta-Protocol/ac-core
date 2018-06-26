@@ -72,9 +72,8 @@ public class Wallet {
             //              //Log.e(LOG_TAG, "Directory not created");
             //            log+=";Directory not created";
             //      }
-            
-            EllipticCryptography ec = EllipticCryptography.getInstance();
-            String fileContents = ec.generatePrivateKey().toString();
+
+            String fileContents = EllipticCryptography.getInstance().generatePrivateKey().toString();
             //log+=";"+fileContents.length();
             FileOutputStream outputStream;
 
@@ -94,7 +93,7 @@ public class Wallet {
             priv = new BigInteger(content);
 
         }
-        pub = publicPointFromPrivate(priv);
+        pub = EllipticCryptography.getInstance().publicPointFromPrivate(priv);
     }  
 
     //must be in sync with the c++ master file wallet/protocol.h

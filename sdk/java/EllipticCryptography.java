@@ -4,13 +4,18 @@ import org.spongycastle.asn1.x9.X9ECParameters;
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;
 import org.spongycastle.crypto.ec.CustomNamedCurves;
 import org.spongycastle.crypto.generators.ECKeyPairGenerator;
-import org.spongycastle.crypto.params.ECDomainParameters;
+import javax.crypto.KeyAgreement;
 import org.spongycastle.crypto.params.ECKeyGenerationParameters;
+import org.spongycastle.crypto.agreement.ECDHBasicAgreement;
 import org.spongycastle.crypto.params.ECPrivateKeyParameters;
-import org.spongycastle.crypto.params.ECPublicKeyParameters;
 import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.math.ec.FixedPointCombMultiplier;
 import org.spongycastle.math.ec.FixedPointUtil;
+import javax.crypto.SecretKey;
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import org.spongycastle.crypto.params.ECDomainParameters;
 
 public class EllipticCryptography{
 
@@ -32,9 +37,9 @@ public class EllipticCryptography{
     }
 
     public SecretKey generatePrivateKey(){
-            AsymmetricCipherKeyPair = generateKeyPair();
+            AsymmetricCipherKeyPair keypair = generateKeyPair();
             ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-            return privParams.getD();
+            return (SecretKey) privParams.getD();
     }
 
     public AsymmetricCipherKeyPair generateKeyPair(){
@@ -44,11 +49,11 @@ public class EllipticCryptography{
         return generator.generateKeyPair();
     }
 
-    public static SecretKey generateSharedKey(SecretKey privKeyA, ECPoint pubKeyB)
+    public static byte[] generateSharedKey(SecretKey privKeyA, ECPoint pubKeyB)
             throws Exception {
-                KeyAgreement aKA = KeyAgreement.getInstance("ECDH", "SC");
+        KeyAgreement aKA = KeyAgreement.getInstance("ECDH", "SC");
                 aKA.init(privKeyA);
-                aKA.doPhase(pubKeyB, true);
+                aKA.doPhase((PublicKey)pubKeyB, true);
 
             return aKA.generateSecret();
     }
