@@ -8,14 +8,15 @@
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>
 #include <us/wallet/wallet.h>
-//#include <cex/engine.h>
+#include <us/wallet/api.h>
+#include <jsoncpp/json/json.h> 
 
 namespace us { namespace wallet { namespace w3api {
-using namespace std;
 using namespace std;
 using namespace Fastcgipp;
 using namespace us::wallet;
 
+//typedef wchar_t char_type;
 //typedef wchar_t char_type;
 typedef char char_type;
 typedef std::basic_string<char_type> string;
@@ -30,7 +31,16 @@ struct fcgi_t: Fastcgipp::Request<char_type> {
 //	typedef basic_string<chartype> string;
 //    typedef basic_istringstream<chartype> istringstream;
 
+    fcgi_t() {
+    }
+    ~fcgi_t() {
+    }
+
     static int count_reqs;
+    static us::wallet::api*	api;
+
+    void help(ostream& os) const;
+    Json::Value to_json(const string& s) const;
 
     bool response();
 

@@ -20,7 +20,6 @@ unsigned int c::get_seed() {
 #include "auth_app.h"
 #include "policies.h"
 #include <us/gov/cash/app.h>
-#include <us/gov/rep/app.h>
 #include <us/gov/nova/app.h>
 
 
@@ -33,30 +32,24 @@ uint64_t c::delta::merge(local_delta* other) {
 c::local_delta* c::local_delta::create(int id) {
 	if (id==auth::app::id()) return new auth::app::local_delta();
 	if (id==cash::app::id()) return new cash::app::local_delta();
-	if (id==rep::app::id()) return new rep::local_delta();
 	if (id==nova::app::id()) return new nova::app::local_delta();
-
-    assert(false);
+        assert(false);
 	return 0;
 }
 
 c::delta* c::delta::create(int id) {
 	if (id==auth::app::id()) return new auth::app::delta();
 	if (id==cash::app::id()) return new cash::app::delta();
-	if (id==rep::app::id()) return new rep::delta();
 	if (id==nova::app::id()) return new nova::app::delta();
-
-    assert(false);
+        assert(false);
 	return 0;
 }
 
 c::delta* c::delta::create(int id, istream& is) {
 	if (id==auth::app::id()) return auth::app::delta::from_stream(is);
 	if (id==cash::app::id()) return cash::app::delta::from_stream(is);
-	if (id==rep::app::id()) return rep::delta::from_stream(is);
 	if (id==nova::app::id()) return nova::app::delta::from_stream(is);
-
-    assert(false);
+        assert(false);
 	return 0;
 }
 
@@ -64,7 +57,7 @@ c::local_delta* c::local_delta::create(int id, istream& is) {
 	local_delta* i=local_delta::create(id);
 	if (!i) return 0;
 	i->from_stream(is);
-	return i;	
+	return i;
 }
 
 c::local_delta* c::local_delta::create(istream& is) {

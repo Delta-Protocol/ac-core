@@ -7,7 +7,7 @@ CXXFLAGS:=-g -O0
 all: us-walletd
 
 us-walletd: ${CPPS} ${HS}
-	g++ ${CXXFLAGS} -pthread -lusgov -luswallet -lfastcgipp -L../gov -L../wallet -I../.. ${CPPS} -o us-walletd
+	g++ ${CXXFLAGS} -pthread -lusgov -luswallet -lfastcgipp -ljsoncpp -L../gov -L../wallet -I../.. ${CPPS} -o us-walletd
 
 clean:
 	rm -f us-walletd

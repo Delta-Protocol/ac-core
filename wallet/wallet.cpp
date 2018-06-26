@@ -498,6 +498,15 @@ string c::nova_query(const nova::hash_t& compartiment) {
     return os.str();
 }
 
+string c::nova_mempool() {
+	socket::datagram* d=new socket::datagram(us::gov::protocol::nova_mempool_query);
+	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
+	if (!response_datagram) return "";
+	auto r=response_datagram->parse_string();
+	delete response_datagram;
+    return r;
+}
+
 void c::nova_move_input::to_stream(ostream& os) const {
 	os << compartiment << ' ' << item << ' ' << (load?'1':'0') << ' ' << (sendover?'1':'0');
 }
