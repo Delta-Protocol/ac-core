@@ -80,6 +80,17 @@ cout << "SGT-01-RECEIVED QUERY" << endl; //settlement go throught
 			compartiment_query(c,d);
 			return true;
 		} break;
+		case protocol::nova_mempool_query: {
+            ostringstream os;
+            {
+        	lock_guard<mutex> lock(mx_pool);
+            pool->compartiments.dump(os);
+            }
+        	c->send(protocol::nova_response,os.str());	
+
+//			compartiment_query(c,d);
+			return true;
+		} break;
 	}
 	return false;
 }

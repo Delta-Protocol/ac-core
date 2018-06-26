@@ -17,9 +17,10 @@ start() {
 
 stop() {
       echo -n "Stopping us-wallet-api: "
-      killall -q -w -u $USER /usr/bin/spawn-fcgi
+echo      killall -q -w -u $USER /usr/bin/spawn-fcgi
+      killall -q -w -u $USER us-walletd 
       RETVAL=$?
-#      echo "$API_NAME."
+      echo "$API_NAME. $RETVAL"
 }
 
 case "$1" in
