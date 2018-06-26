@@ -43,6 +43,7 @@ struct api {
 	virtual void nova_move(const nova_move_input&, ostream&)=0;
 	virtual void nova_track(const nova_track_input&, ostream&)=0;
 	virtual void nova_query(const nova::hash_t& compartiment, ostream&)=0;
+	virtual void nova_mempool(ostream&)=0;
 };
 
 
@@ -67,6 +68,7 @@ struct rpc_api:api {
 	virtual void nova_move(const nova_move_input&, ostream&) override;
 	virtual void nova_track(const nova_track_input&, ostream&) override;
 	virtual void nova_query(const nova::hash_t& compartiment, ostream&) override;
+	virtual void nova_mempool(ostream&) override;
 
 private:
 	void ask(int service, ostream&os);
@@ -99,6 +101,7 @@ struct local_api:api, wallet, pairing {
 	virtual void nova_move(const api::nova_move_input&, ostream&) override;
 	virtual void nova_track(const api::nova_track_input&, ostream&) override;
 	virtual void nova_query(const nova::hash_t& compartiment, ostream&) override;
+	virtual void nova_mempool(ostream&) override;
 
 private:
 };

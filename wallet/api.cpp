@@ -121,6 +121,10 @@ void rpc_api::nova_query(const nova::hash_t& i, ostream& os) {
     si << i;
 	ask(us::wallet::protocol::nova_query,si.str(),os);
 }
+void rpc_api::nova_mempool(ostream& os) {
+	ask(us::wallet::protocol::nova_mempool,"",os);
+}
+
 
 
 //----------------local api
@@ -221,6 +225,10 @@ void local_api::nova_track(const api::nova_track_input& i, ostream& os) {
 
 void local_api::nova_query(const nova::hash_t& i, ostream& os) {
     os << wallet::nova_query(i) << endl;
+}
+
+void local_api::nova_mempool(ostream& os) {
+    os << wallet::nova_mempool() << endl;
 }
 
 
