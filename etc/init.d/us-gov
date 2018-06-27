@@ -5,7 +5,7 @@
 USER=root
 
 DAEMON="/usr/local/bin/us-govd"
-DAEMON_ARGS="-d"
+DAEMON_ARGS="-ds"
 PIDFILE="/var/run/us-govd.pid"
 NAME="us-govd"
 
