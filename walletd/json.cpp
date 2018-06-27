@@ -122,8 +122,8 @@ Json::Value c::convert_response_query(const string& s) {
 
 Json::Value c::convert_response_mempool(const string& s) {
     Json::Value val;
-val["raw"]=s;
-return val;
+    val["raw"]=s;
+//return val;
 	istringstream is(s);
 	int m=0;
 	is >> m;
