@@ -144,10 +144,11 @@ void c::compartiment_query(peer_t *c, datagram*d) {
 cout << "COMPARTIMENT_QUERY" << endl;
 	query_compartiments_t q=query_compartiments_t::from_datagram(d);
 
+    int r=0;
 	ostringstream os;
-	os << "0 "; //ret code ok
 	{
 	lock_guard<mutex> lock(db.mx);
+
 	for (auto&addr:q) {
 		auto a=db.compartiments->find(addr);
 		if (likely(a!=db.compartiments->end())) {
@@ -158,15 +159,19 @@ cout << "COMPARTIMENT_QUERY" << endl;
 			a.locking_program=0;
 			//a.balance=0;
 			a.to_stream(os);
+            r=1;
 		}
 	}
 	}
 
 	os << ' ' << last_block_imported;
 
-cout << "NOVA_RESPONSE " << os.str() << endl;
+	ostringstream osf;
+	osf << r << ' ' << os.str(); 
 
-	c->send(protocol::nova_response,os.str());	
+cout << "NOVA_RESPONSE " << osf.str() << endl;
+
+	c->send(protocol::nova_response,osf.str());	
 }
 /*
 bool c::process_work(peer_t *c, datagram*d) {

@@ -130,6 +130,7 @@ c::compartiments_query_t c::query_compartiments(const nova::app::query_compartim
 	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
 	if (!response_datagram) return move(ret);
 	auto r=response_datagram->parse_string();
+//cout << "raw ans: " << r << endl;
 	delete response_datagram;
 
 	istringstream is(r);
@@ -495,6 +496,8 @@ string c::nova_query(const nova::hash_t& compartiment) {
 	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
     ostringstream os;
     data.pretty_print(os);
+    os << "raw answer: ";
+
     return os.str();
 }
 

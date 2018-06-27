@@ -77,3 +77,37 @@ Json::Value c::convert_response_track(const string& s) {
     return val;
 }
 
+#include <us/gov/nova/app.h>
+
+Json::Value c::convert_response_query(const string& s) {
+    Json::Value val;
+	istringstream is(s);
+	int code;
+	is >> code;
+	if (code!=0) {	
+		string err;
+		is >> err;
+        val["error"]=err;
+        return val;
+	}
+	gov::nova::app::compartiment_t a=gov::nova::app::compartiment_t::from_stream(is);
+//    val["locking_program"]=a.locking_program;
+    Json::Value lb;
+    int n=0;
+    for (auto&i:a.logbook) {
+        lb[n++]=i;
+    }
+    val["logbook"]=lb;
+
+    Json::Value itms;
+    n=0;
+    for (auto&i:a.logbook.items) {
+        itms[n++]=i;
+    }
+    val["items"]=itms;
+
+//    string parent_block;    
+//    is >> parent_block;
+    return val;
+}
+
