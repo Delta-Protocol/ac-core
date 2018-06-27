@@ -64,6 +64,7 @@ Json::Value to_json(const string& r,const string& cmd) {
     if (cmd=="new_compartiment") return json::convert_response_new_compartiment(r);
     if (cmd=="move") return json::convert_response_move(r);
     if (cmd=="track") return json::convert_response_track(r);
+    if (cmd=="query") return json::convert_response_query(r);
 
     Json::Value err;
     err["error"]="unknown command";

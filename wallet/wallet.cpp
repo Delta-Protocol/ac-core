@@ -495,8 +495,9 @@ string c::nova_query(const nova::hash_t& compartiment) {
 	compartiments.emplace_back(compartiment);
 	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
     ostringstream os;
-    data.pretty_print(os);
-    os << "raw answer: ";
+	data.to_stream(os);
+//    data.pretty_print(os);
+//    os << "raw answer: ";
 
     return os.str();
 }

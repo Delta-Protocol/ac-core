@@ -82,29 +82,35 @@ Json::Value c::convert_response_track(const string& s) {
 Json::Value c::convert_response_query(const string& s) {
     Json::Value val;
 	istringstream is(s);
-	int code;
-	is >> code;
-	if (code!=0) {	
-		string err;
-		is >> err;
-        val["error"]=err;
-        return val;
-	}
-	gov::nova::app::compartiment_t a=gov::nova::app::compartiment_t::from_stream(is);
-//    val["locking_program"]=a.locking_program;
-    Json::Value lb;
-    int n=0;
-    for (auto&i:a.logbook) {
-        lb[n++]=i;
-    }
-    val["logbook"]=lb;
+	int m=0;
+	is >> m;
+	Json::Value co;
+	
+	for (int i=0; i<m; ++i) {
+		string comp;
+		is >> comp;
+		gov::nova::app::compartiment_t a=gov::nova::app::compartiment_t::from_stream(is);
+		co["id"]=comp;
 
-    Json::Value itms;
-    n=0;
-    for (auto&i:a.logbook.items) {
-        itms[n++]=i;
-    }
-    val["items"]=itms;
+		    Json::Value lb;
+		    int n=0;
+		    for (auto&i:a.logbook) {
+		        lb[n++]=i;
+		    }
+		    co["logbook"]=lb;
+
+	    Json::Value itms;
+	    n=0;
+	    for (auto&i:a.logbook.items) {
+	        itms[n++]=i;
+	    }
+	    co["items"]=itms;
+
+
+	}
+
+	val["compartiment"]=co;
+//    val["locking_program"]=a.locking_program;
 
 //    string parent_block;    
 //    is >> parent_block;
