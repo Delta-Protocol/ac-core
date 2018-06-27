@@ -84,7 +84,7 @@ cout << "SGT-01-RECEIVED QUERY" << endl; //settlement go throught
             ostringstream os;
             {
         	lock_guard<mutex> lock(mx_pool);
-            pool->compartiments.dump(os);
+            pool->compartiments.to_stream(os);
             }
         	c->send(protocol::nova_response,os.str());	
 

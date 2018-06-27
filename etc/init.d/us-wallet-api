@@ -2,7 +2,7 @@
 #copy this file into /etc/init.d/
 #update-rc.d curex-fcgi defaults
 
-USER=www-data
+USER=root
 
 PROG="/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-walletd -- -fcgi"
 RETVAL=0

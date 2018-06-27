@@ -34,11 +34,12 @@ Json::Value c::convert_response_move(const string& s) {
     is >> locking_prog;
     string locking_prog_input;
     is >> locking_prog_input;
-    string parent_block;    
+    string parent_block;
     is >> parent_block;
-    
+
     Json::Value val;
-    val["transaction_b58"]=b58;
+    val["transaction_b58"]=s;
+    val["transaction"]=tx;
     val["compartiment"]=compartiment;
     val["item"]=item;
     val["action"]=action==1?"load":"unload";
@@ -118,44 +119,6 @@ Json::Value c::convert_response_query(const string& s) {
     return val;
 }
 
-Json::Value c::convert_response_query(const string& s) {
-    Json::Value val;
-	istringstream is(s);
-	int m=0;
-	is >> m;
-	Json::Value cos;
-	
-	for (int i=0; i<m; ++i) {
-    	Json::Value co;
-		string comp;
-		is >> comp;
-		gov::nova::app::compartiment_t a=gov::nova::app::compartiment_t::from_stream(is);
-		co["id"]=comp;
-
-		    Json::Value lb;
-		    int n=0;
-		    for (auto&i:a.logbook) {
-		        lb[n++]=i;
-		    }
-		    co["logbook"]=lb;
-
-	    Json::Value itms;
-	    n=0;
-	    for (auto&i:a.logbook.items) {
-	        itms[n++]=i;
-	    }
-	    co["items"]=itms;
-        cos[i]=co;
-
-	}
-
-	val["compartiments"]=cos;
-//    val["locking_program"]=a.locking_program;
-
-//    string parent_block;    
-//    is >> parent_block;
-    return val;
-}
 
 Json::Value c::convert_response_mempool(const string& s) {
     Json::Value val;

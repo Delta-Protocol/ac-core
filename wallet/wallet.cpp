@@ -41,7 +41,9 @@ bool c::load() {
 }
 
 bool c::save() const {
-//cout << "saving wallet" << endl;
+//ofstream cout("/tmp/xxxxxxx");
+
+//cout << "saving wallet " << filename() <<endl;
 
 	if (!need_save) return true;
 	auto file=filename();
@@ -59,6 +61,7 @@ cash::hash_t c::new_address() {
 	auto h=k.pub.compute_hash();
 	emplace(h,move(k));
 	need_save=true;
+	save();
 	return move(h);
 }
 cash::hash_t c::add_address(const crypto::ec::keys::priv_t& key) {
@@ -66,6 +69,7 @@ cash::hash_t c::add_address(const crypto::ec::keys::priv_t& key) {
 	auto h=k.pub.compute_hash();
 	emplace(h,move(k));
 	need_save=true;
+	save();
 	return move(h);
 }
 const crypto::ec::keys* c::get_keys(const cash::hash_t& address) const {
@@ -130,24 +134,25 @@ c::compartiments_query_t c::query_compartiments(const nova::app::query_compartim
 	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
 	if (!response_datagram) return move(ret);
 	auto r=response_datagram->parse_string();
-//cout << "raw ans: " << r << endl;
+ofstream cout("/tmp/yyyy");
+cout << "raw ans: " << r << endl;
 	delete response_datagram;
 
 	istringstream is(r);
 	int code;
 	is >> code;
-	if (code!=0) {	
-		string err;
-		is >> err;
-		cerr << err << endl;
-	}
-	else {
+//	if (code!=0) {
+//		string err;
+//		is >> err;
+//		cerr << err << endl;
+//	}
+//	else {
 		for (auto&i:addresses) {
 			nova::app::compartiment_t a=nova::app::compartiment_t::from_stream(is);
-			ret.emplace(i,move(a));
+			if (code==0) ret.emplace(i,move(a));
 		}
 		is >> ret.parent_block;
-	}
+//	}
 	return move(ret);
 }
 
@@ -433,15 +438,20 @@ pair<string,nova::evidence_load> c::nova_move(const nova_move_input& i) {
 	compartiments.emplace_back(i.compartiment);
 
 	auto data=query_compartiments(compartiments);
-    if (data.size()!=1) {
-			ret.first="Compartiment not found";
-			return move(ret);
-    }
+//    if (data.size()!=1) {
+//			ret.first="Compartiment not found";
+//			return move(ret);
+ //   }
     t.compartiment=i.compartiment;
 	t.parent_block=data.parent_block;
     t.load=i.load;
     t.item=i.item;
-    t.locking_program=data.begin()->second.locking_program==0?1:data.begin()->second.locking_program; 
+    if (data.empty()) {
+     t.locking_program=1;
+    }
+    else {
+      t.locking_program=data.begin()->second.locking_program;
+    }
 
 //cout << "parent block " <<     t.parent_block << endl;
 
