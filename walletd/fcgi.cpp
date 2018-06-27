@@ -52,6 +52,7 @@ void c::help(ostream& os) const {
 		os << url << "/?<b>app=nova&cmd=move&compartiment=&lt;compartiment&gt;&item=&lt;item&gt;&action=&lt;load/unload&gt;&send=&lt;1|0&gt; </b>" << endl;
 		os << url << "/?<b>app=nova&cmd=track&compartiment=&lt;compartiment&gt;&sensors=&lt;sensors_b58&gt;&send=&lt;1|0&gt; </b>" << endl;
 		os << url << "/?<b>app=nova&cmd=query&compartiment=&lt;compartiment&gt;</b>" << endl;
+		os << url << "/?<b>app=nova&cmd=query&item=&lt;item&gt;</b>" << endl;
 		os << url << "/?<b>app=nova&cmd=mempool</b>" << endl;
 
 		os << endl;
@@ -197,9 +198,15 @@ out << uri << endl;
     }
     else if (cmd=="query") {
 		++n;if (n==m.end()) {help(out); return true;}
-        nova::hash_t compartiment;
-     	compartiment=nova::hash_t::from_b58(n->second);
-        api->nova_query(compartiment,os);
+	if (n->first=="compartiment") {
+	        nova::hash_t compartiment;
+     		compartiment=nova::hash_t::from_b58(n->second);
+	        api->nova_query(compartiment,os);
+	}
+	else {
+		string item=n->second;
+		api->nova_query(item,os);
+	}
     }
     else if (cmd=="mempool") {
         api->nova_mempool(os);

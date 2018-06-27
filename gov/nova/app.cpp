@@ -80,6 +80,10 @@ cout << "SGT-01-RECEIVED QUERY" << endl; //settlement go throught
 			compartiment_query(c,d);
 			return true;
 		} break;
+		case protocol::nova_item_query: {
+			item_query(c,d);
+			return true;
+		} break;
 		case protocol::nova_mempool_query: {
             ostringstream os;
             {
@@ -162,6 +166,46 @@ cout << "COMPARTIMENT_QUERY" << endl;
             r=1;
 		}
 	}
+	}
+
+	os << ' ' << last_block_imported;
+
+	ostringstream osf;
+	osf << r << ' ' << os.str(); 
+
+cout << "NOVA_RESPONSE " << osf.str() << endl;
+
+	c->send(protocol::nova_response,osf.str());	
+}
+
+void c::item_query(peer_t *c, datagram*d) {
+cout << "ITEM_QUERY" << endl;
+	string item=d->parse_string();
+	delete d;
+	auto addr=db.find_compartiment(item);
+//	if (addr==0) {
+//		c->send(protocol::nova_response,"Not found");
+//		delete d;
+//		return;
+//	}
+	
+    int r=0;
+	ostringstream os;
+	os << addr << ' ';
+	{
+	lock_guard<mutex> lock(db.mx);
+
+		auto a=db.compartiments->find(addr);
+		if (likely(a!=db.compartiments->end())) {
+			a->second.to_stream(os);
+		}
+		else {
+			compartiment_t a;
+			a.locking_program=0;
+			//a.balance=0;
+			a.to_stream(os);
+            r=1;
+		}
 	}
 
 	os << ' ' << last_block_imported;

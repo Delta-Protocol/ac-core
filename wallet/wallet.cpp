@@ -134,8 +134,8 @@ c::compartiments_query_t c::query_compartiments(const nova::app::query_compartim
 	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
 	if (!response_datagram) return move(ret);
 	auto r=response_datagram->parse_string();
-ofstream cout("/tmp/yyyy");
-cout << "raw ans: " << r << endl;
+//ofstream cout("/tmp/yyyy");
+//cout << "raw ans: " << r << endl;
 	delete response_datagram;
 
 	istringstream is(r);
@@ -151,6 +151,40 @@ cout << "raw ans: " << r << endl;
 			nova::app::compartiment_t a=nova::app::compartiment_t::from_stream(is);
 			if (code==0) ret.emplace(i,move(a));
 		}
+		is >> ret.parent_block;
+//	}
+	return move(ret);
+}
+
+c::compartiments_query_t c::query_compartiments(const string& item) const {
+	compartiments_query_t ret;
+
+	socket::datagram* d=new socket::datagram(us::gov::protocol::nova_item_query,item);
+
+	if (!d) return ret;
+
+	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
+	if (!response_datagram) return move(ret);
+	auto r=response_datagram->parse_string(); //0 11111111111111112UzHM 4 2rPXzY 2rPXzY 2rPXzy 2rPXzy 1 item2   2yjHq7aCZLLw2awfCdhFC36ASF1X
+ofstream cout("/tmp/yyyy");
+cout << "raw ans: " << r << endl;
+	delete response_datagram;
+
+	istringstream is(r);
+	int code;
+	is >> code;
+//	if (code!=0) {
+//		string err;
+//		is >> err;
+//		cerr << err << endl;
+//	}
+//	else {
+	//	for (auto&i:addresses) {
+	nova::hash_t cid;
+	is >> cid;
+			nova::app::compartiment_t a=nova::app::compartiment_t::from_stream(is);
+			if (code==0) ret.emplace(cid,move(a));
+	//	}
 		is >> ret.parent_block;
 //	}
 	return move(ret);
@@ -478,14 +512,23 @@ pair<string,nova::evidence_track> c::nova_track(const nova_track_input& i) {
 	compartiments.emplace_back(i.compartiment);
 
 	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
-    if (data.size()!=1) {
-			ret.first="Compartiment not found";
-			return move(ret);
-    }
+//    if (data.size()!=1) {
+//			ret.first="Compartiment not found";
+//			return move(ret);
+//    }
     t.compartiment=i.compartiment;
 	t.parent_block=data.parent_block;
     t.data=i.data;
-    t.locking_program=data.begin()->second.locking_program==0?1:data.begin()->second.locking_program; 
+
+    if (data.empty()) {
+     t.locking_program=1;
+    }
+    else {
+      t.locking_program=data.begin()->second.locking_program;
+    }
+
+
+//    t.locking_program=data.begin()->second.locking_program==0?1:data.begin()->second.locking_program; 
 
 //cout << "parent block " <<     t.parent_block << endl;
 
@@ -500,7 +543,7 @@ pair<string,nova::evidence_track> c::nova_track(const nova_track_input& i) {
     return move(ret);
 }
 
-string c::nova_query(const nova::hash_t& compartiment) {
+string c::nova_query(const nova::hash_t& compartiment) const {
 	nova::app::query_compartiments_t compartiments;
 	compartiments.emplace_back(compartiment);
 	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
@@ -511,8 +554,18 @@ string c::nova_query(const nova::hash_t& compartiment) {
 
     return os.str();
 }
+string c::nova_query(const string& item) const {
 
-string c::nova_mempool() {
+	auto data=query_compartiments(item); //TODO distinguish between notfound and lockingprogram==0
+    ostringstream os;
+	data.to_stream(os);
+//    data.pretty_print(os);
+//    os << "raw answer: ";
+
+    return os.str();
+}
+
+string c::nova_mempool() const {
 	socket::datagram* d=new socket::datagram(us::gov::protocol::nova_mempool_query);
 	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
 	if (!response_datagram) return "";
