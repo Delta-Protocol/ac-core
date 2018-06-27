@@ -84,9 +84,10 @@ Json::Value c::convert_response_query(const string& s) {
 	istringstream is(s);
 	int m=0;
 	is >> m;
-	Json::Value co;
+	Json::Value cos;
 	
 	for (int i=0; i<m; ++i) {
+    	Json::Value co;
 		string comp;
 		is >> comp;
 		gov::nova::app::compartiment_t a=gov::nova::app::compartiment_t::from_stream(is);
@@ -105,11 +106,11 @@ Json::Value c::convert_response_query(const string& s) {
 	        itms[n++]=i;
 	    }
 	    co["items"]=itms;
-
+        cos[i]=co;
 
 	}
 
-	val["compartiment"]=co;
+	val["compartiments"]=cos;
 //    val["locking_program"]=a.locking_program;
 
 //    string parent_block;    
