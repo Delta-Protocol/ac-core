@@ -65,6 +65,7 @@ Json::Value to_json(const string& r,const string& cmd) {
     if (cmd=="move") return json::convert_response_move(r);
     if (cmd=="track") return json::convert_response_track(r);
     if (cmd=="query") return json::convert_response_query(r);
+    if (cmd=="mempool") return json::convert_response_mempool(r);
 
     Json::Value err;
     err["error"]="unknown command";

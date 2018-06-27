@@ -15,6 +15,7 @@ struct json {
     static Json::Value convert_response_move(const string& s);
     static Json::Value convert_response_track(const string& s);
     static Json::Value convert_response_query(const string& s);
+    static Json::Value convert_response_mempool(const string& s);
 
 };
 
