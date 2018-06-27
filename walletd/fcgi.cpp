@@ -58,21 +58,17 @@ void c::help(ostream& os) const {
 		os << "</pre>" << endl;
 }
 
+#include "json.h"
 
-Json::Value c::to_json(const string& s) const {
-    istringstream is(s);
-    Json::Value val;
-    int i=0;
-    while(is.good()) {
-        string f;
-        is >> f;
-        if (!f.empty()) val[i++]=f;
-    }
-    return val;
+Json::Value to_json(const string& r,const string& cmd) {
+    if (cmd=="") return json::convert_response_new_compartiment(r);
+
+    Json::Value err;
+    err["error"]="unknown command";
+    return err;
 }
 
 
-#include <map>
 
 pair<string,string> split(const string& s, char c) {
 	for (int i=0; i<s.size(); ++i) {
@@ -109,6 +105,7 @@ vector<pair<string,string>> parse_uri(const string& uri) {
 	}
 	return m;
 }
+
 
 bool c::response() {
         ++count_reqs;
@@ -147,68 +144,74 @@ out << uri << endl;
 //	istringstream is(uri);
 //	string command;
 //	is >> command;
-istringstream is("");
+    istringstream is("");
+    string cmd;
 	if (app=="nova") {
 	++n;
 	if (n==m.end()) {help(out); return true;}
-	string cmd=n->second;
-    	if (cmd=="new_compartiment") {
-    	    api->new_address(os);
-        }
+	cmd=n->second;
+  	if (cmd=="new_compartiment") {
+   	    api->new_address(os);
+    }
 	else if (cmd=="track") {
-            wallet::nova_track_input i;
+        wallet::nova_track_input i;
 		++n;if (n==m.end()) {help(out); return true;}
-        	i.compartiment=nova::hash_t::from_b58(n->second);
+     	i.compartiment=nova::hash_t::from_b58(n->second);
 		++n;if (n==m.end()) {help(out); return true;}
-        	i.data=n->second;
+       	i.data=n->second;
 		++n;if (n==m.end()) {help(out); return true;}
+        string sendover;
+        sendover=n->second;
+        i.sendover=sendover=="1";
+        api->nova_track(i,os);
+    }
+    else if (cmd=="move") {
+        wallet::nova_move_input i;
+		++n;if (n==m.end()) {help(out); return true;}
+       	i.compartiment=nova::hash_t::from_b58(n->second);
+		++n;if (n==m.end()) {help(out); return true;}
+       	i.item=n->second;
+		++n;if (n==m.end()) {help(out); return true;}
+        string s;
+        s=n->second;
+        bool ok{false};
+        if (s=="load") {
+            i.load=true;
+            ok=true;
+        }
+        else if (s=="unload") {
+            i.load=false;
+            ok=true;
+        }
+        if (ok) {
+            ++n;if (n==m.end()) {help(out); return true;}
             string sendover;
             sendover=n->second;
             i.sendover=sendover=="1";
-            api->nova_track(i,os);
+            api->nova_move(i,os);
         }
-        else if (cmd=="move") {
-            wallet::nova_move_input i;
+    }
+    else if (cmd=="query") {
 		++n;if (n==m.end()) {help(out); return true;}
-        	i.compartiment=nova::hash_t::from_b58(n->second);
-		++n;if (n==m.end()) {help(out); return true;}
-        	i.item=n->second;
-		++n;if (n==m.end()) {help(out); return true;}
-            string s;
-            s=n->second;
-            bool ok{false};
-            if (s=="load") {
-                i.load=true;
-                ok=true;
-            }
-            else if (s=="unload") {
-                i.load=false;
-                ok=true;
-            }
-            if (ok) {
-		++n;if (n==m.end()) {help(out); return true;}
-                string sendover;
-            sendover=n->second;
-                i.sendover=sendover=="1";
-                api->nova_move(i,os);
-            }
-        }
-        else if (cmd=="query") {
-		++n;if (n==m.end()) {help(out); return true;}
-            nova::hash_t compartiment;
-        	compartiment=nova::hash_t::from_b58(n->second);
-            api->nova_query(compartiment,os);
-        }
-        else if (cmd=="mempool") {
-            api->nova_mempool(os);
-        }
-	}
+        nova::hash_t compartiment;
+     	compartiment=nova::hash_t::from_b58(n->second);
+        api->nova_query(compartiment,os);
+    }
+    else if (cmd=="mempool") {
+        api->nova_mempool(os);
+    }
+
+
+
+
+    }
+
     string r=os.str();
     bool json=true;
 	if (!r.empty()) {
         if (json) {
 		    out << "Content-Type: application/json; charset=utf-8" << endl << endl;
-            out << to_json(r) << endl;
+            out << to_json(r,cmd) << endl;
         }
         else {
 		    out << "Content-Type: text/plain; charset=utf-8" << endl << endl;
