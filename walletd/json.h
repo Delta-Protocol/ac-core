@@ -13,6 +13,7 @@ struct json {
 
     static Json::Value convert_response_new_compartiment(const string& s);
     static Json::Value convert_response_move(const string& s);
+    static Json::Value convert_response_track(const string& s);
 
 };
 
