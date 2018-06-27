@@ -62,6 +62,7 @@ void c::help(ostream& os) const {
 
 Json::Value to_json(const string& r,const string& cmd) {
     if (cmd=="new_compartiment") return json::convert_response_new_compartiment(r);
+    if (cmd=="move") return json::convert_response_move(r);
 
     Json::Value err;
     err["error"]="unknown command";
