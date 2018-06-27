@@ -208,7 +208,7 @@ out << uri << endl;
     }
 
     string r=os.str();
-    bool json=false;
+    bool json=true;
 	if (!r.empty()) {
         if (json) {
 		    out << "Content-Type: application/json; charset=utf-8" << endl << endl;
