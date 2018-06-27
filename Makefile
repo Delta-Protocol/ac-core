@@ -30,9 +30,13 @@ walletd: walletd/us-walletd
 install: release
 	install gov/libusgov.so ${PREFIX}/lib
 	install wallet/libuswallet.so ${PREFIX}/lib
+	install govd/us-govd ${PREFIX}/bin
 	install walletd/us-walletd ${PREFIX}/bin
 	install etc/init.d/us-wallet-api /etc/init.d
 	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
+	install etc/nginx/snippets/snakeoil.conf /etc/nginx/snippets/
+	install etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/
+	install etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/
 	ldconfig
 
 

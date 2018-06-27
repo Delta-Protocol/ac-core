@@ -48,11 +48,11 @@ void c::help(ostream& os) const {
 		os << "<pre>" << endl;
 		os << "US-Wallet functions" << endl;
 		os << endl;
-		os << url << "/?<b>nova new compartiment</b>" << endl;
-		os << url << "/?<b>nova move &lt;compartiment&gt; &lt;item&gt; &lt;load/unload&gt; [&lt;send&gt;] </b>" << endl;
-		os << url << "/?<b>nova track &lt;compartiment&gt; &lt;sensors_b58&gt; [&lt;send&gt;] </b>" << endl;
-		os << url << "/?<b>nova query &lt;compartiment&gt;</b>" << endl;
-		os << url << "/?<b>mempool</b>" << endl;
+		os << url << "/?<b>app=nova&cmd=new_compartiment</b>" << endl;
+		os << url << "/?<b>app=nova&cmd=move&compartiment=&lt;compartiment&gt;&item=&lt;item&gt;&action=&lt;load/unload&gt;&send=&lt;1|0&gt; </b>" << endl;
+		os << url << "/?<b>app=nova&cmd=track&compartiment=&lt;compartiment&gt;&sensors=&lt;sensors_b58&gt;&send=&lt;1|0&gt; </b>" << endl;
+		os << url << "/?<b>app=nova&cmd=query&compartiment=&lt;compartiment&gt;</b>" << endl;
+		os << url << "/?<b>app=nova&cmd=mempool</b>" << endl;
 
 		os << endl;
 		os << "</pre>" << endl;
@@ -68,7 +68,46 @@ Json::Value c::to_json(const string& s) const {
         is >> f;
         if (!f.empty()) val[i++]=f;
     }
-    return val;    
+    return val;
+}
+
+
+#include <map>
+
+pair<string,string> split(const string& s, char c) {
+	for (int i=0; i<s.size(); ++i) {
+		if (s[i]==c) {
+			return make_pair(s.substr(0,i),s.substr(i+1));
+		}
+	}
+	return make_pair(s,"");
+}
+vector<string> split2(const string& s, char c) {
+	vector<string> v;
+	int previ=0;
+	for (int i=0; i<s.size(); ++i) {
+		if (s[i]==c) {
+			v.push_back(s.substr(previ,i-previ));
+			previ=i+1;
+		}
+	}
+	if (previ<s.size()) v.push_back(s.substr(previ));
+	return v;
+}
+
+
+vector<pair<string,string>> parse_uri(const string& uri) {
+	vector<pair<string,string>> m;
+//m.push_back(make_pair("app","nova"));
+//return m;
+	auto i=uri.find('?');
+	if (i==string::npos) return m;
+	auto p=split2(&uri[i+1],'&'); //vector<str> "para=value"
+	for (auto&i:p) {
+		auto v=split(i,'='); //pair<str,str>
+		m.push_back(v);
+	}
+	return m;
 }
 
 bool c::response() {
@@ -84,37 +123,59 @@ bool c::response() {
 */
 //	out << fixed << setprecision(curex::cex::precision);
 
-
+//https://10.84.172.95/api?app=nova&cmd=track&compartiment=&sensors=&send=1
 
 	auto uri=uri_decode(environment().requestUri);
-	istringstream is(uri);
-	string command;
-	is >> command;
+/*
+out << "Content-Type: text/plain; charset=utf-8" << endl << endl;
 
-    ostringstream os;
-	if (command=="/api/?nova") {
-    	is >> command;
-    	if (command=="new") {
-        	is >> command;
-        	if (command=="compartiment") {
-    			api->new_address(os);
-            }
+out << uri << endl;
+	for (auto& i:m) {
+		out << i.first << " " << i.second << endl;
+
+	}
+
+	return true;
+*/
+        ostringstream os;
+
+	auto m=parse_uri(uri);
+	auto n=m.begin();
+	if (n==m.end()) {help(out); return true;}
+	string app=n->second;
+
+//	istringstream is(uri);
+//	string command;
+//	is >> command;
+istringstream is("");
+	if (app=="nova") {
+	++n;
+	if (n==m.end()) {help(out); return true;}
+	string cmd=n->second;
+    	if (cmd=="new_compartiment") {
+    	    api->new_address(os);
         }
-	    else if (command=="track") {
+	else if (cmd=="track") {
             wallet::nova_track_input i;
-        	is >> i.compartiment;
-        	is >> i.data;
+		++n;if (n==m.end()) {help(out); return true;}
+        	i.compartiment=nova::hash_t::from_b58(n->second);
+		++n;if (n==m.end()) {help(out); return true;}
+        	i.data=n->second;
+		++n;if (n==m.end()) {help(out); return true;}
             string sendover;
-            is >> sendover;
-            i.sendover=sendover=="send";
+            sendover=n->second;
+            i.sendover=sendover=="1";
             api->nova_track(i,os);
         }
-	    else if (command=="move") {
+        else if (cmd=="move") {
             wallet::nova_move_input i;
-            is >> i.compartiment;
-            is >> i.item;
+		++n;if (n==m.end()) {help(out); return true;}
+        	i.compartiment=nova::hash_t::from_b58(n->second);
+		++n;if (n==m.end()) {help(out); return true;}
+        	i.item=n->second;
+		++n;if (n==m.end()) {help(out); return true;}
             string s;
-            is >> s;
+            s=n->second;
             bool ok{false};
             if (s=="load") {
                 i.load=true;
@@ -125,19 +186,21 @@ bool c::response() {
                 ok=true;
             }
             if (ok) {
+		++n;if (n==m.end()) {help(out); return true;}
                 string sendover;
-                is >> sendover;
-                i.sendover=sendover=="send";
+            sendover=n->second;
+                i.sendover=sendover=="1";
                 api->nova_move(i,os);
             }
         }
-	    else if (command=="query") {
+        else if (cmd=="query") {
+		++n;if (n==m.end()) {help(out); return true;}
             nova::hash_t compartiment;
-            is >> compartiment;
+        	compartiment=nova::hash_t::from_b58(n->second);
             api->nova_query(compartiment,os);
         }
-        else if (command=="mempool") {
-            os << "nova mempool" << endl;
+        else if (cmd=="mempool") {
+            api->nova_mempool(os);
         }
 	}
     string r=os.str();

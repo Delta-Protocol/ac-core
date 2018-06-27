@@ -276,9 +276,9 @@ void c::local_delta::compartiment_t::dump_brief(ostream& os) const {
 }
 
 void c::local_delta::compartiments_t::dump(ostream& os) const {
-	cout << size() << " compartiments:" << endl;
+	os << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
-		cout << ' ' << i.first << ' ';
+		os << ' ' << i.first << ' ';
 		i.second.dump(os);
 		//os << endl;
 	}
@@ -290,9 +290,9 @@ void c::local_delta::compartiment_t::pretty_print(ostream& os) const {
 }
 
 void c::local_delta::compartiments_t::pretty_print(ostream& os) const {
-	cout << size() << " compartiments:" << endl;
+	os << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
-		cout << "compartiment " << i.first << ' ';
+		os << "compartiment " << i.first << ' ';
 		i.second.pretty_print(os);
 		//os << endl;
 	}
