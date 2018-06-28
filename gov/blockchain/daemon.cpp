@@ -367,17 +367,33 @@ string c::blocksdir() const {
     return home+"/blocks";
 }
 
+#include <us/gov/stacktrace.h>
+
 void c::save(const diff& bl) const {
+	ostringstream fn;
+	fn << blocksdir()+"/"+bl.hash().to_b58();
+	
 	{
-cout << "file " << blocksdir()+"/"+bl.hash().to_b58() << endl;
-	ofstream os(blocksdir()+"/"+bl.hash().to_b58());
+cout << "file " << fn.str() << endl;
+	ofstream os(fn.str());
 	bl.to_stream(os);
 	}
-	ifstream is(blocksdir()+"/"+bl.hash().to_b58());  //TODO remove this check
+	if (!file_exists(fn.str())) {
+		cerr << "file should be in the filesystem, I just saved it" << endl;
+		print_stacktrace();
+		assert(false);
+	}
+	ifstream is(fn.str());  //TODO remove this check
+	if (!is.good()) {
+		cerr << "file should be good in the filesystem, I just saved it" << endl;
+		print_stacktrace();
+		assert(false);
+	}
 	diff*b=diff::from_stream(is);
 	if (!b) {
 		cout << "ERROR A" << endl;
-		exit(1);
+		print_stacktrace();
+		assert(false);
 	}
 	if (b->hash()!=bl.hash()) {
 		cout << b->hash() << " " << bl.hash() << endl;
@@ -386,7 +402,8 @@ cout << "file " << blocksdir()+"/"+bl.hash().to_b58() << endl;
 		b->to_stream(os);
 		}
 		cout << "ERROR B " << (blocksdir()+"/"+bl.hash().to_b58()+"_") << endl;
-		exit(1);
+		print_stacktrace();
+		assert(false);
 	}
 	delete b;	
 }

@@ -45,10 +45,19 @@ c::delta* c::delta::create(int id) {
 	return 0;
 }
 
+#include <us/gov/stacktrace.h>
+
 c::delta* c::delta::create(int id, istream& is) {
 	if (id==auth::app::id()) return auth::app::delta::from_stream(is);
 	if (id==cash::app::id()) return cash::app::delta::from_stream(is);
 	if (id==nova::app::id()) return nova::app::delta::from_stream(is);
+	cerr << "Attempting to create a non-recognized app: " << id << endl;
+	char str[256];
+	is.get(str,256);
+	cerr << str << " ..." << endl;
+
+	print_stacktrace();
+
         assert(false);
 	return 0;
 }

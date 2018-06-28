@@ -215,10 +215,16 @@ struct cfg: filesystem::cfg {
 		cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
 
 	    string blocks_dir=abs_file(home,"blocks");
+	    cout << "making sure dir for blocks exists" << endl;
 	    if (!ensure_dir(blocks_dir)) {
 		cerr << "Cannot create blocks dir " << blocks_dir << endl;
 		exit(1);
 	    }
+{
+ostringstream os;
+os << "find " << home;
+system(os.str().c_str());
+}
 
 	    string locking_dir=abs_file(home,"locking");
 		    if (!ensure_dir(locking_dir)) {
