@@ -233,7 +233,7 @@ cout << "/stage1" << endl;
 
 bool c::stage2(cycle_data& data) {
 cout << "stage2 votes.size=" << votes.size() << endl;
-	diff::hash_t hash=votes.select();		
+	diff::hash_t hash=votes.select();
 	cout << "NB Voting process result: diff with hash " << hash << endl;
 	cout << "Last block imported (syncd tail) before importing=" << get_last_block_imported() << endl;
 	if (!hash.is_zero()) {
@@ -946,9 +946,10 @@ void c::votes_t::clear() {
 	b::clear();
 }
 bool c::votes_t::add(const pubkey_t::hash_t& h,const diff::hash_t& v) {
+cout << "Adding vote " << h << endl;
 	auto i=find(h);
 	if (i!=end()) {
-		++i->second.second;
+		//++i->second.second;
 		return false; //not new to me
 	}
 	emplace(h,make_pair(v,1));
@@ -956,15 +957,28 @@ bool c::votes_t::add(const pubkey_t::hash_t& h,const diff::hash_t& v) {
 }
 
 diff::hash_t c::votes_t::select() {
+	unordered_map<diff::hash_t,unsigned long> x;
+	{
 	lock_guard<mutex> lock(mx);
 	if (empty()) return diff::hash_t(0);
-	unsigned long max{0};
-	diff::hash_t* hash;
 	for (auto&i:*this) {
-		if (i.second.second>=max) {
-			max=i.second.second;
-			hash=&i.second.first;
-cout << "xx " << i.second.first << endl;
+		auto a=x.find(i.second.first);
+		if (a!=x.end()) {
+			a->second++;
+		}
+		else {
+			x.emplace(i.second.first,1);
+		}
+	}
+	}
+
+	unsigned long max{0};
+	const diff::hash_t* hash;
+	for (auto&i:x) {
+		if (i.second>=max) {
+			max=i.second;
+			hash=&(i.first);
+//cout << "xx " << i.second.first << endl;
 		}
 	}
 	auto ans=*hash;
