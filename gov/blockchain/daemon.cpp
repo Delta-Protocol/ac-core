@@ -84,8 +84,8 @@ void c::syncd::run() {
 				else {
 					cout << "SYNCD: querying file for " << cu << endl;
 					d->query_block(cu);
-					cout << "SYNCD: going to sleep for 5 secs." << endl;
-					wait(chrono::seconds(5)); //TODO better
+					cout << "SYNCD: going to sleep for 2 secs." << endl;
+					wait(chrono::seconds(2)); //TODO better
 					cout << "SYNCD: waked up " << endl;
 				}
 				if (program::_this.terminated) return;
@@ -107,6 +107,7 @@ void c::syncd::run() {
 }
 
 void c::syncd::update(const diff::hash_t& h, const diff::hash_t& t) {
+cout << "syncd: UPDATE head " << h << " tail " << t << endl;
 	{
 	lock_guard<mutex> lock(mx); 
 	cur=head=h;
@@ -116,6 +117,7 @@ void c::syncd::update(const diff::hash_t& h, const diff::hash_t& t) {
 	update();
 }
 void c::syncd::update(const diff::hash_t& t) {
+cout << "syncd: UPDATE tail " << t << endl;
 	{
 	lock_guard<mutex> lock(mx); 
 	tail=t;
@@ -126,7 +128,7 @@ void c::syncd::update(const diff::hash_t& t) {
 }
 void c::syncd::update() {
 	cout << "SYNCD: received wakeup signal " << endl;
-	cv.notify_all();		
+	cv.notify_all();
 }
 void c::syncd::wait() {
 	unique_lock<mutex> lock(mx);
@@ -139,7 +141,7 @@ void c::syncd::wait(const chrono::steady_clock::duration& d) {
 	resume=false;
 }
 void c::syncd::on_finish() {
-	cv.notify_all();		
+	cv.notify_all();
 }
 
 bool c::syncd::in_sync() const {
