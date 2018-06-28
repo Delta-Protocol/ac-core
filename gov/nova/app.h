@@ -74,7 +74,7 @@ namespace nova {
 			struct logbook_t:vector<string> {
                 typedef evidence_load::item_t item_t;
 
-				unordered_set<item_t> items;
+				set<item_t> items;
 				void dump(ostream& os) const;
 				void dump_brief(ostream& os) const;
 				void pretty_print(ostream& os) const;
