@@ -957,7 +957,7 @@ cout << "Adding vote " << h << endl;
 }
 
 diff::hash_t c::votes_t::select() {
-	unordered_map<diff::hash_t,unsigned long> x;
+	map<diff::hash_t,unsigned long> x;
 	{
 	lock_guard<mutex> lock(mx);
 	if (empty()) return diff::hash_t(0);
@@ -965,9 +965,11 @@ diff::hash_t c::votes_t::select() {
 		auto a=x.find(i.second.first);
 		if (a!=x.end()) {
 			a->second++;
+			cout << "VOTE count for " << i.second.first << " is " << a->second << endl;
 		}
 		else {
 			x.emplace(i.second.first,1);
+			cout << "VOTE count for " << i.second.first << " is 1" << endl;
 		}
 	}
 	}
