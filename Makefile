@@ -39,6 +39,7 @@ install: release
 	install etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/
 	install etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/
 	ldconfig
+	systemctl daemon-reload
 
 
 
