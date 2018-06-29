@@ -177,7 +177,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 struct cfg: filesystem::cfg {
 	typedef crypto::ec::keys keys_t;
 
-	cfg(const string& privkb58, const string& home, vector<string>&& seed_nodes): keys(privkb58), home(home), seed_nodes(seed_nodes) {
+	cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes): keys(privk), home(home), seed_nodes(seed_nodes) {
 	}
     cfg(const cfg& other): keys(other.keys), home(other.home), seed_nodes(other.seed_nodes) {
     }
@@ -196,13 +196,19 @@ struct cfg: filesystem::cfg {
 			f << k.priv.to_b58() << endl;
 			cout << "done." << endl;
 		}
-		string pk;
+
+		string pkb58;
 		{
 		ifstream f(keyfile);
-		getline(f,pk);
+		getline(f,pkb58);
 		}
+		auto pk=crypto::ec::keys::priv_t::from_b58(pkb58);
+		if (!crypto::ec::keys::verify(pk)) {
+	            cerr << "Invalid private key " << endl;
+        	    exit(1);
+	    	}
 
-		vector<string> addrs;		
+		vector<string> addrs;
 		string seeds_file=abs_file(home,"nodes.manual");
 		cout << "reading " << seeds_file << endl;
 		ifstream f(seeds_file);
@@ -220,11 +226,13 @@ struct cfg: filesystem::cfg {
 		cerr << "Cannot create blocks dir " << blocks_dir << endl;
 		exit(1);
 	    }
+/*
 {
 ostringstream os;
 os << "find " << home;
 system(os.str().c_str());
 }
+*/
 
 	    string locking_dir=abs_file(home,"locking");
 		    if (!ensure_dir(locking_dir)) {

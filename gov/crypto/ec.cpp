@@ -13,6 +13,10 @@ c c::instance;
 
 c::ec() {
 	ctx=secp256k1_context_create(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY); ///context to do EC operations
+	if (ctx==0) {
+		cerr << "Could not initialize EC context." << endl;
+		exit(1);
+	}
 }
 
 c::~ec() {
@@ -20,32 +24,41 @@ c::~ec() {
 }
 
 c::keys::keys(const priv_t& pk) {
-	for (int i=0; i<32; ++i) priv[i]=pk[i];
-	int r=secp256k1_ec_pubkey_create(ec::instance.ctx,&pub,&pk[0]);
-	assert(r==1); 
+	memcpy(&priv[0],&pk[0],32);
+//	for (int i=0; i<32; ++i) priv[i]=pk[i];
+	if (!secp256k1_ec_pubkey_create(ec::instance.ctx,&pub,&pk[0])) {
+		cerr << "Cannot create public key from priv" << endl;
+		pub.zero();
+	}
+//	assert(r==1);   <<-----------lint this querido markotas, ya me diras ma;ana como te lo has pasado de bien con Axel y Aida. ... - very well indeed.
 	//assert(pub==get_pubkey(pk));
 
 }
 
-c::keys::keys(const string& privk_b58) {
+/*
+c::keys::keys(const string& privk_b58,bool b) {
 	priv=priv_t::from_b58(privk_b58);
+/ *
 	if (!verify(priv)) {
 		cerr << "The private key is incorrect." << endl;
 		exit(1);
 	}
-	int r=secp256k1_ec_pubkey_create(ec::instance.ctx,&pub,&priv[0]);
-	if(r!=1) {
+* /
+	if (!secp256k1_ec_pubkey_create(ec::instance.ctx,&pub,&priv[0])) {
 		cerr << "Invalid private key." << endl;
-		exit(1);
+		priv.zero();
 	}
 }
+*/
 
 c::keys::keys(const keys& other): pub(other.pub) {
-	for (int i=0; i<32; ++i) priv[i]=other.priv[i];
+//	for (int i=0; i<32; ++i) priv[i]=other.priv[i];
+	memcpy(&priv[0],&other.priv[0],32);
 }
 
 c::keys::keys(keys&& other): pub(other.pub) {
-	for (int i=0; i<32; ++i) priv[i]=other.priv[i];
+//	for (int i=0; i<32; ++i) priv[i]=other.priv[i];
+	memcpy(&priv[0],&other.priv[0],32);
 }
 
 void c::keys::dump(ostream& os) const {
@@ -114,36 +127,38 @@ c::keys::pub_t c::keys::pub_t::from_b58(const string& s) {
 	v.reserve(32);
 	if (!b58::decode(s,v)) {
 		cerr << "Error reading public key, invalid b58 encoding. " << s << endl;
-		assert(false);
-		exit(1);//TODO not exit
+		k.zero();
+		return move(k);
+		//assert(false);
+		//exit(1);//TODO not exit
 	}
 	if (v.size()!=33) {
 		cerr << "Error reading public key, invalid length." << endl;
-		assert(false);
-		exit(1);//TODO not exit
+		k.zero();
+		return move(k);
+		//assert(false);
+		//exit(1);//TODO not exit
 	}
 	auto r=secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], 33);
 	if (r!=1) {
 		cerr << "Error reading public key." << endl;
-		assert(false);
-		exit(1);
+		k.zero();
+		return move(k);
+		//assert(false);
+		//exit(1);
 	}
 	return move(k);
 }
 
 bool c::keys::pub_t::set_b58(const string& s) {
 	vector<unsigned char> v;
-	if (!b58::decode(s,v)) {
-		return false;
-	}
-	if (v.size()!=33) {
-		return false;
-	}
-	auto r=secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33);
-	if (r!=1) {
-		return false;
-	}
-	return true;
+	if (!b58::decode(s,v)) 	return false;
+	if (v.size()!=33) return false;
+	return secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33)==1;
+//	if (r!=1) {
+//		return false;
+//	}
+//	return true;
 }
 
 c::keys::pub_t c::keys::pub_t::from_hex(const string& s) {
@@ -151,34 +166,42 @@ c::keys::pub_t c::keys::pub_t::from_hex(const string& s) {
 	auto v=c::from_hex(s);
 	if (v.size()!=33) {
 		cerr << "Error reading public key, invalid length." << endl;
-		assert(false);
-		exit(1);//TODO not exit
+		k.zero();
+		return move(k);
+//		assert(false);
+//		exit(1);//TODO not exit
 	}
 	auto r=secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], 33);
 	if (r!=1) {
 		cerr << "Error reading public key." << endl;
-		assert(false);
-		exit(1);
+		k.zero();
+		return move(k);
+//		assert(false);
+//		exit(1);
 	}
 	return move(k);
 }
 
-void c::keys::pub_t::assign(const string& s) {
+bool c::keys::pub_t::assign(const string& s) {
 	vector<unsigned char> v;
 	if (!b58::decode(s,v)) {
 		cerr << "Error reading public key, invalid b58 encoding." << endl;
-		assert(false);
-		exit(1);//TODO not exit
+		return false;
+//		assert(false);
+//		exit(1);//TODO not exit
 	}
 	if (v.size()!=33) {
 		cerr << "Error reading public key, invalid length." << endl;
-		exit(1);//TODO not exit
+		return false;
+//		exit(1);//TODO not exit
 	}
-	auto r=secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33);
-	if (r!=1) {
-		cerr << "Error reading public key." << endl;
-		exit(1);
-	}
+	return secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33)==1;
+//	if (r!=1) {
+//		cerr << "Error reading public key." << endl;
+//		return false;
+////		exit(1);
+//	}
+//	return true;
 }
 
 bool c::keys::pub_t::operator == (const keys::pub_t& other) const {
@@ -243,7 +266,8 @@ bool c::verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, c
 	int rt=secp256k1_ecdsa_signature_parse_der(ctx,&sig,&sighex[0],sighex.size());
 	if (unlikely(rt!=1)) {
 		cerr << "cannot parse signature '" << signature_der_b58 << "' " << sighex.size() << endl;
-		exit(1);
+		return false;
+//		exit(1);
 	}
 	/// EC Verify
         int ret = secp256k1_ecdsa_verify(ec::instance.ctx, &sig, &msgh[0], &pk);
@@ -269,7 +293,9 @@ c::keys::pub_t c::keys::get_pubkey(const priv_t& privk) {
 	int r=secp256k1_ec_pubkey_create(ec::instance.ctx,&k,&privk[0]);
 	if(r!=1) {
 		cerr << "Error generating public key." << endl;
-		exit(1);
+		k.zero();
+		return k;
+		//exit(1);
 	}
 	return move(k);
 }
@@ -298,7 +324,7 @@ vector<unsigned char> c::from_hex(const string& hex) {
 		string byte = hex.substr(i,2);
 		unsigned char chr = (unsigned char) (int)strtol(byte.c_str(), 0, 16);
 		z.push_back(chr);
-	}	
+	}
 	return move(z);
 }
 
@@ -306,8 +332,9 @@ vector<unsigned char> c::from_b58(const string& b58) {
 	vector<unsigned char> v;
 	if (!b58::decode(b58,v)) {
 		cerr << "Error reading b58. " << b58 << endl;
-		assert(false);
-		exit(1);//TODO not exit
+		v.clear();
+		//assert(false);
+		//exit(1);//TODO not exit
 	}
 	return move(v);
 }

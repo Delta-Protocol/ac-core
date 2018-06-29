@@ -32,7 +32,12 @@ bool c::load() {
 		string pkb58;
 		f >> pkb58;
 		if (pkb58.empty()) continue;
-		crypto::ec::keys k(crypto::ec::keys::priv_t::from_b58(pkb58));
+		auto pk=crypto::ec::keys::priv_t::from_b58(pkb58);
+	        if (!gov::crypto::ec::keys::verify(pk)) {
+        	        cerr << "The private key " << pkb58 << " is incorrect." << endl;
+                	continue;
+	        }
+		crypto::ec::keys k(pk);
 		cash::hash_t h=k.pub.compute_hash(); //cash::hash_t::from_b58("2vVN9EUdmZ5ypMe84JrQqwExMRjn");
 //			cout << "loaded addr " << h << endl;
 		emplace(h,move(k));
@@ -65,6 +70,10 @@ cash::hash_t c::new_address() {
 	return move(h);
 }
 cash::hash_t c::add_address(const crypto::ec::keys::priv_t& key) {
+	if (!gov::crypto::ec::keys::verify(key)) {
+		cerr << "Invalid private key" << endl;
+		return 0;
+	}
 	crypto::ec::keys k(key);
 	auto h=k.pub.compute_hash();
 	emplace(h,move(k));
