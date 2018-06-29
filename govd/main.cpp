@@ -410,6 +410,10 @@ int main(int argc, char** argv) {
         cout << "created wallet at " << wallet_file << endl;
     }
 
+	if (!conf.keys.pub.valid) {
+		cerr << "Invalid node pubkey" << endl;
+		exit(1);
+	}
 
 	cout << "Node public key is " << conf.keys.pub << endl;
 	if (p.daemon) {

@@ -30,6 +30,9 @@ c::keys::keys(const priv_t& pk) {
 		cerr << "Cannot create public key from priv" << endl;
 		pub.zero();
 	}
+	else {
+		pub.valid=true;
+	}
 //	assert(r==1);   <<-----------lint this querido markotas, ya me diras ma;ana como te lo has pasado de bien con Axel y Aida. ... - very well indeed.
 	//assert(pub==get_pubkey(pk));
 
@@ -67,7 +70,9 @@ void c::keys::dump(ostream& os) const {
 	os << endl;
 }
 
+
 c::keys::pub_t::hash_t c::keys::pub_t::compute_hash() const {
+    if (unlikely(!valid)) return 0;
     unsigned char out[33];
     size_t len=33;
     if (unlikely(!secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED))) {
@@ -95,7 +100,10 @@ string c::keys::priv_t::to_b58() const {
 	return b58::encode(&*begin(),&*end());
 }
 
+
+
 string c::keys::pub_t::to_b58() const {
+	if (unlikely(!valid)) return "";
 	unsigned char out[33];
 	size_t len=33;
 	if (unlikely(!secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED))) {
@@ -107,6 +115,7 @@ string c::keys::pub_t::to_b58() const {
 }
 
 string c::keys::pub_t::to_hex() const {
+	if (unlikely(!valid)) return "";
 	unsigned char out[33];
 	size_t len=33;
 	if (unlikely(!secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED))) {
@@ -153,14 +162,29 @@ c::keys::pub_t c::keys::pub_t::from_b58(const string& s) {
 		k.zero();
 		return move(k);
 	}
+	k.valid=true;
 	return move(k);
 }
 
 bool c::keys::pub_t::set_b58(const string& s) {
 	vector<unsigned char> v;
-	if (!b58::decode(s,v)) 	return false;
-	if (v.size()!=33) return false;
-	return secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33)==1;
+	if (!b58::decode(s,v)) {
+		cerr << "Error reading public key, invalid b58 encoding." << endl;
+		return false;
+	}
+/*
+	if (v.size()!=33) {
+		cerr << "Error reading public key, invalid length. " << v.size() << endl;
+		return false;
+	}
+*/
+	if (unlikely(!secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33))) {
+		cerr << "Error reading public key, invalid der encoding." << endl;
+		valid=false;
+		return false;
+	}
+	valid=true;
+	return true;
 //	if (r!=1) {
 //		return false;
 //	}
@@ -171,7 +195,7 @@ c::keys::pub_t c::keys::pub_t::from_hex(const string& s) {
 	pub_t k;
 	auto v=c::from_hex(s);
 	if (v.size()!=33) {
-		cerr << "Error reading public key, invalid length." << endl;
+		cerr << "Error reading public key, invalid length h." << endl;
 		k.zero();
 		return move(k);
 //		assert(false);
@@ -184,19 +208,22 @@ c::keys::pub_t c::keys::pub_t::from_hex(const string& s) {
 //		assert(false);
 //		exit(1);
 	}
+	k.valid=true;
 	return move(k);
 }
-
+/*
 bool c::keys::pub_t::assign(const string& s) {
 	vector<unsigned char> v;
 	if (!b58::decode(s,v)) {
 		cerr << "Error reading public key, invalid b58 encoding." << endl;
+		k.zero();
 		return false;
 //		assert(false);
 //		exit(1);//TODO not exit
 	}
 	if (v.size()!=33) {
 		cerr << "Error reading public key, invalid length." << endl;
+		k.zero();
 		return false;
 //		exit(1);//TODO not exit
 	}
@@ -208,16 +235,24 @@ bool c::keys::pub_t::assign(const string& s) {
 //	}
 //	return true;
 }
-
+*/
 bool c::keys::pub_t::operator == (const keys::pub_t& other) const {
 	for (int i=0; i<64; i+=8)
 	    if (*reinterpret_cast<const uint64_t*>(&data[i])!=*reinterpret_cast<const uint64_t*>(&other.data[i])) return false;
 	return true;
 }
 
+c::keys::pub_t::pub_t(const pub_t& other):h(other.h), hash_cached(other.hash_cached), valid(other.valid)  {
+	for (int i=0; i<64; i+=8)
+	    *reinterpret_cast<uint64_t*>(&data[i])=*reinterpret_cast<const uint64_t*>(&other.data[i]);
+}
+
 c::keys::pub_t& c::keys::pub_t::operator = (const keys::pub_t& other) {
 	for (int i=0; i<64; i+=8)
 	    *reinterpret_cast<uint64_t*>(&data[i])=*reinterpret_cast<const uint64_t*>(&other.data[i]);
+	valid=other.valid;
+	hash_cached=other.hash_cached;
+	h=other.h;
 	return *this;
 }
 
@@ -305,6 +340,7 @@ c::keys::pub_t c::keys::get_pubkey(const priv_t& privk) {
 		return k;
 		//exit(1);
 	}
+	k.valid=true;
 	return move(k);
 }
 

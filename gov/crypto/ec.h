@@ -19,6 +19,10 @@ struct ec {
 
 	struct keys {
 		struct pub_t:secp256k1_pubkey { //64 bytes length
+			pub_t():valid(false), h(false) {
+			}
+			pub_t(const pub_t& other);
+
 			typedef crypto::ripemd160 hasher_t;
 			typedef hasher_t::value_type hash_t;
 
@@ -35,13 +39,14 @@ struct ec {
 			bool set_b58(const string&);
 			static pub_t from_b58(const string&);
 			static pub_t from_hex(const string&);
-			bool assign(const string&);
+			//bool assign(const string&);
 
 			bool operator == (const pub_t& other) const;
 			pub_t& operator = (const pub_t& other);
 
-			inline void zero() { memset(this,0,sizeof(data)); }
+			inline void zero() { valid=false; } //memset(this,0,sizeof(data)); }
 
+			bool valid{false};
 		private:
 			mutable bool h{false};
 			mutable hash_t hash_cached;
