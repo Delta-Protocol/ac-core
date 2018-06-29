@@ -730,14 +730,14 @@ cout << "PROCESSING DATAGRAM " << d->service << endl;
 	if (protocol::is_node_protocol(d->service)) { //high priority
 cout << "NODE PROTOCOL " << d->service << endl;
 		if (parent->process_work(static_cast<peer_t*>(c),d)) return true;
-cout << "NOT handled by specialists! " << d->service << endl;
+cerr << "ERROR           NOT handled by specialists! " << d->service << endl;
 	}
+
 	if (protocol::is_app_query(d->service)) {
 cout << "QUERY PROTOCOL " << d->service << endl;
 		if (parent->process_app_query(static_cast<peer_t*>(c),d)) return true;
 cout << "NOT handled by specialists! " << d->service << endl;
 	}
-
 
 	if (b::process_work(c,d)) { //ping, evidences, auth
 		return true;
@@ -754,9 +754,13 @@ bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
 
 
 bool c::process_evidence(peer_t *c, datagram*d) {
-        
 	send(*d, c); //relay
 
+        if (!syncdemon.in_sync()) {
+		cout << "ignoring evidence processing, I am syncing" << endl;
+		delete d;
+		return true;
+	}
 
 	bool processed=false;
 	for (auto&i:apps_) {
@@ -770,6 +774,11 @@ bool c::process_evidence(peer_t *c, datagram*d) {
 
 bool c::process_app_query(peer_t *c, datagram*d) {
 cout << "BLOCKCHAIN: process_query " << d->service << endl;
+        if (!syncdemon.in_sync()) {
+		cout << "ignoring query, I am syncing" << endl;
+		delete d;
+		return true;
+	}
 	bool processed=false;
 	for (auto&i:apps_) {
 //		if (!i.second->in_service()) continue;
