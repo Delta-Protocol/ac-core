@@ -497,8 +497,12 @@ vector<peer_t*> c::get_people() {
 void c::update_peers_state() {
 	for (auto& i:peerd.in_service()) {
 		auto p=reinterpret_cast<peer_t*>(i);
-		if (p->stage!=peer_t::sysop)
+		if (p->stage!=peer_t::sysop) {
+			for (int i=0; i<sizeof(p->pubkey.data); ++i)
+				cout << p->pubkey.data[i]  << " ";
+			cout << endl;
 			p->stage=auth_app->db.get_stage(p->pubkey.hash());
+		}
 	}
 }
 

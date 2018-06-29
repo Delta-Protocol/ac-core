@@ -70,7 +70,10 @@ void c::keys::dump(ostream& os) const {
 c::keys::pub_t::hash_t c::keys::pub_t::compute_hash() const {
     unsigned char out[33];
     size_t len=33;
-    secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED);
+    if (unlikely(!secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED))) {
+	cerr << "cannot serialize pubkey" << endl;
+	return 0;
+    }
 
 	hasher_t hasher;
 //	hasher.write(&data[0],64); //only for LE platform TODO  
@@ -84,7 +87,7 @@ c::keys::pub_t::hash_t c::keys::pub_t::compute_hash() const {
 
 string c::keys::to_hex(const priv_t& privkey) {
 	ostringstream os;
-	for (int i=0; i<32; ++i) os << hex << setfill('0') << setw(2) << (int)privkey[i];
+	for (int i=0; i<32; ++i) os << hex << setfill('0') << setw(2) << (int)privkey[i]; //only LE //TODO
 	return os.str();
 }
 
@@ -95,7 +98,10 @@ string c::keys::priv_t::to_b58() const {
 string c::keys::pub_t::to_b58() const {
 	unsigned char out[33];
 	size_t len=33;
-	secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED);
+	if (unlikely(!secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED))) {
+		cerr << "cannot serialize pubkey" << endl;
+		return "";
+	}
 	auto s=b58::encode(out,out+len);
 	return s;
 }
@@ -103,7 +109,10 @@ string c::keys::pub_t::to_b58() const {
 string c::keys::pub_t::to_hex() const {
 	unsigned char out[33];
 	size_t len=33;
-	secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED);
+	if (unlikely(!secp256k1_ec_pubkey_serialize(ec::instance.ctx, out, &len, this, SECP256K1_EC_COMPRESSED))) {
+		cerr << "cannot serialize pubkey" << endl;
+		return "";
+	}
 	ostringstream os;
 	for (auto i=0; i<len; ++i) os << hex << setfill('0') << setw(2) << (int)out[i];
 	return os.str();
@@ -139,13 +148,10 @@ c::keys::pub_t c::keys::pub_t::from_b58(const string& s) {
 		//assert(false);
 		//exit(1);//TODO not exit
 	}
-	auto r=secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], 33);
-	if (r!=1) {
+	if (unlikely(!secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], 33))) {
 		cerr << "Error reading public key." << endl;
 		k.zero();
 		return move(k);
-		//assert(false);
-		//exit(1);
 	}
 	return move(k);
 }
@@ -171,8 +177,7 @@ c::keys::pub_t c::keys::pub_t::from_hex(const string& s) {
 //		assert(false);
 //		exit(1);//TODO not exit
 	}
-	auto r=secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], 33);
-	if (r!=1) {
+	if (unlikely(!secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], 33))) {
 		cerr << "Error reading public key." << endl;
 		k.zero();
 		return move(k);
@@ -229,9 +234,16 @@ vector<unsigned char> c::sign(const keys::priv_t& pk, const sigmsg_hasher_t::val
 	signature.resize(72);
 	size_t nSigLen=72;
 	secp256k1_ecdsa_signature sig;
-	int ret = secp256k1_ecdsa_sign(ctx, &sig, &hash[0], &pk[0], secp256k1_nonce_function_rfc6979, 0);
-	assert(ret);
-	secp256k1_ecdsa_signature_serialize_der(ctx, (unsigned char*)&signature[0], &nSigLen, &sig);
+	if (unlikely(!secp256k1_ecdsa_sign(ctx, &sig, &hash[0], &pk[0], secp256k1_nonce_function_rfc6979, 0))) {
+		cerr << "couldn't sign" << endl;
+		return move(signature);
+        }
+//	assert(ret);
+	if (unlikely(!secp256k1_ecdsa_signature_serialize_der(ctx, (unsigned char*)&signature[0], &nSigLen, &sig))) {
+		cerr << "couldn't serialize signature" << endl;
+		signature.clear();
+		return move(signature);
+	}
 	signature.resize(nSigLen);
 	return move(signature);
 }
@@ -263,15 +275,13 @@ bool c::verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, c
 	if (unlikely(sighex.empty())) return false;
 	//cout << "verifying hash '" << msgh << "' " << sighex.size() << " " << sighex[0] << " " << signature_der_b58 << " " << pk << endl;
 	signature sig;
-	int rt=secp256k1_ecdsa_signature_parse_der(ctx,&sig,&sighex[0],sighex.size());
-	if (unlikely(rt!=1)) {
+	if (unlikely(!secp256k1_ecdsa_signature_parse_der(ctx,&sig,&sighex[0],sighex.size()))) {
 		cerr << "cannot parse signature '" << signature_der_b58 << "' " << sighex.size() << endl;
 		return false;
 //		exit(1);
 	}
 	/// EC Verify
-        int ret = secp256k1_ecdsa_verify(ec::instance.ctx, &sig, &msgh[0], &pk);
-	return ret==1;
+	return secp256k1_ecdsa_verify(ec::instance.ctx, &sig, &msgh[0], &pk)==1;
 }
 
 bool c::verify(const keys::pub_t& pk, const string& text, const string& signature_der_b58) const {
@@ -284,14 +294,12 @@ bool c::verify(const keys::pub_t& pk, const string& text, const string& signatur
 }
 
 bool c::keys::verify(const keys::priv_t& privkey) {
-	int r=secp256k1_ec_seckey_verify(ec::instance.ctx,&privkey[0]);
-	return r==1;
+	return secp256k1_ec_seckey_verify(ec::instance.ctx,&privkey[0])==1;
 }
 
 c::keys::pub_t c::keys::get_pubkey(const priv_t& privk) {
 	pub_t k;
-	int r=secp256k1_ec_pubkey_create(ec::instance.ctx,&k,&privk[0]);
-	if(r!=1) {
+	if(unlikely(!secp256k1_ec_pubkey_create(ec::instance.ctx,&k,&privk[0]))) {
 		cerr << "Error generating public key." << endl;
 		k.zero();
 		return k;
