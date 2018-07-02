@@ -84,8 +84,8 @@ void c::syncd::run() {
 				else {
 					cout << "SYNCD: querying file for " << cu << endl;
 					d->query_block(cu);
-					cout << "SYNCD: going to sleep for 5 secs." << endl;
-					wait(chrono::seconds(5)); //TODO better
+					cout << "SYNCD: going to sleep for 2 secs." << endl;
+					wait(chrono::seconds(2)); //TODO better
 					cout << "SYNCD: waked up " << endl;
 				}
 				if (program::_this.terminated) return;
@@ -107,6 +107,7 @@ void c::syncd::run() {
 }
 
 void c::syncd::update(const diff::hash_t& h, const diff::hash_t& t) {
+cout << "syncd: UPDATE head " << h << " tail " << t << endl;
 	{
 	lock_guard<mutex> lock(mx); 
 	cur=head=h;
@@ -116,6 +117,7 @@ void c::syncd::update(const diff::hash_t& h, const diff::hash_t& t) {
 	update();
 }
 void c::syncd::update(const diff::hash_t& t) {
+cout << "syncd: UPDATE tail " << t << endl;
 	{
 	lock_guard<mutex> lock(mx); 
 	tail=t;
@@ -126,7 +128,7 @@ void c::syncd::update(const diff::hash_t& t) {
 }
 void c::syncd::update() {
 	cout << "SYNCD: received wakeup signal " << endl;
-	cv.notify_all();		
+	cv.notify_all();
 }
 void c::syncd::wait() {
 	unique_lock<mutex> lock(mx);
@@ -139,7 +141,7 @@ void c::syncd::wait(const chrono::steady_clock::duration& d) {
 	resume=false;
 }
 void c::syncd::on_finish() {
-	cv.notify_all();		
+	cv.notify_all();
 }
 
 bool c::syncd::in_sync() const {
@@ -231,7 +233,7 @@ cout << "/stage1" << endl;
 
 bool c::stage2(cycle_data& data) {
 cout << "stage2 votes.size=" << votes.size() << endl;
-	diff::hash_t hash=votes.select();		
+	diff::hash_t hash=votes.select();
 	cout << "NB Voting process result: diff with hash " << hash << endl;
 	cout << "Last block imported (syncd tail) before importing=" << get_last_block_imported() << endl;
 	if (!hash.is_zero()) {
@@ -367,17 +369,33 @@ string c::blocksdir() const {
     return home+"/blocks";
 }
 
+#include <us/gov/stacktrace.h>
+
 void c::save(const diff& bl) const {
+	ostringstream fn;
+	fn << blocksdir()+"/"+bl.hash().to_b58();
+	
 	{
-cout << "file " << blocksdir()+"/"+bl.hash().to_b58() << endl;
-	ofstream os(blocksdir()+"/"+bl.hash().to_b58());
+cout << "file " << fn.str() << endl;
+	ofstream os(fn.str());
 	bl.to_stream(os);
 	}
-	ifstream is(blocksdir()+"/"+bl.hash().to_b58());  //TODO remove this check
+	if (!file_exists(fn.str())) {
+		cerr << "file should be in the filesystem, I just saved it" << endl;
+		print_stacktrace();
+		assert(false);
+	}
+	ifstream is(fn.str());  //TODO remove this check
+	if (!is.good()) {
+		cerr << "file should be good in the filesystem, I just saved it" << endl;
+		print_stacktrace();
+		assert(false);
+	}
 	diff*b=diff::from_stream(is);
 	if (!b) {
 		cout << "ERROR A" << endl;
-		exit(1);
+		print_stacktrace();
+		assert(false);
 	}
 	if (b->hash()!=bl.hash()) {
 		cout << b->hash() << " " << bl.hash() << endl;
@@ -386,7 +404,8 @@ cout << "file " << blocksdir()+"/"+bl.hash().to_b58() << endl;
 		b->to_stream(os);
 		}
 		cout << "ERROR B " << (blocksdir()+"/"+bl.hash().to_b58()+"_") << endl;
-		exit(1);
+		print_stacktrace();
+		assert(false);
 	}
 	delete b;	
 }
@@ -478,8 +497,12 @@ vector<peer_t*> c::get_people() {
 void c::update_peers_state() {
 	for (auto& i:peerd.in_service()) {
 		auto p=reinterpret_cast<peer_t*>(i);
-		if (p->stage!=peer_t::sysop)
+		if (p->stage!=peer_t::sysop) {
+			for (int i=0; i<sizeof(p->pubkey.data); ++i)
+				cout << p->pubkey.data[i]  << " ";
+			cout << endl;
 			p->stage=auth_app->db.get_stage(p->pubkey.hash());
+		}
 	}
 }
 
@@ -711,14 +734,14 @@ cout << "PROCESSING DATAGRAM " << d->service << endl;
 	if (protocol::is_node_protocol(d->service)) { //high priority
 cout << "NODE PROTOCOL " << d->service << endl;
 		if (parent->process_work(static_cast<peer_t*>(c),d)) return true;
-cout << "NOT handled by specialists! " << d->service << endl;
+cerr << "ERROR           NOT handled by specialists! " << d->service << endl;
 	}
+
 	if (protocol::is_app_query(d->service)) {
 cout << "QUERY PROTOCOL " << d->service << endl;
 		if (parent->process_app_query(static_cast<peer_t*>(c),d)) return true;
 cout << "NOT handled by specialists! " << d->service << endl;
 	}
-
 
 	if (b::process_work(c,d)) { //ping, evidences, auth
 		return true;
@@ -735,9 +758,13 @@ bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
 
 
 bool c::process_evidence(peer_t *c, datagram*d) {
-        
 	send(*d, c); //relay
 
+        if (!syncdemon.in_sync()) {
+		cout << "ignoring evidence processing, I am syncing" << endl;
+		delete d;
+		return true;
+	}
 
 	bool processed=false;
 	for (auto&i:apps_) {
@@ -751,6 +778,11 @@ bool c::process_evidence(peer_t *c, datagram*d) {
 
 bool c::process_app_query(peer_t *c, datagram*d) {
 cout << "BLOCKCHAIN: process_query " << d->service << endl;
+        if (!syncdemon.in_sync()) {
+		cout << "ignoring query, I am syncing" << endl;
+		delete d;
+		return true;
+	}
 	bool processed=false;
 	for (auto&i:apps_) {
 //		if (!i.second->in_service()) continue;
@@ -927,9 +959,10 @@ void c::votes_t::clear() {
 	b::clear();
 }
 bool c::votes_t::add(const pubkey_t::hash_t& h,const diff::hash_t& v) {
+cout << "Adding vote " << h << endl;
 	auto i=find(h);
 	if (i!=end()) {
-		++i->second.second;
+		//++i->second.second;
 		return false; //not new to me
 	}
 	emplace(h,make_pair(v,1));
@@ -937,15 +970,30 @@ bool c::votes_t::add(const pubkey_t::hash_t& h,const diff::hash_t& v) {
 }
 
 diff::hash_t c::votes_t::select() {
+	map<diff::hash_t,unsigned long> x;
+	{
 	lock_guard<mutex> lock(mx);
 	if (empty()) return diff::hash_t(0);
-	unsigned long max{0};
-	diff::hash_t* hash;
 	for (auto&i:*this) {
-		if (i.second.second>=max) {
-			max=i.second.second;
-			hash=&i.second.first;
-cout << "xx " << i.second.first << endl;
+		auto a=x.find(i.second.first);
+		if (a!=x.end()) {
+			a->second++;
+			cout << "VOTE count for " << i.second.first << " is " << a->second << endl;
+		}
+		else {
+			x.emplace(i.second.first,1);
+			cout << "VOTE count for " << i.second.first << " is 1" << endl;
+		}
+	}
+	}
+
+	unsigned long max{0};
+	const diff::hash_t* hash;
+	for (auto&i:x) {
+		if (i.second>=max) {
+			max=i.second;
+			hash=&(i.first);
+//cout << "xx " << i.second.first << endl;
 		}
 	}
 	auto ans=*hash;

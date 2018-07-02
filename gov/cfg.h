@@ -16,6 +16,7 @@ struct cfg {
 	static bool ensure_dir(const string& d);
 	static bool exists_dir(const string& d);
 	static string abs_file(const string& home, const string& fn);
+	static void mkdir_tree(string sub, string dir);
 
 };
 

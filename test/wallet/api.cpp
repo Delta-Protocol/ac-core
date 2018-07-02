@@ -205,7 +205,9 @@ void testing_wallet_api()
 	cout << " ---------------------------Test-------------------------------" << endl;
 		//     [ip]       [port]        [address]               [amoundSend]  [fees] 	[privateKey] 			            [timer]
 		test("127.0.0.1" , 46001 , "4WFcdMLaDEG4WPE8pHCTLZymBneJ" ,  10000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
+	sleep(20);		
 		test("127.0.0.1" , 46001 , "3onaAM6pyGMx5FyA1VuYADpcH6wG" ,  20000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true  );
+	sleep(20);		
 		test("127.0.0.1" , 46001 , "2f4M2qtWznu3PrSm3qqM9HS4SUJD" ,  30000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
 //		test("127.0.0.1" , 46001 , "29zPdkeU82Fzp8QRrNQVocqPKpqZ" ,  40000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
 //		test("127.0.0.1" , 46001 , "2HfujHeDRWX4qCM35c3UqtXaFDxd" ,  55555   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );

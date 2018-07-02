@@ -40,6 +40,7 @@ struct params {
     }
 	bool daemon{false};
     bool fcgi{false};
+    bool json{false};
     string homedir;
     bool offline{false};
 	string backend_host{"localhost"}; uint16_t backend_port{16672};
@@ -56,7 +57,7 @@ void help(const params& p, ostream& os=cout) {
 	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
 	os << " -d        Run wallet daemon on port " << p.walletd_port << endl;
 	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
-	os << " -json     output json instead of text" << endl;
+	os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
     if (p.offline) {
 	    os << " backend connector:" << endl;
 	    os << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
@@ -122,20 +123,33 @@ void error_log(const char* msg) {
 */
 }
 
+
+
+
 void run_fcgi(const params& p) {
    //engine::init(); 
 //   e=new engine("/var/cex",wcerr);
    //e->add_sample_liquidity(wcerr);
+
+
+   w3api::fcgi_t::api=new local_api(p.homedir,p.backend_host,p.backend_port);
+
    try {
       Fastcgipp::Manager<w3api::fcgi_t> fcgi;
+      fcgi.setupSignals();
+      fcgi.listen();
       fcgi.start();
+      cout << "us-wallet fast-cgi initiated normally" << endl;
       fcgi.join();
-      cerr << "us-wallet fast-cgi initiated normally" << endl;
+
+
    }
    catch(std::exception& ex) {
       cerr << ex.what() << endl;
    }
 //   delete e;
+    delete w3api::fcgi_t::api;
+
 }
 
 
@@ -178,6 +192,9 @@ string parse_options(args_t& args, params& p) {
         }
         else if (cmd=="-fcgi") {
         	p.fcgi=true;
+        }
+        else if (cmd=="-json") {
+        	p.json=true;
         }
         else {
             break;
@@ -247,7 +264,7 @@ string sim_sensors() {
     return os.str();
 }
 
-void nova_app(api& wapi, args_t& args, const params& p) {
+void nova_app(api& wapi, args_t& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="move") {
         if (args.args_left()<3) {
@@ -266,7 +283,7 @@ void nova_app(api& wapi, args_t& args, const params& p) {
             return;
         }
         i.sendover=args.next<string>("nopes")=="send";
-        wapi.nova_move(i,cout);
+        wapi.nova_move(i,os);
 //    os << " nova move <compartiment pubkey> <item pubkey> <load|unload> [<send>]   ." << endl;
 	}
 	else if (command=="track") {
@@ -279,14 +296,14 @@ void nova_app(api& wapi, args_t& args, const params& p) {
             cout << crypto::b58::decode(i.data) << endl;
         }
         i.sendover=args.next<string>("nopes")=="send";
-        wapi.nova_track(i,cout);
+        wapi.nova_track(i,os);
 //    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
     }
 	else if (command=="new") {
     	string cmd=args.next<string>();
         if (cmd=="compartiment") {
-            cout << "Compartiment id: ";
-			wapi.new_address(cout);
+            //cout << "Compartiment id: ";
+			wapi.new_address(os);
         }
         else {
     		help(p);
@@ -294,22 +311,22 @@ void nova_app(api& wapi, args_t& args, const params& p) {
     }
     else if (command=="sim_sensors") {
         string raw=sim_sensors();
-        cout << raw << endl;
-        cout << crypto::b58::encode(raw) << endl;
+        os << raw << endl;
+        os << crypto::b58::encode(raw) << endl;
     }
     else if (command=="decode_move") {
     	string txb58=args.next<string>();
 	    nova::evidence_load t=nova::evidence_load::from_b58(txb58);
-	    t.write_pretty(cout);
+	    t.write_pretty(os);
     }
     else if (command=="decode_track") {
     	string txb58=args.next<string>();
 	    nova::evidence_track t=nova::evidence_track::from_b58(txb58);
-	    t.write_pretty(cout);
+	    t.write_pretty(os);
     }
 	else if (command=="query") {
         auto compartiment=args.next<nova::hash_t>();
-        wapi.nova_query(compartiment,cout);
+        wapi.nova_query(compartiment,os);
         
     }
 	else {
@@ -318,7 +335,7 @@ void nova_app(api& wapi, args_t& args, const params& p) {
 }
 
 
-void tx(api& wapi, args_t& args, const params& p) {
+void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 /*
 	if (command=="make") {
@@ -334,25 +351,25 @@ void tx(api& wapi, args_t& args, const params& p) {
         i.sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
         i.sigcode_outputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
         i.sendover=args.next<string>("nopes")=="send";
-        wapi.tx_make_p2pkh(i,cout);
+        wapi.tx_make_p2pkh(i,os);
 	}
 	else if (command=="sign") {
 	    auto b58=args.next<string>();
 	    auto sigcodei=args.next<cash::tx::sigcode_t>();
 	    auto sigcodeo=args.next<cash::tx::sigcode_t>();
-        wapi.tx_sign(b58,sigcodei,sigcodeo,cout);
+        wapi.tx_sign(b58,sigcodei,sigcodeo,os);
 	}
 	else if (command=="decode") {
 	    auto b58=args.next<string>();
-        wapi.tx_decode(b58,cout);
+        wapi.tx_decode(b58,os);
 	}
 	else if (command=="check") {
 	    auto b58=args.next<string>();
-        wapi.tx_check(b58,cout);
+        wapi.tx_check(b58,os);
 	}
 	else if (command=="send") {
 		auto b58=args.next<string>();
-		wapi.tx_send(b58,cout);
+		wapi.tx_send(b58,os);
 	}
 /*
 	else if (command=="base") {
@@ -369,6 +386,19 @@ void tx(api& wapi, args_t& args, const params& p) {
 }
 
 #include <us/wallet/api.h>
+#include <jsoncpp/json/json.h> 
+
+Json::Value to_json(const string& s) {
+    istringstream is(s);
+    Json::Value val;
+    int i=0;
+    while(is.good()) {
+        string f;
+        is >> f;
+        if (!f.empty()) val[i++]=f;
+    }
+    return val;    
+}
 
 int main(int argc, char** argv) {
 
@@ -399,58 +429,66 @@ int main(int argc, char** argv) {
 	}
 	api& wapi=*papi;
 
+    ostringstream os;
+
 	if (command=="tx") {
-    	tx(wapi,args,p);
+    	tx(wapi,args,p,os);
 	}
 	if (command=="nova") {
-    	nova_app(wapi,args,p);
+    	nova_app(wapi,args,p,os);
 	}
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
-		wapi.priv_key(privkey,cout);
+		wapi.priv_key(privkey,os);
 	}
 	else if (command=="address") {
 		command=args.next<string>();
 		if (command=="new") {
             cout << "Address: ";
-			wapi.new_address(cout);
+			wapi.new_address(os);
 		}
 		else if (command=="add") {
 			crypto::ec::keys::priv_t k=args.next<crypto::ec::keys::priv_t>();
             cout << "Address: ";
-			wapi.add_address(k,cout);
+			wapi.add_address(k,os);
 		}
 		else {
 			help(p);
 		}
 	}
 	else if (command=="dump") {
-		wapi.dump(cout);
+		wapi.dump(os);
 	} 
 	else if (command=="balance") {
-		wapi.balance(args.next<bool>(false),cout);
+		wapi.balance(args.next<bool>(false),os);
 	}
 	else if (command=="gen_keys") {
-		wapi.gen_keys(cout);
+		wapi.gen_keys(os);
 	}
 	else if (command=="pair") {
 		api::pub_t pub=args.next<api::pub_t>();
 	    auto name=args.next<string>();
 //cout << "-- " << name << endl;
-		wapi.pair(pub,name,cout);
+		wapi.pair(pub,name,os);
 	}
 	else if (command=="unpair") {
 		api::pub_t pub=args.next<api::pub_t>();
-		wapi.unpair(pub,cout);
+		wapi.unpair(pub,os);
 	}
 	else if (command=="list_devices") {
-		wapi.list_devices(cout);
+		wapi.list_devices(os);
 	}
 	else {
 		help(p);
 	}
 //cout << "deleting" << endl;
 	delete papi;
+    
+    if (p.json)
+    cout << to_json(os.str()) << endl;
+    else
+    cout << os.str() << endl;
+
 	return 0;
 }
 

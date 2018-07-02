@@ -104,6 +104,35 @@ void rpc_api::list_devices(ostream&os) {
 	ask(us::wallet::protocol::list_devices_query,os);
 }
 
+<<<<<<< HEAD
+=======
+
+void rpc_api::nova_move(const nova_move_input& i, ostream& os) {
+	ostringstream si;
+	i.to_stream(si);
+	ask(us::wallet::protocol::nova_move,si.str(),os);
+}
+
+void rpc_api::nova_track(const nova_track_input& i, ostream& os) {
+	ostringstream si;
+	i.to_stream(si);
+	ask(us::wallet::protocol::nova_track,si.str(),os);
+}
+void rpc_api::nova_query(const nova::hash_t& i, ostream& os) {
+	ostringstream si;
+    si << i;
+	ask(us::wallet::protocol::nova_query,si.str(),os);
+}
+void rpc_api::nova_query(const string& item, ostream& os) {
+	ask(us::wallet::protocol::nova_query_item,item,os);
+}
+void rpc_api::nova_mempool(ostream& os) {
+	ask(us::wallet::protocol::nova_mempool,"",os);
+}
+
+
+
+>>>>>>> 9e49d3baf424f66ad08953e35922d55c7bc3373c
 //----------------local api
 
 
@@ -185,3 +214,35 @@ void local_api::list_devices(ostream&os) {
     devices.dump(os);    
 }
 
+<<<<<<< HEAD
+=======
+void local_api::nova_move(const api::nova_move_input& i, ostream& os) {
+    auto tx=wallet::nova_move(i);
+    if (tx.first.empty())
+    	os << tx.second << endl;
+    else 
+    	os << tx.first << endl;
+}
+
+void local_api::nova_track(const api::nova_track_input& i, ostream& os) {
+    auto tx=wallet::nova_track(i);
+    if (tx.first.empty())
+    	os << tx.second << endl;
+    else 
+    	os << tx.first << endl;
+}
+
+void local_api::nova_query(const nova::hash_t& i, ostream& os) {
+    os << wallet::nova_query(i) << endl;
+}
+
+void local_api::nova_query(const string& item, ostream& os) {
+    os << wallet::nova_query(item) << endl;
+}
+
+void local_api::nova_mempool(ostream& os) {
+    os << wallet::nova_mempool() << endl;
+}
+
+
+>>>>>>> 9e49d3baf424f66ad08953e35922d55c7bc3373c
