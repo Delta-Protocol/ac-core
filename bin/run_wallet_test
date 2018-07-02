@@ -17,6 +17,7 @@ fi
 ls $home
 
 
+#---govd---
 LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -p 46000 2>&1 >/dev/null &
 sleep 1
 pid=`ps ax | grep govd | grep -v grep | awk '{print $1}'`

@@ -104,25 +104,6 @@ void rpc_api::list_devices(ostream&os) {
 	ask(us::wallet::protocol::list_devices_query,os);
 }
 
-
-void rpc_api::nova_move(const nova_move_input& i, ostream& os) {
-	ostringstream si;
-	i.to_stream(si);
-	ask(us::wallet::protocol::nova_move,si.str(),os);
-}
-
-void rpc_api::nova_track(const nova_track_input& i, ostream& os) {
-	ostringstream si;
-	i.to_stream(si);
-	ask(us::wallet::protocol::nova_track,si.str(),os);
-}
-void rpc_api::nova_query(const nova::hash_t& i, ostream& os) {
-	ostringstream si;
-    si << i;
-	ask(us::wallet::protocol::nova_query,si.str(),os);
-}
-
-
 //----------------local api
 
 
@@ -147,12 +128,12 @@ void local_api::dump(ostream&os) {
 }
 
 void local_api::new_address(ostream&os) {
-	os << wallet::new_address() << endl;
+	os << "Address: " << wallet::new_address() << endl;
 }
 
 void local_api::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	auto a=wallet::add_address(privkey);
-	os << a << endl;
+	os << "Address: " << a << endl;
 }
 
 void local_api::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream&os) {
@@ -203,25 +184,4 @@ void local_api::unpair(const pub_t& pk, ostream&os) {
 void local_api::list_devices(ostream&os) {
     devices.dump(os);    
 }
-
-void local_api::nova_move(const api::nova_move_input& i, ostream& os) {
-    auto tx=wallet::nova_move(i);
-    if (tx.first.empty())
-    	os << tx.second << endl;
-    else 
-    	os << tx.first << endl;
-}
-
-void local_api::nova_track(const api::nova_track_input& i, ostream& os) {
-    auto tx=wallet::nova_track(i);
-    if (tx.first.empty())
-    	os << tx.second << endl;
-    else 
-    	os << tx.first << endl;
-}
-
-void local_api::nova_query(const nova::hash_t& i, ostream& os) {
-    os << wallet::nova_query(i) << endl;
-}
-
 

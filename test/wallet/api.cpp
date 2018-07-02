@@ -1,5 +1,8 @@
 #include <iostream>
 #include <ostream>
+#include <string>
+#include <sstream>
+
 #include "api.h"
 
 #include <us/gov/socket/datagram.h>
@@ -8,90 +11,206 @@
 
 #include <us/gov/socket/datagram.h>
 #include <us/gov/crypto.h>
-#include <sstream>
+
+#include <us/gov/socket/server.h>//---
+#include <us/gov/socket/client.h>//--
+#include <thread>
 
 using namespace std;
 
 using namespace us::wallet;
 
 
+using datagram=us::gov::socket::datagram;//socket::datagram;
+
 
 struct test_api : rpc_api {
 
 	test_api( string walletd_host, uint16_t walletd_port): rpc_api( walletd_host, walletd_port ) {}
 
-/*
-void  priv_key(const crypto::ec::keys::priv_t& privkey, ostream&os)  {
-	if (!crypto::ec::keys::verify(privkey)) {
-		os << "The private key is incorrect." << endl;
+ 
+
+string ask(int service, const string& args){
+
+	datagram* q=new datagram(service,args);        //(walletd_host, walletd_port, q);
+	socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" , 46000 , q); 
+
+	if (response) {
+		return response->parse_string();
+		delete response;
 	}
-	auto pub=crypto::ec::keys::get_pubkey(privkey);
-	os << "Public key: " << pub << endl;
-	os << "Public key hash: " << pub.compute_hash() << endl;
+	else {
+		cout << "ERROR" << endl;
+	}
 }
-*/
+
+void gen_keys() {
+	crypto::ec::keys k=crypto::ec::keys::generate();
+	 k.priv.to_b58();
+	 k.pub.to_b58();
+	 k.pub.compute_hash();
+}
+
 };
+
+
+
+using namespace us::gov::socket;
+
+
+struct test_client: client {
+	
+	test_client(int sock):client(sock) {
+   	}
+
+	virtual void on_connect() override {
+		cout << "connected" << endl;
+	}
+};
+
+
+
+//------------------------------------/--------------------------------------------|
+
+
+
+
+
+void test(string ip , int port , string address ,int amoundSend, int fees , string privKey , bool timer){
+
+
+string tx_receipt="";
+	
+	
+	test_api ts( ip , port );
+
+	
+
+
+	ts.gen_keys();
+
+
+try{
+	//------add_address--to-wallet---------------|
+	ostringstream osAddaddr;
+	//ts.add_address(crypto::ec::keys::priv_t::from_b58( privKey ) , osAddaddr);        --------------------> uncomment <---------------
+	string addAddr = osAddaddr.str();
+	//cout << "new Wallet address : "<< addAddr << "\n" << endl;
+} catch (const std::exception& e){assert(false);}
+
+
+
+try{
+	//-----------wallet--balance-----------------|
+	ostringstream osb;
+	ts.balance( true , osb );
+	string balance(osb.str());
+	cout << "Total Wallet Balance: "<< balance << "\n" << endl;
+} catch (const std::exception& e){assert(false);}
+
+
+
+
+
+
+try{	
+	//---------------tx_make_p2pkh()------------|
+	api::tx_make_p2pkh_input i;
+	
+	ostringstream osTX;
+
+	i.rcpt_addr = address; //--address
+	i.amount = amoundSend; //--amoundSend
+	i.fee = fees;          //--fees
+//	i.sigcode_inputs = 0;
+//	i.sigcode_outputs = 1;
+//	i.sendover = 1;	
+	ts.tx_make_p2pkh(i,osTX);
+	tx_receipt = osTX.str();
+	//cout << tx_receipt << endl;
+}  catch (const std::exception& e){assert(false);}
+
+
+
+
+if (timer != false ){
+	sleep(60);
+}
+
+
+
+//--------------------check-addr-balance-----------------|
+try{
+	test_client c( 0 );
+	c.connect( "localhost", 46001 , false );	
+	
+
+	string addrBalance = ts.ask(protocol::cash_query, "1 "+address); //----------------------------------------------------here-------
+	int index = 0;
+	for (int i = 0; i < 2; ++i){
+	    index = (addrBalance.find(" ", index)) + 1; }
+	string balance= addrBalance.substr(index);
+	cout << balance.substr(0, balance.find(" ")) << endl;
+} catch (const std::exception& e){assert(false);}
+
+
+
+
+
+
+try{
+	//----------------new-Address--------------|
+	ostringstream os;
+	ts.new_address(os);
+	string addr = os.str();
+	if(addr.length()==30||addr.length()==29){}else{ assert(false);} //"address length is OK \n"
+} catch (const std::exception& e){assert(false);}
+
+	
+
+
+try{	//------tx_decode----------|
+	ostringstream osDecode;
+	ts.tx_decode( tx_receipt , osDecode);
+	string txdecode = osDecode.str();
+	//cout << txdecode << endl;
+
+	//-----tx-check-------------|
+	ostringstream osCheck;
+	ts.tx_check( tx_receipt , osCheck);		
+	string txCheck = osCheck.str();
+	//cout << txCheck << endl;	
+
+	//-----tx-send-------------|
+	ostringstream osSend;
+	ts.tx_send( tx_receipt , osSend);
+	string txSend = osSend.str();
+	//cout << txSend << endl;
+} catch (const std::exception& e){assert(false);}
+
+cout << "    --   --   --   --   --   --   --   --   --   --  \n" << endl;
+
+}
+
+
+
+
 
 
 void testing_wallet_api()
 {
 
-	test_api ts( "127.0.0.1" , 46001 );
-
-	ts.balance( true , cout );
-
-
-//-------new_address()------------|
-	ostringstream os;
-
-	ts.new_address(os);
-
-	string addr=os.str();
-
-	//cout << "Length: " << addr.length() << " ---> " << addr << endl;
-//------------------------------|
-
-	//ts.dump(cout);
-
-//-------tx_make_p2pkh()--------------------------------|
-	api::tx_make_p2pkh_input i;
-
-	i.rcpt_addr = "3dsS2paq5J3c9tW33unQ82jcQmU3";
-	i.amount = 33333333;
-	i.fee = 11;
-//	i.sigcode_inputs = 0;
-//	i.sigcode_outputs = 1;
-//	i.sendover = 1;	
-	//ts.tx_make_p2pkh(i,cout);					
-//-----------------------------------------------------|
-
-	//ts.tx_decode(" APej2rnDJxDjzrkXrruHSiHKeK3TfkdbZkKjVNme2j2XxgrZCsYKWZruK9DhG6H9ybnv6csnLT5ARaA2acoX9QYp9scuf6Ph6LyvzhPKk5L6E3gVaxCn193EEZc51kU1b5jFjL8nWZSDp2YEDwSEP2CzM9PYTXLSetK294UXQfRP3c3xvnYkCkiXvcUNSCbiidS79H9PtbF7aXQGK4vMsQgb2W3vub1YYU68GBXuk2jm7v45RRG4oSZ42vcbpx9EbW8v3DicfgN416kFu8s6gYQpF3DJNc4Jrysr6hMyZJiNLvFr7jn1mvS3kgZ6WBxSrciwBwiUyhChpCiVbTC8xeZpadtFdeLpMAQCchbrHopG1ZzqbW1Qr9jKDz6yJ9zFgX5yWAVLhQLF2iy9CJeQUAuk4rD5iJh3y6qsLS21iqmHGGKUPEMvnzyHnvkNKeowBGUKnUsQigDp4a3" , cout);		
-
-
-	//ts.tx_check(" KrjuM9X2UsU3DFa9FbRRZQyZVdpoaiEJLKzf1Ki8aL6uuXmtfSRWN4gUEfeidHdkzYp3dkL9XjEECrLRygd4rn3YG6wtjuVRinNgH5ProfLCw2zSJDkQRyCjyBAXUC6916kGREmA51MT28xpYwxbx9PoEx14QMMPtNK4hZQWpYgzev44djZ9URCmb8U2QkpdRaGcBzsHKX29EQw5XFHR2pidkTfypMeUnpdpzmfzrC5q3ZYxJSZQNakabFYBsGRybXvnNtQg2J9QSrz6RbgfZe2Pu2BhzmCw4fXiE7FmsT16RVXPi2nVKUqdc5U8mpGjuK89izCwZmMjyFpSF92DL51vPfE8PptNeBuZCh3ZfUzZTF3Us8DqGs9CAmswduyf48hAsGu6xFNzTt2uhznaHd4KcJdvwN9x6wUboUSRwfJQ8zWuvG3Dhhcpq6EegZ67NZjJ2zhM", cout);		
-
-
-
-	//ts.tx_send(" KrjuM9X2UsU3DFa9FbRRZQyZVdpoaiEJLKzf1Ki8aL6uuXmtfSRWN4gUEfeidHdkzYp3dkL9XjEECrLRygd4rn3YG6wtjuVRinNgH5ProfLCw2zSJDkQRyCjyBAXUC6916kGREmA51MT28xpYwxbx9PoEx14QMMPtNK4hZQWpYgzev44djZ9URCmb8U2QkpdRaGcBzsHKX29EQw5XFHR2pidkTfypMeUnpdpzmfzrC5q3ZYxJSZQNakabFYBsGRybXvnNtQg2J9QSrz6RbgfZe2Pu2BhzmCw4fXiE7FmsT16RVXPi2nVKUqdc5U8mpGjuK89izCwZmMjyFpSF92DL51vPfE8PptNeBuZCh3ZfUzZTF3Us8DqGs9CAmswduyf48hAsGu6xFNzTt2uhznaHd4KcJdvwN9x6wUboUSRwfJQ8zWuvG3Dhhcpq6EegZ67NZjJ2zhM",cout);
-
-
-	
-//ts.add_address(crypto::ec::keys::priv_t::from_b58("9DkAG6KFh6uqD3pbH4a8zLug77zbXfA5CMqHqaRRaYPm") , cout);	
-
-
-//---------------------------
-
-	//crypto::ec::keys::priv_t::from_b58( --> eliptic curve
-
-	api::priv_key("CJ69dXF5E9CTXG4AGCF3hd5ZYVtEtDAWzSQi5F3Ugkcd",cout); 
-	
-	
-	//ts.gen_keys(cout);
-
-	//cout << "--------------------------------------|" << endl;	
-
-	//ts.new_address(cout);
-
+	for (int i=1; i<=3; i++ ) 
+	{
+	cout << " ---------------------------Test-------------------------------" << endl;
+		//     [ip]       [port]        [address]               [amoundSend]  [fees] 	[privateKey] 			            [timer]
+		test("127.0.0.1" , 46001 , "4WFcdMLaDEG4WPE8pHCTLZymBneJ" ,  10000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
+		test("127.0.0.1" , 46001 , "3onaAM6pyGMx5FyA1VuYADpcH6wG" ,  20000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true  );
+		test("127.0.0.1" , 46001 , "2f4M2qtWznu3PrSm3qqM9HS4SUJD" ,  30000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
+//		test("127.0.0.1" , 46001 , "29zPdkeU82Fzp8QRrNQVocqPKpqZ" ,  40000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
+//		test("127.0.0.1" , 46001 , "2HfujHeDRWX4qCM35c3UqtXaFDxd" ,  55555   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
+//		test("127.0.0.1" , 46001 , "4TQWGGFjoqRvifGsp6hKBTcsw4x6" ,  66666   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
+	}
 
 }
 
@@ -100,6 +219,28 @@ void testing_wallet_api()
 
 
 
+
+
+
+   
+
+
+
+
+
+
+
+
+
+/*
+
+	//ts.list_devices(cout);
+
+	//ts.dump(cout);	
+
+	//api::priv_key("5k6K4uBmM86rKYQZqytctexBwfwN4GeDvvVZgBXxtbE9",cout); 
+
+*/
 
 
 

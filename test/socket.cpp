@@ -294,6 +294,7 @@ struct test_server: server {
 			}
 
 		//---Completed datagram---
+			
 
 		//check_received_datagram(*d);
 		delete d;                                       
