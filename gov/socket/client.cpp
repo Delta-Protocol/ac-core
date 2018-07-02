@@ -23,9 +23,9 @@ typedef us::gov::socket::client c;
 using namespace std;
 using namespace us::gov::socket;
 
-
 c::client():sock(0) {
 }
+
 c::client(int sock):sock(sock) {
    if (sock!=0) addr=address();
 }
@@ -40,8 +40,7 @@ string client::address() const {
 	int a=getpeername(sock, (struct sockaddr*)&addr, &len);
 	if (a!=0) return "";
 
-	// deal with both IPv4 and IPv6:
-	char ipstr[INET6_ADDRSTRLEN];
+	char ipstr[INET6_ADDRSTRLEN]; // deal with both IPv4 and IPv6
 	if (addr.ss_family == AF_INET) {
 	    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
 	    int port = ntohs(s->sin_port);
@@ -168,8 +167,6 @@ datagram* c::complete_datagram() {
 	return curd;
 }
 
-
-
 bool c::send(datagram* d) const { 
 	if (!sock) {
 		cout << "socket: client: cannot send, sock is 0" << endl;
@@ -187,4 +184,3 @@ bool c::send(const datagram& d) const {
 void c::dump(ostream& os) const {
 	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
 }
-
