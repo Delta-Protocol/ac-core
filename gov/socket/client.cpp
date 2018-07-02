@@ -37,18 +37,25 @@ c::~client() {
 string client::address() const {
 	struct sockaddr_storage addr;
 	socklen_t len=sizeof addr;
+//    cout << "========================================================" << endl;
+//    cout << "len0 " << len << endl;
 	int a=getpeername(sock, (struct sockaddr*)&addr, &len);
 	if (a!=0) return "";
+    //len contains the actual size of the name returned in bytes
+//    cout << "len  " << len << endl;
+//    cout << "INET6_ADDRSTRLEN " << INET6_ADDRSTRLEN << endl;
 
-	char ipstr[INET6_ADDRSTRLEN]; // deal with both IPv4 and IPv6
+
+//	char ipstr[INET6_ADDRSTRLEN]; // deal with both IPv4 and IPv6
+	char ipstr[len]; // deal with both IPv4 and IPv6
 	if (addr.ss_family == AF_INET) {
 	    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
 	    int port = ntohs(s->sin_port);
-	    inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+	    inet_ntop(AF_INET, &s->sin_addr, ipstr, len); //sizeof ipstr);
 	} else { // AF_INET6
 	    struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
 	    int port = ntohs(s->sin6_port);
-	    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+	    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, len); //sizeof ipstr);
 	}
 	return ipstr;
 }

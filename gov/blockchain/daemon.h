@@ -23,7 +23,7 @@
 #include <condition_variable>
 #include <mutex>
 #include "shell.h"
-//#include <queue>
+
 
 namespace us { namespace gov {
 namespace blockchain {
@@ -119,11 +119,7 @@ namespace blockchain {
 			hash_t tail;
 			bool resume{false};
 		};
-/*
-		struct chain: array<pair<diff::hash_t,diff::hash_t>,10> { // { {base,diff} }
-			
-		};
-*/
+
 		bool need_sync(const string& target) const;
 		void sync(const string& target);
 
@@ -134,17 +130,7 @@ namespace blockchain {
 
 		void send(const local_deltas& g, peer_t* exclude=0);
 		void send(const datagram& g, peer_t* exclude=0);
-/*
-		struct cycle_data {
-			cycle_data():new_block(0) {
-			}
-			~cycle_data() {
-				delete new_block;
-			}
-			diff* new_block;
-			cycle_t cycle;
-		};
-*/
+
 		void stage1(cycle_t&);
 		bool stage2(cycle_t&);
 		void stage3(cycle_t&);
@@ -200,10 +186,7 @@ namespace blockchain {
 		apps apps_;
 		auth::app* auth_app;
 
-
         void start_new_blockchain(const string& addr);
-
-
 
 		struct votes_t:unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> { // <pubkey,pair<hash,count>>
 			typedef unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> b;
