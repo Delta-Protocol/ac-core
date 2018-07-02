@@ -14,7 +14,7 @@ using namespace std;
 c c::read(istream& is) {
 	c t;
 	is >> t.data;
-    t.data=crypto::b58::decode(t.data);
+    //t.data=crypto::b58::decode(t.data);
     b::read(t,is);
 	return move(t);
 }
@@ -33,7 +33,7 @@ void c::write_pretty(ostream& os) const {
 }
 
 void c::write(ostream& os) const {
-	os << crypto::b58::encode(data) << ' ';
+	os << data << ' ';
     b::write(os);
 }
 

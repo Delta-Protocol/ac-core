@@ -13,7 +13,9 @@ namespace protocol {
 //	static constexpr uint16_t nova_reading{((nova_base+2)<<2)+evidence_suffix};
 //	static constexpr uint16_t nova_unload{((nova_base+3)<<2)+evidence_suffix};
 	static constexpr uint16_t nova_compartiment_query{((nova_base+4)<<2)+query_suffix};
-	static constexpr uint16_t nova_response{((nova_base+5)<<2)+query_suffix};
+	static constexpr uint16_t nova_item_query{((nova_base+5)<<2)+query_suffix};
+	static constexpr uint16_t nova_mempool_query{((nova_base+6)<<2)+query_suffix};
+	static constexpr uint16_t nova_response{((nova_base+7)<<2)+query_suffix};
 }
 }}
 

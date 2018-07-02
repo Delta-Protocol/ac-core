@@ -83,7 +83,7 @@ bool c::process_work(datagram* d) { //executed by thread from pool
 			break;
 		 }
          case protocol::pong: {
-			delete d;	
+			delete d;
 			process_pong();
 			break;
 		 }

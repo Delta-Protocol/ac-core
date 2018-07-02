@@ -2,7 +2,7 @@
 #copy this file into /etc/init.d/
 #update-rc.d curex-fcgi defaults
 
-USER=www-data
+USER=root
 
 PROG="/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-walletd -- -fcgi"
 RETVAL=0
@@ -17,9 +17,10 @@ start() {
 
 stop() {
       echo -n "Stopping us-wallet-api: "
-      killall -q -w -u $USER /usr/bin/spawn-fcgi
+echo      killall -q -w -u $USER /usr/bin/spawn-fcgi
+      killall -q -w -u $USER us-walletd 
       RETVAL=$?
-#      echo "$API_NAME."
+      echo "$API_NAME. $RETVAL"
 }
 
 case "$1" in
