@@ -8,6 +8,7 @@
 #include "app.h"
 #include "auth_app.h"
 #include "policies.h"
+#include "cycle.h"
 #include <us/gov/signal_handler.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -28,27 +29,6 @@ namespace us { namespace gov {
 namespace blockchain {
 	using namespace std;
 	using socket::datagram;
-
-	struct cycle_t {
-		typedef chrono::system_clock::duration duration;
-		typedef chrono::system_clock::time_point time_point;
-		typedef chrono::minutes minutes;
-		typedef chrono::seconds seconds;
-		enum stage {
-			new_cycle=0,
-			local_deltas_io=10,
-			consensus_vote_tip_io=40,
-			num_stages
-		};
-		
-		cycle_t() {}
-		void wait_for_stage(stage ts);
-		string str(stage s) const;
-		stage get_stage();
-
-		time_point cur_sync;
-		duration period{60s};
-	};
 
 	struct daemon {
 		typedef crypto::ec::keys keys;
@@ -154,7 +134,7 @@ namespace blockchain {
 
 		void send(const local_deltas& g, peer_t* exclude=0);
 		void send(const datagram& g, peer_t* exclude=0);
-
+/*
 		struct cycle_data {
 			cycle_data():new_block(0) {
 			}
@@ -164,15 +144,14 @@ namespace blockchain {
 			diff* new_block;
 			cycle_t cycle;
 		};
-
-		void stage1(cycle_data&);
-		bool stage2(cycle_data&);
-		void stage3(cycle_data&);
+*/
+		void stage1(cycle_t&);
+		bool stage2(cycle_t&);
+		void stage3(cycle_t&);
 		void run();
 
 		void load_head();
 
-		void on_begin_cycle();
 		local_deltas* create_local_deltas();
 
 		void update_peers_state();
