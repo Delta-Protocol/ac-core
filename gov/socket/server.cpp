@@ -65,6 +65,7 @@ bool c::receive_and_process(client*c) {
 
 #include <set>
 bool c::banned_throttle(const string& addr) {
+return false;
     static unordered_set<string> throttle;
     auto x=throttle.find(addr);
     if (x==throttle.end()) {
