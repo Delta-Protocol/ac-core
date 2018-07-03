@@ -38,6 +38,7 @@ install: release
 	install etc/nginx/snippets/snakeoil.conf /etc/nginx/snippets/
 	install etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/
 	install etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/
+	install var/www/html/index.html /var/www/html/
 	ldconfig
 	systemctl daemon-reload
 
