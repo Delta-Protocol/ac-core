@@ -80,11 +80,15 @@ cout << "SGT-01-RECEIVED QUERY" << endl; //settlement go throught
 			compartiment_query(c,d);
 			return true;
 		} break;
+		case protocol::nova_item_query: {
+			item_query(c,d);
+			return true;
+		} break;
 		case protocol::nova_mempool_query: {
             ostringstream os;
             {
         	lock_guard<mutex> lock(mx_pool);
-            pool->compartiments.dump(os);
+            pool->compartiments.to_stream(os);
             }
         	c->send(protocol::nova_response,os.str());	
 
@@ -144,10 +148,11 @@ void c::compartiment_query(peer_t *c, datagram*d) {
 cout << "COMPARTIMENT_QUERY" << endl;
 	query_compartiments_t q=query_compartiments_t::from_datagram(d);
 
+    int r=0;
 	ostringstream os;
-	os << "0 "; //ret code ok
 	{
 	lock_guard<mutex> lock(db.mx);
+
 	for (auto&addr:q) {
 		auto a=db.compartiments->find(addr);
 		if (likely(a!=db.compartiments->end())) {
@@ -158,15 +163,59 @@ cout << "COMPARTIMENT_QUERY" << endl;
 			a.locking_program=0;
 			//a.balance=0;
 			a.to_stream(os);
+            r=1;
 		}
 	}
 	}
 
 	os << ' ' << last_block_imported;
 
-cout << "NOVA_RESPONSE " << os.str() << endl;
+	ostringstream osf;
+	osf << r << ' ' << os.str(); 
 
-	c->send(protocol::nova_response,os.str());	
+cout << "NOVA_RESPONSE " << osf.str() << endl;
+
+	c->send(protocol::nova_response,osf.str());	
+}
+
+void c::item_query(peer_t *c, datagram*d) {
+cout << "ITEM_QUERY" << endl;
+	string item=d->parse_string();
+	delete d;
+	auto addr=db.find_compartiment(item);
+//	if (addr==0) {
+//		c->send(protocol::nova_response,"Not found");
+//		delete d;
+//		return;
+//	}
+	
+    int r=0;
+	ostringstream os;
+	os << addr << ' ';
+	{
+	lock_guard<mutex> lock(db.mx);
+
+		auto a=db.compartiments->find(addr);
+		if (likely(a!=db.compartiments->end())) {
+			a->second.to_stream(os);
+		}
+		else {
+			compartiment_t a;
+			a.locking_program=0;
+			//a.balance=0;
+			a.to_stream(os);
+            r=1;
+		}
+	}
+
+	os << ' ' << last_block_imported;
+
+	ostringstream osf;
+	osf << r << ' ' << os.str(); 
+
+cout << "NOVA_RESPONSE " << osf.str() << endl;
+
+	c->send(protocol::nova_response,osf.str());	
 }
 /*
 bool c::process_work(peer_t *c, datagram*d) {
@@ -276,9 +325,9 @@ void c::local_delta::compartiment_t::dump_brief(ostream& os) const {
 }
 
 void c::local_delta::compartiments_t::dump(ostream& os) const {
-	cout << size() << " compartiments:" << endl;
+	os << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
-		cout << ' ' << i.first << ' ';
+		os << ' ' << i.first << ' ';
 		i.second.dump(os);
 		//os << endl;
 	}
@@ -290,9 +339,9 @@ void c::local_delta::compartiment_t::pretty_print(ostream& os) const {
 }
 
 void c::local_delta::compartiments_t::pretty_print(ostream& os) const {
-	cout << size() << " compartiments:" << endl;
+	os << size() << " compartiments:" << endl;
 	for (auto& i:*this) {
-		cout << "compartiment " << i.first << ' ';
+		os << "compartiment " << i.first << ' ';
 		i.second.pretty_print(os);
 		//os << endl;
 	}

@@ -35,7 +35,7 @@ namespace peer {
 		constexpr static array<const char*,2> modestr={"tor","ip4"};
 		peer_t(int sock);
 		virtual ~peer_t();
-		datagram* complete_datagram();
+		//datagram* complete_datagram();
 
 		virtual bool connect(const string& host, uint16_t port, bool block=false) override;
 

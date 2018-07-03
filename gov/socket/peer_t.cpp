@@ -14,7 +14,6 @@ c::peer_t(int sock): b(sock) {
 }
 
 c::~peer_t() {
-	delete curd;
 }
 
 void c::ready() {
@@ -22,20 +21,6 @@ void c::ready() {
 	parent->cv.notify_all();
 }
 
-datagram* c::complete_datagram() {
-	if (!curd) curd=new datagram();
-	if (!curd->recv(sock)) {
-		delete curd;
-		curd=0;
-		return 0;
-	}
-	if (curd->completed()) {
-		auto t=curd;
-		curd=0;
-		return t;
-	}
-	return curd;
-}
 
 void c::on_connect() {
 	if (parent) parent->incorporate(this);

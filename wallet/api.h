@@ -16,14 +16,14 @@ struct api {
 	typedef gov::crypto::ec::keys::pub_t pub_t;
     typedef cash::tx::sigcode_t sigcode_t;
 
+	static void priv_key(const priv_t& privkey, ostream&);
+        virtual ~api() {
+        }
 
-    virtual ~api() {
-    }
-
-	void priv_key(const priv_t& privkey, ostream&);
 
 	virtual void balance(bool detailed, ostream&)=0;
 	virtual void dump(ostream&)=0;
+
 	virtual void new_address(ostream&)=0;
 	virtual void add_address(const priv_t&, ostream&)=0;
 	typedef wallet::tx_make_p2pkh_input tx_make_p2pkh_input;
@@ -43,6 +43,7 @@ struct api {
 	virtual void nova_move(const nova_move_input&, ostream&)=0;
 	virtual void nova_track(const nova_track_input&, ostream&)=0;
 	virtual void nova_query(const nova::hash_t& compartiment, ostream&)=0;
+	virtual void nova_query(const string& item, ostream&)=0;
 	virtual void nova_mempool(ostream&)=0;
 };
 
@@ -68,6 +69,7 @@ struct rpc_api:api {
 	virtual void nova_move(const nova_move_input&, ostream&) override;
 	virtual void nova_track(const nova_track_input&, ostream&) override;
 	virtual void nova_query(const nova::hash_t& compartiment, ostream&) override;
+	virtual void nova_query(const string& item, ostream&) override;
 	virtual void nova_mempool(ostream&) override;
 
 private:
@@ -101,6 +103,7 @@ struct local_api:api, wallet, pairing {
 	virtual void nova_move(const api::nova_move_input&, ostream&) override;
 	virtual void nova_track(const api::nova_track_input&, ostream&) override;
 	virtual void nova_query(const nova::hash_t& compartiment, ostream&) override;
+	virtual void nova_query(const string& item, ostream&) override;
 	virtual void nova_mempool(ostream&) override;
 
 private:

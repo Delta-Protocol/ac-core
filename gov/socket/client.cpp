@@ -23,9 +23,9 @@ typedef us::gov::socket::client c;
 using namespace std;
 using namespace us::gov::socket;
 
-
 c::client():sock(0) {
 }
+
 c::client(int sock):sock(sock) {
    if (sock!=0) addr=address();
 }
@@ -37,19 +37,25 @@ c::~client() {
 string client::address() const {
 	struct sockaddr_storage addr;
 	socklen_t len=sizeof addr;
+//    cout << "========================================================" << endl;
+//    cout << "len0 " << len << endl;
 	int a=getpeername(sock, (struct sockaddr*)&addr, &len);
 	if (a!=0) return "";
+    //len contains the actual size of the name returned in bytes
+//    cout << "len  " << len << endl;
+//    cout << "INET6_ADDRSTRLEN " << INET6_ADDRSTRLEN << endl;
 
-	// deal with both IPv4 and IPv6:
-	char ipstr[INET6_ADDRSTRLEN];
+
+//	char ipstr[INET6_ADDRSTRLEN]; // deal with both IPv4 and IPv6
+	char ipstr[len]; // deal with both IPv4 and IPv6
 	if (addr.ss_family == AF_INET) {
 	    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
 	    int port = ntohs(s->sin_port);
-	    inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+	    inet_ntop(AF_INET, &s->sin_addr, ipstr, len); //sizeof ipstr);
 	} else { // AF_INET6
 	    struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
 	    int port = ntohs(s->sin6_port);
-	    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+	    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, len); //sizeof ipstr);
 	}
 	return ipstr;
 }
@@ -153,6 +159,21 @@ bool c::send(char d) const {
 	return io::send(sock,d); 
 }
 
+datagram* c::complete_datagram() {
+	if (!curd) curd=new datagram();
+	if (!curd->recv(sock)) {
+		delete curd;
+		curd=0;
+		return 0;
+	}
+	if (curd->completed()) {
+		auto t=curd;
+		curd=0;
+		return t;
+	}
+	return curd;
+}
+
 bool c::send(datagram* d) const { 
 	if (!sock) {
 		cout << "socket: client: cannot send, sock is 0" << endl;
@@ -170,4 +191,3 @@ bool c::send(const datagram& d) const {
 void c::dump(ostream& os) const {
 	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
 }
-

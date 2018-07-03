@@ -74,10 +74,15 @@ namespace nova {
 			struct logbook_t:vector<string> {
                 typedef evidence_load::item_t item_t;
 
-				unordered_set<item_t> items;
+				set<item_t> items;
 				void dump(ostream& os) const;
 				void dump_brief(ostream& os) const;
 				void pretty_print(ostream& os) const;
+
+
+				bool has_item(const string& item) const {
+					return items.find(item)!=items.end();
+				}
 
                 void rm(const item_t& item) {
                     auto i=items.find(item);
@@ -128,6 +133,13 @@ namespace nova {
 				//bool add_input(tx& t, const hash_t& addr, const cash_t& amount);
 				//bool add_output(tx& t, const hash_t& addr, const cash_t& amount, const hash_t& locking_program);
     			void compute_hash(hasher_t&) const;
+
+				hash_t find_compartiment(const string& item) const {
+					for (auto&i:*this) {
+						if (i.second.logbook.has_item(item)) return i.first;
+					}
+					return 0;
+				}
 
 				
 				void dump(ostream& os) const;
@@ -208,6 +220,7 @@ namespace nova {
 		virtual bool process_evidence(peer_t *, datagram*) override;
 //		bool process_tx(peer_t *, datagram*);
 		void compartiment_query(peer_t *, datagram*);
+		void item_query(peer_t *, datagram*);
 
 		virtual void import(const blockchain::app::delta&, const blockchain::pow_t&) override;
 
@@ -238,6 +251,12 @@ namespace nova {
 			void clear();
 			void to_stream(ostream&) const;
 			static db_t from_stream(istream&);
+
+			hash_t find_compartiment(const string& item) const {
+				lock_guard<mutex> lock(mx);
+
+				return compartiments->find_compartiment(item);
+			}
 
 			mutable mutex mx;
 			compartiments_t* compartiments{0};

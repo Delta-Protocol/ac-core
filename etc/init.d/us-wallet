@@ -1,0 +1,59 @@
+#!/bin/bash
+#copy this file into /etc/init.d/
+#update-rc.d curex-fcgi defaults
+
+
+
+USER=root
+
+#DAEMON="/usr/local/bin/us-walletd"
+DAEMON="/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-walletd -- "
+DAEMON_ARGS="-d -fcgi"
+PIDFILE="/var/run/us-walletd.pid"
+NAME="us-walletd"
+
+RETVAL=0
+
+start() {
+      echo -n "Starting us-wallet: "
+#     echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env $PROG"
+  #    /sbin/start-stop-daemon  --start --background --chuid "$USER" --exec /usr/bin/env  $PROG > /var/log/us-govd.log 2>&1
+
+/sbin/start-stop-daemon --start  --background \
+  --pidfile $PIDFILE --make-pidfile \
+  --chuid $USER \
+  --startas /usr/bin/pipexec -- -k \
+   -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:2>D:1}' '{D:1>L:0}'
+
+
+      RETVAL=$?
+      echo "$API_NAME. $RETVAL"
+}
+
+
+stop() {
+      echo -n "Stopping us-wallet: "
+#echo      killall -q -w -u $USER /usr/bin/spawn-fcgi
+      killall -q -w -u $USER us-walletd
+      RETVAL=$?
+      echo "$API_NAME. $RETVAL"
+}
+
+case "$1" in
+    start)
+      start
+  ;;
+    stop)
+      stop
+  ;;
+    restart)
+      stop
+      start
+  ;;
+    *)
+      echo "Usage: service us-wallet {start|stop|restart}"
+      exit 1
+  ;;
+esac
+exit $RETVAL
+

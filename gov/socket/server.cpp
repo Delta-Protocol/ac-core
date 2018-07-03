@@ -62,6 +62,22 @@ bool c::receive_and_process(client*c) {
 #include <sys/types.h>
 #include <sys/socket.h>
 
+
+#include <set>
+bool c::banned_throttle(const string& addr) {
+    static unordered_set<string> throttle;
+    auto x=throttle.find(addr);
+    if (x==throttle.end()) {
+        throttle.emplace(addr);
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+#include <us/gov/likely.h>
+
 void c::run() {
 	fd_set read_fd_set;
 	int i;
@@ -128,7 +144,12 @@ void c::run() {
 			}
 			cout << "socket: server: accepted, creating client for fd " << nnew << endl;
 			auto cl=create_client(nnew);
-			clients.add(cl,false);
+            if (unlikely(banned_throttle(cl->addr))) {
+                delete cl;
+            }
+            else {
+			    clients.add(cl,false);
+            }
 		}
 		for (int i:sl) { //Service all the sockets with input pending.
 			cout << "socket: server: scanning fd " << i << endl;

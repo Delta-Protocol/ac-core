@@ -20,6 +20,10 @@ struct ec {
 
 	struct keys {
 		struct pub_t:secp256k1_pubkey { //64 bytes length
+			pub_t():valid(false), h(false) {
+			}
+			pub_t(const pub_t& other);
+
 			typedef crypto::ripemd160 hasher_t;
 			typedef hasher_t::value_type hash_t;
 
@@ -36,25 +40,39 @@ struct ec {
 			bool set_b58(const string&);
 			static pub_t from_b58(const string&);
 			static pub_t from_hex(const string&);
-			void assign(const string&);
+			//bool assign(const string&);
 
 			bool operator == (const pub_t& other) const;
 			pub_t& operator = (const pub_t& other);
 
+			inline void zero() { valid=false; } //memset(this,0,sizeof(data)); }
+
+			bool valid{false};
 		private:
 			mutable bool h{false};
 			mutable hash_t hash_cached;
 		};
 
 		struct priv_t: array<unsigned char,32> {
+			priv_t() {
+			}
+			priv_t(const string& b58) {
+				set_b58(b58);
+			}
+			priv_t(const char* b58) {
+				set_b58(b58);
+			}
 			string to_b58() const;
 			static priv_t from_b58(const string&);
 			bool set_b58(const string&);
+			inline void zero() { memset(this,0,32); }
 		};
 
+		
+
 		keys() {}
-		keys(const priv_t& pk);
-		keys(const string& privk_b58);
+		keys(const priv_t&); //call keys::verify before contructing keys
+//		keys(const string& privk_b58, bool); //call keys::verify before contructing keys
 		keys(const keys& other);
 		keys(keys&& other);
 

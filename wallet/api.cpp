@@ -121,6 +121,9 @@ void rpc_api::nova_query(const nova::hash_t& i, ostream& os) {
     si << i;
 	ask(us::wallet::protocol::nova_query,si.str(),os);
 }
+void rpc_api::nova_query(const string& item, ostream& os) {
+	ask(us::wallet::protocol::nova_query_item,item,os);
+}
 void rpc_api::nova_mempool(ostream& os) {
 	ask(us::wallet::protocol::nova_mempool,"",os);
 }
@@ -128,6 +131,7 @@ void rpc_api::nova_mempool(ostream& os) {
 
 
 //----------------local api
+
 
 local_api::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port), pairing(homedir) {
 }
@@ -225,6 +229,10 @@ void local_api::nova_track(const api::nova_track_input& i, ostream& os) {
 
 void local_api::nova_query(const nova::hash_t& i, ostream& os) {
     os << wallet::nova_query(i) << endl;
+}
+
+void local_api::nova_query(const string& item, ostream& os) {
+    os << wallet::nova_query(item) << endl;
 }
 
 void local_api::nova_mempool(ostream& os) {

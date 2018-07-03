@@ -26,8 +26,9 @@ cout << "AAA process_auth_request" << endl;
 cout << "process_auth_request " << hello_msg << endl;
 	string signature=crypto::ec::instance.sign_encode(mykeys.priv,hello_msg);
 
-	msg=get_random_message();		
+	msg=get_random_message();
 	ostringstream os;
+assert(mykeys.pub.valid);
 	os << mykeys.pub << ' ' << signature << ' ' << msg;
 cout << "AAA process_auth_request. sending auth_peer_challenge" << endl;
 	send(new datagram(protocol::auth_peer_challenge,os.str()));
@@ -49,10 +50,14 @@ cout << "process_auth_peer_challenge " << data << endl;
 	is >> peer_signature_der_b58;
 	is >> hello_msg;
 	}
+
 cout << "peer_signature_der_b58 " << peer_signature_der_b58 << endl;
 cout << "peer_pubk " << peer_pubk << endl;
 
-	if (crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58)) {
+	if (unlikely(!peer_pubk.valid)) {
+		stage_peer=verified_fail;
+	}
+	else if (likely(crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58))) {
 		stage_peer=verified;
 		pubkey=peer_pubk;
 	}
@@ -63,6 +68,7 @@ cout << "FAIL 1" << endl;
 	}
 	msg.clear();
 
+	assert(mykeys.pub.valid);
 
 	string signature_der_b58=crypto::ec::instance.sign_encode(mykeys.priv,hello_msg);
 	ostringstream os;
@@ -91,7 +97,10 @@ cout << "process_auth_challenge_response " << data << endl;
 cout << "peer_signature_der_b58 " << peer_signature_der_b58 << endl;
 	stage_me=(stage_t)(stoi(sveredict));
 	
-	if (crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58)) {
+	if (unlikely(!peer_pubk.valid)) {
+		stage_peer=verified_fail;
+	}
+	else if (likely(crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58))) {
 		stage_peer=peer_t::verified;
 		pubkey=peer_pubk;
 cout << "Peer pubkey is " << pubkey << endl;

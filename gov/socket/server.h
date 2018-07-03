@@ -40,12 +40,15 @@ namespace socket {
 		struct pub_t:vector<client*> {
 		};
 
+        bool banned_throttle(const string& addr);
+
 		virtual bool receive_and_process(client*);
 
 		struct clients_t: unordered_map<int,client*> {
 			typedef unordered_map<int,client*> b; ///<sock,client*>
 
-			clients_t(){}
+			clients_t() {
+            }
 			clients_t(const clients_t& other)=delete;
 			~clients_t();
 
@@ -75,6 +78,8 @@ namespace socket {
 				~attic_t();
 				void purge(); //definitely delete those clients that terminated long ago, in hope there is no more workers on them
 			};
+
+
 
 			void add(client* c,bool wakeupselect=true);
 			void remove(client* c);
