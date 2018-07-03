@@ -12,7 +12,7 @@ public class UnitTests{
         
     }*/
 
-    boolean test_symmetric_encryption(){
+    /*boolean test_symmetric_encryption(){
         
         EllipticCryptography ec = EllipticCryptography.getInstance();
         AsymmetricCipherKeyPair a = ec.generateKeyPair();
@@ -108,7 +108,7 @@ public class UnitTests{
         
         return decryptedtext1==decryptedtext2;
         
-    }
+    }*/
 
     
 }

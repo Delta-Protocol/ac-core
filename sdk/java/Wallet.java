@@ -58,7 +58,7 @@ public class Wallet {
 
     void setup_keys() throws IOException {
         String filename = "k";
-
+        String fileContents;
         File file = new File(ctx.getFilesDir(),filename);
         if(!file.exists()) {
             file.getParentFile().mkdirs();
@@ -73,7 +73,7 @@ public class Wallet {
             //            log+=";Directory not created";
             //      }
 
-            String fileContents = EllipticCryptography.getInstance().generatePrivateKey().toString();
+            fileContents = EllipticCryptography.getInstance().generatePrivateKey().toString();
             //log+=";"+fileContents.length();
             FileOutputStream outputStream;
 
@@ -89,10 +89,11 @@ public class Wallet {
         }
         else {
 
-            String content = getStringFromFile(file);
-            priv = new BigInteger(content);
+            fileContents = getStringFromFile(file);
+
 
         }
+        priv = new BigInteger(fileContents);
         pub = EllipticCryptography.getInstance().publicPointFromPrivate(priv);
     }  
 

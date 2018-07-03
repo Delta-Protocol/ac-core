@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import org.spongycastle.crypto.params.ECDomainParameters;
+import org.spongycastle.util.test.FixedSecureRandom;
 
 public class EllipticCryptography{
 
@@ -36,10 +37,10 @@ public class EllipticCryptography{
         secureRandom = new SecureRandom();
     }
 
-    public SecretKey generatePrivateKey(){
+    public BigInteger generatePrivateKey(){
             AsymmetricCipherKeyPair keypair = generateKeyPair();
             ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-            return (SecretKey) privParams.getD();
+            return privParams.getD();
     }
 
     public AsymmetricCipherKeyPair generateKeyPair(){

@@ -11,4 +11,6 @@ test/unit_tests
 android_studio/
 valgrind-out.txt
 *.out
+android/local.properties
+android/.gradle/
 
