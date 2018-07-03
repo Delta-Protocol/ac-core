@@ -40,6 +40,7 @@ void c::devices_t::save_() const {
         i.second.to_stream(os);
         os << ' ';
     }
+    cout << "saved devices $home/d" << endl;
 }
 
 void c::device::to_stream(ostream&os) const {
