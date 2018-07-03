@@ -17,11 +17,10 @@
 #include <thread>
 
 using namespace std;
-
 using namespace us::wallet;
+using datagram=us::gov::socket::datagram;
 
 
-using datagram=us::gov::socket::datagram;//socket::datagram;
 
 
 struct test_api : rpc_api {
@@ -30,27 +29,29 @@ struct test_api : rpc_api {
 
  
 
-string ask(int service, const string& args){
+	string ask(int service, const string& args){
 
-	datagram* q=new datagram(service,args);        //(walletd_host, walletd_port, q);
-	socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" , 46000 , q); 
+		datagram* q=new datagram(service,args);        //(walletd_host, walletd_port, q);
+		socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" , 46000 , q); 
 
-	if (response) {
-		return response->parse_string();
-		delete response;
+		if (response) {
+			return response->parse_string();
+			delete response;
+		}
+		else {
+			cout << "ERROR" << endl;
+		}
 	}
-	else {
-		cout << "ERROR" << endl;
+
+	void gen_keys() {
+		crypto::ec::keys k=crypto::ec::keys::generate();
+		//cout << k.priv.to_b58() << endl;
+		//cout << k.pub.to_b58() << endl;
+		//cout << k.pub.compute_hash() << endl;
+		k.priv.to_b58();
+		k.pub.to_b58();
+		k.pub.compute_hash();
 	}
-}
-
-void gen_keys() {
-	crypto::ec::keys k=crypto::ec::keys::generate();
-	 k.priv.to_b58();
-	 k.pub.to_b58();
-	 k.pub.compute_hash();
-}
-
 };
 
 
@@ -64,7 +65,7 @@ struct test_client: client {
    	}
 
 	virtual void on_connect() override {
-		cout << "connected" << endl;
+		//cout << "connected" << endl;
 	}
 };
 
@@ -76,7 +77,7 @@ struct test_client: client {
 
 
 
-void test(string ip , int port , string address ,int amoundSend, int fees , string privKey , bool timer){
+void test(string ip , int port , string address ,int amoundSend, int fees , string privKey , bool timer , bool addToWallet){
 
 
 string tx_receipt="";
@@ -84,18 +85,21 @@ string tx_receipt="";
 	
 	test_api ts( ip , port );
 
-	
+//ts.gen_keys();
+//api::priv_key(privKey , cout);
+//ts.dump(cout);
+//ts.list_devices(cout);
 
-
-	ts.gen_keys();
 
 
 try{
 	//------add_address--to-wallet---------------|
-	ostringstream osAddaddr;
-	//ts.add_address(crypto::ec::keys::priv_t::from_b58( privKey ) , osAddaddr);        --------------------> uncomment <---------------
-	string addAddr = osAddaddr.str();
-	//cout << "new Wallet address : "<< addAddr << "\n" << endl;
+	if(addToWallet==true){
+		ostringstream osAddaddr;
+		ts.add_address(crypto::ec::keys::priv_t::from_b58( privKey ) , osAddaddr);
+		string addAddr = osAddaddr.str();
+		//cout << "Add addr to wallet----> "<< addAddr << "\n" << endl;
+	}
 } catch (const std::exception& e){assert(false);}
 
 
@@ -134,26 +138,28 @@ try{
 
 
 if (timer != false ){
-	sleep(60);
+	sleep(65);
 }
 
 
 
-//--------------------check-addr-balance-----------------|
+//--------------------check--addr--balance-----------------|
 try{
 	test_client c( 0 );
-	c.connect( "localhost", 46001 , false );	
+	c.connect( "localhost", 46001 , false );	//------------------------------------------------------------here-------
 	
+	string howManyAddr = "1 ";
+	string askBalanceAddr = howManyAddr + address;	
 
-	string addrBalance = ts.ask(protocol::cash_query, "1 "+address); //----------------------------------------------------here-------
+	string addrBalance = ts.ask(protocol::cash_query, askBalanceAddr ); 
+//	cout << addrBalance << endl;
+
 	int index = 0;
 	for (int i = 0; i < 2; ++i){
 	    index = (addrBalance.find(" ", index)) + 1; }
-	string balance= addrBalance.substr(index);
-	cout << balance.substr(0, balance.find(" ")) << endl;
+	string balance = addrBalance.substr(index); //get only the balance number
+	cout << address <<" Balance : " << balance.substr(0, balance.find(" ")) << endl;
 } catch (const std::exception& e){assert(false);}
-
-
 
 
 
@@ -163,10 +169,16 @@ try{
 	ostringstream os;
 	ts.new_address(os);
 	string addr = os.str();
-	if(addr.length()==30||addr.length()==29){}else{ assert(false);} //"address length is OK \n"
+
+	int index = 0;
+	for (int i = 0; i < 1; ++i){
+	   	index = (addr.find(" ", index)) + 1; }
+	string theAddr= addr.substr(index);
+	string onlyAddr = theAddr.substr(0, theAddr.find(" "));
+	if(onlyAddr.length()==30||onlyAddr.length()==29){  }else{ assert(false);} //"address length is OK \n"
 } catch (const std::exception& e){assert(false);}
 
-	
+
 
 
 try{	//------tx_decode----------|
@@ -188,8 +200,11 @@ try{	//------tx_decode----------|
 	//cout << txSend << endl;
 } catch (const std::exception& e){assert(false);}
 
-cout << "    --   --   --   --   --   --   --   --   --   --  \n" << endl;
 
+
+
+
+cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
 }
 
 
@@ -200,26 +215,19 @@ cout << "    --   --   --   --   --   --   --   --   --   --  \n" << endl;
 void testing_wallet_api()
 {
 
-	for (int i=1; i<=3; i++ ) 
-	{
-	cout << " ---------------------------Test-------------------------------" << endl;
-		//     [ip]       [port]        [address]               [amoundSend]  [fees] 	[privateKey] 			            [timer]
-		test("127.0.0.1" , 46001 , "4WFcdMLaDEG4WPE8pHCTLZymBneJ" ,  10000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
-	sleep(20);		
-		test("127.0.0.1" , 46001 , "3onaAM6pyGMx5FyA1VuYADpcH6wG" ,  20000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true  );
-	sleep(20);		
-		test("127.0.0.1" , 46001 , "2f4M2qtWznu3PrSm3qqM9HS4SUJD" ,  30000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
-//		test("127.0.0.1" , 46001 , "29zPdkeU82Fzp8QRrNQVocqPKpqZ" ,  40000   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
-//		test("127.0.0.1" , 46001 , "2HfujHeDRWX4qCM35c3UqtXaFDxd" ,  55555   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
-//		test("127.0.0.1" , 46001 , "4TQWGGFjoqRvifGsp6hKBTcsw4x6" ,  66666   ,   1 , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu" , true );
-	}
+      for (int i=1; i<=3; i++ ) 
+      {
+	cout << " \n-------------------------------------Test------------------------------------------------\n" << endl;
+	//     [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			    [timer]  [addToWallet]
+	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true  ,	false	);
+	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , true  ,	false	);
+	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , true  ,	false	);
+//	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false ,	false	);
+//	test("127.0.0.1" , 46001 , "4TQWGGFjoqRvifGsp6hKBTcsw4x6" ,  5000   ,   2  , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu"  , false , 	false	);
+//	test("127.0.0.1" , 46001 , "4TQWGGFjoqRvifGsp6hKBTcsw4x6" ,  6000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false ,	false	);
+      }
 
 }
-
-
-
-
-
 
 
 
@@ -236,11 +244,17 @@ void testing_wallet_api()
 
 /*
 
-	//ts.list_devices(cout);
 
-	//ts.dump(cout);	
 
-	//api::priv_key("5k6K4uBmM86rKYQZqytctexBwfwN4GeDvvVZgBXxtbE9",cout); 
+
+
+
+			 [private key ]					[Public Key]
+
+	DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m  		9koUJsXUmpJwWb5uzUm3VNwPz6c              
+	5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876		3nuMp9bm19CGag9a5SvJ3A2n8jTi
+	8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc		3U8AUYbfGWkUncvPSNwR9o3Z8BBs
+	Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72		B2D7drjckG2Vdju2GQeYWSA4EEJ
 
 */
 
