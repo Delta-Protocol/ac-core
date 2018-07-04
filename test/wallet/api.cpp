@@ -185,19 +185,19 @@ try{	//------tx_decode----------|
 	ostringstream osDecode;
 	ts.tx_decode( tx_receipt , osDecode);
 	string txdecode = osDecode.str();
-	//cout << txdecode << endl;
+	cout << txdecode << endl;
 
 	//-----tx-check-------------|
 	ostringstream osCheck;
 	ts.tx_check( tx_receipt , osCheck);		
 	string txCheck = osCheck.str();
-	//cout << txCheck << endl;	
+	cout << txCheck << endl;	
 
 	//-----tx-send-------------|
 	ostringstream osSend;
 	ts.tx_send( tx_receipt , osSend);
 	string txSend = osSend.str();
-	//cout << txSend << endl;
+	cout << txSend << endl;
 } catch (const std::exception& e){assert(false);}
 
 
@@ -219,12 +219,17 @@ void testing_wallet_api()
       {
 	cout << " \n-------------------------------------Test------------------------------------------------\n" << endl;
 	//     [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			    [timer]  [addToWallet]
-	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true  ,	false	);
-	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , true  ,	false	);
-	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , true  ,	false	);
-//	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false ,	false	);
-//	test("127.0.0.1" , 46001 , "4TQWGGFjoqRvifGsp6hKBTcsw4x6" ,  5000   ,   2  , "CMkbepKCiVLnqt8XwYM3KWxDzhRZqecoYyL7ZXG75ZFu"  , false , 	false	);
-//	test("127.0.0.1" , 46001 , "4TQWGGFjoqRvifGsp6hKBTcsw4x6" ,  6000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false ,	false	);
+	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , false  ,	false	);
+	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false  ,	false	);
+	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false  ,	false	);
+	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false  ,	false	);
+
+//	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , false  ,	true	);
+//	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false  ,	false	);
+//	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false  ,	true	);
+//	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false  ,	false	);
+
+
       }
 
 }
