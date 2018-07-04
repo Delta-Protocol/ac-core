@@ -2,6 +2,7 @@ package com.example.usgov;
 
 import android.app.Application;
 import android.util.Log;
+import us.wallet.*;
 
 import java.io.IOException;
 

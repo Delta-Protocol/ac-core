@@ -16,8 +16,12 @@ cd sdk/java
 ./make all
 cd $pwd
 
-cp ../../sdk/java/us-wallet-sdk.jar app/libs/
-cp ../../sdk/java/libs/* app/libs/
+cd app/libs
+rm -f us-wallet-sdk.jar
+ln -s ../../../../sdk/java/us-wallet-sdk.jar .
+cp ../../../../sdk/java/libs/* .
+cd ../..
+
 
 
 #mkdir -p app/src/main/java/com/google/zxing/integration/android

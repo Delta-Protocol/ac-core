@@ -1,5 +1,7 @@
 package com.example.usgov;
 
+import us.wallet.*;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Timer;
 import android.content.ClipData;

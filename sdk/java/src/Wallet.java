@@ -154,7 +154,7 @@ public class Wallet {
         walletdAddress=getStringFromFile(file);
     }
 
-    void set_walletd_host(String addr) throws IOException {
+    public void set_walletd_host(String addr) throws IOException {
         String filename = "n";
         File file = new File(homeDir,filename);
         file.getParentFile().mkdirs();
@@ -204,15 +204,15 @@ public class Wallet {
     }
     private String walletdAddress="";
 
-    String walletd_host() {
+    public String walletd_host() {
         return walletdAddress;
     }
 
-    int walletd_port() {
+    public int walletd_port() {
         return 16673;
     }
 
-    String pay(int amount, int fee, String rcpt_address) {
+    public String pay(int amount, int fee, String rcpt_address) {
         tx_make_p2pkh_input i=new tx_make_p2pkh_input(rcpt_address,amount,fee,tx_make_p2pkh_input.sigcode_all,tx_make_p2pkh_input.sigcode_all,true);
         if (!i.check()) return "Error: Invalid input data";
 
@@ -265,7 +265,8 @@ public class Wallet {
         //Log.d("Wallet","ans "+st);
         return st.trim();
     }
-    boolean isAddressValid(String addr) {
+
+    public boolean isAddressValid(String addr) {
         try {
             byte[] decoded=Base58.decode(addr);
             return decoded.length>0;
@@ -275,7 +276,7 @@ public class Wallet {
         }
     }
 
-    boolean renew_address() throws IOException {
+    public boolean renew_address() throws IOException {
         String addr=new_address();
         if (!isAddressValid(addr)) {
             return false;
@@ -294,10 +295,11 @@ public class Wallet {
         return true;
     }
 
-    String balance(boolean detailed) {
+    public String balance(boolean detailed) {
         return ask(protocol_balance_query,detailed?"1":"0");
     }
-    String new_address() {
+
+    public String new_address() {
         return ask(protocol_new_address_query,"");
     }
 }
