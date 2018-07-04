@@ -90,9 +90,9 @@ public class Wallet {
     public static final short protocol_response = wallet_base+0;
 
 
-    private String homeDir;
+    private File homeDir;
 
-    public Wallet(String homedir) throws IOException {
+    public Wallet(File homedir) throws IOException {
 	homeDir=homedir;
         setup_keys();
         setup_addr();
