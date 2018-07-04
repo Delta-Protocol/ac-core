@@ -2,15 +2,15 @@
 
 #include <iterator>
 
-#include <cryptopp/hex.h>
+#include <crypto++/hex.h>
 using CryptoPP::HexEncoder;
 using CryptoPP::HexDecoder;
 
-#include <cryptopp/cryptlib.h>
+#include <crypto++/cryptlib.h>
 using CryptoPP::BufferedTransformation;
 using CryptoPP::AuthenticatedSymmetricCipher;
 
-#include <cryptopp/filters.h>
+#include <crypto++/filters.h>
 using CryptoPP::Redirector;
 using CryptoPP::StringSink;
 using CryptoPP::StringSource;
@@ -19,7 +19,7 @@ using CryptoPP::ArraySource;
 using CryptoPP::AuthenticatedEncryptionFilter;
 using CryptoPP::AuthenticatedDecryptionFilter;
 
-#include <cryptopp/gcm.h>
+#include <crypto++/gcm.h>
 using CryptoPP::GCM;
 
 #include <secp256k1_ecdh.h>
