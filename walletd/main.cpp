@@ -16,9 +16,12 @@ using namespace us::wallet;
 using namespace std;
 
 
+Fastcgipp::Manager<w3api::fcgi_t>* fcgi{0};
+
 void sig_handler(int s) {
     cout << "main: Caught signal " << s << endl;
     signal_handler::_this.finish();
+    if (fcgi) fcgi->terminate();
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
 }
@@ -56,6 +59,7 @@ void help(const params& p, ostream& os=cout) {
     os << "options are:" << endl;
 	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
 	os << " -d        Run wallet daemon on port " << p.walletd_port << endl;
+	os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
 	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
 	os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
     if (p.offline) {
@@ -69,7 +73,6 @@ void help(const params& p, ostream& os=cout) {
 	    os << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
     }
     os << endl;
-	os << " -fcgi     Run as fast-cgi. [" << (p.fcgi?"yes":"no") << "]" << endl;
     os << "commands are:" << endl;
     os << endl;
     os << "KEYS application:" << endl;
@@ -132,23 +135,22 @@ void run_fcgi(const params& p) {
    //e->add_sample_liquidity(wcerr);
 
 
-   w3api::fcgi_t::api=new local_api(p.homedir,p.backend_host,p.backend_port);
 
    try {
-      Fastcgipp::Manager<w3api::fcgi_t> fcgi;
-      fcgi.setupSignals();
-      fcgi.listen();
-      fcgi.start();
+//      Fastcgipp::Manager<w3api::fcgi_t> fcgi;
+      fcgi=new Fastcgipp::Manager<w3api::fcgi_t>();
+      //fcgi.setupSignals();
+      fcgi->listen();
+      fcgi->start();
       cout << "us-wallet fast-cgi initiated normally" << endl;
-      fcgi.join();
-
-
+      fcgi->join();
+      delete fcgi;
+      fcgi=0;
    }
    catch(std::exception& ex) {
       cerr << ex.what() << endl;
    }
 //   delete e;
-    delete w3api::fcgi_t::api;
 
 }
 
@@ -159,7 +161,23 @@ void run_daemon(const params& p) {
 	signal(SIGPIPE, SIG_IGN);
 
 	wallet_daemon d(p.walletd_port, p.homedir, p.backend_host, p.backend_port);
-	d.run();
+
+    if (p.fcgi) {
+        thread* wt=0;
+        w3api::fcgi_t::api=&d;
+
+        wt=new thread([&](){d.run(); if (fcgi) fcgi->terminate(); });
+        run_fcgi(p);
+        wt->join();
+        delete wt;
+    }
+    else {
+        d.run();
+    }
+
+
+
+//	d.run();
 }
 
 #include <us/wallet/protocol.h>
@@ -406,17 +424,19 @@ int main(int argc, char** argv) {
 	params p;
 	string command=parse_options(args,p);
 
-    if (p.daemon && p.fcgi) {
-        cerr << "-d and -fcgi options are incompatible" << endl;
+    if (!p.daemon && p.fcgi) {
+        cerr << "-fcgi requires -d" << endl;
         return 1;
     }
 
+
+
     if (p.daemon) {
+
         run_daemon(p);
-        return 0;
-    }
-    if (p.fcgi) {
-        run_fcgi(p);
+
+//        cout << "walletd listening on " << p.walletd_host << ":" << p.walletd_port << endl;
+//        run_daemon(p);
         return 0;
     }
 
@@ -428,6 +448,11 @@ int main(int argc, char** argv) {
 		papi=new rpc_api(p.walletd_host,p.walletd_port);
 	}
 	api& wapi=*papi;
+
+//new local_api(p.homedir,p.backend_host,p.backend_port);
+
+//   delete w3api::fcgi_t::api;
+
 
     ostringstream os;
 
