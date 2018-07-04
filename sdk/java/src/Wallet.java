@@ -1,8 +1,5 @@
 package com.example.usgov;
 
-import android.content.Context;
-import android.util.Log;
-
 import org.spongycastle.asn1.x9.X9ECParameters;
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;
 import org.spongycastle.crypto.ec.CustomNamedCurves;
@@ -26,8 +23,6 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.SecureRandom;
-import android.content.Context;
-import android.content.ContextWrapper;
 
 public class Wallet {
 
@@ -45,7 +40,6 @@ public class Wallet {
         curve= new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
         secureRandom = new SecureRandom();
     }
-    private Context ctx;
 
     public class tx_make_p2pkh_input {
         public static final int sigcode_all=0;
@@ -95,22 +89,30 @@ public class Wallet {
 
     public static final short protocol_response = wallet_base+0;
 
+
+    private String homeDir;
+
+    public Wallet(String homedir) throws IOException {
+	homeDir=homedir;
+        setup_keys();
+        setup_addr();
+        setup_walletd_host();
+    }
+
+
+
+    FileOutputStream getOutputStream(String filename) throws IOException {
+	//override. i.e. in Android: return ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+	return new FileOutputStream(filename);
+    }
+
     void setup_keys() throws IOException {
         String filename = "k";
 
-        File file = new File(ctx.getFilesDir(),filename);
+        File file = new File(homeDir,filename);
         if(!file.exists()) {
             file.getParentFile().mkdirs();
-    //        try {
-                file.createNewFile();
-      //      }
-        //    catch(Exception e) {
-          //  }
-            //           log+=";new file";
-//            if (!file.mkdirs()) {
-            //              //Log.e(LOG_TAG, "Directory not created");
-            //            log+=";Directory not created";
-            //      }
+            file.createNewFile();
             ECKeyPairGenerator generator = new ECKeyPairGenerator();
             ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curve, secureRandom);
             generator.init(keygenParams);
@@ -119,21 +121,14 @@ public class Wallet {
             ECPublicKeyParameters pubParams = (ECPublicKeyParameters) keypair.getPublic();
             priv = privParams.getD();
             String fileContents = priv.toString();
-            //log+=";"+fileContents.length();
             FileOutputStream outputStream;
-
-           // try {
-                outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write(fileContents.getBytes());
-                outputStream.write('\n');
-                outputStream.close();
-          //  } catch (Exception e) {
- //               Log.d("Wallet",e.getMessage());
-          //  }
-
+//            outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream = getOutputStream(filename);
+            outputStream.write(fileContents.getBytes());
+            outputStream.write('\n');
+            outputStream.close();
         }
         else {
-
             String content = getStringFromFile(file);
             priv=new BigInteger(content);
 
@@ -141,16 +136,9 @@ public class Wallet {
         pub = publicPointFromPrivate(priv);
     }
 
-    public Wallet(Context ctx_) throws IOException {
-        ctx=ctx_;
-        setup_keys();
-        setup_addr();
-        setup_walletd_host();
-    }
-
     void setup_addr() throws IOException  {
         String filename = "a";
-        File file = new File(ctx.getFilesDir(),filename);
+        File file = new File(homeDir,filename);
         if(!file.exists()) {
             renew_address();
         }
@@ -159,22 +147,20 @@ public class Wallet {
 
     void setup_walletd_host() throws IOException  {
         String filename = "n";
-        File file = new File(ctx.getFilesDir(),filename);
+        File file = new File(homeDir,filename);
         if(!file.exists()) {
-            Log.d("Wallet","Walletd address file does not exist.");
-            return;
+            throw new IOException("Walletd-endpoint file (n) does not exist.");
         }
         walletdAddress=getStringFromFile(file);
-        Log.d("Wallet","Read walletd address from file."+walletdAddress);
     }
 
     void set_walletd_host(String addr) throws IOException {
         String filename = "n";
-        File file = new File(ctx.getFilesDir(),filename);
+        File file = new File(homeDir,filename);
         file.getParentFile().mkdirs();
         file.createNewFile();
         FileOutputStream outputStream;
-        outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+        outputStream = getOutputStream(filename);
         outputStream.write(addr.getBytes());
         outputStream.write('\n');
         outputStream.close();
@@ -191,16 +177,16 @@ public class Wallet {
         }
         return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
     }
+
     public String getStringFromFile (File fl) {
         try {
             FileInputStream fin = new FileInputStream(fl);
             String ret = convertStreamToString(fin);
-            //Make sure you close all streams.
             fin.close();
             return ret;
         }
         catch(Exception e) {
-            return "";//e.getStackTrace().toString();
+            return "";
         }
     }
 
@@ -231,7 +217,7 @@ public class Wallet {
         if (!i.check()) return "Error: Invalid input data";
 
         String args=i.to_string();
-        Log.d("Wallet","Pay order "+args);
+        //Log.d("Wallet","Pay order "+args);
 
         return ask(protocol_tx_make_p2pkh_query,args);
     }
@@ -252,52 +238,31 @@ public class Wallet {
         return curd;
     }
 
-
-
     public synchronized Datagram send_recv(Datagram d) {
         try {
-            Log.d("Wallet","Connecting to "+walletd_host()+":"+walletd_port());
             Socket s = new Socket(walletd_host(), walletd_port());
-            Log.d("Wallet","before send - isClosed "+s.isClosed());
-            Log.d("Wallet","before send - isConnected "+s.isConnected());
-            Log.d("Wallet","about to send datagram - length "+d.bytes.length);
-            Log.d("Wallet","about to send datagram - str "+d.parse_string());
-
             d.send(s);
-            Log.d("Wallet","after send - isClosed "+s.isClosed());
-            Log.d("Wallet","after send - isConnected "+s.isConnected());
-
             Datagram r=null;
             while (true) {
                 r=complete_datagram(s);
                 if (r==null) break;
                 if (r.completed()) break;
-                Log.d("Wallet", "waiting for datagram " + r.bytes.length);
-            }
-            if (r==null) {
-                Log.d("Wallet", "Received null datagram ");
-            }
-            else {
-                Log.d("Wallet", "Received datagram " + r.bytes.length);
             }
             s.close();
             return r;
         } catch (IOException e) {
-            Log.d("Datagram","exception: "+e.getMessage());
-            //e.printStackTrace();
         }
 
         return null;
     }
 
     String ask(short service, String args) {
-        Log.d("Wallet","ask "+service+" " +args);
         Datagram d=new Datagram(service,args);
         Datagram r=send_recv(d);
         if (r==null) return "?";
         String st;
         st = r.parse_string();
-        Log.d("Wallet","ans "+st);
+        //Log.d("Wallet","ans "+st);
         return st.trim();
     }
     boolean isAddressValid(String addr) {
@@ -310,7 +275,7 @@ public class Wallet {
         }
     }
 
-    boolean renew_address()throws IOException {
+    boolean renew_address() throws IOException {
         String addr=new_address();
         if (!isAddressValid(addr)) {
             return false;
@@ -318,11 +283,11 @@ public class Wallet {
         my_address=addr;
 
         String filename = "a";
-        File file = new File(ctx.getFilesDir(),filename);
+        File file = new File(homeDir,filename);
         file.getParentFile().mkdirs();
         file.createNewFile();
         FileOutputStream outputStream;
-        outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+        outputStream = getOutputStream(filename);
         outputStream.write(my_address.getBytes());
         outputStream.write('\n');
         outputStream.close();
