@@ -9,14 +9,12 @@ namespace blockchain {
 	using namespace std;
 	struct param_t {
 
-		enum consensus_t { majority=0, average, num_types };
+		enum consensus_t { majority=0, average, median, num_types };
 		param_t(int id, consensus_t type): id(id), consensus_type(type) {
 		}
-		constexpr static array<const char*,num_types> typestr={"majority","average"};
+		constexpr static array<const char*,num_types> typestr={"majority","average","median"};
 
-		bool operator <(const param_t& other) const {
-			return id < other.id;
-		}
+		inline bool operator <(const param_t& other) const { return id < other.id; }
 		int id;
 		consensus_t consensus_type;
 	};

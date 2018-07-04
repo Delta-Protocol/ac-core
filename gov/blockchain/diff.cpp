@@ -1,15 +1,14 @@
 #include "diff.h"
 #include "app.h"
 #include <cassert>
+#include <iomanip>
+#include <vector>
 
 using namespace us::gov::blockchain;
 using namespace std;
 
 typedef us::gov::blockchain::diff c;
 
-
-#include <iomanip>
-#include <vector>
 namespace {
 string to_string(const vector<unsigned char>& data) {
 	ostringstream os;
@@ -17,34 +16,6 @@ string to_string(const vector<unsigned char>& data) {
 	return os.str();
 }
 }
-
-
-//c::bucket c::empty_bucket;
-/*
-void c::bucket::to_stream(ostream& os) const {
-	os << size() << endl;
-	for (auto& i:*this) {
-		os << i.first << endl;
-		i.second->to_stream(os);
-	}
-}
-
-c::bucket::appguts_by_pubkey(istream& is) {
-	int n;
-	is >> n;
-	for (int i=0; i<n; ++i) {
-		string pubkey;
-		is >> pubkey;
-		app_gut* g=app_gut::create(is);
-		if (g==0) continue; //app no longer recognized
-		emplace(pubkey,g);
-	}
-}
-
-c::bucket::~appguts_by_pubkey() {
-	for (auto& i:*this) delete i.second;
-}
-*/
 
 string local_deltas::message_to_sign() const {
 	ostringstream os;
@@ -75,7 +46,6 @@ local_deltas* local_deltas::from_stream(istream& is) {
 		delete instance;
 		return 0;
 	}
-	//instance->reserve(n);
 	for (int i=0; i<n; ++i) {
 		int appid;
 		is >> appid;
@@ -88,18 +58,9 @@ local_deltas* local_deltas::from_stream(istream& is) {
 	return instance;
 }
 
-/*
-const c::bucket& c::get_app_guts(int id) const {
-	auto i=find(id);
-	if (i==end()) return empty_bucket;
-	return i->second;
-}
-*/
-
 #include<us/gov/likely.h>
 void c::to_stream(ostream& os) const {
 	os << prev << " ";
-//cout << "WRITING prev " << prev << endl;
 	os << size() << " ";
 	for (auto& i:*this) {
 		os << i.first << " ";
@@ -107,7 +68,6 @@ void c::to_stream(ostream& os) const {
 	}
 	os << proof_of_work.size() << " ";
 	for (auto& i:proof_of_work) {
-//cout << "WRITING pow.first " << i.first << endl;
 		os << i.first << " " << i.second << " ";
 	}
 }
@@ -119,7 +79,7 @@ c* c::from_stream(istream& is) {
 //	if (unlikely(bl->prev.is_zero())) return 0;
 	int n;
 	is >> n;
-	if (n<0) {
+	if (unlikely(n<0)) {
 		delete bl;
 		return 0;
 	}
@@ -146,14 +106,8 @@ c* c::from_stream(istream& is) {
 		bl->proof_of_work.emplace(pubkeyh,work);
 	}
 
-
 	return bl;
-
-
-	//b::from_stream(is);
-	//return bl;
 }
-
 
 bool c::allow(const local_deltas& g) { 
 	lock_guard<mutex> lock(mx_proof_of_work);
@@ -173,12 +127,12 @@ uint64_t c::add(int appid, app::local_delta* g) { //private, not protected by mu
 	return i->second->merge(g);
 }
 
-void c::add(local_deltas* mg) {
+void c::add(local_deltas* ld) {
 	uint64_t work=0;
 	{
 	lock_guard<mutex> lock(mx);
 	//mg.create_consensuated_app_gut(*this);
-	for (auto& i:*mg) {
+	for (auto& i:*ld) {
 		work+=add(i.first,i.second);
 		i.second=0;
 	}
@@ -186,13 +140,10 @@ void c::add(local_deltas* mg) {
 
 	{
 	lock_guard<mutex> lock(mx_proof_of_work);
-	proof_of_work.find(mg->pubkey.hash())->second=work;
+	proof_of_work.find(ld->pubkey.hash())->second=work;
 	}
 
-	delete mg;
-
-	//auto i=emplace(pubk,g);
-	//return i.second;
+	delete ld;
 }
 
 void c::end_adding() {
@@ -203,21 +154,9 @@ void c::end_adding() {
 	h=false;
 }
 
-/*
-void block::hash(unsigned char hash[crypto::double_hash256::OUTPUT_SIZE]) const {
-	ostringstream os;
-	to_stream(os);
-	cout << "Computing hash of block content:" << endl;
-	cout << ">" << os.str() << "<" << endl;
-	crypto::double_hash256 h;
-	h.write(os.str());
-	h.finalize(hash);
-}
-*/
 #include <us/gov/crypto/base58.h>
 
 const c::hash_t& c::hash() const {
-//h=false;
 	if (!h) {
 		hasher_t hasher;
 		ostringstream os;
@@ -229,7 +168,7 @@ const c::hash_t& c::hash() const {
 	return hash_cached;
 }
 
-c::hash_t c::hash(const string& content) {	
+c::hash_t c::hash(const string& content) {
 	hash_t ans;
 	hasher_t hasher;
 	ostringstream os;
@@ -237,27 +176,5 @@ c::hash_t c::hash(const string& content) {
 	hasher.finalize(ans);
 	return ans;
 }
-
-/*
-//hash_cached.clear(); //TODO remove
-
-	if (!h) {
-		unsigned char h[crypto::double_hash256::OUTPUT_SIZE];
-		hash(h);
-		h=crypto::b58::encode(h,h+crypto::double_hash256::OUTPUT_SIZE);
-	}
-	cout << "hash_cached=" << hash_cached << endl;
-	return hash_cached;
-}
-
-string block::hash(const string& content) {
-	unsigned char hash[crypto::double_hash256::OUTPUT_SIZE];
-	crypto::double_hash256 h;
-	h.write(content);
-	h.finalize(hash);
-	return crypto::b58::encode(hash,hash+crypto::double_hash256::OUTPUT_SIZE);
-}
-
-*/
 
 
