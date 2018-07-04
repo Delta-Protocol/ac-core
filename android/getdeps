@@ -1,14 +1,23 @@
 #!/bin/sh
 
-wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/core/1.58.0.0/core-1.58.0.0.jar -O app/libs/core-1.58.0.0.jar
-wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/prov/1.58.0.0/prov-1.58.0.0.jar -O app/libs/prov-1.58.0.0.jar
-wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pkix/1.54.0.0/pkix-1.54.0.0.jar -O app/libs/pkix-1.54.0.0.jar
-wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pg/1.54.0.0/pg-1.54.0.0.jar -O app/libs/pg-1.54.0.0.jar
+#wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/core/1.58.0.0/core-1.58.0.0.jar -O app/libs/core-1.58.0.0.jar
+#wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/prov/1.58.0.0/prov-1.58.0.0.jar -O app/libs/prov-1.58.0.0.jar
+#wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pkix/1.54.0.0/pkix-1.54.0.0.jar -O app/libs/pkix-1.54.0.0.jar
+#wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pg/1.54.0.0/pg-1.54.0.0.jar -O app/libs/pg-1.54.0.0.jar
 wget https://repo1.maven.org/maven2/com/google/zxing/core/3.3.2/core-3.3.2.jar -O app/libs/zxing-core-3.3.2.jar
 wget http://www.java2s.com/Code/JarDownload/zxing/zxing-integration.jar.zip
 unzip zxing-integration.jar.zip
 rm zxing-integration.jar.zip
 mv zxing-integration.jar app/libs/
+
+pwd=`pwd`
+cd ../..
+cd sdk/java
+./make all
+cd $pwd
+
+cp ../../sdk/java/us-wallet-sdk.jar app/libs/
+cp ../../sdk/java/libs/* app/libs/
 
 
 #mkdir -p app/src/main/java/com/google/zxing/integration/android

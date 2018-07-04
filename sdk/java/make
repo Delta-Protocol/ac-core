@@ -39,5 +39,8 @@ fi
 if [ "_$cmd" == "_all" ]; then
 	all
 fi
+if [ "_$cmd" == "_clean" ]; then
+	clean
+fi
 
 
