@@ -1,15 +1,32 @@
-// stacktrace.h (c) 2008, Timo Bingmann from http://idlebox.net/
-// published under the WTFPL v2.0
-
 #ifndef _STACKTRACE_H_
 #define _STACKTRACE_H_
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <execinfo.h>
-#include <cxxabi.h>
+//#include <libunwind.h>
+//#include <execinfo.h>
+//#include <cxxabi.h>
 
-/** Print a demangled stack backtrace of the caller function to FILE* out. */
+
+static inline void print_stacktrace() { //FILE *out = stderr, unsigned int max_frames = 63) {
+/*
+  unw_cursor_t cursor; unw_context_t uc;
+  unw_word_t ip, sp;
+
+  unw_getcontext(&uc);
+  unw_init_local(&cursor, &uc);
+  while (unw_step(&cursor) > 0) {
+    unw_get_reg(&cursor, UNW_REG_IP, &ip);
+    unw_get_reg(&cursor, UNW_REG_SP, &sp);
+    printf ("ip = %lx, sp = %lx\n", (long) ip, (long) sp);
+  }
+*/
+}
+
+/*
+// stacktrace.h (c) 2008, Timo Bingmann from http://idlebox.net/
+// published under the WTFPL v2.0
+// Print a demangled stack backtrace of the caller function to FILE* out. 
 static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63)
 {
     fprintf(out, "stack trace:\n");
@@ -89,6 +106,6 @@ static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames 
     free(funcname);
     free(symbollist);
 }
-
-#endif // _STACKTRACE_H_
+*/
+#endif
 
