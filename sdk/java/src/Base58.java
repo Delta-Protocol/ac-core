@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.example.usgov;
+package us.wallet;
 
 import java.util.Arrays;
 

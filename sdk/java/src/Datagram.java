@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.wallet;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
