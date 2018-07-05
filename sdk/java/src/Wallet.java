@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.SecureRandom;
+import org.spongycastle.math.ec.ECPoint;
+import android.content.Context;
 
 public class Wallet {
 
@@ -104,10 +106,10 @@ public class Wallet {
             priv = new BigInteger(fileContents);
         }
         catch(Exception e){
-            Log.e("Wallet",e.getMessage());
+           // Log.e("Wallet",e.getMessage());
         }
         if(priv==null){
-            Log.d("Wallet", "Private key was not successfully retrieved");
+            //Log.d("Wallet", "Private key was not successfully retrieved");
         }
         pub = EllipticCryptography.getInstance().publicPointFromPrivate(priv);
     }  

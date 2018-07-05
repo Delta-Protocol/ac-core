@@ -41,5 +41,9 @@ ln -s ../../../../android/main
 
 cd ../..
 
+cd android_studio/usgov
+./getdeps
+cd ../..
+
 echo "ready"
 

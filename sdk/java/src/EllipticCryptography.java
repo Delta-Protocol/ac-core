@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.wallet;
 
 import org.spongycastle.asn1.x9.X9ECParameters;
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;

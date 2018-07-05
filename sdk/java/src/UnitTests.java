@@ -1,10 +1,8 @@
-package com.example.usgov;
+package us.wallet;
 import javax.crypto.SecretKey;
 
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.util.Log;
+
 
 public class UnitTests{
 

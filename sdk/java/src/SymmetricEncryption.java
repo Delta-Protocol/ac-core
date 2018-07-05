@@ -1,13 +1,13 @@
-package com.example.usgov;
+package us.wallet;
 
 import java.security.SecureRandom;
 import java.security.Security;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.util.Arrays;
 import org.spongycastle.math.ec.ECPoint;
+import org.spongycastle.jce.provider;
 import javax.crypto.spec.SecretKeySpec;
 
 public class SymmetricEncryption {
@@ -20,7 +20,7 @@ public class SymmetricEncryption {
     SecretKeySpec keySpec = null;
 
     public SymmetricEncryption(SecretKey privA, ECPoint pubB) throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
         cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
         iv = new byte[iv_size];
         key = EllipticCryptography.getInstance().generateSharedKey(privA,pubB);
