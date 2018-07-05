@@ -10,7 +10,9 @@
 
 using namespace std;
 
-/*                  
+/*             uncomment if you want to check datagrams results
+
+     
 void test_1(int serviceNumber){
 	us::gov::socket::datagram d(serviceNumber);
 	cout << "\n------Test-1------ "<< endl;
@@ -372,8 +374,6 @@ void testing_socket_communication(){
 //	i.run();
 
 }
-
-// --> emeina sto simeio opou exw error ( vlepe panw ) vasika tipote en doulefkei..., na ksanadw ton kwdika apo tin arxi
 
 
 

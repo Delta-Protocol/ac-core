@@ -114,9 +114,6 @@ try{
 
 
 
-
-
-
 try{	
 	//---------------tx_make_p2pkh()------------|
 	api::tx_make_p2pkh_input i;
@@ -138,7 +135,7 @@ try{
 
 
 if (timer != false ){
-	sleep(65);
+	sleep(125);
 }
 
 
@@ -158,7 +155,7 @@ try{
 	for (int i = 0; i < 2; ++i){
 	    index = (addrBalance.find(" ", index)) + 1; }
 	string balance = addrBalance.substr(index); //get only the balance number
-	cout << address <<" Balance : " << balance.substr(0, balance.find(" ")) << endl;
+	cout << address <<" ---> Balance : " << balance.substr(0, balance.find(" ")) << "\n" << endl;
 } catch (const std::exception& e){assert(false);}
 
 
@@ -185,19 +182,19 @@ try{	//------tx_decode----------|
 	ostringstream osDecode;
 	ts.tx_decode( tx_receipt , osDecode);
 	string txdecode = osDecode.str();
-	cout << txdecode << endl;
+	cout << ".....:::::tx_decote::::::.....\n" << "\n"<<  txdecode << endl;
 
 	//-----tx-check-------------|
 	ostringstream osCheck;
 	ts.tx_check( tx_receipt , osCheck);		
 	string txCheck = osCheck.str();
-	cout << txCheck << endl;	
+	//cout << txCheck << endl;	
 
 	//-----tx-send-------------|
 	ostringstream osSend;
 	ts.tx_send( tx_receipt , osSend);
 	string txSend = osSend.str();
-	cout << txSend << endl;
+	//cout << txSend << endl;
 } catch (const std::exception& e){assert(false);}
 
 
@@ -215,7 +212,7 @@ cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
 void testing_wallet_api()
 {
 
-      for (int i=1; i<=3; i++ ) 
+      for (int i=1; i<=2; i++ ) 
       {
 	cout << " \n-------------------------------------Test------------------------------------------------\n" << endl;
 	//     [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			    [timer]  [addToWallet]
@@ -223,13 +220,6 @@ void testing_wallet_api()
 	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false  ,	false	);
 	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false  ,	false	);
 	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false  ,	false	);
-
-//	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , false  ,	true	);
-//	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false  ,	false	);
-//	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false  ,	true	);
-//	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false  ,	false	);
-
-
       }
 
 }
@@ -248,10 +238,6 @@ void testing_wallet_api()
 
 
 /*
-
-
-
-
 
 
 			 [private key ]					[Public Key]

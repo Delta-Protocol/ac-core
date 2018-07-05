@@ -12,7 +12,7 @@ int main() {
 	//testing_split_function(); //dfs --works!
 	
 
-	//testing_socket_datagram(); //socket --works!
+	//testing_socket_datagram(); //socket --
 	//testing_socket_communication(); --frozen
 
 	

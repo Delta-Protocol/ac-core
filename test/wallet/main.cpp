@@ -7,8 +7,7 @@ using namespace std;
 
 int main() {
 
-	//cout << "-----wallet--Main----" << endl;
- 
+
 	testing_wallet_api();
 
 
