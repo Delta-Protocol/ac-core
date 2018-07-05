@@ -72,7 +72,7 @@ public class Wallet {
     void setup_keys() throws IOException {
         String filename = "k";
         String fileContents;
-        File file = new File(ctx.getFilesDir(),filename);
+        File file = new File(homeDir,filename);
         if(!file.exists()) {
             file.getParentFile().mkdirs();
     //        try {
