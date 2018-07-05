@@ -12,7 +12,6 @@ import java.math.BigInteger;
 import java.net.Socket;
 import java.security.SecureRandom;
 import org.spongycastle.math.ec.ECPoint;
-import android.content.Context;
 
 public class Wallet {
 
