@@ -4,21 +4,17 @@
 #include <iostream>
 #include <string>
 
-#include <cryptopp/osrng.h>
-using CryptoPP::AutoSeededRandomPool;
-
-
-#include <cryptopp/aes.h>
-using CryptoPP::AES;
-
+#include <crypto++/osrng.h>
+#include <crypto++/aes.h>
 #include "ec.h"
-
 #include <stdio.h>
-
-using namespace std;
 
 namespace us { namespace gov {
 namespace crypto {
+
+using CryptoPP::AutoSeededRandomPool;
+using CryptoPP::AES;
+using namespace std;
 
 typedef crypto::ec::keys keys;
 
