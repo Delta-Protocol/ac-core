@@ -34,15 +34,15 @@ install: release
 	install walletd/us-walletd ${PREFIX}/bin
 	install etc/init.d/us-wallet /etc/init.d/
 	install etc/init.d/us-gov /etc/init.d/
+	ldconfig
+	systemctl daemon-reload
+
+install-api:
 	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
 	install etc/nginx/snippets/snakeoil.conf /etc/nginx/snippets/
 	install etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/
 	install etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/
 	install var/www/html/index.html /var/www/html/
-	ldconfig
-	systemctl daemon-reload
-
-
 
 gov/libusgov.so:
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C gov;
