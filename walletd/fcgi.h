@@ -1,6 +1,6 @@
 #ifndef USGOV_4e94439bc0eb29d94882d4e788b52bbb0b3244c4ece2a05770829842a3d2a94d
 #define USGOV_4e94439bc0eb29d94882d4e788b52bbb0b3244c4ece2a05770829842a3d2a94d
-
+#ifdef FCGI
 //#include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
 #include <thread>
@@ -138,11 +138,4 @@ struct fcgi_t: Fastcgipp::Request<char_type> {
 }}}
 
 #endif
-
-
-
-
-
-
-
-
+#endif

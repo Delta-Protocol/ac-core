@@ -1,7 +1,6 @@
-
 #ifndef USGOV_8e4658449e0f86dedb53914984a000314dc1ebf49683eb585130676e4471924d
 #define USGOV_8e4658449e0f86dedb53914984a000314dc1ebf49683eb585130676e4471924d
-
+#ifdef FCGI
 #include <string>
 #include <jsoncpp/json/json.h> 
 
@@ -21,6 +20,7 @@ struct json {
 
 }}}
 
+#endif
 #endif
 
 

@@ -1,3 +1,4 @@
+#ifdef FCGI
 #include "json.h"
 #include <sstream>
 
@@ -160,4 +161,6 @@ Json::Value c::convert_response_mempool(const string& s) {
 //    is >> parent_block;
     return val;
 }
+
+#endif
 
