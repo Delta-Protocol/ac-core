@@ -179,7 +179,7 @@ catch(Exception e) {
                 long timeout = TIMEOUT;
                 while (inputData.hasRemaining()) {
                     if (timeout < 0L) {
-                        throw new IOException(String.format("Timed out, %d of %d bytes read", inputData.position(), inputData.limit()));
+                        throw new IOException(String.forma45t("Timed out, %d of %d bytes read", inputData.position(), inputData.limit()));
                     }
                     long startTime = System.nanoTime();
                     sel.select(timeout);

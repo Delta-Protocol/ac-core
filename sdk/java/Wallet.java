@@ -93,7 +93,16 @@ public class Wallet {
 
 
         }
-        priv = new BigInteger(fileContents);
+
+        try {
+            priv = new BigInteger(fileContents);
+        }
+        catch(Exception e){
+            Log.e("Wallet",e.getMessage());
+        }
+        if(priv==null){
+            Log.d("Wallet", "Private key was not successfully retrieved");
+        }
         pub = EllipticCryptography.getInstance().publicPointFromPrivate(priv);
     }  
 
