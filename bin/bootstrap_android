@@ -35,6 +35,9 @@ echo "dependencies { implementation 'com.google.zxing:core:3.2.0' }" >> build.gr
 echo "dependencies { implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar' }" >> build.gradle
 
 
+echo "dependencies { implementation group: 'pl.droidsonroids.gif', name: 'android-gif-drawable', version: '1.2.12'}" >> build.gradle
+
+
 cd src/
 rm main -r
 ln -s ../../../../android/main
