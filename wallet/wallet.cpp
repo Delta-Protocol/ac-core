@@ -26,6 +26,7 @@ string c::filename() const {
 
 bool c::load() {
 	auto file=filename();
+cout << "loading from " << file << endl;
 	if (!file_exists(file)) return true;
 	ifstream f(file);
 	while(f.good()) {
@@ -203,8 +204,10 @@ void c::refresh() {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
 	for (auto&i:*this) {
+cout << "addr " << i.first << endl;
 		addresses.emplace_back(i.first);
 	}
+cout << "query accounts" << endl;
 	data=query_accounts(addresses);
 }
 

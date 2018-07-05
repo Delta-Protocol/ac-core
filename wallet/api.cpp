@@ -140,13 +140,17 @@ local_api::~local_api() {
 }
 
 void local_api::balance(bool detailed, ostream&os) {
+cout << "LOCALAPI::BALANCE" << endl;
 	refresh();
+cout << "LOCALAPI::BALANCE A" << endl;
 	if (detailed) {
 		dump_balances(os);
 	}
 	else {
+cout << "LOCALAPI::BALANCE A2" << endl;
 		os << wallet::balance() << endl;
 	}
+cout << "LOCALAPI::BALANCE B" << endl;
 }
 
 void local_api::dump(ostream&os) {

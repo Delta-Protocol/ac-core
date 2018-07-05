@@ -44,17 +44,18 @@ namespace cash {
 
 
 
-	struct app:blockchain::runnable_app { 
+	struct app:blockchain::runnable_app {
 		app();
 		virtual ~app();
 
 
 		struct policies_traits {
-			enum paramid { 
+			enum paramid {
 				minimum_fee=0,
+//				floating_point_pos=1,
 				num_params,
 			};
-			constexpr static array<const char*,num_params> paramstr={"minimum_fee"/*,"lifestyle_minimum_level"*/};
+			constexpr static array<const char*,num_params> paramstr={"minimum_fee"/*,"floating_point_pos"*/};
 		};
 
 		struct local_delta: blockchain::policies_local_delta<double, policies_traits> {
@@ -224,6 +225,7 @@ namespace cash {
 			}
 			void temp_load() {
 				(*this)[minimum_fee]=1;
+				//(*this)[floating_point_pos]=8;
 			}
 		};
 		void dump_policies(ostream& os) const;

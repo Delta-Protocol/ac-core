@@ -1,0 +1,46 @@
+#!/bin/bash
+
+function clean {
+	rm -r libs
+	rm -r classes
+	rm *.jar
+}
+
+function getdeps {
+if [ ! -d libs ]; then
+mkdir libs
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/core/1.58.0.0/core-1.58.0.0.jar -O libs/core-1.58.0.0.jar
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/prov/1.58.0.0/prov-1.58.0.0.jar -O libs/prov-1.58.0.0.jar
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pkix/1.54.0.0/pkix-1.54.0.0.jar -O libs/pkix-1.54.0.0.jar
+wget http://search.maven.org/remotecontent?filepath=com/madgag/spongycastle/pg/1.54.0.0/pg-1.54.0.0.jar -O libs/pg-1.54.0.0.jar
+fi
+
+}
+
+
+function all {
+	getdeps
+	mkdir -p classes
+	javac -d classes -cp "libs/core-1.58.0.0.jar:classes" src/*.java
+	rm -f us-wallet-sdk.jar
+	cd classes
+	jar cf ../us-wallet-sdk.jar *
+	cd ..
+}
+
+
+
+cmd=$1
+
+if [ "_$cmd" == "_" ]; then
+	cmd="all"
+fi
+
+if [ "_$cmd" == "_all" ]; then
+	all
+fi
+if [ "_$cmd" == "_clean" ]; then
+	clean
+fi
+
+

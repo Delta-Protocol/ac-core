@@ -151,7 +151,7 @@ namespace blockchain {
 			const D* x=0;
 			unsigned long z=0;
 			for (auto& i:m) {
-				if (i.second>z) {	
+				if (i.second>z) {
 					z=i.second;
 					x=&i.first;
 				}
@@ -162,6 +162,8 @@ namespace blockchain {
 		}
 		unordered_map<D,unsigned long> m;
 	};
+
+
 
 
 	template<typename D, typename T, typename M>

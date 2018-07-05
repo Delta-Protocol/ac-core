@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.usgov;
+package us.wallet;
 
 //import org.slf4j.*;
 

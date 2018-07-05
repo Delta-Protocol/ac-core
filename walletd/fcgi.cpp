@@ -1,3 +1,4 @@
+#ifdef FCGI
 #include "fcgi.h"
 
 using namespace us::wallet::w3api;
@@ -236,4 +237,6 @@ out << uri << endl;
     return true;
 }
 
+
+#endif
 

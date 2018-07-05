@@ -41,4 +41,5 @@ ln -s ../../../../android/main
 
 cd ../..
 
+echo "ready"
 
