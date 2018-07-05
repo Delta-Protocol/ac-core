@@ -135,7 +135,7 @@ c::accounts_query_t c::query_accounts(const cash::app::query_accounts_t& address
 	}
 	return move(ret);
 }
-
+/*
 c::compartiments_query_t c::query_compartiments(const nova::app::query_compartiments_t& addresses) const {
 	compartiments_query_t ret;
 	socket::datagram* d=addresses.get_datagram();
@@ -199,7 +199,7 @@ cout << "raw ans: " << r << endl;
 //	}
 	return move(ret);
 }
-
+*/
 void c::refresh() {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
@@ -250,11 +250,12 @@ void c::accounts_query_t::dump(ostream& os) const {
 	b::dump(os);
 	os << "parent block: " << parent_block << endl;
 }
+/*
 void c::compartiments_query_t::dump(ostream& os) const {
 	b::dump(os);
 	os << "parent block: " << parent_block << endl;
 }
-
+*/
 
 
 c::input_account_t::input_account_t(const hash_t& address,const b& acc, const cash_t& withdraw_amount):b(acc),address(address),withdraw_amount(withdraw_amount) {
@@ -284,9 +285,9 @@ void c::input_accounts_t::dump(ostream& os) const {
 }
 
 #include <us/gov/cash/locking_programs/p2pkh.h>
-#include <us/gov/nova/locking_programs/single_signature.h>
+//#include <us/gov/nova/locking_programs/single_signature.h>
 
-
+/*
 void c::send(const nova::evidence_load& t) const {
 	socket::peer_t cli;
 	if (!cli.connect(backend_host,backend_port,true)) {
@@ -304,7 +305,7 @@ void c::send(const nova::evidence_track& t) const {
 	}
 	cli.send(t.get_datagram());
 }
-
+*/
 void c::send(const cash::tx& t) const {
 	auto fee=t.check();
 	if (fee<=0) {
@@ -318,7 +319,7 @@ void c::send(const cash::tx& t) const {
 	}
 	cli.send(t.get_datagram());
 }
-
+/*
 string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const nova::hash_t& compartiment, const nova::hash_t& locking_program) {
 	if (likely(locking_program<nova::min_locking_program)) {
 		if (unlikely(locking_program==0)) {
@@ -333,7 +334,7 @@ cout << "-------" << endl;
 	}
 	return "";
 }
-
+*/
 string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
 	if (likely(locking_program<cash::min_locking_program)) {
 		if (unlikely(locking_program==0)) {
@@ -471,7 +472,7 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 	is >> i.sendover;
 	return move(i);
 }
-
+/*
 pair<string,nova::evidence_load> c::nova_move(const nova_move_input& i) {
 //cout << "nova move" << endl;
 
@@ -610,7 +611,7 @@ c::nova_track_input c::nova_track_input::from_stream(istream& is) {
 	is >> i.sendover;
 	return move(i);
 }
-
+*/
 
 
 

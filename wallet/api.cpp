@@ -104,7 +104,7 @@ void rpc_api::list_devices(ostream&os) {
 	ask(us::wallet::protocol::list_devices_query,os);
 }
 
-
+/*
 void rpc_api::nova_move(const nova_move_input& i, ostream& os) {
 	ostringstream si;
 	i.to_stream(si);
@@ -127,7 +127,7 @@ void rpc_api::nova_query(const string& item, ostream& os) {
 void rpc_api::nova_mempool(ostream& os) {
 	ask(us::wallet::protocol::nova_mempool,"",os);
 }
-
+*/
 
 
 //----------------local api
@@ -214,7 +214,7 @@ void local_api::unpair(const pub_t& pk, ostream&os) {
 void local_api::list_devices(ostream&os) {
     devices.dump(os);    
 }
-
+/*
 void local_api::nova_move(const api::nova_move_input& i, ostream& os) {
     auto tx=wallet::nova_move(i);
     if (tx.first.empty())
@@ -243,4 +243,4 @@ void local_api::nova_mempool(ostream& os) {
     os << wallet::nova_mempool() << endl;
 }
 
-
+*/

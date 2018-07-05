@@ -105,6 +105,7 @@ void help(const params& p, ostream& os=cout) {
     os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
     os << " list_devices           Show currently paired devices." << endl;
     os << endl;
+/*
     os << "NOVA application:" << endl;
 	os << " nova new compartiment" << endl;
     os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
@@ -113,6 +114,7 @@ void help(const params& p, ostream& os=cout) {
     os << " nova decode_move <txb58>" << endl;
     os << " nova decode_track <txb58>" << endl;
     os << " nova query <compartiment id>" << endl;
+*/
 
 }
 
@@ -293,7 +295,7 @@ string sim_sensors() {
     os << "Latitude: " << rnd_reading(0,90) << " °" << endl;
     return os.str();
 }
-
+/*
 void nova_app(api& wapi, args_t& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="move") {
@@ -363,7 +365,7 @@ void nova_app(api& wapi, args_t& args, const params& p, ostream& os) {
 		help(p);
 	}
 }
-
+*/
 
 void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 	string command=args.next<string>();
@@ -474,9 +476,11 @@ int main(int argc, char** argv) {
 	if (command=="tx") {
     	tx(wapi,args,p,os);
 	}
+/*
 	if (command=="nova") {
     	nova_app(wapi,args,p,os);
 	}
+*/
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
 		wapi.priv_key(privkey,os);
