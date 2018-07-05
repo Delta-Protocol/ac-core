@@ -138,6 +138,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
+/*
 		case us::wallet::protocol::nova_move: {
 			istringstream is(d->parse_string());
 			wallet::nova_move_input i=wallet::nova_move_input::from_stream(is);
@@ -178,7 +179,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
         }
         break;
-
+*/
 		default: break;
 	}
 	return false;

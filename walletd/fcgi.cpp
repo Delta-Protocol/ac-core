@@ -49,13 +49,14 @@ void c::help(ostream& os) const {
 		os << "<pre>" << endl;
 		os << "US-Wallet functions" << endl;
 		os << endl;
+/*
 		os << url << "/?<b>app=nova&cmd=new_compartiment</b>" << endl;
 		os << url << "/?<b>app=nova&cmd=move&compartiment=&lt;compartiment&gt;&item=&lt;item&gt;&action=&lt;load/unload&gt;&send=&lt;1|0&gt; </b>" << endl;
 		os << url << "/?<b>app=nova&cmd=track&compartiment=&lt;compartiment&gt;&sensors=&lt;sensors_b58&gt;&send=&lt;1|0&gt; </b>" << endl;
 		os << url << "/?<b>app=nova&cmd=query&compartiment=&lt;compartiment&gt;</b>" << endl;
 		os << url << "/?<b>app=nova&cmd=query&item=&lt;item&gt;</b>" << endl;
 		os << url << "/?<b>app=nova&cmd=mempool</b>" << endl;
-
+*/
 		os << endl;
 		os << "</pre>" << endl;
 }
@@ -63,12 +64,13 @@ void c::help(ostream& os) const {
 #include "json.h"
 
 Json::Value to_json(const string& r,const string& cmd) {
+/*
     if (cmd=="new_compartiment") return json::convert_response_new_compartiment(r);
     if (cmd=="move") return json::convert_response_move(r);
     if (cmd=="track") return json::convert_response_track(r);
     if (cmd=="query") return json::convert_response_query(r);
     if (cmd=="mempool") return json::convert_response_mempool(r);
-
+*/
     Json::Value err;
     err["error"]="unknown command";
     return err;
@@ -152,6 +154,7 @@ out << uri << endl;
 //	is >> command;
     istringstream is("");
     string cmd;
+/*
 	if (app=="nova") {
 	++n;
 	if (n==m.end()) {help(out); return true;}
@@ -217,7 +220,7 @@ out << uri << endl;
 
 
     }
-
+*/
     string r=os.str();
     bool json=true;
 	if (!r.empty()) {
