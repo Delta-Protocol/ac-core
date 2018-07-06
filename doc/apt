@@ -1,0 +1,3 @@
+#Required packages for building binaries
+Debian: apt install libc-dev make g++ spawn-fcgi nginx libcrypto++-dev automake libtool psmisc pipexec libjsoncpp-dev libunwind-dev libtool automake
+
