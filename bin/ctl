@@ -1,7 +1,9 @@
 #!/bin/sh
 
-service us-gov restart
-service us-wallet restart
-service nginx restart
+cmd=$1
+
+service us-gov $cmd
+service us-wallet $cmd
+service nginx $cmd
 
 
