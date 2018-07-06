@@ -8,7 +8,7 @@ CXXFLAGS = -O0 -g -std=c++17
 all: unit_tests
 
 unit_tests: ${HS} ${CPPS}
-	g++ ${CXXFLAGS} -I${INC} -pthread -lusgov -L../gov ${CPPS} -o unit_tests
+	g++ ${CXXFLAGS} -I${INC} ${CPPS} -lsecp256k1 -lcrypto++ -lusgov -L/usr/lib -L../gov -o unit_tests
 
 clean:
 	rm -f unit_tests

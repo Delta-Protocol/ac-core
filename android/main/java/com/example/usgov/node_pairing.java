@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
+import android.util.Log;
 import java.io.IOException;
 
 public class node_pairing extends AppCompatActivity {
@@ -25,13 +25,13 @@ public class node_pairing extends AppCompatActivity {
                 try {
                     a.w.set_walletd_host(node_addr);
                     if (balance == "?") {
-                        Toast.makeText(getApplicationContext(), "Nice try, but wrong", 6000).show();
+                        Toast.makeText(getApplicationContext(), "Nice try, but wrong", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(node_pairing.this, "walletd is alive at " + a.w.walletd_host(), 30000).show();
+                        Toast.makeText(node_pairing.this, "walletd is alive at " + a.w.walletd_host(), Toast.LENGTH_LONG).show();
                     }
                 }
                 catch (IOException e) {
-                    Toast.makeText(getApplicationContext(), "Unexpected error", 6000).show();
+                    Toast.makeText(getApplicationContext(), "Unexpected error", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -59,11 +59,13 @@ public class node_pairing extends AppCompatActivity {
 */
 
         addr = (EditText) findViewById(R.id.walletd_address);
+
         pair = (Button) findViewById(R.id.pair);
 
         test = (Button) findViewById(R.id.test);
 
-        addr.setText(((app)getApplication()).w.walletd_host());
+
+        addr.setText(((app) getApplication()).w.walletd_host());
 
 
         test.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +84,7 @@ public class node_pairing extends AppCompatActivity {
                     test_result(b,address);
                 }
                 catch (IOException e) {
+                    Log.e("Wallet", e.toString());
                     test_result("?",address);
                 }
             }
@@ -137,7 +140,7 @@ public class node_pairing extends AppCompatActivity {
            finish();
        }
        catch (IOException e) {
-           Toast.makeText(getApplicationContext(), "Nice try, but wrong", 6000).show();
+           Toast.makeText(getApplicationContext(), "Nice try, but wrong", Toast.LENGTH_LONG).show();
        }
 
                                            /*

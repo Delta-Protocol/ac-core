@@ -1,5 +1,5 @@
 #https://gist.github.com/xuhdev/1873316
-OBJS :=  crypto/crypto.o net/net.o socket/socket.o peer/peer.o dfs/dfs.o blockchain/blockchain.o auth/auth.o cash/cash.o loan/loan.o nova/nova.o
+OBJS :=  crypto/crypto.o net/net.o socket/socket.o peer/peer.o dfs/dfs.o blockchain/blockchain.o auth/auth.o cash/cash.o loan/loan.o
 CXXFLAGS := -fPIC ${CXXFLAGS}
 
 .PHONY: all
@@ -11,9 +11,8 @@ signal_handler.o: signal_handler.cpp signal_handler.h
 cfg.o: cfg.cpp cfg.h
 	g++ ${CXXFLAGS} -I../.. -c cfg.cpp
 
-
 libusgov.so: deps signal_handler.o cfg.o
-	g++ -shared -O0 -g -std=c++17 -pthread -lsecp256k1 -I../.. ${OBJS} signal_handler.o cfg.o -o libusgov.so
+	g++ -shared -O0 -g -std=c++17 -pthread ${OBJS} signal_handler.o cfg.o -lcrypto++ -lsecp256k1 -L/usr/lib -I../.. -o libusgov.so
 
 deps:
 	@for a in $$(ls); do \

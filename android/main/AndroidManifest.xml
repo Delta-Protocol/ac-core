@@ -52,5 +52,4 @@
             android:label="@string/title_activity_node_pairing"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
-
 </manifest>

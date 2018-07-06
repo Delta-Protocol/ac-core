@@ -321,8 +321,10 @@ struct tests:vector<pair<TestDatagram,datagram>>, test_server {
 	
 	//---run server thread---
 	tests():test_server(1060) {
-		//thread t(&server::run, &s);//----------------------> 	error
-		//this_thread::sleep_for(100ms);
+
+	//	thread t(&server::run, &s);//----------------------> 	error
+	//	this_thread::sleep_for(100ms);
+
 	}
 
 	~tests() {

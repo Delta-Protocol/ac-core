@@ -15,13 +15,16 @@ using namespace us::wallet;
 
 using namespace std;
 
-
+#ifdef FCGI
 Fastcgipp::Manager<w3api::fcgi_t>* fcgi{0};
+#endif
 
 void sig_handler(int s) {
     cout << "main: Caught signal " << s << endl;
     signal_handler::_this.finish();
+#ifdef FCGI
     if (fcgi) fcgi->terminate();
+#endif
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
 }
@@ -42,8 +45,10 @@ struct params {
         os << "walletd: " << walletd_host << ":" << walletd_port << endl;
     }
 	bool daemon{false};
+#ifdef FCGI
     bool fcgi{false};
     bool json{false};
+#endif
     string homedir;
     bool offline{false};
 	string backend_host{"localhost"}; uint16_t backend_port{16672};
@@ -59,9 +64,11 @@ void help(const params& p, ostream& os=cout) {
     os << "options are:" << endl;
 	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
 	os << " -d        Run wallet daemon on port " << p.walletd_port << endl;
-	os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
 	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
+#ifdef FCGI
+	os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
 	os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
+#endif
     if (p.offline) {
 	    os << " backend connector:" << endl;
 	    os << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
@@ -98,6 +105,7 @@ void help(const params& p, ostream& os=cout) {
     os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
     os << " list_devices           Show currently paired devices." << endl;
     os << endl;
+/*
     os << "NOVA application:" << endl;
 	os << " nova new compartiment" << endl;
     os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
@@ -106,6 +114,7 @@ void help(const params& p, ostream& os=cout) {
     os << " nova decode_move <txb58>" << endl;
     os << " nova decode_track <txb58>" << endl;
     os << " nova query <compartiment id>" << endl;
+*/
 
 }
 
@@ -128,7 +137,7 @@ void error_log(const char* msg) {
 
 
 
-
+#ifdef FCGI
 void run_fcgi(const params& p) {
    //engine::init(); 
 //   e=new engine("/var/cex",wcerr);
@@ -153,7 +162,7 @@ void run_fcgi(const params& p) {
 //   delete e;
 
 }
-
+#endif
 
 void run_daemon(const params& p) {
 	signal(SIGINT,sig_handler);
@@ -162,6 +171,7 @@ void run_daemon(const params& p) {
 
 	wallet_daemon d(p.walletd_port, p.homedir, p.backend_host, p.backend_port);
 
+#ifdef FCGI
     if (p.fcgi) {
         thread* wt=0;
         w3api::fcgi_t::api=&d;
@@ -174,7 +184,9 @@ void run_daemon(const params& p) {
     else {
         d.run();
     }
-
+#else
+    d.run();
+#endif
 
 
 //	d.run();
@@ -208,12 +220,14 @@ string parse_options(args_t& args, params& p) {
         else if (cmd=="-d") {
         	p.daemon=true;
         }
+#ifdef FCGI
         else if (cmd=="-fcgi") {
         	p.fcgi=true;
         }
         else if (cmd=="-json") {
         	p.json=true;
         }
+#endif
         else {
             break;
         }
@@ -281,7 +295,7 @@ string sim_sensors() {
     os << "Latitude: " << rnd_reading(0,90) << " °" << endl;
     return os.str();
 }
-
+/*
 void nova_app(api& wapi, args_t& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="move") {
@@ -351,7 +365,7 @@ void nova_app(api& wapi, args_t& args, const params& p, ostream& os) {
 		help(p);
 	}
 }
-
+*/
 
 void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 	string command=args.next<string>();
@@ -404,8 +418,9 @@ void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 }
 
 #include <us/wallet/api.h>
-#include <jsoncpp/json/json.h> 
 
+#ifdef FCGI
+#include <jsoncpp/json/json.h> 
 Json::Value to_json(const string& s) {
     istringstream is(s);
     Json::Value val;
@@ -417,6 +432,7 @@ Json::Value to_json(const string& s) {
     }
     return val;    
 }
+#endif
 
 int main(int argc, char** argv) {
 
@@ -424,11 +440,12 @@ int main(int argc, char** argv) {
 	params p;
 	string command=parse_options(args,p);
 
+#ifdef FCGI
     if (!p.daemon && p.fcgi) {
         cerr << "-fcgi requires -d" << endl;
         return 1;
     }
-
+#endif
 
 
     if (p.daemon) {
@@ -459,9 +476,11 @@ int main(int argc, char** argv) {
 	if (command=="tx") {
     	tx(wapi,args,p,os);
 	}
+/*
 	if (command=="nova") {
     	nova_app(wapi,args,p,os);
 	}
+*/
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
 		wapi.priv_key(privkey,os);
@@ -508,11 +527,15 @@ int main(int argc, char** argv) {
 	}
 //cout << "deleting" << endl;
 	delete papi;
-    
+
+#ifdef FCGI    
     if (p.json)
     cout << to_json(os.str()) << endl;
     else
     cout << os.str() << endl;
+#else
+    cout << os.str() << endl;
+#endif
 
 	return 0;
 }

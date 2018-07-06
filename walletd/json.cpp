@@ -1,10 +1,11 @@
+#ifdef FCGI
 #include "json.h"
 #include <sstream>
 
 using namespace std;
 using namespace us::wallet::w3api;
 typedef us::wallet::w3api::json c;
- 
+/* 
 Json::Value c::convert_response_new_compartiment(const string& s) {
     istringstream is(s);
     string p;
@@ -15,7 +16,6 @@ Json::Value c::convert_response_new_compartiment(const string& s) {
 }
 
 #include <us/gov/crypto/base58.h>
-
 Json::Value c::convert_response_move(const string& s) {
     string b58;
     {
@@ -77,9 +77,9 @@ Json::Value c::convert_response_track(const string& s) {
     val["parent_block"]=parent_block;
     return val;
 }
-
-#include <us/gov/nova/app.h>
-
+*/
+//#include <us/gov/nova/app.h>
+/*
 Json::Value c::convert_response_query(const string& s) {
     Json::Value val;
 	istringstream is(s);
@@ -118,8 +118,8 @@ Json::Value c::convert_response_query(const string& s) {
 //    is >> parent_block;
     return val;
 }
-
-
+*/
+/*
 Json::Value c::convert_response_mempool(const string& s) {
     Json::Value val;
     val["raw"]=s;
@@ -160,4 +160,6 @@ Json::Value c::convert_response_mempool(const string& s) {
 //    is >> parent_block;
     return val;
 }
+*/
+#endif
 
