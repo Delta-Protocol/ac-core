@@ -63,7 +63,7 @@ public class Wallet {
 
 
 
-    FileOutputStream getOutputStream(String filename) throws IOException {
+    public FileOutputStream getOutputStream(String filename) throws IOException {
 	//override. i.e. in Android: return ctx.openFileOutput(filename, Context.MODE_PRIVATE);
 	return new FileOutputStream(filename);
     }
@@ -106,12 +106,14 @@ public class Wallet {
         }
         catch(Exception e){
            // Log.e("Wallet",e.getMessage());
+            throw new IOException("Cannotmake priv key");
         }
         if(priv==null){
+            throw new IOException("priv key is null");
             //Log.d("Wallet", "Private key was not successfully retrieved");
         }
         pub = EllipticCryptography.getInstance().publicPointFromPrivate(priv);
-    }  
+    }
 
     //must be in sync with the c++ master file wallet/protocol.h
     public static final short wallet_base = 0;

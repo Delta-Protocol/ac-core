@@ -25,9 +25,9 @@ public class SymmetricEncryption {
         iv = new byte[iv_size];
         key = EllipticCryptography.getInstance().generateSharedKey(privA,pubB);
     }
-  
+
     public byte[] encrypt(byte[] plaintext) throws Exception {
-        
+
         random.nextBytes(iv);
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
         return Arrays.concatenate(cipher.doFinal(plaintext), iv);

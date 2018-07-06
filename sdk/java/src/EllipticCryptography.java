@@ -21,9 +21,9 @@ import org.spongycastle.util.test.FixedSecureRandom;
 public class EllipticCryptography {
 
     private static EllipticCryptography instance = null;
-    private SecureRandom secureRandom;
-    private X9ECParameters curve_params;
-    private ECDomainParameters curve;
+    private SecureRandom secureRandom=null;
+    private X9ECParameters curve_params=null;
+    private ECDomainParameters curve=null;
 
 
     private EllipticCryptography() {
@@ -32,6 +32,7 @@ public class EllipticCryptography {
         curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
         secureRandom = new SecureRandom();
     }
+
     public static EllipticCryptography getInstance() {
         if(instance == null) {
            instance = new EllipticCryptography();
@@ -67,6 +68,6 @@ public class EllipticCryptography {
         if (privKey.bitLength() > curve.getN().bitLength()) {
             privKey = privKey.mod(curve.getN());
         }
-        return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
+        return new FixedPointCombMultiplier().multiply(curve_params.getG(), privKey);
     }
 }
