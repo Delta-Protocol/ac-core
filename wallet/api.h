@@ -49,9 +49,6 @@ struct api {
 };
 
 
-
-};
-
 struct rpc_api:api {
 	rpc_api(const string& walletd_host, uint16_t walletd_port);
 	virtual ~rpc_api();

@@ -23,9 +23,15 @@ sleep 1
 pid=`ps ax | grep govd | grep -v grep | awk '{print $1}'`
 echo "pid=$pid"
 
+#---govd---
+#LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -p 46000 2>&1 >/dev/null &
+#sleep 1
+#pid=`ps ax | grep govd | grep -v grep | awk '{print $1}'`
+#echo "pid1=$pid1"
 
 
-#---walletd---                                  wallet port  backend port
+
+#---walletd---                                             wallet port  backend port
 LD_LIBRARY_PATH=wallet:gov walletd/us-walletd -home $home -d -wp 46001 -bp 46000 2>&1 >/dev/null &
 sleep 1
 pid2=`ps ax | grep walletd | grep -v grep | awk '{print $1}'`
@@ -49,7 +55,7 @@ echo "FAIL"
 LD_LIBRARY_PATH=gov gdb -batch -ex "run" -ex "bt" test/unit_tests 2>&1 #| tail -n-3 | cut -d " " -f 4- | tac | nl -n ln | tac | sed "s/^/#/"
 
 if [[ ${home:0:4} = "/tmp" ]] 
-then
+thenki
 rm -r $home
 fi
 

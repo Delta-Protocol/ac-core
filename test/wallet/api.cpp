@@ -79,15 +79,9 @@ struct test_client: client {
 
 void test(string ip , int port , string address ,int amoundSend, int fees , string privKey , bool timer ,int sec,  bool addToWallet){
 
-
 string tx_receipt="";
 	
-	
 	test_api ts( ip , port );
-
-
-
-
 
 try{
 	//------add_address--to-wallet---------------|
@@ -176,7 +170,9 @@ try{
 
 
 try{	
-	
+
+	ts.gen_keys();
+
 	//------api::priv_key------|
 	ostringstream privOut;
 	api::priv_key(privKey , privOut);
@@ -206,7 +202,7 @@ try{
 
 cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
 
-	//ts.gen_keys();
+
 	//ts.dump(cout);
 	//ts.list_devices(cout);
 
@@ -222,20 +218,19 @@ void testing_wallet_api()
 
       for (int i=1; i<=25; i++ ) 
       {
-	cout << " |-------* " << +i <<" *------------------------------>> Test <<------------------------------------------------|  \n" << endl;
-	//     [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
+	cout << " |-------* " << +i <<" *------------------------------>> Test <<-------------------------------------|  \n" << endl;
+	
+//	       [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
 //	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true    , 120 ,	false	);
 //	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false   , 120 ,	false	);
 //	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false   , 120 ,	false	);
 //	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false   , 120 ,	false	);
 
-	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  100000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , true	);
-	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  200000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , false	);
-	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  300000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , true	);
-	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  400000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , false	);
-	
+	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  100000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 12 , true	);
+	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  200000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 12 , false	);
+	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  300000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 12 , true	);
+	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  400000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 12 , false	);
       }
-
 }
 
 
