@@ -14,7 +14,7 @@ cd android_studio
 
 tar -xzf ../android/androidstudio_basic_activity.tgz
 
-cd usgov
+cd us-cash
 ln -s ../../android/getdeps
 #./getdeps
 rm build.gradle
@@ -39,7 +39,7 @@ echo "dependencies { implementation group: 'pl.droidsonroids.gif', name: 'androi
 
 
 cd src/
-rm main -r
+rm main -rf
 ln -s ../../../../android/main
 
 cd ../..

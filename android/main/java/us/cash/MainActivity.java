@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.cash;
 
 import us.wallet.*;
 

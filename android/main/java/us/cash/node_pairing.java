@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.cash;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
