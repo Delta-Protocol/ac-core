@@ -77,7 +77,7 @@ struct test_client: client {
 
 
 
-void test(string ip , int port , string address ,int amoundSend, int fees , string privKey , bool timer , bool addToWallet){
+void test(string ip , int port , string address ,int amoundSend, int fees , string privKey , bool timer ,int sec,  bool addToWallet){
 
 
 string tx_receipt="";
@@ -85,10 +85,7 @@ string tx_receipt="";
 	
 	test_api ts( ip , port );
 
-//ts.gen_keys();
-//api::priv_key(privKey , cout);
-//ts.dump(cout);
-//ts.list_devices(cout);
+
 
 
 
@@ -120,10 +117,10 @@ try{
 	
 	ostringstream osTX;
 
-	i.rcpt_addr = address; //--address
-	i.amount = amoundSend; //--amoundSend
-	i.fee = fees;          //--fees
-//	i.sigcode_inputs = 0;
+	i.rcpt_addr = address; 	//--address
+	i.amount = amoundSend; 	//--amoundSend
+	i.fee = fees;          	//--fees
+//	i.sigcode_inputs  = 1;
 //	i.sigcode_outputs = 1;
 //	i.sendover = 1;	
 	ts.tx_make_p2pkh(i,osTX);
@@ -135,7 +132,7 @@ try{
 
 
 if (timer != false ){
-	sleep(125);
+	sleep(sec);
 }
 
 
@@ -172,17 +169,25 @@ try{
 	   	index = (addr.find(" ", index)) + 1; }
 	string theAddr= addr.substr(index);
 	string onlyAddr = theAddr.substr(0, theAddr.find(" "));
-	if(onlyAddr.length()==30||onlyAddr.length()==29){  }else{ assert(false);} //"address length is OK \n"
+	//if(onlyAddr.length()==30||onlyAddr.length()==29){  } else{ assert(false);} //"address length is OK \n"
 } catch (const std::exception& e){assert(false);}
 
 
 
 
-try{	//------tx_decode----------|
+try{	
+	
+	//------api::priv_key------|
+	ostringstream privOut;
+	api::priv_key(privKey , privOut);
+	string pubk = privOut.str();
+	//cout << pubk << endl;
+
+	//------tx_decode----------|
 	ostringstream osDecode;
 	ts.tx_decode( tx_receipt , osDecode);
 	string txdecode = osDecode.str();
-	cout << ".....:::::tx_decote::::::.....\n" << "\n"<<  txdecode << endl;
+	//cout << ".....:::::tx_decote::::::.....\n" << "\n"<<  txdecode << endl;
 
 	//-----tx-check-------------|
 	ostringstream osCheck;
@@ -199,9 +204,12 @@ try{	//------tx_decode----------|
 
 
 
-
-
 cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
+
+	//ts.gen_keys();
+	//ts.dump(cout);
+	//ts.list_devices(cout);
+
 }
 
 
@@ -212,42 +220,24 @@ cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
 void testing_wallet_api()
 {
 
-      for (int i=1; i<=2; i++ ) 
+      for (int i=1; i<=25; i++ ) 
       {
-	cout << " \n-------------------------------------Test------------------------------------------------\n" << endl;
-	//     [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			    [timer]  [addToWallet]
-	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , false  ,	false	);
-	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false  ,	false	);
-	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false  ,	false	);
-	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false  ,	false	);
+	cout << " |-------* " << +i <<" *------------------------------>> Test <<------------------------------------------------|  \n" << endl;
+	//     [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
+//	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true    , 120 ,	false	);
+//	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false   , 120 ,	false	);
+//	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false   , 120 ,	false	);
+//	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false   , 120 ,	false	);
+
+	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  100000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , true	);
+	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  200000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , false	);
+	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  300000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , true	);
+	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  400000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , false	);
+	
       }
 
 }
 
-
-
-
-   
-
-
-
-
-
-
-
-
-
-/*
-
-
-			 [private key ]					[Public Key]
-
-	DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m  		9koUJsXUmpJwWb5uzUm3VNwPz6c              
-	5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876		3nuMp9bm19CGag9a5SvJ3A2n8jTi
-	8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc		3U8AUYbfGWkUncvPSNwR9o3Z8BBs
-	Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72		B2D7drjckG2Vdju2GQeYWSA4EEJ
-
-*/
 
 
 
