@@ -14,7 +14,7 @@ public class gifView extends View {
     long moviestart;
     public gifView(Context context) {
         super(context);
-        is = context.getResources().openRawResource(R.drawable.carlton);
+        is = context.getResources().openRawResource(R.raw.carlton);
         movie = Movie.decodeStream(is);
     }
     @Override

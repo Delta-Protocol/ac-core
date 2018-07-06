@@ -18,26 +18,28 @@ import java.security.SecureRandom;
 import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.util.test.FixedSecureRandom;
 
-public class EllipticCryptography{
+public class EllipticCryptography {
 
     private static EllipticCryptography instance = null;
-    private EllipticCryptography(){}
+    private SecureRandom secureRandom;
+    private X9ECParameters curve_params;
+    private ECDomainParameters curve;
+
+
+    private EllipticCryptography() {
+        curve_params=CustomNamedCurves.getByName("secp256k1");
+        FixedPointUtil.precompute(curve_params.getG(), 12);
+        curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
+        secureRandom = new SecureRandom();
+    }
     public static EllipticCryptography getInstance() {
         if(instance == null) {
            instance = new EllipticCryptography();
         }
         return instance;
     }
-    private static final SecureRandom secureRandom;
-    private static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
-    private static final ECDomainParameters curve;
-    static {
-        FixedPointUtil.precompute(curve_params.getG(), 12);
-        curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
-        secureRandom = new SecureRandom();
-    }
 
-    public BigInteger generatePrivateKey(){
+    public BigInteger generatePrivateKey() {
             AsymmetricCipherKeyPair keypair = generateKeyPair();
             ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
             return privParams.getD();
@@ -50,16 +52,14 @@ public class EllipticCryptography{
         return generator.generateKeyPair();
     }
 
-    public static byte[] generateSharedKey(SecretKey privKeyA, ECPoint pubKeyB)
-            throws Exception {
-        KeyAgreement aKA = KeyAgreement.getInstance("ECDH", "SC");
+    public static byte[] generateSharedKey(SecretKey privKeyA, ECPoint pubKeyB) throws Exception {
+                KeyAgreement aKA = KeyAgreement.getInstance("ECDH", "SC");
                 aKA.init(privKeyA);
                 aKA.doPhase((PublicKey)pubKeyB, true);
-
-            return aKA.generateSecret();
+                return aKA.generateSecret();
     }
 
-    public static ECPoint publicPointFromPrivate(BigInteger privKey) {
+    public ECPoint publicPointFromPrivate(BigInteger privKey) {
         /*
          * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group order,
          * but that could change in future versions.
