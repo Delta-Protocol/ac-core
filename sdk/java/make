@@ -3,6 +3,7 @@
 function clean {
 	rm -r libs
 	rm -r classes
+	rm -r test_classes
 	rm *.jar
 }
 
@@ -17,19 +18,31 @@ fi
 
 }
 
-function all {
+function source {
 	getdeps
 	mkdir -p classes
-	javac -d classes -cp "libs/core-1.58.0.0.jar:libs/pg-1.54.0.0.jar:libs/pkix-1.54.0.0.jar:libs/prov-1.58.0.0.jar:classes" src/*.java
+	javac -d classes -cp $libspath src/*.java
 	rm -f us-wallet-sdk.jar
 	cd classes
 	jar cf ../us-wallet-sdk.jar *
 	cd ..
 }
 
+function all {
+	source
+	mkdir -p test_classes
+	javac -d test_classes -cp $libspath":us-wallet-sdk.jar" tests/*.java
+	rm -f us-test-sdk.jar
+	cd test_classes
+	jar cf ../us-test-sdk.jar *
+	cd ..
+}
+
 
 
 cmd=$1
+libspath="libs/core-1.58.0.0.jar:libs/pg-1.54.0.0.jar:libs/pkix-1.54.0.0.jar:libs/prov-1.58.0.0.jar"
+
 
 if [ "_$cmd" == "_" ]; then
 	cmd="all"
@@ -38,6 +51,11 @@ fi
 if [ "_$cmd" == "_all" ]; then
 	all
 fi
+
+if [ "_$cmd" == "_source" ]; then
+	source
+fi
+
 if [ "_$cmd" == "_clean" ]; then
 	clean
 fi

@@ -1,18 +1,17 @@
-package us.wallet;
+package us.test;
+
+import us.wallet.*;
 import javax.crypto.SecretKey;
 
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;
 
 
-public class UnitTests{
+public class SymmetricEncryptionTests{
 
-    /*boolean test_elliptic_cryptography(){
-        
-    }*/
 
-    /*boolean test_symmetric_encryption(){
+    public boolean test_symmetric_encryption(){
         
-        EllipticCryptography ec = EllipticCryptography.getInstance();
+       /* EllipticCryptography ec = EllipticCryptography.getInstance();
         AsymmetricCipherKeyPair a = ec.generateKeyPair();
         AsymmetricCipherKeyPair b = ec.generateKeyPair();
         AsymmetricCipherKeyPair c = ec.generateKeyPair();
@@ -40,19 +39,20 @@ public class UnitTests{
         //decrypting invalid ciphertext should return an empty vector.
         assert(test_decrypt_nulls(""));
         assert(test_decrypt_nulls("this string hasn't been encrypted so decryption will fail"));
-
+        */
         return true;
     }
-
-    boolean test_encrypt_decrypt(string plaintext_string){
+/*
+    public boolean test_encrypt_decrypt(String plaintext_string){
         
         AsymmetricCipherKeyPair a = ec.generateKeyPair();
         AsymmetricCipherKeyPair b = ec.generateKeyPair();
         
+        
         return test_encrypt_decrypt_keys(plaintext_string,a.priv,a.pub,b.priv,b.pub);
     }
 
-    boolean test_encrypt_decrypt_keys(string plaintext_string, ECPoint pubA, SecretKey privA, ECPoint pubB, SecretKey privB){
+    public boolean test_encrypt_decrypt_keys(String plaintext_string, ECPoint pubA, SecretKey privA, ECPoint pubB, SecretKey privB){
 
         byte[] plaintext = plaintext_string.getBytes();
         
@@ -65,7 +65,7 @@ public class UnitTests{
         return plaintext==decodedtext;
     }
 
-    boolean test_encrypt_multiple(string plaintext_string){
+    public boolean test_encrypt_multiple(String plaintext_string){
         
         AsymmetricCipherKeyPair a = ec.generateKeyPair();
         AsymmetricCipherKeyPair b = ec.generateKeyPair();
@@ -79,7 +79,7 @@ public class UnitTests{
         return ciphertext_1!=ciphertext_2;
     }
 
-    boolean test_decrypt_nulls(string ciphertext_string){
+    public boolean test_decrypt_nulls(string ciphertext_string){
         
         AsymmetricCipherKeyPair a = ec.generateKeyPair();
         AsymmetricCipherKeyPair b = ec.generateKeyPair();
@@ -90,7 +90,7 @@ public class UnitTests{
         return decryptedtext.length>0;
     }
 
-    boolean test_decrypt_multiple(string plaintext_string){
+    public boolean test_decrypt_multiple(string plaintext_string){
 
         AsymmetricCipherKeyPair a = ec.generateKeyPair();
         AsymmetricCipherKeyPair b = ec.generateKeyPair();
@@ -106,7 +106,7 @@ public class UnitTests{
         
         return decryptedtext1==decryptedtext2;
         
-    }*/
-
+    }
+*/
     
 }
