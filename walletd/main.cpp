@@ -82,17 +82,18 @@ void help(const params& p, ostream& os=cout) {
     os << endl;
     os << "commands are:" << endl;
     os << endl;
-    os << "KEYS application:" << endl;
+    os << "KEYS:" << endl;
 	os << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
 	os << " address add <privkey>  Imports a given private key in the wallet" << endl;
 	os << " dump                   Lists the keys/addresses managed by wallet" << endl;
 	os << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
 	os << " priv_key <private key> Gives information about the given private key." << endl;
     os << endl;
-    os << "CASH application:" << endl;
+    os << "CASH:" << endl;
 	os << " balance [0|1]          Displays the spendable amount." << endl;
 //	os << " tx base                Reports the current parent block for new transactions" << endl;
 //	os << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
+	os << " transfer <dest account> <receive amount>      Orders a transfer to <dest account> for an amount. Fees are paid by the sender." << endl;
 	os << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
 	os << " tx decode <tx_b58>" << endl;
 	os << " tx check <tx_b58>" << endl;
@@ -100,10 +101,10 @@ void help(const params& p, ostream& os=cout) {
 	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
 	os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
     os << endl;
-    os << "PAIR application:" << endl;
-    os << " pair <pubkey> <name>   authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
-    os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
-    os << " list_devices           Show currently paired devices." << endl;
+    os << "DEVICE PAIRING:" << endl;
+    os << " pair <pubkey> <name>   Authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
+    os << " unpair <pubkey>        Revoke authorization to the specified device." << endl;
+    os << " list_devices           Prints the list of recognized devices." << endl;
     os << endl;
 /*
     os << "NOVA application:" << endl;
@@ -191,6 +192,7 @@ void run_daemon(const params& p) {
 
 //	d.run();
 }
+
 
 #include <us/wallet/protocol.h>
 
@@ -375,7 +377,17 @@ void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 	}
 	else
 */
-	if (command=="make_p2pkh") {
+	if (command=="transfer") {
+        wallet::tx_make_p2pkh_input i;
+        i.rcpt_addr=args.next<cash::hash_t>();
+        i.amount=args.next<cash::cash_t>();
+        i.fee=1;
+        i.sigcode_inputs=cash::tx::sigcode_all;
+        i.sigcode_outputs=cash::tx::sigcode_all;
+        i.sendover=true;
+        wapi.tx_make_p2pkh(i,os);
+	}
+	else if (command=="make_p2pkh") {
         wallet::tx_make_p2pkh_input i;
         i.rcpt_addr=args.next<cash::hash_t>();
         i.amount=args.next<cash::cash_t>();
@@ -430,7 +442,7 @@ Json::Value to_json(const string& s) {
         is >> f;
         if (!f.empty()) val[i++]=f;
     }
-    return val;    
+    return val;
 }
 #endif
 
@@ -472,6 +484,12 @@ int main(int argc, char** argv) {
 
 
     ostringstream os;
+
+	if (command=="transfer") { //shortcut to tx fn
+		command=="tx";
+		--args.n; //repeat command transfer
+	}
+
 
 	if (command=="tx") {
     	tx(wapi,args,p,os);

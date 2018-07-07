@@ -19,5 +19,6 @@ cd $dirname
 ln -s $dir/gov
 ln -s $dir/govd
 ln -s $dir/wallet
+ln -s $dir/walletd
 ln -s $dir/Makefile
 

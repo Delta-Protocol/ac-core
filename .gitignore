@@ -1,9 +1,9 @@
 *.o
 .vscode/
 gov/libusgov.so
-govd/us-govd
+govd/us-gov
 wallet/libuswallet.so
-walletd/us-walletd
+walletd/us-wallet
 .idea/*
 */**/.idea/*
 test/a.out

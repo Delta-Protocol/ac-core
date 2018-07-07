@@ -3,13 +3,13 @@
 home=`mktemp -d`
 echo "home dir is $home"
 
-#---govd---
-LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -genesis 127.0.0.1
+#---gov---
+LD_LIBRARY_PATH=gov govd/us-gov -d -home $home -genesis 127.0.0.1
 if [ $? -eq 0 ]; then
-    echo "govd-> PASS"
+    echo "gov-> PASS"
  
 else
-    echo "govd-> FAIL"
+    echo "gov-> FAIL"
 	exit 1;
 
 fi
@@ -17,23 +17,23 @@ fi
 ls $home
 
 
-LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -p 46000 2>&1 >/dev/null &
+LD_LIBRARY_PATH=gov govd/us-gov -d -home $home -p 46000 2>&1 >/dev/null &
 sleep 1
-pid=`ps ax | grep govd | grep -v grep | awk '{print $1}'`
+pid=`ps ax | grep gov | grep -v grep | awk '{print $1}'`
 echo "pid=$pid"
 
 
 
-#---walletd---                                  wallet port  backend port
-LD_LIBRARY_PATH=wallet:gov walletd/us-walletd -home $home -d -wp 46001 -bp 46000 2>&1 >/dev/null &
+#---wallet---                                              wallet port  backend port
+LD_LIBRARY_PATH=wallet:gov walletd/us-wallet -home $home -d -wp 46001 -bp 46000 2>&1 >/dev/null &
 sleep 1
-pid2=`ps ax | grep walletd | grep -v grep | awk '{print $1}'`
+pid2=`ps ax | grep wallet | grep -v grep | awk '{print $1}'`
 echo "pid2=$pid2"
 #exit 0
 
 
 #---Run-Test---
-#LD_LIBRARY_PATH=wallet:gov walletd/us-walletd -d -wp 46001 b
+#LD_LIBRARY_PATH=wallet:gov walletd/us-wallet -d -wp 46001 b
 #
 
 exit 0

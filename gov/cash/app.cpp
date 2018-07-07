@@ -387,7 +387,6 @@ cout << "CASH_QUERY" << endl;
 			a.balance=0;
 			a.to_stream(os);
 		}
-		
 	}
 	}
 
@@ -395,7 +394,7 @@ cout << "CASH_QUERY" << endl;
 
 cout << "CASH_RESPONSE " << os.str() << endl;
 
-	c->send(protocol::cash_response,os.str());	
+	c->send(protocol::cash_response,os.str());
 }
 /*
 bool c::process_work(peer_t *c, datagram*d) {
@@ -601,7 +600,6 @@ bool c::local_delta::accounts_t::withdraw(const hash_t& address, const cash_t& a
 
 		//locate the output;
 //	undo.add_step(i->first,i->second.spend_code,i->second.balance);
-	
 	i->second.balance-=amount;
 	if (unlikely(i->second.balance==0)) {
 		erase(i);

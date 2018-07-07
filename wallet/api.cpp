@@ -38,11 +38,11 @@ void rpc_api::ask(int service, const string& args, ostream&os) {
 	datagram* q=new datagram(service,args);
 	socket::datagram* response=socket::peer_t::send_recv(walletd_host, walletd_port, q);
 	if (response) {
-		os << response->parse_string() << endl;
+		os << response->parse_string();
 		delete response;
 	}
 	else {
-		os << "ERROR" << endl;
+		os << "ERROR ";
 	}
 }
 
@@ -140,17 +140,13 @@ local_api::~local_api() {
 }
 
 void local_api::balance(bool detailed, ostream&os) {
-cout << "LOCALAPI::BALANCE" << endl;
 	refresh();
-cout << "LOCALAPI::BALANCE A" << endl;
 	if (detailed) {
-		dump_balances(os);
+		extended_balance(os);
 	}
 	else {
-cout << "LOCALAPI::BALANCE A2" << endl;
-		os << wallet::balance() << endl;
+		os << wallet::balance();
 	}
-cout << "LOCALAPI::BALANCE B" << endl;
 }
 
 void local_api::dump(ostream&os) {
@@ -186,12 +182,12 @@ void local_api::tx_send(const string&txb58, ostream&os) {
 	wallet::send(cash::tx::from_b58(txb58));
 	os << "sent" << endl;
 }
-   
+
 void local_api::tx_decode(const string&txb58, ostream&os) {
 	cash::tx t=cash::tx::from_b58(txb58);
 	t.write_pretty(os);
 }
-     
+
 void local_api::tx_check(const string&txb58, ostream&os) {
 	cash::tx t=cash::tx::from_b58(txb58);
 	auto fee=t.check();

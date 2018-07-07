@@ -106,6 +106,16 @@ void c::dump_balances(ostream& os) const {
 	os << "total balance: " << b << endl;
 }
 
+void c::extended_balance(ostream& os) const {
+	cash::cash_t b=0;
+	os << "[address] [locking_program] [balance]" << endl;
+	for (auto& i:data) {
+		b+=i.second.balance;
+		os << i.first << ' ' << i.second.locking_program << ' ' << i.second.balance << endl;
+	}
+	os << "total balance: " << b;
+}
+
 c::accounts_query_t c::query_accounts(const cash::app::query_accounts_t& addresses) const {
 	accounts_query_t ret;
 	socket::datagram* d=addresses.get_datagram();

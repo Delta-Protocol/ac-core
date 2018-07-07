@@ -1,4 +1,4 @@
 #!/bin/sh
 #LD_LIBRARY_PATH=gov gdb --args wallet/us-wallet daemon
-LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" walletd/us-walletd -fcgi
+LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" walletd/us-wallet -fcgi
 
