@@ -50,6 +50,7 @@ struct params {
     bool json{false};
 #endif
     bool advanced{false};
+    uint16_t listening_port{16673};
     string homedir;
     bool offline{false};
     string backend_host{"localhost"}; uint16_t backend_port{16672};
@@ -61,26 +62,27 @@ void help(const params& p, ostream& os=cout) {
     os << "us-wallet" << endl;
     os << "You can use this software under the terms of the General Public License (GPL)." << endl;
     os << endl;
-    os << "Usage: us-wallet [options] command" << endl;
+    os << "Usage: us-wallet [options] [command]" << endl;
     os << "options are:" << endl;
    if (!p.advanced) {
 	os << " -a                Advanced mode." << endl;
    }
    if (p.advanced) {
 	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
-	os << " -d        Run wallet daemon on port " << p.walletd_port << endl;
+	os << " -d        Run a new wallet-daemon listening on port " << p.listening_port << " (see -lp)" << endl;
+	os << " -lp       Listening Port." << endl;
 	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
 #ifdef FCGI
 	os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
 	os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
 #endif
     if (p.offline) {
-	    os << " backend connector:" << endl;
-	    os << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
-	    os << " -bp <port>  backend port. [" << p.backend_port << "]" << endl;
+	    os << " RPC to backend(us-gov) parameters:" << endl;
+	    os << " -bhost <address>  us-gov IP address. [" << p.backend_host << "]" << endl;
+	    os << " -bp <port>  TCP port. [" << p.backend_port << "]" << endl;
     }
     else {
-	    os << " walletd connector:" << endl;
+	    os << " RPC to wallet-daemon (us-wallet) parameters:" << endl;
 	    os << " -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
 	    os << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
     }
@@ -199,6 +201,9 @@ string parse_options(args_t& args, params& p) {
     	cmd=args.next<string>();
         if (cmd=="-wp") {
         	p.walletd_port=args.next<int>();
+        }
+        if (cmd=="-lp") {
+        	p.listening_port=args.next<uint16_t>();
         }
         else if (cmd=="-whost") {
         	p.walletd_host=args.next<string>();
