@@ -154,19 +154,16 @@ public class Wallet {
 	}
     }
     void setup_walletd_port() throws IOException  {
+        walletdPort=16673;
         String filename = "p";
         File file = new File(homeDir,filename);
         if(file.exists()) {
 		try {
-	        walletdPort=Integer.parseInt(getStringFromFile(file));
-			walletdPort=16673;
+		        walletdPort=Integer.parseInt(getStringFromFile(file));
 		}
 		catch(NumberFormatException E) {
 		}
         }
-	else {
-	        walletdPort=16673;
-	}
     }
 
     public void set_walletd_host(String addr) throws IOException {
@@ -189,7 +186,7 @@ public class Wallet {
         file.createNewFile();
         FileOutputStream outputStream;
         outputStream = getOutputStream(filename);
-        outputStream.write(port);
+        outputStream.write(Integer.toString(port).getBytes());
         outputStream.write('\n');
         outputStream.close();
 	try {

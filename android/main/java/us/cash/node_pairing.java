@@ -29,7 +29,7 @@ public class node_pairing extends AppCompatActivity {
                     if (balance == "?") {
                         Toast.makeText(getApplicationContext(), "Nice try, but wrong", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(node_pairing.this, "walletd is alive at " + a.w.walletd_host(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(node_pairing.this, "walletd is alive at " + a.w.walletd_host()+":"+a.w.walletd_port(), Toast.LENGTH_LONG).show();
                     }
                 }
                 catch (IOException e) {
