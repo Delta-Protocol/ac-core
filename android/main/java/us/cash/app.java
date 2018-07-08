@@ -32,7 +32,7 @@ public class app extends Application {
                     ml.on_wallet_init_success();
                 }
                 catch(IOException e) {
-                    Log.d("App","ERROR "+e.getStackTrace().toString());
+                    Log.d("App","ERROR "+e.getMessage());
                     w=null;
                     if (ml!=null) ml.on_wallet_init_error("Error: " + e.getMessage());
                 }

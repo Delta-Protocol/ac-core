@@ -37,7 +37,7 @@ install: release
 	ldconfig
 	systemctl daemon-reload
 
-install-api:
+install-nginx:
 	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
 	install etc/nginx/snippets/snakeoil.conf /etc/nginx/snippets/
 	install etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/

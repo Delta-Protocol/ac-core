@@ -59,6 +59,7 @@ public class Wallet {
         setup_keys();
         setup_addr();
         setup_walletd_host();
+        setup_walletd_port();
     }
 
 
@@ -132,8 +133,6 @@ public class Wallet {
 
     public static final short protocol_response = wallet_base+0;
 
-    
-
     void setup_addr() throws IOException  {
         String filename = "a";
         File file = new File(homeDir,filename);
@@ -146,10 +145,28 @@ public class Wallet {
     void setup_walletd_host() throws IOException  {
         String filename = "n";
         File file = new File(homeDir,filename);
-        if(!file.exists()) {
-            throw new IOException("Walletd-endpoint file (n) does not exist.");
+        if(file.exists()) {
+	        walletdAddress=getStringFromFile(file);
+//            throw new IOException("Walletd-endpoint file does not exist. "+homeDir+"/n");
         }
-        walletdAddress=getStringFromFile(file);
+	else {
+	        walletdAddress="127.0.0.1";
+	}
+    }
+    void setup_walletd_port() throws IOException  {
+        String filename = "p";
+        File file = new File(homeDir,filename);
+        if(file.exists()) {
+		try {
+	        walletdPort=Integer.parseInt(getStringFromFile(file));
+			walletdPort=16673;
+		}
+		catch(NumberFormatException E) {
+		}
+        }
+	else {
+	        walletdPort=16673;
+	}
     }
 
     public void set_walletd_host(String addr) throws IOException {
@@ -163,6 +180,25 @@ public class Wallet {
         outputStream.write('\n');
         outputStream.close();
         walletdAddress=getStringFromFile(file);
+    }
+
+    public boolean set_walletd_port(int port) throws IOException {
+        String filename = "p";
+        File file = new File(homeDir,filename);
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        FileOutputStream outputStream;
+        outputStream = getOutputStream(filename);
+        outputStream.write(port);
+        outputStream.write('\n');
+        outputStream.close();
+	try {
+        	walletdPort=Integer.parseInt(getStringFromFile(file));
+		return true;
+	}
+	catch(NumberFormatException e) {
+		return false;
+	}
     }
 
     public String getStringFromFile (File fl) {
@@ -191,13 +227,14 @@ public class Wallet {
     }
 
     private String walletdAddress="";
+    private int walletdPort=16673;
 
     public String walletd_host() {
         return walletdAddress;
     }
 
     public int walletd_port() {
-        return 16673;
+        return walletdPort;
     }
 
     public String pay(int amount, int fee, String rcpt_address) {
