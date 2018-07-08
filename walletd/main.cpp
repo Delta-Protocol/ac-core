@@ -5,6 +5,7 @@
 #include <thread>
 #include <us/gov/cash/locking_programs/p2pkh.h>
 #include <us/gov/cash/tx.h>
+#include <us/gov/cfg.h>
 #include <us/gov/signal_handler.h>
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
@@ -68,7 +69,9 @@ void help(const params& p, ostream& os=cout) {
 	os << " -a                Advanced mode." << endl;
    }
    if (p.advanced) {
+    if (p.offline) {
 	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
+    }
 	os << " -d        Run a new wallet-daemon listening on port " << p.listening_port << " (see -lp)" << endl;
 	os << " -lp       Listening Port." << endl;
 	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
@@ -168,7 +171,7 @@ void run_daemon(const params& p) {
 	signal(SIGTERM,sig_handler);
 	signal(SIGPIPE, SIG_IGN);
 
-	wallet_daemon d(p.walletd_port, p.homedir, p.backend_host, p.backend_port);
+	wallet_daemon d(p.listening_port, p.homedir, p.backend_host, p.backend_port);
 
 #ifdef FCGI
     if (p.fcgi) {
@@ -456,6 +459,11 @@ int main(int argc, char** argv) {
 	params p;
 	string command=parse_options(args,p);
 
+	if (!us::gov::filesystem::cfg::ensure_dir(p.homedir)) {
+		cerr << "could not create " << p.homedir << endl;
+		exit(1);
+	}
+
 #ifdef FCGI
     if (!p.daemon && p.fcgi) {
         cerr << "-fcgi requires -d" << endl;
@@ -534,7 +542,7 @@ int main(int argc, char** argv) {
 //cout << "deleting" << endl;
 	delete papi;
 
-#ifdef FCGI    
+#ifdef FCGI
     if (p.json)
     cout << to_json(os.str()) << endl;
     else

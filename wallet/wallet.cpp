@@ -26,7 +26,7 @@ string c::filename() const {
 
 bool c::load() {
 	auto file=filename();
-cout << "loading from " << file << endl;
+//cout << "loading from " << file << endl;
 	if (!file_exists(file)) return true;
 	ifstream f(file);
 	while(f.good()) {

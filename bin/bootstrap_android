@@ -2,8 +2,9 @@
 
 #tgt=$1
 
+
 if [ -d android_studio ]; then
-	echo "Android studio project already bootstrapped"
+	echo "error. directory exists ./android_studio"
 	exit 1
 fi
 
@@ -47,5 +48,5 @@ cd ../..
 ./getdeps
 cd ../..
 
-echo "ready"
+echo "directory android_studio is ready"
 
