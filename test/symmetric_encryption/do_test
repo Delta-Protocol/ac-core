@@ -1,12 +1,12 @@
 #!/bin/bash
 
-kegerate keypair 1
-kegerate keypair 1
 
-create a msg
+KEYS="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./generate_keys_cpp)"
+MESSAGE='blah blah'
+LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $KEYS "$MESSAGE"
 
-call c++ to encrypt
-call java to decrypt
-check
+#call c++ to encrypt
+#call java to decrypt
+#check
 
-and other way around
+#and other way around
