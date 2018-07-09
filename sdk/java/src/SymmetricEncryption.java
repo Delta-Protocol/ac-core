@@ -9,6 +9,8 @@ import org.spongycastle.util.Arrays;
 import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 public class SymmetricEncryption {
 
@@ -19,7 +21,7 @@ public class SymmetricEncryption {
     private byte[] iv = null;
     SecretKeySpec keySpec = null;
 
-    public SymmetricEncryption(SecretKey privA, ECPoint pubB) throws Exception {
+    public SymmetricEncryption(PrivateKey privA, PublicKey pubB) throws Exception {
         Security.insertProviderAt(new BouncyCastleProvider(), 1);
         cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
         iv = new byte[iv_size];

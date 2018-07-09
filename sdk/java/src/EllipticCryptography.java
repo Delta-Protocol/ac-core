@@ -11,8 +11,10 @@ import org.spongycastle.crypto.params.ECPrivateKeyParameters;
 import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.math.ec.FixedPointCombMultiplier;
 import org.spongycastle.math.ec.FixedPointUtil;
+import java.security.interfaces;
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import org.spongycastle.crypto.params.ECDomainParameters;
@@ -31,32 +33,44 @@ public class EllipticCryptography{
     private static final SecureRandom secureRandom;
     private static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
     private static final ECDomainParameters curve;
+    
     static {
         FixedPointUtil.precompute(curve_params.getG(), 12);
         curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
         secureRandom = new SecureRandom();
     }
 
-    public BigInteger generatePrivateKey(){
+    private BigInteger generatePrivateKey(){
             AsymmetricCipherKeyPair keypair = generateKeyPair();
             ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-            return privParams.getD();
+            return privParams.getS();       
     }
 
-    public AsymmetricCipherKeyPair generateKeyPair(){
+
+    public KeyPair generateKeyPair(){
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
         ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curve, secureRandom);
         generator.init(keygenParams);
         return generator.generateKeyPair();
     }
 
-    public static byte[] generateSharedKey(SecretKey privKeyA, ECPoint pubKeyB)
+    public static byte[] generateSharedKey(PrivateKey privKeyA, PublicKey pubKeyB)
             throws Exception {
         KeyAgreement aKA = KeyAgreement.getInstance("ECDH", "SC");
                 aKA.init(privKeyA);
-                aKA.doPhase((PublicKey)pubKeyB, true);
+                aKA.doPhase(pubKeyB, true);
 
             return aKA.generateSecret();
+    }
+
+    public PrivateKey getPrivateKeyFromBigInteger(BigInteger d){
+        KeySpec keySpec = new ECPrivateKeySpec(d, spec);
+        return KeyFactory.getInstance(ALGORITHM_ECDSA, provider).generatePrivate(keySpec);   
+    }
+
+    public PublicKey getPublicKeyFromECPoint(ECPoint p){
+        KeySpec keySpec = new ECPublicKeySpec(p, spec);
+        return KeyFactory.getInstance(ALGORITHM_ECDSA, provider).generatePublic(keySpec);   
     }
 
     public static ECPoint publicPointFromPrivate(BigInteger privKey) {
@@ -69,4 +83,8 @@ public class EllipticCryptography{
         }
         return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
     }
+
+    public ECKeyPair
+
+
 }
