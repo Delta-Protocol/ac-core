@@ -1,4 +1,4 @@
-#/!/bin/sh
+#/!/bin/bash
 
 
 pwd=`pwd`
@@ -7,7 +7,21 @@ cd sdk/java
 ./make all
 cd $pwd
 
-ANDROID_HOME=/home/brian/Android/Sdk ./gradlew assembleRelease && (exit 1)
+if [ ! -d android_sdk ]; then
+    mkdir android_sdk
+    cp licenses android_sdk/ -R
+    cd android_sdk
+    sdktools=sdk-tools-linux-4333796.zip
+    wget https://dl.google.com/android/repository/$sdktools
+    unzip $sdktools
+    rm $sdktools
+    tools/bin/sdkmanager "build-tools;27.0.3"
+    tools/bin/sdkmanager "platforms;android-27"
+    cd ..
+fi
+
+#ANDROID_HOME=/home/brian/Android/Sdk ./gradlew assembleRelease && (exit 1)
+ANDROID_HOME=android_sdk ./gradlew assembleRelease && (exit 1)
 cp app/build/outputs/apk/release/us.cash-v1-release.apk /var/www/html/
 
 
