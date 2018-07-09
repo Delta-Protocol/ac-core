@@ -1,6 +1,9 @@
 #!/bin/bash
 
-#tgt=$1
+v=$1
+if [ "_$v" == "_" ]; then
+    v="dev"
+fi
 
 
 if [ -d android_studio ]; then
@@ -27,6 +30,9 @@ ln -s ../../../../android/gradle-wrapper.properties
 cd ../..
 
 cd app
+
+ln -s ../../../android/keystore.jks
+
 cat $pwd/sdk/java/build.gradle.snippet >> build.gradle
 #echo "dependencies { implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar' }" >> build.gradle
 
@@ -37,6 +43,8 @@ echo "dependencies { implementation 'com.journeyapps:zxing-android-embedded:3.2.
 
 
 echo "dependencies { implementation group: 'pl.droidsonroids.gif', name: 'android-gif-drawable', version: '1.2.12'}" >> build.gradle
+
+sed -i "s/[VERSION]/$v/g" build.gradle
 
 
 cd src/
