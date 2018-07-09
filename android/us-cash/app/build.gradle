@@ -10,8 +10,9 @@ android {
         applicationId "us.cash"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode [VERSION]
-        versionName "[VERSION_NAME]"
+        versionCode 1
+        versionName "1"
+        setProperty("archivesBaseName", applicationId + "-v" + versionCode)
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -25,9 +26,10 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            setProperty("archivesBaseName", applicationId + "-v" + versionCode)
+            //minifyEnabled true
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+
         }
     }
 }
