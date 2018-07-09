@@ -16,28 +16,28 @@ debug: all
 release: export CXXFLAGS:=${RELEASEFLAGS}
 release: all
 
-all: gov/libusgov.so wallet/libuswallet.so govd/us-govd walletd/us-walletd
+all: gov/libusgov.so wallet/libuswallet.so govd/us-gov walletd/us-wallet
 
-walletd-debug: export CXXFLAGS:=${DEBUGFLAGS}
-walletd-debug: walletd
+wallet-debug: export CXXFLAGS:=${DEBUGFLAGS}
+wallet-debug: wallet
 
-walletd-release: export CXXFLAGS:=${RELEASEFLAGS}
-walletd-release: walletd
+wallet-release: export CXXFLAGS:=${RELEASEFLAGS}
+wallet-release: wallet
 
-govd: govd/us-govd
-walletd: walletd/us-walletd
+gov: govd/us-gov
+wallet: walletd/us-wallet
 
 install: release
 	install gov/libusgov.so ${PREFIX}/lib
 	install wallet/libuswallet.so ${PREFIX}/lib
-	install govd/us-govd ${PREFIX}/bin
-	install walletd/us-walletd ${PREFIX}/bin
+	install govd/us-gov ${PREFIX}/bin
+	install walletd/us-wallet ${PREFIX}/bin
 	install etc/init.d/us-wallet /etc/init.d/
 	install etc/init.d/us-gov /etc/init.d/
 	ldconfig
 	systemctl daemon-reload
 
-install-api:
+install-nginx:
 	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
 	install etc/nginx/snippets/snakeoil.conf /etc/nginx/snippets/
 	install etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/
@@ -47,19 +47,19 @@ install-api:
 gov/libusgov.so:
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C gov;
 
-govd/us-govd: gov/libusgov.so
+govd/us-gov: gov/libusgov.so
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C govd;
 
 
 wallet/libuswallet.so: gov/libusgov.so
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C wallet;
 
-walletd/us-walletd: wallet/libuswallet.so
+walletd/us-wallet: wallet/libuswallet.so
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C walletd ;
 
 .PHONY: all
-.PHONY: walletd
-.PHONY: govd
+.PHONY: wallet
+.PHONY: gov
 .PHONY: debug
 .PHONY: release
 

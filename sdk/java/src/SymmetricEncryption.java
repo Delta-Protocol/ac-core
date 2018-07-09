@@ -27,16 +27,14 @@ public class SymmetricEncryption {
         iv = new byte[iv_size];
         key = EllipticCryptography.getInstance().generateSharedKey(privA,pubB);
     }
-  
+
     public byte[] encrypt(byte[] plaintext) throws Exception {
-        
         random.nextBytes(iv);
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
         return Arrays.concatenate(cipher.doFinal(plaintext), iv);
     }
 
     public byte[] decrypt(byte[] encrypted) throws Exception {
-        
         iv = Arrays.copyOfRange(encrypted, encrypted.length - iv_size, encrypted.length);
         cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
         return cipher.doFinal(Arrays.copyOfRange(encrypted, 0, encrypted.length - iv_size));

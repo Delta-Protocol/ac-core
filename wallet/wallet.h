@@ -62,6 +62,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>, filesystem::cfg {
 	const crypto::ec::keys* get_keys(const cash::hash_t& address) const;
 	cash::cash_t balance() const;
 	void dump_balances(ostream& os) const;
+	void extended_balance(ostream& os) const;
 	accounts_query_t query_accounts(const cash::app::query_accounts_t& addresses) const;
 //    compartiments_query_t query_compartiments(const nova::app::query_compartiments_t& addresses) const;
 //    compartiments_query_t query_compartiments(const string& item) const;

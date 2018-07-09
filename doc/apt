@@ -1,0 +1,37 @@
+#Required packages for building binaries
+Debian: apt install libc-dev make g++ spawn-fcgi nginx libcrypto++-dev automake libtool psmisc pipexec libjsoncpp-dev libunwind-dev libtool automake bc coreutils
+
+#TRACEABILITY (packages-assets to be serviced by it)
+=======================================#============
+
+#coreutils
+#  bin/us-wallet-ctl depends on nohup
+
+#bc
+#  bin/us-wallet-ctl depends on bc
+
+#libunwind-dev
+#  gov debug mode
+
+#libtool
+#  install_libsecp256k1
+
+#automake
+#  install_libsecp256k1
+
+#libcrypto++-dev
+#  gov/crypto
+
+#nginx
+#  
+
+#spawn-fcgi
+#  wallet. (with FCGI compilation flag)
+
+#pipexec
+#  etc/init.d/*
+
+#psmisc
+#   provides killall
+#   etc/init.d/*
+#   bin/us-wallet-ctl

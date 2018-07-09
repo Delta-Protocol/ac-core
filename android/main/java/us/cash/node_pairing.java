@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.cash;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,20 +14,22 @@ import java.io.IOException;
 
 public class node_pairing extends AppCompatActivity {
     private EditText addr;
+    private EditText port;
     private Button pair;
     private Button test;
 
 
-    void test_result(final String balance, final String node_addr) {
+    void test_result(final String balance, final String node_addr, final int node_port) {
         runOnUiThread(new Thread(new Runnable() {
             public void run() {
                 final app a=(app)getApplication();
                 try {
                     a.w.set_walletd_host(node_addr);
+                    a.w.set_walletd_port(node_port);
                     if (balance == "?") {
                         Toast.makeText(getApplicationContext(), "Nice try, but wrong", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(node_pairing.this, "walletd is alive at " + a.w.walletd_host(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(node_pairing.this, "walletd is alive at " + a.w.walletd_host()+":"+a.w.walletd_port(), Toast.LENGTH_LONG).show();
                     }
                 }
                 catch (IOException e) {
@@ -59,6 +61,7 @@ public class node_pairing extends AppCompatActivity {
 */
 
         addr = (EditText) findViewById(R.id.walletd_address);
+        port = (EditText) findViewById(R.id.walletd_port);
 
         pair = (Button) findViewById(R.id.pair);
 
@@ -66,28 +69,38 @@ public class node_pairing extends AppCompatActivity {
 
 
         addr.setText(((app) getApplication()).w.walletd_host());
-
+        port.setText(Integer.toString(((app) getApplication()).w.walletd_port()));
 
         test.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
 
         Thread thread = new Thread(new Runnable() {
-            final String address=addr.getText().toString();
-            final app a=(app)getApplication();
-            final String h=a.w.walletd_host();
-            @Override
-            public void run() {
+                final String address = addr.getText().toString();
+
+                final app a = (app) getApplication();
+                //final String h=a.w.walletd_host();
+                @Override
+                public void run () {
+                    int tcpport;
+                try {
+                    tcpport = Integer.parseInt(port.getText().toString());
+                }
+                catch(NumberFormatException e) {
+                    Log.e("Wallet", e.toString());
+                    tcpport =16673;
+                }
                 try {
                     a.w.set_walletd_host(address);
-                    String b=a.w.balance(false);
-                    test_result(b,address);
-                }
-                catch (IOException e) {
+                    a.w.set_walletd_port(tcpport);
+                    String b = a.w.balance(false);
+                    test_result(b, address, tcpport);
+                } catch (IOException e) {
                     Log.e("Wallet", e.toString());
-                    test_result("?",address);
+                    test_result("?", address, tcpport);
                 }
             }
+
         });
 
         thread.start();
@@ -137,6 +150,8 @@ public class node_pairing extends AppCompatActivity {
        app a=(app)getApplication();
        try {
            a.w.set_walletd_host(addr.getText().toString());
+           final int tcpport=Integer.parseInt(port.getText().toString());
+           a.w.set_walletd_port(tcpport);
            finish();
        }
        catch (IOException e) {

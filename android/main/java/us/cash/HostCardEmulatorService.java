@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.cash;
 
 import android.content.Intent;
 import android.nfc.cardemulation.HostApduService;

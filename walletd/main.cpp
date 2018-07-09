@@ -5,6 +5,7 @@
 #include <thread>
 #include <us/gov/cash/locking_programs/p2pkh.h>
 #include <us/gov/cash/tx.h>
+#include <us/gov/cfg.h>
 #include <us/gov/signal_handler.h>
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
@@ -49,77 +50,78 @@ struct params {
     bool fcgi{false};
     bool json{false};
 #endif
+    bool advanced{false};
+    uint16_t listening_port{16673};
     string homedir;
     bool offline{false};
-	string backend_host{"localhost"}; uint16_t backend_port{16672};
+    string backend_host{"localhost"}; uint16_t backend_port{16672};
     string walletd_host{"localhost"}; uint16_t walletd_port{16673};
 };
 
 
 void help(const params& p, ostream& os=cout) {
-    os << "us.gov wallet" << endl;
-    os << "usage:" << endl;
-    os << " wallet [options] command" << endl;
+    os << "us-wallet" << endl;
+    os << "You can use this software under the terms of the General Public License (GPL)." << endl;
     os << endl;
+    os << "Usage: us-wallet [options] [command]" << endl;
     os << "options are:" << endl;
+   if (!p.advanced) {
+	os << " -a                Advanced mode." << endl;
+   }
+   if (p.advanced) {
+    if (p.offline) {
 	os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
-	os << " -d        Run wallet daemon on port " << p.walletd_port << endl;
+    }
+	os << " -d        Run a new wallet-daemon listening on port " << p.listening_port << " (see -lp)" << endl;
+	os << " -lp       Listening Port." << endl;
 	os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
 #ifdef FCGI
 	os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
 	os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
 #endif
     if (p.offline) {
-	    os << " backend connector:" << endl;
-	    os << " -bhost <address>  backend host. [" << p.backend_host << "]" << endl;
-	    os << " -bp <port>  backend port. [" << p.backend_port << "]" << endl;
+	    os << " RPC to backend(us-gov) parameters:" << endl;
+	    os << " -bhost <address>  us-gov IP address. [" << p.backend_host << "]" << endl;
+	    os << " -bp <port>  TCP port. [" << p.backend_port << "]" << endl;
     }
     else {
-	    os << " walletd connector:" << endl;
+	    os << " RPC to wallet-daemon (us-wallet) parameters:" << endl;
 	    os << " -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
 	    os << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
     }
+  }
     os << endl;
     os << "commands are:" << endl;
-    os << endl;
-    os << "KEYS application:" << endl;
-	os << " address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
-	os << " address add <privkey>  Imports a given private key in the wallet" << endl;
-	os << " dump                   Lists the keys/addresses managed by wallet" << endl;
-	os << " gen_keys               Generates a key pair without adding them to the wallet." << endl;
-	os << " priv_key <private key> Gives information about the given private key." << endl;
-    os << endl;
-    os << "CASH application:" << endl;
-	os << " balance [0|1]          Displays the spendable amount." << endl;
-//	os << " tx base                Reports the current parent block for new transactions" << endl;
-//	os << " tx make <parent-block> <src account> <prev balance> <withdraw amount> <dest account> <deposit amount> <locking program hash>" << endl;
-	os << " tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
-	os << " tx decode <tx_b58>" << endl;
-	os << " tx check <tx_b58>" << endl;
-	os << " tx send <tx_b58>" << endl;
-	os << " tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
+    os << "cash:" << endl;
+
+	os << "  balance [0|1]          Displays the spendable amount." << endl;
+	os << "  transfer <dest account> <receive amount>      Orders a transfer to <dest account> for an amount. Fees are paid by the sender." << endl;
+if (p.advanced) {
+	os << "  tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
+	os << "  tx decode <tx_b58>" << endl;
+	os << "  tx check <tx_b58>" << endl;
+	os << "  tx send <tx_b58>" << endl;
+	os << "  tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
 	os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
-    os << endl;
-    os << "PAIR application:" << endl;
-    os << " pair <pubkey> <name>   authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
-    os << " unpair <pubkey>        revoke authorization to the specified device." << endl;
-    os << " list_devices           Show currently paired devices." << endl;
-    os << endl;
-/*
-    os << "NOVA application:" << endl;
-	os << " nova new compartiment" << endl;
-    os << " nova move <compartiment id> <item> <load|unload> [<send>]   ." << endl;
-    os << " nova track <compartiment id> <sensors|auto> [<send>]." << endl;
-    os << " nova sim_sensors" << endl;
-    os << " nova decode_move <txb58>" << endl;
-    os << " nova decode_track <txb58>" << endl;
-    os << " nova query <compartiment id>" << endl;
-*/
-
 }
-
-
-
+    os << endl;
+    os << "keys:" << endl;
+	os << "  address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
+if (p.advanced) {
+	os << "  address add <privkey>  Imports a given private key in the wallet" << endl;
+}
+	os << "  list                   Lists the keys/addresses managed by wallet" << endl;
+if (p.advanced) {
+	os << "  gen_keys               Generates a key pair without adding them to the wallet." << endl;
+	os << "  priv_key <private key> Gives information about the given private key." << endl;
+}
+    os << endl;
+    os << "device pairing:" << endl;
+    os << "  pair <pubkey> <name>   Authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
+    os << "  unpair <pubkey>        Revoke authorization to the specified device." << endl;
+    os << "  list_devices           Prints the list of recognized devices." << endl;
+    os << endl;
+}
 
 void error_log(const char* msg) {
    using namespace std;
@@ -169,7 +171,7 @@ void run_daemon(const params& p) {
 	signal(SIGTERM,sig_handler);
 	signal(SIGPIPE, SIG_IGN);
 
-	wallet_daemon d(p.walletd_port, p.homedir, p.backend_host, p.backend_port);
+	wallet_daemon d(p.listening_port, p.homedir, p.backend_host, p.backend_port);
 
 #ifdef FCGI
     if (p.fcgi) {
@@ -192,6 +194,7 @@ void run_daemon(const params& p) {
 //	d.run();
 }
 
+
 #include <us/wallet/protocol.h>
 
 
@@ -201,6 +204,9 @@ string parse_options(args_t& args, params& p) {
     	cmd=args.next<string>();
         if (cmd=="-wp") {
         	p.walletd_port=args.next<int>();
+        }
+        if (cmd=="-lp") {
+        	p.listening_port=args.next<uint16_t>();
         }
         else if (cmd=="-whost") {
         	p.walletd_host=args.next<string>();
@@ -219,6 +225,9 @@ string parse_options(args_t& args, params& p) {
         }
         else if (cmd=="-d") {
         	p.daemon=true;
+        }
+        else if (cmd=="-a") {
+        	p.advanced=true;
         }
 #ifdef FCGI
         else if (cmd=="-fcgi") {
@@ -375,7 +384,17 @@ void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 	}
 	else
 */
-	if (command=="make_p2pkh") {
+	if (command=="transfer") {
+        wallet::tx_make_p2pkh_input i;
+        i.rcpt_addr=args.next<cash::hash_t>();
+        i.amount=args.next<cash::cash_t>();
+        i.fee=1;
+        i.sigcode_inputs=cash::tx::sigcode_all;
+        i.sigcode_outputs=cash::tx::sigcode_all;
+        i.sendover=true;
+        wapi.tx_make_p2pkh(i,os);
+	}
+	else if (command=="make_p2pkh") {
         wallet::tx_make_p2pkh_input i;
         i.rcpt_addr=args.next<cash::hash_t>();
         i.amount=args.next<cash::cash_t>();
@@ -430,7 +449,7 @@ Json::Value to_json(const string& s) {
         is >> f;
         if (!f.empty()) val[i++]=f;
     }
-    return val;    
+    return val;
 }
 #endif
 
@@ -440,6 +459,11 @@ int main(int argc, char** argv) {
 	params p;
 	string command=parse_options(args,p);
 
+	if (!us::gov::filesystem::cfg::ensure_dir(p.homedir)) {
+		cerr << "could not create " << p.homedir << endl;
+		exit(1);
+	}
+
 #ifdef FCGI
     if (!p.daemon && p.fcgi) {
         cerr << "-fcgi requires -d" << endl;
@@ -447,13 +471,8 @@ int main(int argc, char** argv) {
     }
 #endif
 
-
     if (p.daemon) {
-
         run_daemon(p);
-
-//        cout << "walletd listening on " << p.walletd_host << ":" << p.walletd_port << endl;
-//        run_daemon(p);
         return 0;
     }
 
@@ -466,21 +485,16 @@ int main(int argc, char** argv) {
 	}
 	api& wapi=*papi;
 
-//new local_api(p.homedir,p.backend_host,p.backend_port);
-
-//   delete w3api::fcgi_t::api;
-
-
     ostringstream os;
+
+	if (command=="transfer") { //shortcut to tx fn
+		command=="tx";
+		--args.n; //repeat command transfer
+	}
 
 	if (command=="tx") {
     	tx(wapi,args,p,os);
 	}
-/*
-	if (command=="nova") {
-    	nova_app(wapi,args,p,os);
-	}
-*/
 	else if (command=="priv_key") {
 		auto privkey=args.next<crypto::ec::keys::priv_t>();
 		wapi.priv_key(privkey,os);
@@ -528,7 +542,7 @@ int main(int argc, char** argv) {
 //cout << "deleting" << endl;
 	delete papi;
 
-#ifdef FCGI    
+#ifdef FCGI
     if (p.json)
     cout << to_json(os.str()) << endl;
     else

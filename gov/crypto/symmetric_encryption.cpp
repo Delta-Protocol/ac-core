@@ -31,21 +31,24 @@ using namespace us::gov::crypto;
 
 typedef us::gov::crypto::symmetric_encryption c;
 
-c::symmetric_encryption(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b){
-    set_agreed_key_value(priv_key_a,pub_key_b);
+c::symmetric_encryption(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b) {
+    if (!set_agreed_key_value(priv_key_a,pub_key_b)) {
+		throw "Could not initialize encryption";
+    }
 }
 
-void c::set_agreed_key_value(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b){
-    
-    if(!secp256k1_ecdh(ec::instance.ctx,key_,&pub_key_b,&priv_key_a[0])){
+bool c::set_agreed_key_value(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b) {
+    if(!secp256k1_ecdh(ec::instance.ctx,key_,&pub_key_b,&priv_key_a[0])) { //LE
         cerr << "Could not create shared secret";
-    } 
+	return false;
+    }
+    return true;
 }
 
-const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext){
-    
+const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext) {
+
     vector<unsigned char> ciphertext(size_iv + plaintext.size() + AES::BLOCKSIZE);
-    
+
     //we need a new iv for each message that is encrypted with the same key.
     prng_.GenerateBlock(c::iv_, size_iv);
 
@@ -55,29 +58,22 @@ const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext){
     ArraySink cs(&ciphertext[0], ciphertext.size());
 
     ArraySource(plaintext.data(), plaintext.size(), true, new AuthenticatedEncryptionFilter(enc, new Redirector(cs),false,tag_size_));
-    
+
     // Set cipher text length now that its known, and append the iv
-    /*size_t ciphertext_length= cs.TotalPutLength()+size_iv;
-    ciphertext.resize(ciphertext_length);
-    for(size_t i = 0; i < size_iv; i++){
-        ciphertext[i+cs.TotalPutLength()] = iv_[i];
-    }*/
     ciphertext.resize(cs.TotalPutLength());
     ciphertext.insert(ciphertext.end(), begin(iv_), end(iv_));
     return move(ciphertext);
 
 }
 
-void c::set_iv_from_ciphertext(const vector<unsigned char>& ciphertext){
-    
+void c::set_iv_from_ciphertext(const vector<unsigned char>& ciphertext) {
     size_t iv_start = ciphertext.size() - size_iv;
     for(size_t i = 0; i < size_iv; i++){
         iv_[i] = ciphertext[i+iv_start];
     }
 }
 
-const vector<unsigned char> c::decrypt(const vector<unsigned char>& ciphertext){
-    
+const vector<unsigned char> c::decrypt(const vector<unsigned char>& ciphertext) {
     if(ciphertext.size()<size_iv){
         cerr << "The ciphertext does not have sufficient length to contain the iv (initialisation vector) which should have been appended.\n" << endl;
         return vector<unsigned char>();
@@ -88,7 +84,7 @@ const vector<unsigned char> c::decrypt(const vector<unsigned char>& ciphertext){
     try{
         GCM< AES >::Decryption d;
         d.SetKeyWithIV( key_, sizeof(key_), iv_, size_iv );
-       
+
         ArraySink sink(decryptedtext.data(), decryptedtext.size());
         AuthenticatedDecryptionFilter filter(d, new Redirector(sink),AuthenticatedDecryptionFilter::DEFAULT_FLAGS, tag_size_);
         ArraySource(ciphertext.data(), ciphertext.size()-size_iv, true, new Redirector(filter));

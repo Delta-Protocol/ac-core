@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.cash;
 
 /*
  * Copyright 2009 ZXing authors

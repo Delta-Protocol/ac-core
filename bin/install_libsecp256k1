@@ -8,6 +8,7 @@ cd secp256k1
 ./configure --enable-experimental --enable-module-ecdh
 make
 ./tests && (exit 1)
-make install
-echo "done"
+make install && (exit 1)
 cd ..
+rm -r secp256k1
+echo "done"

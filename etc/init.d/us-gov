@@ -4,17 +4,16 @@
 
 USER=root
 
-DAEMON="/usr/local/bin/us-govd"
+DAEMON="/usr/local/bin/us-gov"
 DAEMON_ARGS="-ds"
-PIDFILE="/var/run/us-govd.pid"
-NAME="us-govd"
+PIDFILE="/var/run/us-gov.pid"
+NAME="us-gov"
 
 RETVAL=0
 
 start() {
       echo -n "Starting us-gov: "
 # 	  echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env $PROG"
-  #    /sbin/start-stop-daemon  --start --background --chuid "$USER" --exec /usr/bin/env  $PROG > /var/log/us-govd.log 2>&1
 
 /sbin/start-stop-daemon --start  --background \
   --pidfile $PIDFILE --make-pidfile \
@@ -29,7 +28,7 @@ start() {
 
 stop() {
       echo -n "Stopping us-gov: "
-      killall -q -w -u $USER us-govd
+      killall -q -w -u $USER us-gov
       RETVAL=$?
       echo "$API_NAME. $RETVAL"
 }

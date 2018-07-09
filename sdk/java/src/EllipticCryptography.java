@@ -20,27 +20,29 @@ import java.security.SecureRandom;
 import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.util.test.FixedSecureRandom;
 
-public class EllipticCryptography{
+public class EllipticCryptography {
 
     private static EllipticCryptography instance = null;
-    private EllipticCryptography(){}
+    private SecureRandom secureRandom=null;
+    private X9ECParameters curve_params=null;
+    private ECDomainParameters curve=null;
+
+
+    private EllipticCryptography() {
+        curve_params=CustomNamedCurves.getByName("secp256k1");
+        FixedPointUtil.precompute(curve_params.getG(), 12);
+        curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
+        secureRandom = new SecureRandom();
+    }
+
     public static EllipticCryptography getInstance() {
         if(instance == null) {
            instance = new EllipticCryptography();
         }
         return instance;
     }
-    private static final SecureRandom secureRandom;
-    private static final X9ECParameters curve_params = CustomNamedCurves.getByName("secp256k1");
-    private static final ECDomainParameters curve;
-    
-    static {
-        FixedPointUtil.precompute(curve_params.getG(), 12);
-        curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
-        secureRandom = new SecureRandom();
-    }
 
-    private BigInteger generatePrivateKey(){
+    public BigInteger generatePrivateKey() {
             AsymmetricCipherKeyPair keypair = generateKeyPair();
             ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
             return privParams.getS();       
@@ -59,7 +61,6 @@ public class EllipticCryptography{
         KeyAgreement aKA = KeyAgreement.getInstance("ECDH", "SC");
                 aKA.init(privKeyA);
                 aKA.doPhase(pubKeyB, true);
-
             return aKA.generateSecret();
     }
 
@@ -81,10 +82,6 @@ public class EllipticCryptography{
         if (privKey.bitLength() > curve.getN().bitLength()) {
             privKey = privKey.mod(curve.getN());
         }
-        return new FixedPointCombMultiplier().multiply(curve.getG(), privKey);
+        return new FixedPointCombMultiplier().multiply(curve_params.getG(), privKey);
     }
-
-    public ECKeyPair
-
-
 }

@@ -2,8 +2,9 @@
 
 #tgt=$1
 
+
 if [ -d android_studio ]; then
-	echo "Android studio project already bootstrapped"
+	echo "error. directory exists ./android_studio"
 	exit 1
 fi
 
@@ -14,7 +15,7 @@ cd android_studio
 
 tar -xzf ../android/androidstudio_basic_activity.tgz
 
-cd usgov
+cd us-cash
 ln -s ../../android/getdeps
 #./getdeps
 rm build.gradle
@@ -39,7 +40,7 @@ echo "dependencies { implementation group: 'pl.droidsonroids.gif', name: 'androi
 
 
 cd src/
-rm main -r
+rm main -rf
 ln -s ../../../../android/main
 
 cd ../..
@@ -47,5 +48,5 @@ cd ../..
 ./getdeps
 cd ../..
 
-echo "ready"
+echo "directory android_studio is ready"
 

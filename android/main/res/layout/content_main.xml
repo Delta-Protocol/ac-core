@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:visibility="visible"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.usgov.MainActivity"
+    tools:context="us.cash.MainActivity"
     tools:showIn="@layout/activity_main">
 
     <pl.droidsonroids.gif.GifImageView
@@ -14,7 +14,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#ffffff"
-        android:src="@drawable/carlton"
+        android:src="@raw/carlton"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="30dp" />
@@ -23,14 +23,14 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#ffffff"
-        android:src="@drawable/wait"
+        android:src="@raw/wait"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="30dp" />
 
     <Button
         android:id="@+id/balance"
-        android:layout_width="260dp"
+        android:layout_width="194dp"
         android:layout_height="46dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
@@ -44,7 +44,7 @@
     <EditText
         android:id="@+id/amount"
         style="@android:style/Widget.Holo.EditText"
-        android:layout_width="260dp"
+        android:layout_width="194dp"
         android:layout_height="51dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
@@ -62,7 +62,7 @@
 
     <Button
         android:id="@+id/pay"
-        android:layout_width="260dp"
+        android:layout_width="197dp"
         android:layout_height="0dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
@@ -82,15 +82,15 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
+        android:layout_width="52dp"
+        android:layout_height="34dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:adjustViewBounds="true"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_launcher_foreground" />
+        app:srcCompat="@raw/us_cash" />
 
     <TextView
         android:id="@+id/action"
@@ -173,7 +173,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/nfc_set"
                 app:layout_constraintEnd_toEndOf="@+id/nfc_set"
                 app:layout_constraintHorizontal_bias="0.62"
-                app:layout_constraintStart_toEndOf="@+id/editText"
+                app:layout_constraintStart_toEndOf="@+id/walletd_port"
                 app:layout_constraintTop_toTopOf="@+id/nfc_set"
                 app:srcCompat="@drawable/ic_universal_contactless_card_symbol" />
 
@@ -207,7 +207,7 @@
 
     <Button
         android:id="@+id/newaddress"
-        android:layout_width="221dp"
+        android:layout_width="196dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
@@ -237,10 +237,20 @@
         android:layout_height="31dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:src="@drawable/node"
+        android:src="@raw/node"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/share" />
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="32dp"
+        android:text="USC"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toEndOf="@+id/balance"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

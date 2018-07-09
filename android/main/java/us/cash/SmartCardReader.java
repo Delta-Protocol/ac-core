@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.cash;
 
 import android.app.Activity;
 import android.content.Context;
@@ -77,12 +77,12 @@ P1 & P2: these two Parameter bytes are used for further customization of the Ins
 
     @Override
     public void onTagDiscovered(Tag tag) {
-        Log.d("usgov", "onTagDiscovered "+tag.toString());
-        //1-2673/com.example.usgov D/usgov: onTagDiscovered TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcA]
+        Log.d("us.cash", "onTagDiscovered "+tag.toString());
+        //1-2673/us.cash D/ onTagDiscovered TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcA]
 
         //String addr="23TeQWLmU5MUruhZc4SQuXhv6kHa";
         String addr="";
-        Log.d("usgov", "APDUCommand "+HostCardEmulatorService.ByteArrayToHexString(APDUCommand()));
+        Log.d("us.cash", "APDUCommand "+HostCardEmulatorService.ByteArrayToHexString(APDUCommand()));
         try {
             IsoDep isoDep = IsoDep.get(tag);
             isoDep.connect();
@@ -114,7 +114,7 @@ P1 & P2: these two Parameter bytes are used for further customization of the Ins
             isoDep.close();
         }
         catch(IOException e) {
-            Log.d("usgov", "onTagDiscovered "+tag.toString()+ "crashed "+e.getMessage());
+            Log.d("us.cash", "onTagDiscovered "+tag.toString()+ "crashed "+e.getMessage());
         }
     }
 
@@ -122,12 +122,12 @@ P1 & P2: these two Parameter bytes are used for further customization of the Ins
             public NdefRecord createMimeRecord(String payload) {
                 NdefRecord mimeRecord = new NdefRecord(
                         NdefRecord.TNF_MIME_MEDIA ,
-                        "application/com.example.usgov".getBytes(Charset.forName("US-ASCII")),
+                        "application/us.cash".getBytes(Charset.forName("US-ASCII")),
                         new byte[0], payload.getBytes(Charset.forName("US-ASCII")));
                 return mimeRecord;
             }
             public NdefRecord createAR() {
-                return NdefRecord.createApplicationRecord("com.example.usgov");
+                return NdefRecord.createApplicationRecord("us.cash");
             }
 
             @Override

@@ -1,4 +1,4 @@
-package com.example.usgov;
+package us.cash;
 
 public interface AppListener {
     public void on_wallet_init_success();
