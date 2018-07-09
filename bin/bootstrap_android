@@ -58,3 +58,4 @@ cd ../..
 
 echo "directory android_studio is ready"
 
+exit 0

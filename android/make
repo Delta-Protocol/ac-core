@@ -1,0 +1,17 @@
+#/!/bin/sh
+
+v=$1
+
+if [ "_$v" == "_" ]; then
+    v=dev
+fi
+
+cd us-cash
+ANDROID_HOME=/home/brian/Android/Sdk ./gradlew assembleRelease && (exit 1)
+mv app/build/outputs/apk/release/us.cash-v1-release.apk /var/www/html/
+cd ..
+
+
+
+
+
