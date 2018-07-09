@@ -2,15 +2,13 @@
 
 
 pwd=`pwd`
-cd ..
+cd ../..
 cd sdk/java
 ./make all
 cd $pwd
 
-cd us-cash
 ANDROID_HOME=/home/brian/Android/Sdk ./gradlew assembleRelease && (exit 1)
 cp app/build/outputs/apk/release/us.cash-v1-release.apk /var/www/html/
-cd ..
 
 
 
