@@ -1,0 +1,12 @@
+#!/bin/bash
+
+kegerate keypair 1
+kegerate keypair 1
+
+create a msg
+
+call c++ to encrypt
+call java to decrypt
+check
+
+and other way around
