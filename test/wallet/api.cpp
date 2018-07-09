@@ -25,14 +25,14 @@ using datagram=us::gov::socket::datagram;
 
 struct test_api : rpc_api {
 
-	test_api( string walletd_host, uint16_t walletd_port): rpc_api( walletd_host, walletd_port ) {}
+	test_api( string walletd_host, uint16_t walletd_port, int gov_port): rpc_api( walletd_host, walletd_port ), gov_p(gov_port) {}
 
- 
+ 	int gov_p;
 
 	string ask(int service, const string& args){
 
-		datagram* q=new datagram(service,args);        //(walletd_host, walletd_port, q);
-		socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" , 46000 , q); 
+		datagram* q=new datagram(service,args);        //(walletd_host,  node port,  datagram	);
+		socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" , gov_p , 	q	); //	"127.0.0.1"
 
 		if (response) {
 			return response->parse_string();
@@ -77,11 +77,11 @@ struct test_client: client {
 
 
 
-void test(string ip , int port , string address ,int amoundSend, int fees , string privKey , bool timer ,int sec,  bool addToWallet){
+void test(string ip , int port , int gov_p, string address ,int amoundSend, int fees , string privKey , bool timer ,int sec,  bool addToWallet){
 
 string tx_receipt="";
 	
-	test_api ts( ip , port );
+	test_api ts( ip , port , gov_p );
 
 try{
 	//------add_address--to-wallet---------------|
@@ -133,8 +133,8 @@ if (timer != false ){
 
 //--------------------check--addr--balance-----------------|
 try{
-	test_client c( 0 );
-	c.connect( "localhost", 46001 , false );	//------------------------------------------------------------here-------
+	//test_client c( 0 );
+	//c.connect( "localhost", 16673 , false );	//------------------------------------------------------------here-------
 	
 	string howManyAddr = "1 ";
 	string askBalanceAddr = howManyAddr + address;	
@@ -203,9 +203,6 @@ try{
 cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
 
 
-	//ts.dump(cout);
-	//ts.list_devices(cout);
-
 }
 
 
@@ -218,18 +215,18 @@ void testing_wallet_api()
 
       for (int i=1; i<=25; i++ ) 
       {
-	cout << " |-------* " << +i <<" *------------------------------>> Test <<-------------------------------------|  \n" << endl;
+	cout << " |-------* " << +i <<" *-------------->> Test <<-----------------|  \n" << endl;
 	
-//	       [ip]       [port]        [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
+//	       [ip]   [Wallet_port] [g port]      [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
 //	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true    , 120 ,	false	);
 //	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false   , 120 ,	false	);
 //	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false   , 120 ,	false	);
 //	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false   , 120 ,	false	);
 
-	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  100000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 12 , true	);
-	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  200000000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 12 , false	);
-	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  300000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 12 , true	);
-	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  400000000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 12 , false	);
+	test("127.0.0.1" , 16673 , 16672 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  100000000   ,   100  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , true	 );
+	test("127.0.0.1" , 16673 , 16672 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  200000000   ,   200  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , false );
+	test("127.0.0.1" , 16673 , 16672 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  300000000   ,   200  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , true	 );
+	test("127.0.0.1" , 16673 , 16672 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  400000000   ,   200  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , false );
       }
 }
 
