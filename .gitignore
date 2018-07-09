@@ -13,4 +13,7 @@ valgrind-out.txt
 *.out
 android/local.properties
 android/.gradle/
-
+cash/android/android_sdk/
+secp256k1
+fastcgi++
+build

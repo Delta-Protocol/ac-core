@@ -1,6 +1,4 @@
 #/!/bin/bash
-
-
 pwd=`pwd`
 cd ../..
 cd sdk/java
@@ -20,7 +18,6 @@ if [ ! -d android_sdk ]; then
     cd ..
 fi
 
-#ANDROID_HOME=/home/brian/Android/Sdk ./gradlew assembleRelease && (exit 1)
 ANDROID_HOME=android_sdk ./gradlew assembleRelease && (exit 1)
 cp app/build/outputs/apk/release/us.cash-v1-release.apk /var/www/html/
 
