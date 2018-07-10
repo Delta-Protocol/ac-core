@@ -1,5 +1,16 @@
 #/!/bin/bash
+
 pwd=`pwd`
+
+if [ "_$1" == "_clean" ]; then
+	cd ../..
+	cd sdk/java
+	./make clean
+	cd $pwd
+	rm build -rf
+	exit 0
+fi
+
 cd ../..
 cd sdk/java
 ./make all
