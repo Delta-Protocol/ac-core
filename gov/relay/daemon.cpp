@@ -7,10 +7,9 @@ using namespace us::gov;
 using namespace us::gov::relay;
 using namespace std;
 
-c::daemon() {
+c::daemon(const keys& k): b(k) {
 }
-
-c::daemon(uint16_t port, uint16_t edges): b(port,edges) {
+c::daemon(const keys& k, uint16_t port, uint16_t edges): b(k, port,edges) {
 }
 
 c::~daemon() {

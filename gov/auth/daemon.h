@@ -1,7 +1,7 @@
 #ifndef USGOV_c487b00055e53547e15c0855b22f83a7c8fb4700de16953d93bac9768cf373a9
 #define USGOV_c487b00055e53547e15c0855b22f83a7c8fb4700de16953d93bac9768cf373a9
 
-#include <us/gov/relay.h>
+#include <us/gov/peer.h>
 #include "peer_t.h"
 #include <us/gov/socket.h>
 
@@ -10,14 +10,14 @@ namespace auth {
 
 using namespace std;
 
-struct daemon:relay::daemon {
-	typedef relay::daemon b;
+struct daemon:peer::daemon {
+	typedef peer::daemon b;
 	typedef peer_t::keys keys;
 
 	using datagram=socket::datagram;
 
 	daemon(const keys&);
-	daemon(const keys&, uint16_t port, uint16_t edges);
+        daemon(const keys&, uint16_t port, uint16_t edges);
 	virtual ~daemon();
 
 	virtual socket::client* create_client(int sock) override;
