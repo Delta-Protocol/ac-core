@@ -31,6 +31,9 @@ void c::ask(int service, const string& args, ostream&os) {
 			os << "Error. Unable to connect to wallet daemon.";
 			return;
 		}
+		cout << "Iniciando auth" << endl;
+		
+		cout << "auth completed." << endl;
 	}
 	datagram* d=new datagram(service,args);
         send(d);
