@@ -32,10 +32,7 @@ namespace auth {
 		virtual ~peer_t();
 		void dump(ostream& os) const;
 
-		virtual void on_connect() override { //called only on the initiator, the caller side.
-                b::on_connect();
-                do_actions();
-        }
+		virtual void on_connect() override; //called only on the initiator, the caller side.
 
 		void process_auth_request(datagram* d, const keys&);
 		void process_auth_peer_challenge(datagram* d, const keys&);
@@ -63,8 +60,7 @@ namespace auth {
 	};
 
 }
-}
-}
+}}
 
 #endif
 

@@ -118,18 +118,6 @@ c c::load(const string& home) {
                     exit(1);
                 }
 
-            string blocks_dir=abs_file(home,"blocks");
-            cout << "making sure dir for blocks exists" << endl;
-            if (!ensure_dir(blocks_dir)) {
-                cerr << "Cannot create blocks dir " << blocks_dir << endl;
-                exit(1);
-            }
-            string locking_dir=abs_file(home,"locking");
-                    if (!ensure_dir(locking_dir)) {
-                        cerr << "Cannot create locking-programs dir " << locking_dir << endl;
-                        exit(1);
-            }
-
             return cfg(pk,home);
 }
 

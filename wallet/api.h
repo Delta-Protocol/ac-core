@@ -4,6 +4,7 @@
 
 #include <us/gov/socket/datagram.h>
 #include <us/gov/crypto.h>
+#include <us/gov/auth.h>
 #include "wallet.h"
 #include "pairing.h"
 
@@ -19,7 +20,6 @@ struct api {
 	static void priv_key(const priv_t& privkey, ostream&);
         virtual ~api() {
         }
-
 
 	virtual void balance(bool detailed, ostream&)=0;
 	virtual void dump(ostream&)=0;
@@ -41,7 +41,10 @@ struct api {
 
 
 
-struct rpc_api:api {
+struct rpc_api:api, gov::auth::peer_t {
+	typedef gov::auth::peer_t b;
+	using b::pub_t;
+
 	rpc_api(const string& walletd_host, uint16_t walletd_port);
 	virtual ~rpc_api();
 
@@ -57,16 +60,13 @@ struct rpc_api:api {
 	virtual void pair(const pub_t&, const string& name, ostream&os) override;
 	virtual void unpair(const pub_t&, ostream&os) override;
 	virtual void list_devices(ostream&os) override;
-/*
-	virtual void nova_move(const nova_move_input&, ostream&) override;
-	virtual void nova_track(const nova_track_input&, ostream&) override;
-	virtual void nova_query(const nova::hash_t& compartiment, ostream&) override;
-	virtual void nova_query(const string& item, ostream&) override;
-	virtual void nova_mempool(ostream&) override;
-*/
 private:
 	void ask(int service, ostream&os);
 	void ask(int service, const string& args, ostream&os);
+
+	virtual void on_connect() override;
+
+
 
 	string walletd_host;
 	uint16_t walletd_port;

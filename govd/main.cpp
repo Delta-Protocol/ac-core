@@ -189,8 +189,11 @@ struct cfg: filesystem::cfg {
 
 
 cfg cfg::load(const string& home) {
-                auto x=b::load(home);
-                vector<string> addrs;
+	//keys
+	auto x=b::load(home); 
+
+	//seed nodes 
+        vector<string> addrs;
                 string seeds_file=abs_file(home,"nodes.manual");
                 cout << "reading " << seeds_file << endl;
                 ifstream f(seeds_file);
@@ -202,12 +205,16 @@ cfg cfg::load(const string& home) {
                 }
                 cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
 
+	//blocks
             string blocks_dir=abs_file(home,"blocks");
             cout << "making sure dir for blocks exists" << endl;
             if (!ensure_dir(blocks_dir)) {
                 cerr << "Cannot create blocks dir " << blocks_dir << endl;
                 exit(1);
             }
+
+
+	//locking programs
             string locking_dir=abs_file(home,"locking");
                     if (!ensure_dir(locking_dir)) {
                         cerr << "Cannot create locking-programs dir " << locking_dir << endl;
