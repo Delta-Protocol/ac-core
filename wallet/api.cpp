@@ -88,10 +88,6 @@ void rpc_api::tx_check(const string&txb58, ostream&os) {
 	ask(us::wallet::protocol::tx_check_query,txb58,os);
 }
 
-void rpc_api::pair_request(ostream&os) {
-	ask(us::wallet::protocol::pair_request_query,"",os);
-}
-
 void rpc_api::pair(const pub_t& pk, const string& name, ostream&os) {
 	ostringstream si;
 	si << pk << ' ' << name;
@@ -173,10 +169,6 @@ void local_api::tx_check(const string&txb58, ostream&os) {
 		os << "Individual inputs and fees must be positive." << endl;
 	}
 	os << "Looks ok." << endl;
-}
-
-void local_api::pair_request(ostream&os) {
-    os << devices.pair_request();
 }
 
 void local_api::pair(const pub_t& pk, const string& name, ostream&os) {

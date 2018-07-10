@@ -23,12 +23,10 @@ struct daemon:peer::daemon {
 	virtual socket::client* create_client(int sock) override;
 	void dump(ostream& os) const;
 
-    //virtual void on_connect(peer::peer_t&) override;
-
 	virtual bool process_work(socket::peer_t *p, datagram*d) override;
 	//virtual void report_in_service(vector<peer::peer_t*>&) override;
 
-	keys id;
+	keys id; //my id {priv,pub} keys, pub exposed to network
 };
 
 

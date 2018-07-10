@@ -1,5 +1,5 @@
 #include "cfg.h"
-//#include "crypto.h"
+#include "crypto.h"
 #include <string.h> //strerror
 #include <fstream>
 #include <sstream>
@@ -13,7 +13,10 @@ using namespace std;
 using namespace us::gov::filesystem;
 typedef us::gov::filesystem::cfg c;
 
-c::cfg() {
+c::cfg(const keys_t::priv_t& privk, const string& home): keys(privk), home(home) {
+}
+
+c::cfg(const cfg& other): keys(other.keys), home(other.home) {
 }
 
 c:: ~cfg() {
@@ -88,4 +91,46 @@ bool c::exists_dir(const string& d) {
 string c::abs_file(const string& home, const string& fn) { 
 	return home+"/"+fn;
 }
+
+c c::load(const string& home) {
+                if (!ensure_dir(home)) {
+                    cerr << "Cannot create home dir " << home << endl;
+                    exit(1);
+                }
+            string keyfile=abs_file(home,"k");
+                cout << "Loading conf from " << keyfile << endl;
+                if (!file_exists(keyfile)) {
+                        cout << "Generating cryptographic keys..."; cout.flush();
+                        crypto::ec::keys k=crypto::ec::keys::generate();
+                        ofstream f(keyfile);
+                        f << k.priv.to_b58() << endl;
+                        cout << "done." << endl;
+                }
+                string pkb58;
+                {
+                ifstream f(keyfile);
+                getline(f,pkb58);
+                }
+                auto pk=crypto::ec::keys::priv_t::from_b58(pkb58);
+                if (!crypto::ec::keys::verify(pk)) {
+                    cerr << "Invalid private key " << endl;
+                    //mv k -> k.bad TODO
+                    exit(1);
+                }
+
+            string blocks_dir=abs_file(home,"blocks");
+            cout << "making sure dir for blocks exists" << endl;
+            if (!ensure_dir(blocks_dir)) {
+                cerr << "Cannot create blocks dir " << blocks_dir << endl;
+                exit(1);
+            }
+            string locking_dir=abs_file(home,"locking");
+                    if (!ensure_dir(locking_dir)) {
+                        cerr << "Cannot create locking-programs dir " << locking_dir << endl;
+                        exit(1);
+            }
+
+            return cfg(pk,home);
+}
+
 

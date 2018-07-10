@@ -42,8 +42,8 @@ struct params {
 	}
     void dump(ostream& os) const {
         os << "home: " << homedir << endl;
-        os << "backend: " << backend_host << ":" << backend_port << endl;
-        os << "walletd: " << walletd_host << ":" << walletd_port << endl;
+        os << "gov: " << backend_host << ":" << backend_port << endl;
+        os << "wallet: " << walletd_host << ":" << walletd_port << endl;
     }
 	bool daemon{false};
 #ifdef FCGI
@@ -118,7 +118,6 @@ if (p.advanced) {
     os << endl;
 if (p.advanced) {
     os << "device pairing:" << endl;
-    os << "  pair_request           Get a message to be signed by the device." << endl;
     os << "  pair <pubkey> <name>   Authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
     os << "  unpair <pubkey>        Revoke authorization to the specified device." << endl;
     os << "  list_devices           Prints the list of recognized devices." << endl;
@@ -127,32 +126,9 @@ if (p.advanced) {
 
 }
 
-void error_log(const char* msg) {
-   using namespace std;
-/*
-//   using namespace boost;
-   static std::ofstream error;
-   if(!error.is_open())
-   {
-      error.open("/tmp/errlog", ios_base::out | ios_base::app);
-      error.imbue(locale(error.getloc(), new posix_time::time_facet()));
-   }
-   error << '[' << posix_time::second_clock::local_time() << "] " << msg << endl;
-*/
-}
-
-
-
 #ifdef FCGI
 void run_fcgi(const params& p) {
-   //engine::init(); 
-//   e=new engine("/var/cex",wcerr);
-   //e->add_sample_liquidity(wcerr);
-
-
-
    try {
-//      Fastcgipp::Manager<w3api::fcgi_t> fcgi;
       fcgi=new Fastcgipp::Manager<w3api::fcgi_t>();
       //fcgi.setupSignals();
       fcgi->listen();
@@ -165,17 +141,19 @@ void run_fcgi(const params& p) {
    catch(std::exception& ex) {
       cerr << ex.what() << endl;
    }
-//   delete e;
-
 }
 #endif
+
+#include <us/gov/cfg.h>
 
 void run_daemon(const params& p) {
 	signal(SIGINT,sig_handler);
 	signal(SIGTERM,sig_handler);
 	signal(SIGPIPE, SIG_IGN);
 
-	wallet_daemon d(p.listening_port, p.homedir, p.backend_host, p.backend_port);
+//	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
+
+	wallet_daemon d(us::gov::filesystem::cfg::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
 
 #ifdef FCGI
     if (p.fcgi) {
@@ -193,9 +171,6 @@ void run_daemon(const params& p) {
 #else
     d.run();
 #endif
-
-
-//	d.run();
 }
 
 
@@ -245,149 +220,11 @@ string parse_options(args_t& args, params& p) {
             break;
         }
     }
-    return cmd;        
+    return cmd;
 }
-/*
-void tx_make(api& wapi, args_t& args, const params& p) {
-	t.parent_block=args.next<blockchain::diff::hash_t>();
-
-	auto src=args.next<cash::hash_t>();
-	auto prev_balance=args.next<cash::cash_t>();
-	auto withdraw_amount=args.next<cash::cash_t>();
-
-	auto dst=args.next<cash::hash_t>();
-	auto deposit_amount=args.next<cash::cash_t>();
-	auto locking_program=args.next<cash::hash_t>();
-
-	cash::tx t;
-	t.add_input(src, prev_balance, withdraw_amount);
-	t.add_output(dst, deposit_amount, locking_program);
-	if (!t.check()) {
-		cerr << "Error" << endl;
-		exit(1);
-	}
-
-	cout << endl;
-	cout << t << endl;
-	//DECODED:
-	cout << "decoded:" << endl;
-	t.write(cout);	
-	cout << endl;
-}
-*/
-#include <random>
-
-double rnd_reading(double mean,double stddev) {
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  default_random_engine generator(seed);
-  normal_distribution<double> distribution(mean,stddev);
-  return distribution(generator);
-}
-
-string sim_sensors() {
-    time_t now;
-    time(&now);
-    char buf[sizeof "2018-06-08T07:07:09Z"];
-    strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
-
-    ostringstream os;
-    os << "Time: " << buf << endl;
-    os << "Temperature: " << endl;
-    for (int i=0; i<3;++i) {
-         os << "  #" << i+1 << ": " << rnd_reading(4,2) << " °C" << endl;
-    }
-    os << "Pressure: " << endl;
-    for (int i=0; i<3;++i) {
-         os << "  #" << i+1 << ": " << rnd_reading(1,0.05) << " Bar" << endl;
-    }
-    os << "Humidity: " << endl;
-    for (int i=0; i<3;++i) {
-         os << "  #" << i+1 << ": " << rnd_reading(60,10) << " %" << endl;
-    }
-    os << "Longitude: " << rnd_reading(0,180) << " °" << endl;
-    os << "Latitude: " << rnd_reading(0,90) << " °" << endl;
-    return os.str();
-}
-/*
-void nova_app(api& wapi, args_t& args, const params& p, ostream& os) {
-	string command=args.next<string>();
-	if (command=="move") {
-        if (args.args_left()<3) {
-            help(p);
-            return;
-        }
-        wallet::nova_move_input i;
-        i.compartiment=args.next<nova::hash_t>();
-        i.item=args.next<string>();
-        auto s=args.next<string>();
-        if (s=="load") i.load=true;
-        else if (s=="unload") i.load=false;
-        else {
-            cerr << "Please specify either load or unload" << endl;
-            help(p);
-            return;
-        }
-        i.sendover=args.next<string>("nopes")=="send";
-        wapi.nova_move(i,os);
-//    os << " nova move <compartiment pubkey> <item pubkey> <load|unload> [<send>]   ." << endl;
-	}
-	else if (command=="track") {
-        wallet::nova_track_input i;
-        i.compartiment=args.next<nova::hash_t>();
-        i.data=args.next<string>();
-        if (i.data=="auto") {
-            i.data=crypto::b58::encode(sim_sensors());
-            cout << "sim sensors:" << endl;
-            cout << crypto::b58::decode(i.data) << endl;
-        }
-        i.sendover=args.next<string>("nopes")=="send";
-        wapi.nova_track(i,os);
-//    os << " nova track <compartiment pubkey> <time> <temp> <pressure> <humidity> <longitude> <latitude> [<send>]." << endl;
-    }
-	else if (command=="new") {
-    	string cmd=args.next<string>();
-        if (cmd=="compartiment") {
-            //cout << "Compartiment id: ";
-			wapi.new_address(os);
-        }
-        else {
-    		help(p);
-        }
-    }
-    else if (command=="sim_sensors") {
-        string raw=sim_sensors();
-        os << raw << endl;
-        os << crypto::b58::encode(raw) << endl;
-    }
-    else if (command=="decode_move") {
-    	string txb58=args.next<string>();
-	    nova::evidence_load t=nova::evidence_load::from_b58(txb58);
-	    t.write_pretty(os);
-    }
-    else if (command=="decode_track") {
-    	string txb58=args.next<string>();
-	    nova::evidence_track t=nova::evidence_track::from_b58(txb58);
-	    t.write_pretty(os);
-    }
-	else if (command=="query") {
-        auto compartiment=args.next<nova::hash_t>();
-        wapi.nova_query(compartiment,os);
-        
-    }
-	else {
-		help(p);
-	}
-}
-*/
 
 void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 	string command=args.next<string>();
-/*
-	if (command=="make") {
-        	tx_make(wapi,args,p);
-	}
-	else
-*/
 	if (command=="transfer") {
         wallet::tx_make_p2pkh_input i;
         i.rcpt_addr=args.next<cash::hash_t>();
@@ -426,15 +263,6 @@ void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 		auto b58=args.next<string>();
 		wapi.tx_send(b58,os);
 	}
-/*
-	else if (command=="base") {
-		cash::app::query_accounts_t addresses;
-		addresses.add("2vVN9EUdmZ5ypMe84JrQqwExMRjn");
-		addresses.add("mok8mKgni4Bjv1z6NsE3JUDG6FG");
-		wallet::accounts_query_t bases=wallet::query_accounts(p.backend_host, p.backend_port, addresses);
-		bases.dump(cout);
-	}
-*/
 	else {
 		help(p);
 	}
@@ -457,28 +285,13 @@ Json::Value to_json(const string& s) {
 }
 #endif
 
-int main(int argc, char** argv) {
 
-	args_t args(argc,argv);
-	params p;
-	string command=parse_options(args,p);
-
+void run_local(string command, args_t& args, const params& p) {
 	if (!us::gov::filesystem::cfg::ensure_dir(p.homedir)) {
 		cerr << "could not create " << p.homedir << endl;
 		exit(1);
 	}
 
-#ifdef FCGI
-    if (!p.daemon && p.fcgi) {
-        cerr << "-fcgi requires -d" << endl;
-        return 1;
-    }
-#endif
-
-    if (p.daemon) {
-        run_daemon(p);
-        return 0;
-    }
 
 	api* papi;
 	if (p.offline) {
@@ -527,9 +340,6 @@ int main(int argc, char** argv) {
 	else if (command=="gen_keys") {
 		wapi.gen_keys(os);
 	}
-	else if (command=="pair_request") {
-		wapi.pair_request(os);
-	}
 	else if (command=="pair") {
 		api::pub_t pub=args.next<api::pub_t>();
 	    auto name=args.next<string>();
@@ -557,7 +367,29 @@ int main(int argc, char** argv) {
 #else
     cout << os.str() << endl;
 #endif
+}
 
-	return 0;
+
+
+int main(int argc, char** argv) {
+
+	args_t args(argc,argv);
+	params p;
+	string command=parse_options(args,p);
+
+#ifdef FCGI
+    if (!p.daemon && p.fcgi) {
+        cerr << "-fcgi requires -d" << endl;
+        return 1;
+    }
+#endif
+
+    if (p.daemon) {
+        run_daemon(p);
+        return 0;
+    }
+
+    run_local(command,args,p);
+    return 0;
 }
 

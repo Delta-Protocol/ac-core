@@ -175,77 +175,47 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 #include <us/gov/cfg.h>
 
 struct cfg: filesystem::cfg {
+	typedef filesystem::cfg b;
 	typedef crypto::ec::keys keys_t;
 
-	cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes): keys(privk), home(home), seed_nodes(seed_nodes) {
+	cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes): b(privk, home), seed_nodes(seed_nodes) {
 	}
-    cfg(const cfg& other): keys(other.keys), home(other.home), seed_nodes(other.seed_nodes) {
-    }
-
-	static cfg load(const string& home) {
-        if (!ensure_dir(home)) {
-            cerr << "Cannot create home dir " << home << endl;
-            exit(1);
+        cfg(const cfg& other): b(other), seed_nodes(other.seed_nodes) {
         }
-	    string keyfile=abs_file(home,"k");
-		cout << "Loading conf from " << keyfile << endl;
-		if (!file_exists(keyfile)) {
-			cout << "Generating cryptographic keys..."; cout.flush();
-			crypto::ec::keys k=crypto::ec::keys::generate();
-			ofstream f(keyfile);
-			f << k.priv.to_b58() << endl;
-			cout << "done." << endl;
-		}
 
-		string pkb58;
-		{
-		ifstream f(keyfile);
-		getline(f,pkb58);
-		}
-		auto pk=crypto::ec::keys::priv_t::from_b58(pkb58);
-		if (!crypto::ec::keys::verify(pk)) {
-	            cerr << "Invalid private key " << endl;
-        	    exit(1);
-	    	}
-
-		vector<string> addrs;
-		string seeds_file=abs_file(home,"nodes.manual");
-		cout << "reading " << seeds_file << endl;
-		ifstream f(seeds_file);
-		while(f.good()) {
-			string addr;
-			getline(f,addr);
-			if (addr.empty()) continue;
-			addrs.push_back(addr);
-		}
-		cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
-
-	    string blocks_dir=abs_file(home,"blocks");
-	    cout << "making sure dir for blocks exists" << endl;
-	    if (!ensure_dir(blocks_dir)) {
-		cerr << "Cannot create blocks dir " << blocks_dir << endl;
-		exit(1);
-	    }
-/*
-{
-ostringstream os;
-os << "find " << home;
-system(os.str().c_str());
-}
-*/
-
-	    string locking_dir=abs_file(home,"locking");
-		    if (!ensure_dir(locking_dir)) {
-			cerr << "Cannot create locking-programs dir " << locking_dir << endl;
-			exit(1);
-	    }
-
-	    return cfg(pk,home,move(addrs));
-	}
-	string home;
-	keys_t keys;
+	static cfg load(const string& home);
 	vector<string> seed_nodes;
 };
+
+
+cfg cfg::load(const string& home) {
+                auto x=b::load(home);
+                vector<string> addrs;
+                string seeds_file=abs_file(home,"nodes.manual");
+                cout << "reading " << seeds_file << endl;
+                ifstream f(seeds_file);
+                while(f.good()) {
+                        string addr;
+                        getline(f,addr);
+                        if (addr.empty()) continue;
+                        addrs.push_back(addr);
+                }
+                cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
+
+            string blocks_dir=abs_file(home,"blocks");
+            cout << "making sure dir for blocks exists" << endl;
+            if (!ensure_dir(blocks_dir)) {
+                cerr << "Cannot create blocks dir " << blocks_dir << endl;
+                exit(1);
+            }
+            string locking_dir=abs_file(home,"locking");
+                    if (!ensure_dir(locking_dir)) {
+                        cerr << "Cannot create locking-programs dir " << locking_dir << endl;
+                        exit(1);
+            }
+
+            return cfg(x.keys.priv,home,move(addrs));
+}
 
 struct thinfo {
 	thinfo(const params& p, const cfg& conf): p(p), conf(conf) {
