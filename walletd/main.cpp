@@ -116,11 +116,15 @@ if (p.advanced) {
 	os << "  priv_key <private key> Gives information about the given private key." << endl;
 }
     os << endl;
+if (p.advanced) {
     os << "device pairing:" << endl;
+    os << "  pair_request           Get a message to be signed by the device." << endl;
     os << "  pair <pubkey> <name>   Authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
     os << "  unpair <pubkey>        Revoke authorization to the specified device." << endl;
     os << "  list_devices           Prints the list of recognized devices." << endl;
     os << endl;
+}
+
 }
 
 void error_log(const char* msg) {
@@ -522,6 +526,9 @@ int main(int argc, char** argv) {
 	}
 	else if (command=="gen_keys") {
 		wapi.gen_keys(os);
+	}
+	else if (command=="pair_request") {
+		wapi.pair_request(os);
 	}
 	else if (command=="pair") {
 		api::pub_t pub=args.next<api::pub_t>();

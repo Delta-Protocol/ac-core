@@ -13,7 +13,6 @@
 #include <chrono>
 #include <cassert>
 #include "peer_t.h"
-#include <unordered_set>
 
 namespace us { namespace gov {
 namespace peer {
@@ -55,15 +54,7 @@ namespace peer {
 
 		virtual string get_random_peer(const unordered_set<string>& exclude) const { return ""; }
 
-		void clear_evidences();
-
-
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;
-		virtual bool process_evidence(peer_t *c, datagram*d);
-
-		typedef unordered_set<datagram::hash_t> evidences_t;
-		evidences_t evidences;
-		mutex mx_evidences;
 
 		vector<peer_t*> in_service() const;
 		vector<peer_t*> in_service(const pub_t& a) const;
@@ -85,7 +76,6 @@ namespace peer {
 	private:
 		uint16_t edges;
 	};
-
 
 }
 

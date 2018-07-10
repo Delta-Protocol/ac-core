@@ -37,15 +37,6 @@ struct api {
 	virtual void list_devices(ostream&os)=0;
 
 	void gen_keys(ostream&os);
-/*
-	typedef wallet::nova_move_input nova_move_input;
-	typedef wallet::nova_track_input nova_track_input;
-	virtual void nova_move(const nova_move_input&, ostream&)=0;
-	virtual void nova_track(const nova_track_input&, ostream&)=0;
-	virtual void nova_query(const nova::hash_t& compartiment, ostream&)=0;
-	virtual void nova_query(const string& item, ostream&)=0;
-	virtual void nova_mempool(ostream&)=0;
-*/
 };
 
 
@@ -100,13 +91,6 @@ struct local_api:api, wallet, pairing {
 	virtual void pair(const pub_t&, const string& name, ostream&os) override;
 	virtual void unpair(const pub_t&, ostream&os) override;
 	virtual void list_devices(ostream&os) override;
-/*
-	virtual void nova_move(const api::nova_move_input&, ostream&) override;
-	virtual void nova_track(const api::nova_track_input&, ostream&) override;
-	virtual void nova_query(const nova::hash_t& compartiment, ostream&) override;
-	virtual void nova_query(const string& item, ostream&) override;
-	virtual void nova_mempool(ostream&) override;
-*/
 private:
 };
 

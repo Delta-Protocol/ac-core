@@ -39,7 +39,7 @@ void c::check_latency(const pub_t& a) {
 			cout << "SENDING PING from check_latency" << endl;
 			i->ping();
 		}
-	}		
+	}
 }
 
 c::pub_t c::connected_peers() const { 
@@ -63,28 +63,7 @@ c::pub_t c::adjust_peer_number() {
 	return move(a);
 }
 
-bool c::process_evidence(peer_t *c, datagram*d) {
-	return false;
-}
-
-void c::clear_evidences() {
-	evidences.clear();
-}
-
 bool c::process_work(socket::peer_t *c, datagram*d) {
-	if (protocol::is_evidence(d->service)) {
-		datagram::hash_t h=d->compute_hash();
-		{
-		lock_guard<mutex> lock(mx_evidences);
-		if (evidences.find(h)!=evidences.end()) {
-		delete d;
-		return true;
-		}
-		evidences.emplace(h);
-		}
-		return process_evidence(static_cast<peer_t*>(c),d);
-	}
-
 	bool ispong=d->service==protocol::pong;
 	if (c->process_work(d)) {
 		if (ispong) {
