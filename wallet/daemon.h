@@ -5,7 +5,7 @@
 #include <us/gov/crypto/ec.h>
 #include "wallet.h"
 #include <unordered_map>
-#include "api.h"
+#include "local_api.h"
 
 namespace us { namespace wallet {
 
