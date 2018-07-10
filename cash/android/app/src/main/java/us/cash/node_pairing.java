@@ -152,6 +152,7 @@ public class node_pairing extends AppCompatActivity {
            a.w.set_walletd_host(addr.getText().toString());
            final int tcpport=Integer.parseInt(port.getText().toString());
            a.w.set_walletd_port(tcpport);
+           //a.w.pair
            finish();
        }
        catch (IOException e) {
