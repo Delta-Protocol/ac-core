@@ -32,7 +32,7 @@ namespace auth {
 		virtual ~peer_t();
 		void dump(ostream& os) const;
 
-		virtual void on_connect() override; //called only on the initiator, the caller side.
+		virtual void on_connect() override; //backcalled only on the initiator.
 
 		void process_auth_request(datagram* d, const keys&);
 		void process_auth_peer_challenge(datagram* d, const keys&);

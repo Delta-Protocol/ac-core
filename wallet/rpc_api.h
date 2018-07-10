@@ -34,7 +34,6 @@ private:
 	void ask(int service, const string& args, ostream&os);
 
 	virtual void on_connect() override;
-
 	string walletd_host;
 	uint16_t walletd_port;
 

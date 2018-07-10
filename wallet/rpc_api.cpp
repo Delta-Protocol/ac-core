@@ -11,6 +11,7 @@ using namespace std;
 using datagram=socket::datagram;
 
 c::rpc_api(const string& walletd_host, uint16_t walletd_port):walletd_host(walletd_host), walletd_port(walletd_port), b(0) {
+
 }
 
 c::~rpc_api() {
@@ -25,15 +26,27 @@ void c::ask(int service, ostream&os) {
 }
 
 void c::ask(int service, const string& args, ostream&os) {
-	datagram* q=new datagram(service,args);
-	socket::datagram* response=socket::peer_t::send_recv(walletd_host, walletd_port, q);
-	if (response) {
-		os << response->parse_string();
-		delete response;
+	if (sock==0) {
+		if (!connect(walletd_host,walletd_port,true)) {
+			os << "Error. Unable to connect to wallet daemon.";
+			return;
+		}
 	}
-	else {
-		os << "ERROR ";
-	}
+	datagram* d=new datagram(service,args);
+        send(d);
+
+        auto response=new datagram();
+        while (!response->completed()) {
+                if (!response->recv(sock,2)) {
+                        delete response;
+                        os << "Error. Connected but unable to receive a response.";
+			return;
+                }
+        }
+
+	//socket::datagram* response=socket::peer_t::send_recv(walletd_host, walletd_port, d);
+	os << response->parse_string();
+	delete response;
 }
 
 void c::balance(bool detailed, ostream&os) {
