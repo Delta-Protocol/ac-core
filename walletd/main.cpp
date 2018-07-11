@@ -268,7 +268,8 @@ void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 	}
 }
 
-#include <us/wallet/api.h>
+#include <us/wallet/rpc_api.h>
+#include <us/wallet/local_api.h>
 
 #ifdef FCGI
 #include <jsoncpp/json/json.h> 
@@ -295,10 +296,10 @@ void run_local(string command, args_t& args, const params& p) {
 
 	api* papi;
 	if (p.offline) {
-		papi=new local_api(p.homedir,p.backend_host,p.backend_port);
+		papi=new local_api(p.homedir,p.backend_host,p.backend_port); //rpc to node
 	}
 	else {
-		papi=new rpc_api(p.walletd_host,p.walletd_port);
+		papi=new rpc_api(p.walletd_host,p.walletd_port); //rpc to a wallet daemon
 	}
 	api& wapi=*papi;
 
