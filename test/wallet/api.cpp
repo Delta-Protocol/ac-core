@@ -31,8 +31,8 @@ struct test_api : rpc_api {
 
 	string ask(int service, const string& args){
 
-		datagram* q=new datagram(service,args);        //(walletd_host,  node port,  datagram	);
-		socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" , gov_p , 	q	); //	"127.0.0.1"
+		datagram* q=new datagram(service,args);//	    (walletd_host, node port,  datagram	);
+		socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" ,   gov_p  , 	  q     ); 
 
 		if (response) {
 			return response->parse_string();
@@ -77,11 +77,11 @@ struct test_client: client {
 
 
 
-void test(string ip , int port , int gov_p, string address ,int amoundSend, int fees , string privKey , bool timer ,int sec,  bool addToWallet){
+void test(string ip_w_host , int wallet_p , int gov_p, string address ,int amoundSend, int fees , string privKey , bool timer ,int sec,  bool addToWallet){
 
 string tx_receipt="";
 	
-	test_api ts( ip , port , gov_p );
+	test_api ts( ip_w_host , wallet_p , gov_p );
 
 try{
 	//------add_address--to-wallet---------------|
@@ -217,18 +217,17 @@ void testing_wallet_api()
       {
 	cout << " |-------* " << +i <<" *-------------->> Test <<-----------------|  \n" << endl;
 	
-//	       [ip]   [Wallet_port] [g port]      [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
-//	test("127.0.0.1" , 46001 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000   ,   2  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true    , 120 ,	false	);
-//	test("127.0.0.1" , 46001 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000   ,   2  , "5NAnVaY2tHeHMxWk6faPRvWfB7RmCXbxMoqqMsFU7876"  , false   , 120 ,	false	);
-//	test("127.0.0.1" , 46001 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  3000   ,   2  , "8WeT9ZJSSaQ1V5XUjJZy9gXVBFhaPsjqhd8ciepiMePc"  , false   , 120 ,	false	);
-//	test("127.0.0.1" , 46001 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  4000   ,   2  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , false   , 120 ,	false	);
+//   [ip-wallet_Host] [Wallet_port] [g_port]      [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
 
-	test("127.0.0.1" , 16673 , 16672 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  100000000   ,   100  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , true	 );
-	test("127.0.0.1" , 16673 , 16672 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  200000000   ,   200  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 2 , false );
-	test("127.0.0.1" , 16673 , 16672 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  300000000   ,   200  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , true	 );
-	test("127.0.0.1" , 16673 , 16672 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  400000000   ,   200  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 2 , false );
+	test("127.0.0.1" , 16673 , 16671 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000000   ,   1000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );
+	test("127.0.0.1" , 16674 , 16670 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000000   ,   2000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );
+	test("127.0.0.1" , 16675 , 16669 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  3000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
+	test("127.0.0.1" , 16676 , 16671 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  4000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
+	test("127.0.0.1" , 16677 , 16670 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  1234560   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
+
       }
 }
+
 
 
 
