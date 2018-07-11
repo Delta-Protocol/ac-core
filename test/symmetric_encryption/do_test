@@ -3,7 +3,7 @@
 
 KEYS="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./generate_keys_cpp)"
 MESSAGE='blah blah'
-LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $KEYS "$MESSAGE"
+LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $KEYS "encrypt" "$MESSAGE"
 
 #call c++ to encrypt
 #call java to decrypt

@@ -3,14 +3,24 @@
 #include <iterator>
 
 #include <crypto++/hex.h>
-using CryptoPP::HexEncoder;
-using CryptoPP::HexDecoder;
+
 
 #include <crypto++/cryptlib.h>
-using CryptoPP::BufferedTransformation;
-using CryptoPP::AuthenticatedSymmetricCipher;
 
 #include <crypto++/filters.h>
+
+#include <crypto++/gcm.h>
+
+
+#include <secp256k1_ecdh.h>
+
+#include <cassert>
+
+using CryptoPP::GCM;
+using CryptoPP::HexEncoder;
+using CryptoPP::HexDecoder;
+using CryptoPP::BufferedTransformation;
+using CryptoPP::AuthenticatedSymmetricCipher;
 using CryptoPP::Redirector;
 using CryptoPP::StringSink;
 using CryptoPP::StringSource;
@@ -18,14 +28,6 @@ using CryptoPP::ArraySink;
 using CryptoPP::ArraySource;
 using CryptoPP::AuthenticatedEncryptionFilter;
 using CryptoPP::AuthenticatedDecryptionFilter;
-
-#include <crypto++/gcm.h>
-using CryptoPP::GCM;
-
-#include <secp256k1_ecdh.h>
-
-#include <cassert>
-
 
 using namespace us::gov::crypto;
 

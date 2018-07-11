@@ -3,38 +3,52 @@
 #include <iostream>
 #include <string>
 #include <us/gov/crypto/ec.h>
+#include <vector>
 
 using namespace std;
 using namespace us::gov::crypto;
+using std::begin;
+using std::end;
 
 int main ( int argc, char *argv[] )
 {
-    if ( argc < 4 ) {
-        cout<<"required arugments: <private key> <wallet public key> <message>" << endl;
+    if ( argc < 5 ) {
+        cout<<"required arugments: <private key> <wallet public key> <[encrypt|decrypt]> <message>" << endl;
 
-        if(argc = 2)
+        if(argc == 2)
             cout<<"provided private key: " << argv[1] << endl;
-            cout<<"no public key or message provided" << endl;
-        if(argc = 3)
+            
+        if(argc == 3)
             cout<<"provided private key: " << argv[1] << "\n" << "provided public key: " << argv[2] << endl;
-            cout<<"no message provided" << endl;
+        if(argc == 4)
+            cout<<"provided private key: " << argv[1] << "\n" << "provided public key: " << argv[2] << "\n" << "provided command: " << argv[3] << endl;
+        
     }
     else {
-        keys::priv_t priv;
-        priv.from_b58(argv[1]);
+        ec::keys::priv_t priv;
+        std::string argv1(argv[1]);
+        priv.from_b58(argv1);
         
         cout << priv.to_b58() << endl;
 
-        keys::pub_t pub;
-        pub.from_b58(argv[2]);
+        ec::keys::pub_t pub;
+        std::string argv2(argv[2]);
+        pub.from_b58(argv2);
         
         cout << pub.to_b58() << endl; 
 
-        string message(argv[3]);
-    
-        cout << message << endl;
+        std::string message_string(argv[4]);
+        cout << message_string << endl;
+        vector<unsigned char> message(message_string.begin(),message_string.end());
+        
+        //symmetric_encryption s_e(priv,pub); <--this line breaks compile atm
+        //if(argv[3]=="encrypt"){
+        
+           //vector<unsigned char> encrypted = s_e.encrypt(message);
+           //string encrypted_string(encrypted.begin(), encrypted.end());
 
-        symmetric_encryption s_e(priv,pub)
+           //cout << encrypted_string << endl;
+        //}
     }
 }
 

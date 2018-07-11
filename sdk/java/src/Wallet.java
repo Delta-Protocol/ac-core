@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.net.Socket;
 import java.security.SecureRandom;
 import org.spongycastle.math.ec.ECPoint;
+import java.security.GeneralSecurityException;
 
 public class Wallet {
 
@@ -54,7 +55,7 @@ public class Wallet {
 
     private File homeDir;
 
-    public Wallet(File homedir) throws IOException {
+    public Wallet(File homedir) throws IOException, GeneralSecurityException {
 	homeDir=homedir;
         setup_keys();
         setup_addr();
@@ -69,7 +70,7 @@ public class Wallet {
 	return new FileOutputStream(filename);
     }
 
-    void setup_keys() throws IOException {
+    void setup_keys() throws IOException, GeneralSecurityException {
         String filename = "k";
         String fileContents;
         File file = new File(homeDir,filename);

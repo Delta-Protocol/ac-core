@@ -9,6 +9,6 @@ using namespace us::gov::crypto;
 
 int main ()
 {
-    keys k = keys::generate();
+    ec::keys k = ec::keys::generate();
     std::cout << k.priv.to_b58() << " " << k.pub.to_b58() << endl;
 }
