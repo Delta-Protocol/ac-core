@@ -48,9 +48,12 @@ struct pairing {
 
         void dump(ostream& os) const;
 
+	string pair_request();
         void pair(const pub_t& pub, const string& name);
         void unpair(const pub_t& pub);
         const string& get_name(const pub_t& pub);
+
+	string msg;
     };
 
     devices_t devices;

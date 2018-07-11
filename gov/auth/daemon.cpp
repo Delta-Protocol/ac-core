@@ -9,10 +9,10 @@ using namespace std;
 typedef us::gov::auth::daemon c;
 
 
-c::daemon(const keys& k): id(k) {
+c::daemon(const keys& k, uint16_t port, uint16_t edges): b(port,edges), id(k) {
 }
 
-c::daemon(const keys& k, uint16_t port, uint16_t edges): b(port,edges), id(k) {
+c::daemon(const keys& k): id(k) {
 }
 
 c::~daemon() {

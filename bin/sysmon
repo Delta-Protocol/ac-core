@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo -n "maximum simultaneous opened files: "
+cat /proc/sys/fs/file-max
+
+echo -n "maximum simultaneous opened files per process: "
+ulimit -n
+
+echo -n "Num CPUs: "
+cat /proc/cpuinfo | grep bogomips | wc -l
+
+echo "bogomips:"
+cat /proc/cpuinfo | grep bogomips | nl
+

@@ -53,7 +53,7 @@ namespace blockchain {
 			networking(const keys& k, blockchain::daemon* parent): b(k), parent(parent) {}
 			networking(const keys& k, uint16_t port, uint16_t edges, blockchain::daemon* parent, const vector<string>& seed_nodes): b(k, port, edges), parent(parent), seed_nodes(seed_nodes) {}
 			virtual bool process_work(socket::peer_t *c, datagram*d) override;
-			virtual bool process_evidence(peer::peer_t *c, datagram*d) override;
+			virtual bool process_evidence(relay::peer_t *c, datagram*d) override;
 			bool process_work_sysop(peer::peer_t *c, datagram*d);
 			virtual string get_random_peer(const unordered_set<string>& exclude) const override; //returns ipaddress //there exist a possibility of returning "" even though there were eligible items available
 

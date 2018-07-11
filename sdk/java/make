@@ -18,6 +18,13 @@ fi
 
 }
 
+javac=`which javac`
+if [ "_$JAVA_HOME" != "_" ]; then
+javac=$JAVA_HOME/bin/javac
+fi
+
+echo "using javac=$javac"
+
 function source {
 	getdeps
 	mkdir -p classes
