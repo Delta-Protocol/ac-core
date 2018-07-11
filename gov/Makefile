@@ -6,10 +6,10 @@ OBJS :=  crypto/crypto.o net/net.o socket/socket.o peer/peer.o relay/relay.o dfs
 all: libusgov.so
 
 signal_handler.o: signal_handler.cpp signal_handler.h
-	g++ ${CXXFLAGS} -I../.. -c signal_handler.cpp
+	g++ -fPIC ${CXXFLAGS} -I../.. -c signal_handler.cpp
 
 cfg.o: cfg.cpp cfg.h
-	g++ ${CXXFLAGS} -I../.. -c cfg.cpp
+	g++ -fPIC ${CXXFLAGS} -I../.. -c cfg.cpp
 
 libusgov.so: deps signal_handler.o cfg.o
 #	g++ -shared -fPIC ${CXXFLAGS} -pthread ${OBJS} signal_handler.o cfg.o -lcrypto++ -lsecp256k1 -L/usr/lib -I../.. -o libusgov.so
