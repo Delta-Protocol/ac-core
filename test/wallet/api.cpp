@@ -213,7 +213,7 @@ cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
 void testing_wallet_api()
 {
 
-      for (int i=1; i<=25; i++ ) 
+      for (int i=1; i<=4; i++ ) 
       {
 	cout << " |-------* " << +i <<" *-------------->> Test <<-----------------|  \n" << endl;
 	
