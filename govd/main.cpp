@@ -1,7 +1,6 @@
 #include <us/gov/auth.h>
 #include <us/gov/blockchain.h>
 #include <us/gov/cash.h>
-//#include <us/gov/nova.h>
 #include <us/gov/signal_handler.h>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/blockchain/protocol.h>
@@ -40,8 +39,8 @@ struct params {
 
 	uint16_t port{16672};
 	uint16_t edges{10};
-	bool genesis{false};
-	string genesis_address;
+//	bool genesis{false};
+//	string genesis_address;
 	bool daemon{false};
 	bool shell{false};
 	uint16_t simul_num_nodes_deployed{0};
@@ -57,7 +56,7 @@ void help() {
 	cout << "  -ds           Run daemon with sysop shell" << endl;
 	cout << "  -p <port>     Listening port, default " << p.port << endl;
 	cout << "  -e <edges>    Max num neightbours, default " << p.edges << endl;
-	cout << "  -genesis <address of genesis node>    start a new history" << endl;
+//	cout << "  -genesis <address of genesis node>    start a new history" << endl;
 	cout << "  -home <homedir>   Set home directory (default is ~/.us) " << endl;
 	cout << "  -host <address>   Specify where the daemon is running, defaults to localhost" << endl;
 	cout << "  -h            Print this help and exit " << endl;
@@ -110,6 +109,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 			}
 			continue;
 		}
+/*
 		if (inp=="-genesis") {
 			p.genesis=true;
 			if (i<argc) {
@@ -121,6 +121,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 			}
 			continue;
 		}
+*/
 		if (inp=="-home") {
 			if (i<argc) {
 				p.homedir=argv[i++];
@@ -372,13 +373,14 @@ int main(int argc, char** argv) {
 
 	p.homedir+="/gov";
 
+/*
 	if (p.genesis) {
 		if (cfg::exists_dir(p.homedir)) {
 			cerr << "Cannot start a new blockchain if home dir exists: " << p.homedir << endl;
 			exit(1);
 		}
 	}
-
+*/
 	cfg conf=cfg::load(p.homedir);
 
     if (!wallet_file.empty()) {
@@ -400,16 +402,14 @@ int main(int argc, char** argv) {
 		blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 		d.sysop_allowed=p.shell;
 		d.add(new cash::app());
-//		d.add(new nova::app());
-
+/*
         if (p.genesis) {
             cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
-//            d.auth_app->db.genesis(conf.keys.pub,p.genesis_address);
             d.start_new_blockchain(p.genesis_address);
             cout << "genesis block has been created." << endl;
             exit(0);
         }
-
+*/
 
 		d.run();
 		cout << "main: exited normally" << (thread_::_this.terminated?", terminated by signal":"") << endl;

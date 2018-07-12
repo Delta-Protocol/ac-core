@@ -33,7 +33,7 @@ void c::add(app*app) {
 	//app->parent=this;
 	apps_.emplace(app->get_id(),app);
 }
-
+/*
 void c::start_new_blockchain(const string& addr) {
     assert(!addr.empty());
     auto pool=new diff();
@@ -50,7 +50,7 @@ void c::start_new_blockchain(const string& addr) {
     }
     delete pool;
 }
-
+*/
 
 c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
 }

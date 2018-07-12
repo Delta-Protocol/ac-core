@@ -186,7 +186,7 @@ namespace blockchain {
 		apps apps_;
 		auth::app* auth_app;
 
-        void start_new_blockchain(const string& addr);
+//        void start_new_blockchain(const string& addr);
 
 		struct votes_t:unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> { // <pubkey,pair<hash,count>>
 			typedef unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> b;
