@@ -11,6 +11,9 @@ using namespace us::gov;
 using namespace us::gov::cash;
 using namespace std;
 
+constexpr array<const char*,c::num_sigcodes> c::sigcodestr;
+
+
 void c::dump_sigcodes(ostream&os) {
 	os << sigcodestr[sigcode_all] << ' ' << sigcodestr[sigcode_none] << ' ' << sigcodestr[sigcode_this] << ' ';
 }
