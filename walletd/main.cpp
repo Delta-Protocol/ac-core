@@ -9,7 +9,7 @@
 #include <us/gov/signal_handler.h>
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
-#include "args.h"
+#include <us/gov/input.h>
 #include "fcgi.h"
 
 using namespace us::wallet;
@@ -144,6 +144,8 @@ void run_fcgi(const params& p) {
 }
 #endif
 
+using us::gov::input::cfg;
+using us::gov::input::cfg1;
 
 void run_daemon(const params& p) {
 	signal(SIGINT,sig_handler);
@@ -152,7 +154,7 @@ void run_daemon(const params& p) {
 
 //	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
 
-	wallet_daemon d(us::gov::input::cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
+	wallet_daemon d(cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
 
 #ifdef FCGI
     if (p.fcgi) {
@@ -175,6 +177,7 @@ void run_daemon(const params& p) {
 
 #include <us/wallet/protocol.h>
 
+using us::gov::input::args_t;
 
 string parse_options(args_t& args, params& p) {
     string cmd;
@@ -372,6 +375,8 @@ void run_local(string command, args_t& args, const params& p) {
 
 
 int main(int argc, char** argv) {
+
+    cfg::check_platform();
 
 	args_t args(argc,argv);
 	params p;

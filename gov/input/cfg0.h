@@ -12,6 +12,8 @@ struct cfg0 {
        cfg0(const string& home);
        cfg0(const cfg0& other);
 
+    static void check_platform();
+     static bool is_big_endian();
 
 	static bool mkdir(const string& d);
 	static bool file_exists(const string& f);

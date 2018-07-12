@@ -36,7 +36,8 @@ void help() {
 	cout << "  -h            Print this help and exit " << endl;
 }
 
-#include "args.h"
+#include <us/gov/input.h>
+using us::gov::input::args_t;
 using namespace us;
 
 string parse_options(args_t& args, params& p) {

@@ -1,12 +1,12 @@
-#ifndef USGOV_50d37207c1cd1fede08cc12a819a7a44a67234e5ad287e693cd167c2ee630227
-#define USGOV_50d37207c1cd1fede08cc12a819a7a44a67234e5ad287e693cd167c2ee630227
+#ifndef USGOV_46373a79c914cc1afc4dcf1f5c83a282d35ddf519feb546780be965072e21ade
+#define USGOV_46373a79c914cc1afc4dcf1f5c83a282d35ddf519feb546780be965072e21ade
 
 #include <string>
 #include <sstream>
-#include <us/gov/cash.h>
-#include <us/gov/crypto.h>
 
-namespace us { namespace wallet {
+namespace us { namespace gov {
+namespace input {
+
 using namespace std;
 
 template<typename T>
@@ -18,18 +18,13 @@ T convert(const string& s) {
 }
 
 template<> string convert(const string& s);
-template<> us::gov::cash::tx::sigcode_t convert(const string& s);
-template<> us::gov::crypto::ec::keys::priv_t convert(const string& s);
-
 
 
 struct args_t {	
 	args_t(int argc, char** argv):argc(argc), argv(argv) {
-        //for (int i=0; i<argc; ++i) cout << argv[i] << endl;
 	}
 	template<typename T>
 	T next() {
-//cout << argc << " " << n << endl;
 		if (n>=argc) {
 			return T();
 		}
@@ -53,6 +48,7 @@ struct args_t {
 };
 
 
+}
 }}
 
 #endif

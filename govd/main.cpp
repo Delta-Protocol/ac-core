@@ -293,6 +293,9 @@ void open_shell(thinfo& i) {
 #include <sys/wait.h>
 
 int main(int argc, char** argv) {
+
+    cfg::check_platform();
+
 	params p;
 	if(!parse_cmdline(argc,argv,p)) return 1;
 

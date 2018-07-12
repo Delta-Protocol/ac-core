@@ -21,6 +21,22 @@ c::cfg0(const cfg0& other): home(other.home) {
 c::~cfg0() {
 }
 
+
+bool c::is_big_endian() {
+    union {
+        uint16_t i;
+        char c[2];
+    } bint = {0x0102};
+    return bint.c[0] == 1; 
+}
+
+void c::check_platform() {
+    if (is_big_endian()) {
+        cerr << "This program cannot run on big-endian systems." << endl;
+        exit(1);
+    }
+}
+
 bool c::mkdir(const string& d) {
 	int e = ::mkdir(d.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (e==-1) cerr << errno << " " << strerror(errno) << endl;

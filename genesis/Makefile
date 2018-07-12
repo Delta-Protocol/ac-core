@@ -5,7 +5,7 @@ CXXFLAGS:=-O3
 all: genesis
 
 genesis: main.cpp
-	g++ ${CXXFLAGS} -pthread -I../.. main.cpp args.cpp -lusgov -L../gov -L/usr/lib -o genesis
+	g++ ${CXXFLAGS} -pthread -I../.. main.cpp -lusgov -L../gov -L/usr/lib -o genesis
 
 clean:
 	rm -f genesis
