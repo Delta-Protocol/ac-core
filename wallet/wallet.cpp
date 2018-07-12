@@ -1,6 +1,6 @@
 #include "wallet.h"
 #include "protocol.h"
-#include <us/gov/cfg.h>
+#include <us/gov/input.h>
 
 using namespace us::wallet;
 using namespace std;
@@ -28,7 +28,7 @@ string c::filename() const {
 bool c::load() {
 	auto file=filename();
 //cout << "loading from " << file << endl;
-	if (!us::gov::filesystem::cfg::file_exists(file)) return true;
+	if (!us::gov::input::cfg::file_exists(file)) return true;
 	ifstream f(file);
 	while(f.good()) {
 		string pkb58;

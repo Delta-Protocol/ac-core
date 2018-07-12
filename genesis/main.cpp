@@ -87,66 +87,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 #include <string.h>
 #include <iomanip>
 #include <fstream>
-#include <us/gov/cfg.h>
-
-struct cfg: filesystem::cfg {
-    typedef filesystem::cfg b;
-    typedef crypto::ec::keys keys_t;
-
-    cfg(const keys_t::priv_t& privk, const string& home): b(privk, home) {
-    }
-        cfg(const cfg& other): b(other) {
-        }
-
-    static cfg load(const string& home);
-};
-
-
-cfg cfg::load(const string& home) {
-    //keys
-    auto x=b::load(home); 
-
-    //blocks
-            string blocks_dir=abs_file(home,"blocks");
-            cout << "making sure dir for blocks exists" << endl;
-            if (!ensure_dir(blocks_dir)) {
-                cerr << "Cannot create blocks dir " << blocks_dir << endl;
-                exit(1);
-            }
-
-
-    //locking programs
-            string locking_dir=abs_file(home,"locking");
-                    if (!ensure_dir(locking_dir)) {
-                        cerr << "Cannot create locking-programs dir " << locking_dir << endl;
-                        exit(1);
-            }
-
-            return cfg(x.keys.priv,home);
-}
-
-
-/*
-struct cfg: filesystem::cfg {
-	typedef filesystem::cfg b;
-	typedef crypto::ec::keys keys_t;
-
-	cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes): b(privk, home), seed_nodes(seed_nodes) {
-	}
-        cfg(const cfg& other): b(other), seed_nodes(other.seed_nodes) {
-        }
-
-	static cfg load(const string& home);
-	vector<string> seed_nodes;
-};
-
-
-cfg cfg::load(const string& home) {
-	//keys
-	return b::load(home); 
-}
-*/
-//using filesystem::cfg;
+#include <us/gov/input.h>
 
 #include <us/gov/blockchain/diff.h>
 
@@ -178,6 +119,9 @@ struct genesis_daemon: blockchain::daemon {
 };
 
 
+using us::gov::input::cfg;
+using us::gov::input::cfg1;
+
 int main(int argc, char** argv) {
 
     args_t args(argc,argv);
@@ -207,7 +151,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	cfg conf=cfg::load(p.homedir);
+	cfg1 conf=cfg1::load(p.homedir);
 
 	if (!conf.keys.pub.valid) {
 		cerr << "Invalid node pubkey" << endl;

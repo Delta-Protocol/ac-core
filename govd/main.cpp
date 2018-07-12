@@ -4,10 +4,12 @@
 #include <us/gov/signal_handler.h>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/blockchain/protocol.h>
+#include <us/gov/input.h>
 
 using namespace us::gov;
 using namespace std;
 using socket::datagram;
+using us::gov::input::cfg;
 
 void sig_handler(int s) {
     cout << "main: Caught signal " << s << endl;
@@ -39,8 +41,6 @@ struct params {
 
 	uint16_t port{16672};
 	uint16_t edges{10};
-//	bool genesis{false};
-//	string genesis_address;
 	bool daemon{false};
 	bool shell{false};
 	uint16_t simul_num_nodes_deployed{0};
@@ -56,7 +56,6 @@ void help() {
 	cout << "  -ds           Run daemon with sysop shell" << endl;
 	cout << "  -p <port>     Listening port, default " << p.port << endl;
 	cout << "  -e <edges>    Max num neightbours, default " << p.edges << endl;
-//	cout << "  -genesis <address of genesis node>    start a new history" << endl;
 	cout << "  -home <homedir>   Set home directory (default is ~/.us) " << endl;
 	cout << "  -host <address>   Specify where the daemon is running, defaults to localhost" << endl;
 	cout << "  -h            Print this help and exit " << endl;
@@ -109,19 +108,6 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 			}
 			continue;
 		}
-/*
-		if (inp=="-genesis") {
-			p.genesis=true;
-			if (i<argc) {
-				p.genesis_address=argv[i++];
-			}
-			else {
-				cerr << "I need the address of the genesis node." << endl;
-				return false;
-			}
-			continue;
-		}
-*/
 		if (inp=="-home") {
 			if (i<argc) {
 				p.homedir=argv[i++];
@@ -173,57 +159,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 #include <string.h>
 #include <iomanip>
 #include <fstream>
-#include <us/gov/cfg.h>
-
-struct cfg: filesystem::cfg {
-	typedef filesystem::cfg b;
-	typedef crypto::ec::keys keys_t;
-
-	cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes): b(privk, home), seed_nodes(seed_nodes) {
-	}
-        cfg(const cfg& other): b(other), seed_nodes(other.seed_nodes) {
-        }
-
-	static cfg load(const string& home);
-	vector<string> seed_nodes;
-};
-
-
-cfg cfg::load(const string& home) {
-	//keys
-	auto x=b::load(home); 
-
-	//seed nodes 
-        vector<string> addrs;
-                string seeds_file=abs_file(home,"nodes.manual");
-                cout << "reading " << seeds_file << endl;
-                ifstream f(seeds_file);
-                while(f.good()) {
-                        string addr;
-                        getline(f,addr);
-                        if (addr.empty()) continue;
-                        addrs.push_back(addr);
-                }
-                cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
-
-	//blocks
-            string blocks_dir=abs_file(home,"blocks");
-            cout << "making sure dir for blocks exists" << endl;
-            if (!ensure_dir(blocks_dir)) {
-                cerr << "Cannot create blocks dir " << blocks_dir << endl;
-                exit(1);
-            }
-
-
-	//locking programs
-            string locking_dir=abs_file(home,"locking");
-                    if (!ensure_dir(locking_dir)) {
-                        cerr << "Cannot create locking-programs dir " << locking_dir << endl;
-                        exit(1);
-            }
-
-            return cfg(x.keys.priv,home,move(addrs));
-}
+#include <us/gov/input.h>
 
 struct thinfo {
 	thinfo(const params& p, const cfg& conf): p(p), conf(conf) {
@@ -373,14 +309,6 @@ int main(int argc, char** argv) {
 
 	p.homedir+="/gov";
 
-/*
-	if (p.genesis) {
-		if (cfg::exists_dir(p.homedir)) {
-			cerr << "Cannot start a new blockchain if home dir exists: " << p.homedir << endl;
-			exit(1);
-		}
-	}
-*/
 	cfg conf=cfg::load(p.homedir);
 
     if (!wallet_file.empty()) {
@@ -402,14 +330,6 @@ int main(int argc, char** argv) {
 		blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 		d.sysop_allowed=p.shell;
 		d.add(new cash::app());
-/*
-        if (p.genesis) {
-            cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
-            d.start_new_blockchain(p.genesis_address);
-            cout << "genesis block has been created." << endl;
-            exit(0);
-        }
-*/
 
 		d.run();
 		cout << "main: exited normally" << (thread_::_this.terminated?", terminated by signal":"") << endl;

@@ -1,4 +1,5 @@
 #https://gist.github.com/xuhdev/1873316
+CXXFLAGS:=-O3
 
 .PHONY: all
 all: genesis

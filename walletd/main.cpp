@@ -5,7 +5,7 @@
 #include <thread>
 #include <us/gov/cash/locking_programs/p2pkh.h>
 #include <us/gov/cash/tx.h>
-#include <us/gov/cfg.h>
+#include <us/gov/input/cfg.h>
 #include <us/gov/signal_handler.h>
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
@@ -144,7 +144,6 @@ void run_fcgi(const params& p) {
 }
 #endif
 
-#include <us/gov/cfg.h>
 
 void run_daemon(const params& p) {
 	signal(SIGINT,sig_handler);
@@ -153,7 +152,7 @@ void run_daemon(const params& p) {
 
 //	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
 
-	wallet_daemon d(us::gov::filesystem::cfg::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
+	wallet_daemon d(us::gov::input::cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
 
 #ifdef FCGI
     if (p.fcgi) {
@@ -288,7 +287,7 @@ Json::Value to_json(const string& s) {
 
 
 void run_local(string command, args_t& args, const params& p) {
-	if (!us::gov::filesystem::cfg::ensure_dir(p.homedir)) {
+	if (!us::gov::input::cfg::ensure_dir(p.homedir)) {
 		cerr << "could not create " << p.homedir << endl;
 		exit(1);
 	}
