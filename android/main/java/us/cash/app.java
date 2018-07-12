@@ -6,6 +6,7 @@ import android.util.Log;
 import us.wallet.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 
 public class app extends Application {
@@ -35,6 +36,9 @@ public class app extends Application {
                     Log.d("App","ERROR "+e.getMessage());
                     w=null;
                     if (ml!=null) ml.on_wallet_init_error("Error: " + e.getMessage());
+                }
+                catch(GeneralSecurityException e) {
+                    Log.d("App","ERROR "+e.getMessage());
                 }
             }
         });

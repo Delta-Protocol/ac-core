@@ -20,14 +20,12 @@ import org.spongycastle.crypto.params.ECKeyGenerationParameters;
 import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.util.test.FixedSecureRandom;
 import org.spongycastle.asn1.x9.X9ECParameters;
+import java.security.Security;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
-
-
-
 
 public class EllipticCryptography {
 
@@ -40,10 +38,13 @@ public class EllipticCryptography {
 
 
     private EllipticCryptography() throws NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
+        
+        Security.addProvider(new BouncyCastleProvider());
         curve_params=ECNamedCurveTable.getParameterSpec("secp256k1");
-        factory = KeyFactory.getInstance("EC", "BC");
+        factory = KeyFactory.getInstance("ECDSA");
         curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
         secureRandom = new SecureRandom();
+        
     }
 
     public static EllipticCryptography getInstance() throws NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException {
@@ -53,7 +54,7 @@ public class EllipticCryptography {
         return instance;
     }
 
-    public BigInteger generatePrivateKey() throws NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
+    public BigInteger generatePrivateKey() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
         KeyPair keyPair = generateKeyPair();
         PrivateKey privateKey = privateKeyFromKeyPair(keyPair);
         return new BigInteger(privateKey.getEncoded());
@@ -71,15 +72,15 @@ public class EllipticCryptography {
         return factory.generatePublic(new X509EncodedKeySpec(keypair.getPublic().getEncoded()));
     }
 
-    public KeyPair generateKeyPair() throws NoSuchAlgorithmException,InvalidAlgorithmParameterException {
+    public KeyPair generateKeyPair() throws NoSuchAlgorithmException,InvalidAlgorithmParameterException, NoSuchProviderException {
 
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC", new BouncyCastleProvider());
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("ECDSA");
         generator.initialize(curve_params);
         return generator.generateKeyPair();
     }
 
-    public static byte[] generateSharedKey(PrivateKey privKeyA, PublicKey pubKeyB) throws InvalidKeyException, InvalidKeySpecException, NoSuchAlgorithmException {
-        KeyAgreement aKA = KeyAgreement.getInstance("ECDH", new BouncyCastleProvider());
+    public static byte[] generateSharedKey(PrivateKey privKeyA, PublicKey pubKeyB) throws NoSuchProviderException, InvalidKeyException, InvalidKeySpecException, NoSuchAlgorithmException {
+        KeyAgreement aKA = KeyAgreement.getInstance("ECDH");
         aKA.init(privKeyA);
         aKA.doPhase(pubKeyB, true);
         return aKA.generateSecret();

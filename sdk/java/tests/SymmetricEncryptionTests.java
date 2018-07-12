@@ -5,6 +5,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.KeyPair;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 
 
@@ -70,16 +71,17 @@ public class SymmetricEncryptionTests{
     }
 
     public boolean test_encrypt_decrypt_keys(String plaintext_string, PrivateKey priv_a, PublicKey pub_a, PrivateKey priv_b, PublicKey pub_b) throws GeneralSecurityException{
-
+        System.out.println("encrypting :" + plaintext_string);
         byte[] plaintext = plaintext_string.getBytes();
-        
+        System.out.println("encrypting as bytes:" + plaintext);
         SymmetricEncryption se_a= new SymmetricEncryption(priv_a,pub_b);
         byte[] ciphertext = se_a.encrypt(plaintext);
-
+        System.out.println("ciphertext as bytes:" + ciphertext);
         SymmetricEncryption se_b= new SymmetricEncryption(priv_b,pub_a);
         byte[] decodedtext = se_b.decrypt(ciphertext);
+        System.out.println("decrypted :" + decodedtext.toString());
         
-        return plaintext==decodedtext;
+        return Arrays.equals(plaintext,decodedtext);
     }
 
     public boolean test_encrypt_multiple(String plaintext_string)throws GeneralSecurityException{
@@ -96,7 +98,7 @@ public class SymmetricEncryptionTests{
         byte[] ciphertext_1 = se_a.encrypt(plaintext);
         byte[] ciphertext_2 = se_a.encrypt(plaintext);
 
-        return ciphertext_1!=ciphertext_2;
+        return !Arrays.equals(ciphertext_1,ciphertext_2);
     }
 
     public boolean test_decrypt_nulls(String ciphertext_string) throws GeneralSecurityException{
@@ -110,7 +112,7 @@ public class SymmetricEncryptionTests{
         byte[] ciphertext = ciphertext_string.getBytes();
         SymmetricEncryption se = new SymmetricEncryption(priv_a,pub_b);
         byte[] decryptedtext = se.decrypt(ciphertext);
-        return decryptedtext.length>0;
+        return decryptedtext.length == 0;
     }
 
     public boolean test_decrypt_multiple(String plaintext_string) throws GeneralSecurityException{
@@ -131,9 +133,8 @@ public class SymmetricEncryptionTests{
         SymmetricEncryption se_b = new SymmetricEncryption(priv_b,pub_a);
         byte[] decryptedtext1 = se_b.decrypt(plaintext);
         byte[] decryptedtext2 = se_b.decrypt(plaintext);
-        
-        return decryptedtext1==decryptedtext2;
-        
+     
+        return Arrays.equals(decryptedtext1,decryptedtext2);
     }
 
     

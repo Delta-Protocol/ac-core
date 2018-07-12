@@ -31,17 +31,17 @@ function source {
 function all {
 	source
 	mkdir -p test_classes
-	javac -d test_classes -cp $libspath":us-wallet-sdk.jar" tests/*.java
+	javac -d test_classes -cp ".:libs/*:us-wallet-sdk.jar" tests/*.java
 	rm -f us-test-sdk.jar
 	cd test_classes
-	jar cf ../us-test-sdk.jar *
+	jar cfe ../us-test-sdk.jar us/test/MainTest *
 	cd ..
 }
 
 
 
 cmd=$1
-libspath="libs/core-1.58.0.0.jar:libs/pg-1.54.0.0.jar:libs/pkix-1.54.0.0.jar:libs/prov-1.58.0.0.jar"
+libspath=".:libs/core-1.58.0.0.jar:libs/pg-1.54.0.0.jar:libs/pkix-1.54.0.0.jar:libs/prov-1.58.0.0.jar"
 
 
 if [ "_$cmd" == "_" ]; then
