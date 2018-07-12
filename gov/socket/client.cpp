@@ -63,8 +63,12 @@ string client::address() const {
 bool client::connect(const string& host, uint16_t port, bool block) {
 	disconnect();
 	lock_guard<mutex> lock(mx);
-	if (!init_sock(host, port, block)) return false;
+	if (!init_sock(host, port, block)) {
+        cerr << "Could not init socket for " << host << ":" << port << endl;
+        return false;
+    }
 	addr=host;
+cout << "calling on_connect" << endl;
     on_connect();
 	return true;
 }
@@ -157,6 +161,22 @@ bool c::send(char d) const {
 		return false;
 	}
 	return io::send(sock,d); 
+}
+
+//if completed the caller is responsible to delete it, otherwise it is just a weak pointer
+datagram* c::complete_datagram(int timeout_seconds) {
+    if (!curd) curd=new datagram();
+    if (!curd->recv(sock,timeout_seconds)) {
+        delete curd;
+        curd=0;
+        return 0;
+    }
+    if (curd->completed()) {
+        auto t=curd;
+        curd=0;
+        return t;
+    }
+    return curd;
 }
 
 datagram* c::complete_datagram() {

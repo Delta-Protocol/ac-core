@@ -16,8 +16,10 @@ c::~peer_t() {
 }
 
 void c::on_connect() { //called only on the initiator, the caller side.
+cout << "AUTH ONCONNECT" << endl;
     b::on_connect();
-    do_actions();
+cout << "INITIATE DIALOGUE" << endl;
+    initiate_dialogue();
 }
 
 void c::dump(ostream& os) const {
@@ -130,8 +132,8 @@ cout << "A2A calling verification_completed" << endl;
 	verification_completed();
 }
 
-void c::do_actions() {
-cout << "do_actions" << endl;
+void c::initiate_dialogue() {
+cout << "initiate_dialogue" << endl;
 	if (stage_me==anonymous && msg.empty()) {  //if msg not empty we are carrying on the auth process already
 		//cout << "auth: peer_t: send protocol::auth_request" << endl;
 		msg=get_random_message();		
@@ -158,3 +160,55 @@ string c::get_random_message() {
 	return to_string(v);
  }
 
+
+const c::keys& c::get_keys() const {
+    assert(parent!=0);
+    return static_cast<const daemon*>(parent)->id;
+}
+
+bool c::process_work(datagram*d) {
+    if (b::process_work(d)) return true;
+
+    switch(d->service) {
+        case protocol::auth_request: process_auth_request(d,get_keys()); break;
+        case protocol::auth_peer_challenge: process_auth_peer_challenge(d,get_keys()); break;
+        case protocol::auth_challenge_response: process_auth_challenge_response(d); break;
+        case protocol::auth_peer_status: process_auth_peer_status(d); break;
+    default: return false;
+    }
+    return true;
+}
+
+
+bool c::run_auth() {
+    if (parent!=0) {
+        cerr << "this object is already managed by a daemon" << endl;
+        return false;
+    }
+    fd_set read_fd_set;
+cout << "-----------------" << endl;
+cout << "enter while" << endl;
+    while(!program::_this.terminated) {
+        if (stage_peer==verified || stage_peer==verified_fail) {
+cout << "FINISHED break" << endl;
+            break;
+        }
+cout << "complete_datagram" << endl;
+        datagram* d=complete_datagram(10);
+        if (d==0) {
+cout << "d=0" << endl;
+            break;
+        }
+        if (!d->completed()) { 
+cout << "ok, not completed, continuing" << endl;
+           continue;
+        }
+        if (process_work(d)) {
+cout << "ok, work processed, continuing" << endl;
+                continue;
+        }
+cout << "break" << endl;
+        break; //datagram not recognized in the protocol
+    }
+    return stage_peer==verified;
+ }

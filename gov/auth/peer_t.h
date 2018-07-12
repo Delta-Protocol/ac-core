@@ -34,11 +34,13 @@ namespace auth {
 
 		virtual void on_connect() override; //backcalled only on the initiator.
 
+        virtual bool process_work(datagram*d) override;
+
 		void process_auth_request(datagram* d, const keys&);
 		void process_auth_peer_challenge(datagram* d, const keys&);
 		void process_auth_challenge_response(datagram* d);
 		void process_auth_peer_status(datagram* d);
-		void do_actions();
+		void initiate_dialogue();
 		static string get_random_message();
 		static string to_string(const vector<unsigned char>& data);
 
@@ -48,6 +50,9 @@ namespace auth {
 		virtual void verification_completed() {}
 
 		daemon* get_parent() { return reinterpret_cast<daemon*>(parent); }
+
+        virtual const keys& get_keys() const;
+        bool run_auth();
 
 		/// For every edge in the graph of nodes there are two nodes on each end, each node has an instance of this class, 
 		/// If one of these nodes is me and the other is peer

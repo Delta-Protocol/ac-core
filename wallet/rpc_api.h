@@ -3,18 +3,18 @@
 #define USGOV_be7dc84108784c4af35dada40b3f9b325e2d9f0782781c75529a2c286e0cfa5c
 
 #include "api.h"
-#include <us/gov/auth.h>
+#include "peer_t.h"
 
 
 namespace us { namespace wallet {
 
 using namespace std;
 
-struct rpc_api:api, gov::auth::peer_t {
-	typedef gov::auth::peer_t b;
+struct rpc_api:api, peer_t {
+	typedef peer_t b;
 	using b::pub_t;
 
-	rpc_api(const string& walletd_host, uint16_t walletd_port);
+	rpc_api(const b::keys&, const string& walletd_host, uint16_t walletd_port);
 	virtual ~rpc_api();
 
 	virtual void balance(bool detailed, ostream&os) override;
@@ -33,9 +33,9 @@ private:
 	void ask(int service, ostream&os);
 	void ask(int service, const string& args, ostream&os);
 
-	virtual void on_connect() override;
 	string walletd_host;
 	uint16_t walletd_port;
+
 
 };
 

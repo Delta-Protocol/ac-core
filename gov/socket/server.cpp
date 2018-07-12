@@ -77,102 +77,6 @@ return false;
     }
 }
 
-#include <us/gov/likely.h>
-
-void c::run() {
-	fd_set read_fd_set;
-	int i;
-	struct sockaddr_in clientname;
-	unsigned int size;
-	assert(port);
-	sock = make_socket(port);
-	if (!sock) {
-		cerr << "error making socket" << endl;
-		program::_this.finish();
-		return;
-	}
-	if (::listen (sock, 1) < 0) {
-		cerr << "error listen" << endl;
-		close(sock);
-		sock=0;
-		program::_this.finish();
-		return;
-	}
-	if (!clients.locli.connect("127.0.0.1",port)) {
-		close(sock);
-		sock=0;
-		cerr << "failed connecting the loopback client" << endl;
-		program::_this.finish();
-		return;
-	}
-
-	// Initialize the set of active sockets.
-	int loopback;
-	size = sizeof (clientname);
-	loopback = ::accept(sock, (struct sockaddr *) &clientname,&size);
-	if (loopback < 0) {
-		cerr << "error in ::accept" << endl;
-		close(sock);
-		program::_this.finish();
-		return;
-	}
-
-	signal_handler::_this.add(this);
-	char discard[30]; //loopback recv buffer, up to 30 wake up signals
-	while (true) {
-		if (thread_::_this.terminated) {
-			break;
-		}
-		FD_ZERO(&read_fd_set);
-		FD_SET(sock,&read_fd_set);
-		FD_SET(loopback,&read_fd_set);
-		vector<int> sl=clients.update();
-		for (auto& i:sl) FD_SET(i,&read_fd_set);
-		if (::select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0) {
-			cerr << "error in select" << endl;
-			continue;
-		}
-		if (FD_ISSET(loopback, &read_fd_set)) {
-			int r=os->recv(loopback,&discard,30,0);
-		}
-		if (FD_ISSET(sock, &read_fd_set)) {
-			int nnew;
-			size = sizeof (clientname);
-			nnew = ::accept(sock, (struct sockaddr *) &clientname,&size);
-			if (nnew < 0) {
-				cerr << "error in ::accept 2" << endl;
-				continue;
-			}
-			cout << "socket: server: accepted, creating client for fd " << nnew << endl;
-			auto cl=create_client(nnew);
-            if (unlikely(banned_throttle(cl->addr))) {
-                delete cl;
-            }
-            else {
-			    clients.add(cl,false);
-            }
-		}
-		for (int i:sl) { //Service all the sockets with input pending.
-			cout << "socket: server: scanning fd " << i << endl;
-			if (!FD_ISSET (i, &read_fd_set)) continue;
-			cout << "socket: server: fd " << i << " is set" << endl;
-			auto c=clients.find(i); //no need lock , this thread is the only that changes size of clients
-			if (c==clients.end()) {
-				cerr << "data arrived for an unknown fd " << i << endl;
-				continue;
-			}
-			clients.hold(c->second);
-			receive_and_process(c->second);
-		}
-	}
-	signal_handler::_this.remove(this);
-	close(sock);
-	close(loopback);
-	sock=0;
-	loopback=0;
-	clients.locli.disconnect();
-}
-
 void c::on_finish() {
 	clients.read_sockets();
 }
@@ -432,5 +336,102 @@ void c::clients_t::wait::dump(ostream& os) const {
 		{ i->dump(os); }
 }
 
+
+
+#include <us/gov/likely.h>
+
+void c::run() {
+	fd_set read_fd_set;
+	int i;
+	struct sockaddr_in clientname;
+	unsigned int size;
+	assert(port);
+	sock = make_socket(port);
+	if (!sock) {
+		cerr << "error making socket" << endl;
+		program::_this.finish();
+		return;
+	}
+	if (::listen (sock, 1) < 0) {
+		cerr << "error listen" << endl;
+		close(sock);
+		sock=0;
+		program::_this.finish();
+		return;
+	}
+	if (!clients.locli.connect("127.0.0.1",port)) {
+		close(sock);
+		sock=0;
+		cerr << "failed connecting the loopback client" << endl;
+		program::_this.finish();
+		return;
+	}
+
+	// Initialize the set of active sockets.
+	int loopback;
+	size = sizeof (clientname);
+	loopback = ::accept(sock, (struct sockaddr *) &clientname,&size);
+	if (loopback < 0) {
+		cerr << "error in ::accept" << endl;
+		close(sock);
+		program::_this.finish();
+		return;
+	}
+
+	signal_handler::_this.add(this);
+	char discard[30]; //loopback recv buffer, up to 30 wake up signals
+	while (true) {
+		if (thread_::_this.terminated) {
+			break;
+		}
+		FD_ZERO(&read_fd_set);
+		FD_SET(sock,&read_fd_set);
+		FD_SET(loopback,&read_fd_set);
+		vector<int> sl=clients.update();
+		for (auto& i:sl) FD_SET(i,&read_fd_set);
+		if (::select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0) {
+			cerr << "error in select" << endl;
+			continue;
+		}
+		if (FD_ISSET(loopback, &read_fd_set)) {
+			int r=os->recv(loopback,&discard,30,0);
+		}
+		if (FD_ISSET(sock, &read_fd_set)) {
+			int nnew;
+			size = sizeof (clientname);
+			nnew = ::accept(sock, (struct sockaddr *) &clientname,&size);
+			if (nnew < 0) {
+				cerr << "error in ::accept 2" << endl;
+				continue;
+			}
+			cout << "socket: server: accepted, creating client for fd " << nnew << endl;
+			auto cl=create_client(nnew);
+            if (unlikely(banned_throttle(cl->addr))) {
+                delete cl;
+            }
+            else {
+			    clients.add(cl,false);
+            }
+		}
+		for (int i:sl) { //Service all the sockets with input pending.
+			cout << "socket: server: scanning fd " << i << endl;
+			if (!FD_ISSET (i, &read_fd_set)) continue;
+			cout << "socket: server: fd " << i << " is set" << endl;
+			auto c=clients.find(i); //no need lock , this thread is the only that changes size of clients
+			if (c==clients.end()) {
+				cerr << "data arrived for an unknown fd " << i << endl;
+				continue;
+			}
+			clients.hold(c->second);
+			receive_and_process(c->second);
+		}
+	}
+	signal_handler::_this.remove(this);
+	close(sock);
+	close(loopback);
+	sock=0;
+	loopback=0;
+	clients.locli.disconnect();
+}
 
 

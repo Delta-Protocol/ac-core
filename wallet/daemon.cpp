@@ -27,7 +27,13 @@ bool c::send_response(peer_t *c, datagram*d, const string& payload) {
 	return true;
 }
 
-bool c::process_work(peer_t *c, datagram*d) {
+bool c::process_work(socket::peer_t *c0, datagram*d) {
+    if (b::process_work(c0,d)) return true;
+
+    if (static_cast<auth::peer_t*>(c0)->stage_peer!=auth::peer_t::verified) {
+        return false;
+    }
+    peer_t* c=static_cast<peer_t*>(c0);
 	switch(d->service) {
 		case us::wallet::protocol::tx_make_p2pkh_query: {
 			istringstream is(d->parse_string());
@@ -138,48 +144,6 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-/*
-		case us::wallet::protocol::nova_move: {
-			istringstream is(d->parse_string());
-			wallet::nova_move_input i=wallet::nova_move_input::from_stream(is);
-            if (unlikely(is.fail())) {
-                return send_error_response(c,d,"Unacceptable input.");
-            }
-
-			ostringstream ans;
-			local_api::nova_move(i,ans);
-			return send_response(c,d,ans.str());
-        }
-        break;
-		case us::wallet::protocol::nova_track: {
-			istringstream is(d->parse_string());
-			wallet::nova_track_input i=wallet::nova_track_input::from_stream(is);
-            if (unlikely(is.fail())) {
-                return send_error_response(c,d,"Unacceptable input.");
-            }
-
-			ostringstream ans;
-			local_api::nova_track(i,ans);
-			return send_response(c,d,ans.str());
-        }
-        break;
-		case us::wallet::protocol::nova_query: {
-			string s=d->parse_string();
-            istringstream is(s);
-            nova::hash_t h;
-            is >> h;
-			ostringstream ans;
-			local_api::nova_query(h,ans);
-			return send_response(c,d,ans.str());
-        }
-        break;
-		case us::wallet::protocol::nova_mempool: {
-			ostringstream ans;
-			local_api::nova_mempool(ans);
-			return send_response(c,d,ans.str());
-        }
-        break;
-*/
 		default: break;
 	}
 	return false;

@@ -32,6 +32,7 @@ bool c::connect(const string& host, uint16_t port, bool block) {
 }
 
 void c::on_connect() {
+cout << "PEER ONCONNECT" << endl;
     b::on_connect();
 	since=chrono::steady_clock::now();
 	//stage=connected;

@@ -3,7 +3,6 @@
 
 #include <unordered_map>
 #include <us/gov/cash.h>
-//#include <us/gov/nova.h>
 #include <us/gov/crypto.h>
 #include <fstream>
 #include <unordered_map>
@@ -12,7 +11,7 @@ namespace us { namespace wallet {
 using namespace std;
 using namespace us::gov;
 
-struct wallet: unordered_map<cash::hash_t,crypto::ec::keys>/*, filesystem::cfg*/ {
+struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 	wallet(const string& datapath, const string& backend_host, uint16_t backend_port);
 	virtual ~wallet();
 	string backend_host;

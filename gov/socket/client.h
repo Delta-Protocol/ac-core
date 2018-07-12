@@ -35,11 +35,17 @@ namespace socket {
 		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
 		bool init_sock(const string& host, uint16_t port, bool block=false);
 
-		virtual void on_connect() {}
+		virtual void on_connect() {
+            cout << "SOCKET client ONCONNECT" << endl;
+        }
 
 		void dump(ostream& os) const;
 
+        void run_dialogue();
+
 		datagram* complete_datagram();
+		datagram* complete_datagram(int timeout_seconds);
+
 		datagram* curd{0};
 
 		int sock;

@@ -60,7 +60,7 @@ bool c::process_work(peer_t *c) {
 		return true;
 	}
 	if (!d->completed()) { 
-		cout << "socket: daemon: recv partial datagram. returning to listen pool" << endl;
+		cout << "socket: daemon: recv partial datagram. returning to listening pool" << endl;
 		return true;
 	}
 	bool processed=process_work(c,d);

@@ -22,7 +22,7 @@ struct wallet_daemon: auth::daemon, local_api {
 
 	wallet_daemon(const keys&, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port);
 	virtual ~wallet_daemon();
-	bool process_work(peer_t*, datagram*);
+	virtual bool process_work(socket::peer_t*, datagram*) override;
 
   //  string backend_host;
   //  uint16_t backend_port;

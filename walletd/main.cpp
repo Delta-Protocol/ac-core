@@ -301,7 +301,7 @@ void run_local(string command, args_t& args, const params& p) {
 		papi=new local_api(p.homedir,p.backend_host,p.backend_port); //rpc to node
 	}
 	else {
-		papi=new rpc_api(p.walletd_host,p.walletd_port); //rpc to a wallet daemon
+		papi=new rpc_api(cfg1::load(p.homedir).keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon
 	}
 	api& wapi=*papi;
 

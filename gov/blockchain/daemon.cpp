@@ -775,8 +775,8 @@ cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
 		}
 	}
 
-	if (c->stage==peer_t::sysop) {
-		cout << "Connection from myself" << endl;
+	if (c->stage==peer_t::sysop) { //only service sysop can be operated by a sysop
+		cout << "Sysop connection sending invalid datagrams." << endl;
 		delete d;
 		c->disconnect();
 		return true;
@@ -796,53 +796,20 @@ cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
 			return true;
 		}
 	}
-/*
-	if (!auth_app->in_service()) {
-		delete d;
-		return true;
-	}
-*/	
 	if (!syncdemon.in_sync()) {
-		delete d;
+		//delete d;
 		cout << "missing command cause I am syncing" << endl;
-		return true;
+		//return true;
+		return false; //
 	}
-/*
-cout << "Delivering to " << apps_.size() << " apps" << endl;
-	bool processed=false;
-	for (auto&i:apps_) {
-//		if (!i.second->in_service()) continue;
-        cout << "delivering to app " << i.second->get_name() << endl;
-		if (i.second->process_work(c,d)) {
-			processed=true;
-			break;
-		}
-	}
-//cout << "d" << endl;
-
-	if (processed) return true;
-*/
 	switch(d->service) {
 		case protocol::local_deltas: {
 			process_incoming_local_deltas(c,d); 
 			return true;
 		}
 	}
-	
-
-
 	return false;
 }
-
-/*
-void c::clear_db() {
-	lock_guard<mutex> lock(mx_import); 
-	for (auto&i:apps_) {
-		i.second->clear_db();
-	}
-	set_last_block_imported_("");
-}
-*/
 
 void c::set_last_block_imported_(const diff::hash_t& h) {
 	last_block_imported=h;
@@ -852,7 +819,7 @@ void c::set_last_block_imported_(const diff::hash_t& h) {
 }
 
 void c::clear() {
-	cout << "DB cleared" << endl; //TODO
+	//cout << "DB cleared" << endl; //TODO
 	for (auto&i:apps_) {
         i.second->clear();
 	}
@@ -873,13 +840,6 @@ bool c::import(const diff& b) {
                 cout << "block not in sequence." << b.prev << " " << last_block_imported << endl;
                 return false;
         }
-/*  
-	lock_guard<mutex> lock(mx_import); 
-	if (b.base!=dbhash()) {
-		cout << "block not in sequence" << endl;
-		return false;
-	}
-*/
 	app::last_block_imported=last_block_imported;
 
 	for (auto&i:b) {

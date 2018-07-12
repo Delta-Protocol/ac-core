@@ -17,7 +17,6 @@ void sig_handler(int s) {
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
 	signal(SIGPIPE,SIG_DFL);
-
 }
 
 using namespace std::chrono_literals;

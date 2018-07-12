@@ -92,12 +92,11 @@ cout << "addr " << addr << endl;
 				auto* p=create_client(0);
 cout << "connecting to address " << addr << endl;
 				if (p->connect(addr,16672)) {
-cout << "XXXXXXXXXXXXXX connected to address " << addr << endl;
+cout << "connected to address " << addr << endl;
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);
 				}
 				else {
-cout << "XXXXXXXXXXXXXX " << addr << endl;
 					cout << "peerd: unable to connect, deleting peer" << endl;
 					delete p;
 				}

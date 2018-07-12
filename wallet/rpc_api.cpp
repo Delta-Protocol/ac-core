@@ -10,16 +10,13 @@ using namespace std;
 
 using datagram=socket::datagram;
 
-c::rpc_api(const string& walletd_host, uint16_t walletd_port):walletd_host(walletd_host), walletd_port(walletd_port), b(0) {
+c::rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port):walletd_host(walletd_host), walletd_port(walletd_port), b(k,0) {
 
 }
 
 c::~rpc_api() {
 }
 
-void c::on_connect() {
-
-}
 
 void c::ask(int service, ostream&os) {
 	ask(service,"",os);
@@ -27,29 +24,45 @@ void c::ask(int service, ostream&os) {
 
 void c::ask(int service, const string& args, ostream&os) {
 	if (sock==0) {
+		cout << "Iniciando auth" << endl;
 		if (!connect(walletd_host,walletd_port,true)) {
 			os << "Error. Unable to connect to wallet daemon.";
 			return;
 		}
-		cout << "Iniciando auth" << endl;
-		
+        if (!run_auth()) {
+            os << "Autentication failed." << endl;
+            return;
+        }
 		cout << "auth completed." << endl;
 	}
 	datagram* d=new datagram(service,args);
-        send(d);
+    send(d);
 
-        auto response=new datagram();
+    auto response=complete_datagram(3);
+
+    cout << "received datagram" << response << endl;
+
+    
+
+//        auto response=new datagram();
+/*
         while (!response->completed()) {
-                if (!response->recv(sock,2)) {
+                if (!response->complete_datagram(sock,2)) {
                         delete response;
                         os << "Error. Connected but unable to receive a response.";
 			return;
                 }
         }
-
+*/
 	//socket::datagram* response=socket::peer_t::send_recv(walletd_host, walletd_port, d);
-	os << response->parse_string();
-	delete response;
+    if (response==0) {
+        os << "Error 59843766" << endl;
+    }
+    else {
+        cout << "datagram" << response->size() << endl;
+    	os << response->parse_string();
+	    delete response;
+    }
 }
 
 void c::balance(bool detailed, ostream&os) {

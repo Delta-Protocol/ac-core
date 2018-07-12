@@ -91,10 +91,10 @@ bool datagram::completed() const {
 }
 
 bool datagram::recv(int sock, int timeout_seconds) {
-	struct timeval tv;
-	tv.tv_sec = timeout_seconds;
-	tv.tv_usec = 0;
-	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+   	struct timeval tv;
+    tv.tv_sec = timeout_seconds;
+   	tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 	return recv(sock);
 }
 
@@ -104,7 +104,7 @@ bool datagram::recv(int sock) {
 		ssize_t nread = server::os->recv(sock, &(*this)[dend], h-dend, 0);
 		if (nread<=0) {
 			if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
-				cout << "socket: client: EINPROGRESS fd" << sock  << endl;
+				cout << "socket: client: 1 EINPROGRESS fd" << sock  << endl;
 				error=4;
 			}
 			else {
