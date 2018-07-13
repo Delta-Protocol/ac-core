@@ -1,5 +1,6 @@
 #include "wallet.h"
 #include "protocol.h"
+#include <us/gov/cfg.h>
 
 using namespace us::wallet;
 using namespace std;
@@ -27,7 +28,7 @@ string c::filename() const {
 bool c::load() {
 	auto file=filename();
 //cout << "loading from " << file << endl;
-	if (!file_exists(file)) return true;
+	if (!us::gov::filesystem::cfg::file_exists(file)) return true;
 	ifstream f(file);
 	while(f.good()) {
 		string pkb58;
@@ -145,71 +146,6 @@ c::accounts_query_t c::query_accounts(const cash::app::query_accounts_t& address
 	}
 	return move(ret);
 }
-/*
-c::compartiments_query_t c::query_compartiments(const nova::app::query_compartiments_t& addresses) const {
-	compartiments_query_t ret;
-	socket::datagram* d=addresses.get_datagram();
-	if (!d) return ret;
-
-	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
-	if (!response_datagram) return move(ret);
-	auto r=response_datagram->parse_string();
-//ofstream cout("/tmp/yyyy");
-//cout << "raw ans: " << r << endl;
-	delete response_datagram;
-
-	istringstream is(r);
-	int code;
-	is >> code;
-//	if (code!=0) {
-//		string err;
-//		is >> err;
-//		cerr << err << endl;
-//	}
-//	else {
-		for (auto&i:addresses) {
-			nova::app::compartiment_t a=nova::app::compartiment_t::from_stream(is);
-			if (code==0) ret.emplace(i,move(a));
-		}
-		is >> ret.parent_block;
-//	}
-	return move(ret);
-}
-
-c::compartiments_query_t c::query_compartiments(const string& item) const {
-	compartiments_query_t ret;
-
-	socket::datagram* d=new socket::datagram(us::gov::protocol::nova_item_query,item);
-
-	if (!d) return ret;
-
-	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
-	if (!response_datagram) return move(ret);
-	auto r=response_datagram->parse_string(); //0 11111111111111112UzHM 4 2rPXzY 2rPXzY 2rPXzy 2rPXzy 1 item2   2yjHq7aCZLLw2awfCdhFC36ASF1X
-ofstream cout("/tmp/yyyy");
-cout << "raw ans: " << r << endl;
-	delete response_datagram;
-
-	istringstream is(r);
-	int code;
-	is >> code;
-//	if (code!=0) {
-//		string err;
-//		is >> err;
-//		cerr << err << endl;
-//	}
-//	else {
-	//	for (auto&i:addresses) {
-	nova::hash_t cid;
-	is >> cid;
-			nova::app::compartiment_t a=nova::app::compartiment_t::from_stream(is);
-			if (code==0) ret.emplace(cid,move(a));
-	//	}
-		is >> ret.parent_block;
-//	}
-	return move(ret);
-}
-*/
 void c::refresh() {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
@@ -228,7 +164,7 @@ c::input_accounts_t c::select_sources( const cash::cash_t& amount) {
 	for (accounts_query_t::const_iterator i=data.begin(); i!=data.end(); ++i) {
 		v.emplace_back(i);
 	}
-	
+
 	sort(v.begin(),v.end(),[](const accounts_query_t::const_iterator&v1, const accounts_query_t::const_iterator&v2) { return v1->second.balance < v2->second.balance; });
 	input_accounts_t ans;
 	ans.parent_block=data.parent_block;
@@ -243,7 +179,6 @@ c::input_accounts_t c::select_sources( const cash::cash_t& amount) {
 			remaining=0;
 			break;
 		}
-		
 	}
 	return ans;
 }
@@ -260,13 +195,6 @@ void c::accounts_query_t::dump(ostream& os) const {
 	b::dump(os);
 	os << "parent block: " << parent_block << endl;
 }
-/*
-void c::compartiments_query_t::dump(ostream& os) const {
-	b::dump(os);
-	os << "parent block: " << parent_block << endl;
-}
-*/
-
 
 c::input_account_t::input_account_t(const hash_t& address,const b& acc, const cash_t& withdraw_amount):b(acc),address(address),withdraw_amount(withdraw_amount) {
 }
@@ -295,27 +223,7 @@ void c::input_accounts_t::dump(ostream& os) const {
 }
 
 #include <us/gov/cash/locking_programs/p2pkh.h>
-//#include <us/gov/nova/locking_programs/single_signature.h>
 
-/*
-void c::send(const nova::evidence_load& t) const {
-	socket::peer_t cli;
-	if (!cli.connect(backend_host,backend_port,true)) {
-		cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
-		exit(1);
-	}
-	cli.send(t.get_datagram());
-}
-
-void c::send(const nova::evidence_track& t) const {
-	socket::peer_t cli;
-	if (!cli.connect(backend_host,backend_port,true)) {
-		cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
-		exit(1);
-	}
-	cli.send(t.get_datagram());
-}
-*/
 void c::send(const cash::tx& t) const {
 	auto fee=t.check();
 	if (fee<=0) {
@@ -329,22 +237,7 @@ void c::send(const cash::tx& t) const {
 	}
 	cli.send(t.get_datagram());
 }
-/*
-string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const nova::hash_t& compartiment, const nova::hash_t& locking_program) {
-	if (likely(locking_program<nova::min_locking_program)) {
-		if (unlikely(locking_program==0)) {
-			return "";
-		}
-		else if (locking_program==1) {
-cout << "-------" << endl; 
-			const crypto::ec::keys* k=get_keys(compartiment);
-			if (k==0) return "";
-			return nova::single_signature::create_input(msg, k->priv);
-		}
-	}
-	return "";
-}
-*/
+
 string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
 	if (likely(locking_program<cash::min_locking_program)) {
 		if (unlikely(locking_program==0)) {
@@ -403,12 +296,7 @@ pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t&
                 os << "cannot unlock account " << i.address << endl;
                 ret.first=os.str(); 
 			}
-		}	
-/*
-		else {
-			cout << "unlocked! " << i.address << endl;
 		}
-*/
 		++n;
 	}
     return move(ret);
@@ -482,146 +370,6 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 	is >> i.sendover;
 	return move(i);
 }
-/*
-pair<string,nova::evidence_load> c::nova_move(const nova_move_input& i) {
-//cout << "nova move" << endl;
-
-    pair<string,nova::evidence_load> ret;
-    nova::evidence_load& t=ret.second;
-
-	//blockchain::diff::hash_t parent_block;
-
-	nova::app::query_compartiments_t compartiments;
-	compartiments.emplace_back(i.compartiment);
-
-	auto data=query_compartiments(compartiments);
-//    if (data.size()!=1) {
-//			ret.first="Compartiment not found";
-//			return move(ret);
- //   }
-    t.compartiment=i.compartiment;
-	t.parent_block=data.parent_block;
-    t.load=i.load;
-    t.item=i.item;
-    if (data.empty()) {
-     t.locking_program=1;
-    }
-    else {
-      t.locking_program=data.begin()->second.locking_program;
-    }
-
-//cout << "parent block " <<     t.parent_block << endl;
-
-	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
-	t.locking_program_input=generate_locking_program_input(h,i.compartiment,t.locking_program);
-//t.write_pretty(cout);
-	if (i.sendover) {
-		send(t);
-//			cout << "sent." << endl;
-	}
-
-    return move(ret);
-}
-
-pair<string,nova::evidence_track> c::nova_track(const nova_track_input& i) {
-//cout << "nova move" << endl;
-
-    pair<string,nova::evidence_track> ret;
-    nova::evidence_track& t=ret.second;
-
-	//blockchain::diff::hash_t parent_block;
-
-	nova::app::query_compartiments_t compartiments;
-	compartiments.emplace_back(i.compartiment);
-
-	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
-//    if (data.size()!=1) {
-//			ret.first="Compartiment not found";
-//			return move(ret);
-//    }
-    t.compartiment=i.compartiment;
-	t.parent_block=data.parent_block;
-    t.data=i.data;
-
-    if (data.empty()) {
-     t.locking_program=1;
-    }
-    else {
-      t.locking_program=data.begin()->second.locking_program;
-    }
-
-
-//    t.locking_program=data.begin()->second.locking_program==0?1:data.begin()->second.locking_program; 
-
-//cout << "parent block " <<     t.parent_block << endl;
-
-	crypto::ec::sigmsg_hasher_t::value_type h=t.get_hash();
-	t.locking_program_input=generate_locking_program_input(h,i.compartiment,t.locking_program);
-//t.write_pretty(cout);
-	if (i.sendover) {
-		send(t);
-//			cout << "sent." << endl;
-	}
-
-    return move(ret);
-}
-
-string c::nova_query(const nova::hash_t& compartiment) const {
-	nova::app::query_compartiments_t compartiments;
-	compartiments.emplace_back(compartiment);
-	auto data=query_compartiments(compartiments); //TODO distinguish between notfound and lockingprogram==0
-    ostringstream os;
-	data.to_stream(os);
-//    data.pretty_print(os);
-//    os << "raw answer: ";
-
-    return os.str();
-}
-string c::nova_query(const string& item) const {
-
-	auto data=query_compartiments(item); //TODO distinguish between notfound and lockingprogram==0
-    ostringstream os;
-	data.to_stream(os);
-//    data.pretty_print(os);
-//    os << "raw answer: ";
-
-    return os.str();
-}
-
-string c::nova_mempool() const {
-	socket::datagram* d=new socket::datagram(us::gov::protocol::nova_mempool_query);
-	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
-	if (!response_datagram) return "";
-	auto r=response_datagram->parse_string();
-	delete response_datagram;
-    return r;
-}
-
-void c::nova_move_input::to_stream(ostream& os) const {
-	os << compartiment << ' ' << item << ' ' << (load?'1':'0') << ' ' << (sendover?'1':'0');
-}
-
-c::nova_move_input c::nova_move_input::from_stream(istream& is) {
-	nova_move_input i;
-	is >> i.compartiment;
-    is >> i.item;
-	is >> i.load;
-	is >> i.sendover;
-	return move(i);
-}
-
-void c::nova_track_input::to_stream(ostream& os) const {
-	os << compartiment << ' ' << data << ' ' << (sendover?'1':'0');
-}
-
-c::nova_track_input c::nova_track_input::from_stream(istream& is) {
-	nova_track_input i;
-	is >> i.compartiment;
-    is >> i.data;
-	is >> i.sendover;
-	return move(i);
-}
-*/
 
 
 

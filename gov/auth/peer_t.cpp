@@ -15,6 +15,11 @@ c::peer_t(int sock): b(sock) {
 c::~peer_t() {
 }
 
+void c::on_connect() { //called only on the initiator, the caller side.
+    b::on_connect();
+    do_actions();
+}
+
 void c::dump(ostream& os) const {
 	os << this << "- I am (to peer): " << stagestr[stage_me] << "; Peer is (to me): " << stagestr[stage_peer] << endl;
 

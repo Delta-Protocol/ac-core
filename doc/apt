@@ -1,5 +1,8 @@
 #Required packages for building binaries
-Debian: apt install libc-dev make g++ spawn-fcgi nginx libcrypto++-dev automake libtool psmisc pipexec libjsoncpp-dev libunwind-dev libtool automake bc coreutils
+Debian: apt install libc-dev make g++ spawn-fcgi nginx libcrypto++-dev automake libtool psmisc pipexec libjsoncpp-dev libunwind-dev libtool automake bc coreutils unzip
+Alpine: apk add autoconf automake libtool crypto++-dev
+
+openjdk-11-jdk-headless
 
 #TRACEABILITY (packages-assets to be serviced by it)
 =======================================#============
@@ -35,3 +38,6 @@ Debian: apt install libc-dev make g++ spawn-fcgi nginx libcrypto++-dev automake 
 #   provides killall
 #   etc/init.d/*
 #   bin/us-wallet-ctl
+
+#unzip
+#   cash/android/make

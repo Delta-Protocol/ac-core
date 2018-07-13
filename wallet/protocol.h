@@ -21,13 +21,7 @@ namespace protocol {
 	static constexpr uint16_t pair_query{wallet_base+10};
 	static constexpr uint16_t unpair_query{wallet_base+11};
 	static constexpr uint16_t list_devices_query{wallet_base+12};
-/*
-	static constexpr uint16_t nova_move{wallet_base+13}; //item is associated with a compartiment
-	static constexpr uint16_t nova_track{wallet_base+14}; // compartiment status
-	static constexpr uint16_t nova_query{wallet_base+15}; // compartiment status
-	static constexpr uint16_t nova_query_item{wallet_base+16}; // compartiment status
-	static constexpr uint16_t nova_mempool{wallet_base+17}; // compartiment status
-*/
+
 	static constexpr uint16_t response{wallet_base+0};
 
 }

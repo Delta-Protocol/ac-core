@@ -30,7 +30,9 @@ void c::devices_t::load_() {
     ifstream is(home+"/d");
     while (is.good()) {
         device d=device::from_stream(is);
-        emplace(d.pub.hash(),move(d));
+	if (d.pub.valid) {
+        	emplace(d.pub.hash(),move(d));
+	}
     }
 }
 
@@ -59,6 +61,11 @@ void c::device::dump(ostream& os) const {
     os << name << ' ' << pub << endl;
 }
 
+#include <us/gov/auth/peer_t.h>
+
+string c::devices_t::pair_request() { //return a random message to sign by the requester
+	return us::gov::auth::peer_t::get_random_message();
+}
 
 void c::devices_t::pair(const pub_t& pub, const string& name) {
 	lock_guard<mutex> lock(mx);

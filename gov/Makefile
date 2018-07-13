@@ -1,18 +1,19 @@
 #https://gist.github.com/xuhdev/1873316
-OBJS :=  crypto/crypto.o net/net.o socket/socket.o peer/peer.o dfs/dfs.o blockchain/blockchain.o auth/auth.o cash/cash.o loan/loan.o
-CXXFLAGS := -fPIC ${CXXFLAGS}
+OBJS :=  crypto/crypto.o net/net.o socket/socket.o peer/peer.o relay/relay.o dfs/dfs.o blockchain/blockchain.o auth/auth.o cash/cash.o loan/loan.o
+#CXXFLAGS := ${CXXFLAGS}
 
 .PHONY: all
 all: libusgov.so
 
 signal_handler.o: signal_handler.cpp signal_handler.h
-	g++ ${CXXFLAGS} -I../.. -c signal_handler.cpp
+	g++ -fPIC ${CXXFLAGS} -I../.. -c signal_handler.cpp
 
 cfg.o: cfg.cpp cfg.h
-	g++ ${CXXFLAGS} -I../.. -c cfg.cpp
+	g++ -fPIC ${CXXFLAGS} -I../.. -c cfg.cpp
 
 libusgov.so: deps signal_handler.o cfg.o
-	g++ -shared -O0 -g -std=c++17 -pthread ${OBJS} signal_handler.o cfg.o -lcrypto++ -lsecp256k1 -L/usr/lib -I../.. -o libusgov.so
+#	g++ -shared -fPIC ${CXXFLAGS} -pthread ${OBJS} signal_handler.o cfg.o -lcrypto++ -lsecp256k1 -L/usr/lib -I../.. -o libusgov.so
+	g++ -shared -fPIC ${CXXFLAGS} -pthread ${OBJS} signal_handler.o cfg.o -lcryptopp -lsecp256k1 -L/usr/lib -I../.. -o libusgov.so
 
 deps:
 	@for a in $$(ls); do \

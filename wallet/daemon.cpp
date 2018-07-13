@@ -7,7 +7,7 @@ typedef us::wallet::wallet_daemon c;
 
 
 
-c::wallet_daemon(uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), local_api(home,backend_host,backend_port) {
+c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(k,port,2), local_api(home,backend_host,backend_port) {
 }
 
 c::~wallet_daemon() {

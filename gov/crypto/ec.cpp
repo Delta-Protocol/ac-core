@@ -169,7 +169,7 @@ c::keys::pub_t c::keys::pub_t::from_b58(const string& s) {
 bool c::keys::pub_t::set_b58(const string& s) {
 	vector<unsigned char> v;
 	if (!b58::decode(s,v)) {
-		cerr << "Error reading public key, invalid b58 encoding." << endl;
+		//cerr << "Error reading public key, invalid b58 encoding." << endl;
 		return false;
 	}
 /*
@@ -179,7 +179,7 @@ bool c::keys::pub_t::set_b58(const string& s) {
 	}
 */
 	if (unlikely(!secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33))) {
-		cerr << "Error reading public key, invalid der encoding." << endl;
+		//cerr << "Error reading public key, invalid der encoding." << endl;
 		valid=false;
 		return false;
 	}

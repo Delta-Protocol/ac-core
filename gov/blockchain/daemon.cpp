@@ -679,7 +679,7 @@ void c::process_block(peer_t *c, datagram*d) {
 	delete b;
 }
 
-bool c::networking::process_evidence(peer::peer_t *c, datagram*d) {
+bool c::networking::process_evidence(relay::peer_t *c, datagram*d) {
 //cout << "PROCESSING EVIDENCE " << d->service << endl;
 	return parent->process_evidence(reinterpret_cast<peer_t*>(c),d);
 }
