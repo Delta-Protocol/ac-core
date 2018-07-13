@@ -32,8 +32,9 @@ public class EllipticCryptography {
     private static EllipticCryptography instance;
     private SecureRandom secureRandom;
     private static KeyFactory factory;
-    private static ECParameterSpec curve_params=null;
-    private ECDomainParameters curve=null;
+    private static ECParameterSpec curve_params;
+    private ECDomainParameters curve;
+    private static KeyPairGenerator generator;
    
 
 
@@ -44,7 +45,8 @@ public class EllipticCryptography {
         factory = KeyFactory.getInstance("ECDSA");
         curve = new ECDomainParameters(curve_params.getCurve(), curve_params.getG(), curve_params.getN(), curve_params.getH());
         secureRandom = new SecureRandom();
-        
+        generator = KeyPairGenerator.getInstance("ECDSA");
+        generator.initialize(curve_params);   
     }
 
     public static EllipticCryptography getInstance() throws NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException {
@@ -54,33 +56,28 @@ public class EllipticCryptography {
         return instance;
     }
 
-    public BigInteger generatePrivateKey() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
+    public static BigInteger generatePrivateKey() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
         KeyPair keyPair = generateKeyPair();
-        return getBigIntegerFromKeyPair(keyPair);
-        
+        return getBigIntegerFromKeyPair(keyPair);  
     }
 
-    private BigInteger getBigIntegerFromKeyPair(KeyPair keypair){
+    private static BigInteger getBigIntegerFromKeyPair(KeyPair keypair){
         return new BigInteger(keypair.getPrivate().getEncoded());
     }
 
-    public PrivateKey privateKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException{
-        
+    public static PrivateKey privateKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException{
         return factory.generatePrivate(new PKCS8EncodedKeySpec(keypair.getPrivate().getEncoded()));
     }
 
-    private BigInteger getBigIntegerFromPrivateKey(PrivateKey privateKey){
+    private static BigInteger getBigIntegerFromPrivateKey(PrivateKey privateKey){
         return new BigInteger(privateKey.getEncoded());
     }
 
-    public PublicKey publicKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException {
+    public static PublicKey publicKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException {
         return factory.generatePublic(new X509EncodedKeySpec(keypair.getPublic().getEncoded()));
     }
 
     public static KeyPair generateKeyPair() throws NoSuchAlgorithmException,InvalidAlgorithmParameterException, NoSuchProviderException {
-
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("ECDSA");
-        generator.initialize(curve_params);
         return generator.generateKeyPair();
     }
 

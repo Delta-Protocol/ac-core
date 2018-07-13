@@ -13,7 +13,7 @@ using std::end;
 int main ( int argc, char *argv[] )
 {
     if ( argc < 5 ) {
-        cout<<"required arugments: <private key> <wallet public key> <[encrypt|decrypt]> <message>" << endl;
+        cout<<"required arugments: <private key> <public key> <[encrypt|decrypt]> <message>" << endl;
 
         if(argc == 2)
             cout<<"provided private key: " << argv[1] << endl;
@@ -25,30 +25,30 @@ int main ( int argc, char *argv[] )
         
     }
     else {
-        ec::keys::priv_t priv;
+        cout<<"provided private key: " << argv[1] << "\n" << "provided public key: " << argv[2] << "\n" << "provided command: " << argv[3] << "\n" << "provided message: " << argv[4] << endl;
+        ec::keys k;
         std::string argv1(argv[1]);
-        priv.from_b58(argv1);
+        k.priv.from_b58(argv1);
         
-        cout << priv.to_b58() << endl;
+        cout << k.priv.to_b58() << endl;
 
-        ec::keys::pub_t pub;
         std::string argv2(argv[2]);
-        pub.from_b58(argv2);
+        k.pub.from_b58(argv2);
         
-        cout << pub.to_b58() << endl; 
+        cout << k.pub.to_b58() << endl; 
 
         std::string message_string(argv[4]);
         cout << message_string << endl;
         vector<unsigned char> message(message_string.begin(),message_string.end());
         
-        //symmetric_encryption s_e(priv,pub); <--this line breaks compile atm
-        //if(argv[3]=="encrypt"){
+        symmetric_encryption s_e(k.priv,k.pub);
+        if(argv[3]=="encrypt"){
         
            //vector<unsigned char> encrypted = s_e.encrypt(message);
            //string encrypted_string(encrypted.begin(), encrypted.end());
 
            //cout << encrypted_string << endl;
-        //}
+        }
     }
 }
 
