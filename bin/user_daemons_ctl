@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-#-------------------------start()----------------------------------------
+#-------------------------start()-----------------------|
 start() {
 
 	home=`mktemp -d`
@@ -12,21 +12,20 @@ start() {
        
       if [ $? -eq 0 ]; then
     	echo "govd-> PASS"
- 
 	else
     	echo "govd-> FAIL"
 	exit 1;
      fi
 
-ls $home
+ ls $home
 
 #-------
 
-g_port=16671
-w_port=16673
+ g_port=16671
+ w_port=16673
 
-for value in {1..3}
-do                                                                 #
+ for value in {1..3}
+ do                                                                 #
    LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -p $g_port 2>&1 >/dev/null &
    sleep 1
    pid_g=`ps ax | grep govd | grep -v grep | awk '{print $1}' | sort | tail -n1`
@@ -42,8 +41,8 @@ do                                                                 #
 		let w_port++ 
 	done
 
-let g_port--
-done
+ let g_port--
+ done
 
 }
 
@@ -51,9 +50,8 @@ done
 
 
 
-#-----------------------stop()----------------------------------------
+#-----------------------stop()-----------------------|
 stop() {
-	
 	killall us-walletd us-govd
 }
 
@@ -63,7 +61,7 @@ stop() {
 
 
 
-#----------------------case-----------------------------------------
+#----------------------case------------------------------------------|
 case "$1" in   
 	start)   start ;;  
 	stop)    stop ;;

@@ -31,7 +31,7 @@ struct test_api : rpc_api {
 
 	string ask(int service, const string& args){
 
-		datagram* q=new datagram(service,args);//	    (walletd_host, node port,  datagram	);
+		datagram* q=new datagram(service,args);  //	    (walletd_host, node port,  datagram	);
 		socket::datagram* response=socket::peer_t::send_recv("127.0.0.1" ,   gov_p  , 	  q     ); 
 
 		if (response) {
@@ -134,7 +134,7 @@ if (timer != false ){
 //--------------------check--addr--balance-----------------|
 try{
 	//test_client c( 0 );
-	//c.connect( "localhost", 16673 , false );	//------------------------------------------------------------here-------
+	//c.connect( "localhost", 16672 , false );	//---------------------------------------------------------------???----
 	
 	string howManyAddr = "1 ";
 	string askBalanceAddr = howManyAddr + address;	
@@ -199,7 +199,6 @@ try{
 } catch (const std::exception& e){assert(false);}
 
 
-
 cout << " \n   --   --   --   --   --   --   --   --   --   --  \n" << endl;
 
 
@@ -217,13 +216,13 @@ void testing_wallet_api()
       {
 	cout << " |-------* " << +i <<" *-------------->> Test <<-----------------|  \n" << endl;
 	
-//   [ip-wallet_Host] [Wallet_port] [g_port]      [address]               [amoundSend]  [fees] 	          [privKey] 			      [timer]   [sec] [addToWallet]
+//   [ip-wallet_Host] [Wallet_port] [g_port]      [address]                 [amoundSend]  [fees] 	          [privKey] 			  [timer]   [sec] [addToWallet]
 
-	test("127.0.0.1" , 16673 , 16671 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000000   ,   1000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );
-	test("127.0.0.1" , 16674 , 16670 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000000   ,   2000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );
-	test("127.0.0.1" , 16675 , 16669 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  3000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
-	test("127.0.0.1" , 16676 , 16671 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  4000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
-	test("127.0.0.1" , 16677 , 16670 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  1234560   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
+	test("127.0.0.1" , 16673 , 16671 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000000   ,   1000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 70 , false );
+	test("127.0.0.1" , 16674 , 16670 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000000   ,   2000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 70 , false );
+	test("127.0.0.1" , 16675 , 16669 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  3000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 70 , false );
+	test("127.0.0.1" , 16676 , 16671 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  4000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 70 , false );
+	test("127.0.0.1" , 16677 , 16670 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  1234560   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 70 , false );
 
       }
 }
