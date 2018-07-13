@@ -24,21 +24,21 @@
 using namespace std;
 using namespace us::gov::socket;
 
-bool io::send(int sock, datagram*d) {
+string io::send(int sock, datagram*d) {
 	auto b=d->send(sock);
-	if (likely(b)) delete d;
+	delete d;
 	return b;
 }
 
-bool io::send(int sock, char d) {
+string io::send(int sock, char d) {
         auto nbytes = server::os->write(sock, &d, 1);
         if (unlikely(nbytes<0)) {
-                return false;
+                return "Error. Writting io buffer";
         }
         if (unlikely(nbytes!=1)) {
-                return false;
+                return "Error. Wrote unexpected size to io buffer";
         }
-	return true;
+	return "";
 }
 
 

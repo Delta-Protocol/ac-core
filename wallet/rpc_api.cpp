@@ -29,20 +29,20 @@ void c::ask(int service, const string& args, ostream&os) {
 			os << "Error. Unable to connect to wallet daemon.";
 			return;
 		}
-        if (!run_auth()) {
-            os << "Autentication failed." << endl;
+        auto r=run_auth();
+        if (unlikely(!r.empty())) {
+            os << r;
             return;
         }
-		cout << "auth completed." << endl;
 	}
 	datagram* d=new datagram(service,args);
-    send(d);
 
-    auto response=complete_datagram(3);
+    auto r=send_recv(d);
 
-    cout << "received datagram" << response << endl;
+//    send(d);
+//    auto r=recv_response(); //complete_datagram(3);
 
-    
+        
 
 //        auto response=new datagram();
 /*
@@ -55,13 +55,13 @@ void c::ask(int service, const string& args, ostream&os) {
         }
 */
 	//socket::datagram* response=socket::peer_t::send_recv(walletd_host, walletd_port, d);
-    if (response==0) {
-        os << "Error 59843766" << endl;
+    if (unlikely(!r.first.empty())) {
+        os << r.first;
     }
     else {
-        cout << "datagram" << response->size() << endl;
-    	os << response->parse_string();
-	    delete response;
+        //cout << "datagram" << response->size() << endl;
+    	os << r.second->parse_string();
+	    delete r.second;
     }
 }
 

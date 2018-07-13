@@ -18,6 +18,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <us/gov/signal_handler.h>
+#include <us/gov/likely.h>
+
 
 typedef us::gov::socket::client c;
 using namespace std;
@@ -75,9 +77,11 @@ cout << "calling on_connect" << endl;
 
 void client::disconnect() {
 	lock_guard<mutex> lock(mx);
-	if (sock==0) return;
+	if (unlikely(sock==0)) return;
 	close(sock);
 	sock=0;
+    delete curd;
+    curd=0;
 }
 
 void client::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t port) {
@@ -146,65 +150,88 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 
 //busy-polling all sockets http://www.wangafu.net/~nickm/libevent-book/01_intro.html
 
-bool c::send(int service, const string& payload) {
+
+string c::send(int service, const string& payload) {
 	datagram* d=new datagram(service,payload);
-	if (!send(d)) {
+    auto r=send(d);
+	if (unlikely(!r.empty())) {
 		delete d;
-		return false;
+		return move(r);
 	}
-	return true;
+	return "";
 }
 
-bool c::send(char d) const { 
+string c::send(char d) const { 
 	if (!sock) {
-		cout << "socket: client: cannot send char, sock is 0" << endl;
-		return false;
+		return "Error. Not connected client.";
 	}
 	return io::send(sock,d); 
 }
 
+pair<string,datagram*> c::recv_response() { //caller owns the returning object
+    pair<string,datagram*> r;
+    while(!program::_this.terminated) {
+        r=complete_datagram(socket::response_timeout_secs);
+        if (unlikely(!r.first.empty())) {
+            return move(r);
+//cout << "d=0" << endl;
+        }
+        assert(r.second!=0); 
+        if (unlikely(!r.second->completed())) { 
+            continue;
+        }
+    }
+    return move(r);
+}
+
+
+
 //if completed the caller is responsible to delete it, otherwise it is just a weak pointer
-datagram* c::complete_datagram(int timeout_seconds) {
+pair<string,datagram*> c::complete_datagram(int timeout_seconds) {
     if (!curd) curd=new datagram();
-    if (!curd->recv(sock,timeout_seconds)) {
+	auto r=curd->recv(sock,timeout_seconds);
+	if (unlikely(!r.empty())) {
         delete curd;
         curd=0;
-        return 0;
+		return make_pair(r,(datagram*)0);
     }
     if (curd->completed()) {
         auto t=curd;
         curd=0;
-        return t;
+		return make_pair("",t);
     }
-    return curd;
+	return make_pair("",curd);
 }
 
-datagram* c::complete_datagram() {
+pair<string,datagram*> c::complete_datagram() {
 	if (!curd) curd=new datagram();
-	if (!curd->recv(sock)) {
+	auto r=curd->recv(sock);
+	if (unlikely(!r.empty())) {
 		delete curd;
 		curd=0;
-		return 0;
+		return make_pair(r,(datagram*)0);
 	}
 	if (curd->completed()) {
 		auto t=curd;
 		curd=0;
-		return t;
+		return make_pair("",t);
 	}
-	return curd;
+	return make_pair("",curd);
 }
 
-bool c::send(datagram* d) const { 
-	if (!sock) {
-		cout << "socket: client: cannot send, sock is 0" << endl;
-		return false;
+
+string c::send(datagram* d) const { 
+	if (unlikely(!sock)) {
+		return "Error. Sending datagram before connecting.";
 	}
 	assert(d); 
 	return io::send(sock,d); 
 }
 
-bool c::send(const datagram& d) const {
-	if (!sock) return false;
+string c::send(const datagram& d) const {
+	if (unlikely(!sock)) {
+		return "Error. Sending datagram before connecting.";
+	}
 	return io::send(sock,d); 
 }
 

@@ -19,9 +19,9 @@ namespace socket {
 	struct io {
 		static datagram* send_recv(int sock, const string& msg);
 		static datagram* send_recv(int sock, datagram* d);
-		static bool send(int sock, datagram*);
-		static bool send(int sock, char);
-		static bool send(int sock, const datagram& d) { return d.send(sock); }
+		static string send(int sock, datagram*);
+		static string send(int sock, char);
+		static inline string send(int sock, const datagram& d) { return d.send(sock); }
 		long ping(int sock);
 	};
 

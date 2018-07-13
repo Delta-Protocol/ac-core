@@ -191,25 +191,21 @@ void shell_echo(thinfo* info) {
         if (finished22) break;
 
 		if (FD_ISSET (cli.sock, &read_fd_set)) {
-			datagram* d=cli.complete_datagram();
-			if (!d || d->error!=0) {
-				//cout << "error recv datagram." << endl;
-				if (d) delete d;
-                finished22=true;
-				break;
-			}
-			if (!d->completed()) { 
-				return;
-			}
-			if (demon.peerd.process_work_sysop(&cli,d)) {
+			pair<string,datagram*> r=cli.recv_response();
+            if (!r.first.empty()) {
+                assert(r.second==0);
+                cerr << r.first << endl;
+                break;
+            }
+			if (demon.peerd.process_work_sysop(&cli,r.second)) {
 				continue;
 			}
-			if (d->service!=us::gov::protocol::sysop) {
-				delete d;
+			if (r.second->service!=us::gov::protocol::sysop) {
+				delete r.second;
 				continue;
 			}
-			cout << d->parse_string() << endl;
-			delete d;
+			cout << r.second->parse_string() << endl;
+			delete r.second;
 			{
 			unique_lock<mutex> lock(mx22);
 			ready22=true;

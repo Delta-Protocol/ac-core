@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <us/gov/cash.h>
 #include <us/gov/crypto.h>
+#include <us/gov/auth.h>
 #include <fstream>
 #include <unordered_map>
 
@@ -53,11 +54,11 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 	cash::cash_t balance() const;
 	void dump_balances(ostream& os) const;
 	void extended_balance(ostream& os) const;
-	accounts_query_t query_accounts(const cash::app::query_accounts_t& addresses) const;
+	pair<string,accounts_query_t> query_accounts(socket::peer_t& peer, const cash::app::query_accounts_t& addresses) const;
 
-	void refresh();
+	string refresh(socket::peer_t&);
  
-	input_accounts_t select_sources(const cash::cash_t& amount);
+	pair<string,input_accounts_t> select_sources(socket::peer_t& peer, const cash::cash_t& amount);
 
     string generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
     string generate_locking_program_input(const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
@@ -74,10 +75,10 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 	static tx_make_p2pkh_input from_stream(istream&);
 
     };
-    void send(const cash::tx&) const;
+    string send(socket::peer_t&, const cash::tx&) const;
 
-    pair<string,cash::tx> tx_make_p2pkh(const tx_make_p2pkh_input& i);
-    pair<string,cash::tx> tx_sign(const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
+    pair<string,cash::tx> tx_make_p2pkh(socket::peer_t&, const tx_make_p2pkh_input& i);
+    pair<string,cash::tx> tx_sign(socket::peer_t&, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
 
 	void dump(ostream& os) const;
 	accounts_query_t data;

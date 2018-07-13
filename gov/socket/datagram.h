@@ -15,6 +15,10 @@
 
 namespace us { namespace gov {
 namespace socket {
+
+    static constexpr int response_timeout_secs={3};
+
+
 	using namespace std;
 	struct datagram:vector<uint8_t> {
 		typedef vector<uint8_t> b;
@@ -30,15 +34,16 @@ namespace socket {
 		datagram(uint16_t service, const string&);
 		datagram(uint16_t service, vector<uint8_t>&&) {}
 
+
 		bool completed() const;
 		
 		hash_t compute_hash() const;
 
 //		void* wp();
 //		uint32_t remaining() const;
-		bool send(int sock) const;
-		bool recv(int sock);
-		bool recv(int sock, int timeout_seconds);
+		string send(int sock) const;
+		string recv(int sock);
+		string recv(int sock, int timeout_seconds);
 
 		vector<string> parse_strings() const;
 		string parse_string() const;
@@ -53,7 +58,7 @@ namespace socket {
 		uint16_t service;
 		//size_t cur;
 		size_t dend;
-		int error;
+//		int error;
 	};
 }
 }}

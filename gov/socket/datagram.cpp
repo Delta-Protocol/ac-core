@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <us/gov/likely.h>
 #include <stdio.h>
 #include <errno.h>
 #include <cassert>
@@ -23,20 +24,21 @@
 using namespace std;
 using namespace us::gov::socket;
 
+
 constexpr size_t datagram::h;
 constexpr size_t datagram::maxsize;
 
-datagram::datagram():error(0), dend(0) {
+datagram::datagram(): dend(0) {
 }
 
-datagram::datagram(uint16_t service):service(service), error(0) {
+datagram::datagram(uint16_t service):service(service) {
 	resize(h);
 	encode_size(size());
 	encode_service(service);
 	dend=size();
 }
 
-datagram::datagram(uint16_t service, uint16_t payload):service(service), error(0) {
+datagram::datagram(uint16_t service, uint16_t payload):service(service) {
 	resize(h+2);
 	encode_size(size());
 	encode_service(service);
@@ -45,7 +47,7 @@ datagram::datagram(uint16_t service, uint16_t payload):service(service), error(0
 	dend=size();
 }
 
-datagram::datagram(uint16_t service, const string& payload):service(service), error(0) {
+datagram::datagram(uint16_t service, const string& payload):service(service) {
 	assert(h+payload.size()<maxsize);
 	resize(h+payload.size());
 	encode_size(size());
@@ -90,7 +92,7 @@ bool datagram::completed() const {
 	return dend==size() && !empty();
 }
 
-bool datagram::recv(int sock, int timeout_seconds) {
+string datagram::recv(int sock, int timeout_seconds) {
    	struct timeval tv;
     tv.tv_sec = timeout_seconds;
    	tv.tv_usec = 0;
@@ -98,57 +100,65 @@ bool datagram::recv(int sock, int timeout_seconds) {
 	return recv(sock);
 }
 
-bool datagram::recv(int sock) {
+string datagram::recv(int sock) {
 	if (dend<h) {
 		if (size()<h) resize(h);
 		ssize_t nread = server::os->recv(sock, &(*this)[dend], h-dend, 0);
-		if (nread<=0) {
+		if (unlikely(nread<=0)) {
 			if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
 				cout << "socket: client: 1 EINPROGRESS fd" << sock  << endl;
-				error=4;
+//				error=4;
+    			return "Error. Timeout waiting for data from peer.";
 			}
 			else {
-				error=nread==0?1:2;
+//				error=nread==0?1:2;
+    			return "Error. Timeout waiting for data from peer.";
 			}
-			return false;
 		}
 		dend+=nread;
-		if (dend<h) return true;
+		if (dend<h) {
+            return ""; //need to recv more
+        }
 		uint32_t sz=decode_size();
 		if (sz>maxsize) {
-			error=3;
-			return false;
+			//error=3;
+			return "Error. Incoming datagram is too big.";
 		}
 		resize(sz);
 		service=decode_service();
-		if (dend==sz) return true;
+		if (dend==sz) {
+            return "";
+        }
 	}
 	ssize_t nread = server::os->recv(sock, &(*this)[dend], size()-dend,0);
 	if (nread<=0) {
 		if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
 			cout << "socket: client: EINPROGRESS fd" << sock  << endl;
-			error=4;
+//			error=4;
+   			return "Error. Timeout waiting for data from peer.";
 		}
 		else {
-			error=nread==0?1:2;
+//			error=nread==0?1:2;
+			return "Error. Incoming datagram is too big.";
 		}
-		return false;
 	}
 	dend+=nread;
-	return true;
+	return "";
 }
 
-bool datagram::send(int sock) const {
-	assert(size()<maxsize);
+string datagram::send(int sock) const {
+	if (unlikely(size()>=maxsize)) {
+        return "Error. Datagram is too big.";
+    }
 	uint8_t sz[h];
 	auto nbytes = server::os->write(sock, &(*this)[0], size());
 	if (nbytes < 0) {
-		return false;
+		return "Error. While wrtting to socket";
 	}
 	if (nbytes!=size()) {
-		return false;
+		return "Error. Unexpected write size while wrtting to socket";
 	}
-	return true;
+	return "";
 }
 
 datagram::hash_t datagram::compute_hash() const {

@@ -21,7 +21,6 @@ c::peer_t(int sock): b(sock), stage(service),latency(100ms) {
 }
 
 c::~peer_t() {
-	delete curd;
 }
 
 bool c::connect(const string& host, uint16_t port, bool block) {
@@ -45,7 +44,7 @@ bool c::ping() {
 	lock_guard<mutex> lock(mx);
 	sent_ping=chrono::steady_clock::now();
 	}
-	return send(protocol::ping,"ping");
+	return send(protocol::ping,"ping").empty();
 }
 
 

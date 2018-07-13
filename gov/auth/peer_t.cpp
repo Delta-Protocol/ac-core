@@ -180,35 +180,24 @@ bool c::process_work(datagram*d) {
 }
 
 
-bool c::run_auth() {
-    if (parent!=0) {
-        cerr << "this object is already managed by a daemon" << endl;
-        return false;
-    }
-    fd_set read_fd_set;
-cout << "-----------------" << endl;
-cout << "enter while" << endl;
+string c::run_auth() {
+    assert(parent==0); //this object should not be managed by a daemon to use this function
+
     while(!program::_this.terminated) {
         if (stage_peer==verified || stage_peer==verified_fail) {
-cout << "FINISHED break" << endl;
             break;
         }
-cout << "complete_datagram" << endl;
-        datagram* d=complete_datagram(10);
-        if (d==0) {
-cout << "d=0" << endl;
-            break;
+        pair<string,datagram*> r=recv_response(); //complete_datagram(10);
+        if (unlikely(!r.first.empty())) {
+            assert(r.second==0);
+            return "Error. Peer not responding";
         }
-        if (!d->completed()) { 
-cout << "ok, not completed, continuing" << endl;
-           continue;
-        }
-        if (process_work(d)) {
-cout << "ok, work processed, continuing" << endl;
+
+        if (likely(process_work(r.second))) {
                 continue;
         }
-cout << "break" << endl;
-        break; //datagram not recognized in the protocol
+        delete r.second;
+        return "Error. Unrecognized datagram arrived";
     }
-    return stage_peer==verified;
+    return stage_peer==verified?"":"Error. Peer failed to demonstrate identity";
  }

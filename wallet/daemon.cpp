@@ -23,6 +23,7 @@ bool c::send_error_response(peer_t *c, datagram*d, const string& error) {
 bool c::send_response(peer_t *c, datagram*d, const string& payload) {
 	c->send(us::wallet::protocol::response,payload);
 	this_thread::sleep_for(500ms); //TODO check if we can do it better
+cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW Sleep 500ms"  << endl;
 	delete d;
 	return true;
 }
@@ -70,10 +71,8 @@ bool c::process_work(socket::peer_t *c0, datagram*d) {
 		break;
 		case us::wallet::protocol::balance_query: {
 			bool detailed=d->parse_string()=="1";
-			refresh();
-
 			ostringstream ans;
-			local_api::balance(detailed,ans);
+   			local_api::balance(detailed,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;

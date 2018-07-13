@@ -4,6 +4,7 @@
 #include "api.h"
 #include "wallet.h"
 #include "pairing.h"
+#include <us/gov/socket.h>
 
 namespace us { namespace wallet {
 using namespace std;
@@ -26,6 +27,10 @@ struct local_api:api, wallet, pairing {
 	virtual void pair(const pub_t&, const string& name, ostream&os) override;
 	virtual void unpair(const pub_t&, ostream&os) override;
 	virtual void list_devices(ostream&os) override;
+
+    bool bring_up_backend(ostream&os);
+
+    socket::peer_t endpoint;
 };
 
 }}

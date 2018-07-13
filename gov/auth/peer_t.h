@@ -52,7 +52,7 @@ namespace auth {
 		daemon* get_parent() { return reinterpret_cast<daemon*>(parent); }
 
         virtual const keys& get_keys() const;
-        bool run_auth();
+        string run_auth();
 
 		/// For every edge in the graph of nodes there are two nodes on each end, each node has an instance of this class, 
 		/// If one of these nodes is me and the other is peer

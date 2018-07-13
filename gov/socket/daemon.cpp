@@ -2,6 +2,7 @@
 #include "protocol.h"
 #include "peer_t.h"
 #include <us/gov/signal_handler.h>
+#include <us/gov/likely.h>
 
 typedef us::gov::socket::daemon c;
 using namespace us::gov;
@@ -35,7 +36,8 @@ void c::run() {
 	unique_lock<mutex> lock(mx);
 	while(!thread_::_this.terminated) {
 		clients.read_sockets();
-		daemon_timer();
+		//daemon_timer();
+cout << "MUTATION DISABLED" << endl;
 		ready=false;
 		cv.wait_for(lock,chrono::seconds(30),[&]{return ready;});  //TODO not every 30 secs but at some safe point in the cycle
 		cout << "socket: daemon waked up" << endl;
@@ -52,18 +54,19 @@ bool c::receive_and_process(client* scl) {
 }
 
 bool c::process_work(peer_t *c) {
-	datagram* d=c->complete_datagram();
-	if (!d || d->error!=0) {
-		cout << "socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
-		if (d) delete d;
+	auto r=c->recv_response(); //complete_datagram();
+	if (unlikely(!r.first.empty())) {
+		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
+		assert(!r.second);
 		clients.remove(c); 
-		return true;
+		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
+		return true; //processed work
 	}
-	if (!d->completed()) { 
+	if (unlikely(!r.second->completed())) { 
 		cout << "socket: daemon: recv partial datagram. returning to listening pool" << endl;
 		return true;
 	}
-	bool processed=process_work(c,d);
+	bool processed=process_work(c,r.second);
 	clients.resume(c);
 	return processed;
 }

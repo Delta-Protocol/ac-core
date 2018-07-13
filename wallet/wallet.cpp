@@ -117,36 +117,50 @@ void c::extended_balance(ostream& os) const {
 	os << "total balance: " << b;
 }
 
-c::accounts_query_t c::query_accounts(const cash::app::query_accounts_t& addresses) const {
-	accounts_query_t ret;
-	socket::datagram* d=addresses.get_datagram();
-	if (!d) return ret;
+using socket::datagram;
 
-	socket::datagram* response_datagram=socket::peer_t::send_recv(backend_host,backend_port,d);
-	if (!response_datagram) return move(ret);
-	auto r=response_datagram->parse_string();
-	delete response_datagram;
+pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const cash::app::query_accounts_t& addresses) const {
+	pair<string,accounts_query_t> ret;
+	socket::datagram* d=addresses.get_datagram();
+	if (unlikely(!d)) {
+        ret.first="Error. Making datagram from addresses.";
+        return move(ret);
+    }
+
+	pair<string,datagram*> response=peer.send_recv(d);
+    
+    if (unlikely(!response.first.empty())) {
+        ret.first=response.first; //"Error. Backend is not answering.";
+        return move(ret);
+    }
+
+	auto r=response.second->parse_string(); 
+	delete response.second;
 
 	istringstream is(r);
 	int code;
 	is >> code;
-	if (code!=0) {	
+	if (unlikely(code!=0)) {	
 		string err;
 		is >> err;
-		cerr << err << endl;
+        ostringstream os;
+        os << "Error. Backend reported: " << err;
+        ret.first=os.str();
+cerr << err << endl;
 	}
 	else {
 		for (auto&i:addresses) {
 			cash::app::account_t a=cash::app::account_t::from_stream(is);
 			if (a.balance>0) {
-				ret.emplace(i,move(a));
+				ret.second.emplace(i,move(a));
 			}
 		}
-		is >> ret.parent_block;
+		is >> ret.second.parent_block;
 	}
 	return move(ret);
 }
-void c::refresh() {
+
+string c::refresh(socket::peer_t& peer) {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
 	for (auto&i:*this) {
@@ -154,33 +168,40 @@ cout << "addr " << i.first << endl;
 		addresses.emplace_back(i.first);
 	}
 cout << "query accounts" << endl;
-	data=query_accounts(addresses);
+	auto r=query_accounts(peer,addresses);
+    if (likely(r.first.empty())) data=move(r.second);
+    return r.first;
 }
 
-c::input_accounts_t c::select_sources( const cash::cash_t& amount) {
-	refresh();
+pair<string,c::input_accounts_t> c::select_sources(socket::peer_t& peer, const cash::cash_t& amount) {
+    pair<string,c::input_accounts_t> ans;
+    ans.first=refresh(peer);
+	if (unlikely(!ans.first.empty())) {
+        return move(ans);
+    }
 	vector<accounts_query_t::const_iterator> v;	
 	v.reserve(data.size());
 	for (accounts_query_t::const_iterator i=data.begin(); i!=data.end(); ++i) {
 		v.emplace_back(i);
 	}
 
+    //among all our balances we choose to consume those with lowest balance first (globally this algorithm will reduce the number of accounts with small amounts in the ledger)
 	sort(v.begin(),v.end(),[](const accounts_query_t::const_iterator&v1, const accounts_query_t::const_iterator&v2) { return v1->second.balance < v2->second.balance; });
-	input_accounts_t ans;
-	ans.parent_block=data.parent_block;
+
+	ans.second.parent_block=data.parent_block;
 	cash::cash_t remaining=amount;
 	for (auto&i:v) {
 		if (i->second.balance<=remaining) {
-			ans.emplace_back(input_account_t(i->first,i->second,i->second.balance));
+			ans.second.emplace_back(input_account_t(i->first,i->second,i->second.balance));
 			remaining-=i->second.balance;
 		}
 		else {
-			ans.emplace_back(input_account_t(i->first,i->second,remaining));
+			ans.second.emplace_back(input_account_t(i->first,i->second,remaining));
 			remaining=0;
 			break;
 		}
 	}
-	return ans;
+	return move(ans);
 }
 
 void c::dump(ostream& os) const {
@@ -224,18 +245,19 @@ void c::input_accounts_t::dump(ostream& os) const {
 
 #include <us/gov/cash/locking_programs/p2pkh.h>
 
-void c::send(const cash::tx& t) const {
+string c::send(socket::peer_t& cli, const cash::tx& t) const {
 	auto fee=t.check();
 	if (fee<=0) {
-		cerr << "Individual inputs and fees must be positive." << endl;
-		exit(1);
+		return "Error. Individual inputs and fees must be positive.";
 	}
+/*
 	socket::peer_t cli;
 	if (!cli.connect(backend_host,backend_port,true)) {
 		cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
-		exit(1);
+		return false;
 	}
-	cli.send(t.get_datagram());
+*/
+	return cli.send(t.get_datagram());
 }
 
 string c::generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program) {
@@ -267,7 +289,7 @@ string c::generate_locking_program_input(const cash::tx& t, size_t this_index, c
 }
 
 
-pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
+pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
 	auto sigcodes=cash::tx::combine(sigcodei,sigcodeo);
 
     pair<string,cash::tx> ret;
@@ -277,24 +299,26 @@ pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t&
 	for (auto&i:ret.second.inputs) {
 		addresses.emplace_back(i.address);
 	}
-	wallet::accounts_query_t bases=query_accounts(addresses);
+	pair<string,wallet::accounts_query_t> r=query_accounts(peer,addresses);
+    auto& bases=r.second;
 //	bases.dump(cout);
-    string err;
+//    string err;
 	int n=0;
 	for (auto&i:ret.second.inputs) {
 		auto b=bases.find(i.address);
-		if(b==bases.end()) {
+		if(unlikely(b==bases.end())) {
+            ret.first="Error. Address not found.";
 			cerr << "No such address " << i.address << endl;
-			exit(1);
+			return move(ret);
 		}
 		const cash::app::account_t& src=b->second;
 		if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,ret.second)) {
 			i.locking_program_input=generate_locking_program_input(ret.second,n,sigcodes,i.address, src.locking_program);
 			if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,ret.second)) {	
 				i.locking_program_input="";
-				ostringstream os;
-                os << "cannot unlock account " << i.address << endl;
-                ret.first=os.str(); 
+				//ostringstream os;
+                cout << "warning, cannot unlock account " << i.address << endl;  //not an error, an input can be left unsigned
+                //ret.first=os.str(); 
 			}
 		}
 		++n;
@@ -302,19 +326,25 @@ pair<string,cash::tx> c::tx_sign(const string& txb58, const cash::tx::sigcode_t&
     return move(ret);
 }
 
-pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) { //non-empty first means error
+pair<string,cash::tx> c::tx_make_p2pkh(socket::peer_t& peer, const tx_make_p2pkh_input& i) { //non-empty first means error
         pair<string,cash::tx> ret;
         cash::tx& t=ret.second;
 
         auto sigcodes=cash::tx::combine(i.sigcode_inputs, i.sigcode_outputs);
 
-		input_accounts_t input_accounts=select_sources(i.amount+i.fee);
+		auto s=select_sources(peer, i.amount+i.fee);
+        if (unlikely(!s.first.empty())) {
+            ret.first=s.first;
+            return move(ret);
+        }
+        input_accounts_t& input_accounts=s.second;
+        
 		if (input_accounts.empty()) {
-			ret.first="no inputs";
+			ret.first="Error. Insufficient balance";
 			return move(ret);
 		}
 		if(input_accounts.get_withdraw_amount()!=i.amount+i.fee) {
-			ret.first="Failed amounts check";
+			ret.first="Error. Inconsistency on amounts.";
             return move(ret);
         }
 
@@ -325,7 +355,7 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) { //non-emp
 		}
 		t.add_output(i.rcpt_addr, i.amount, cash::p2pkh::locking_program_hash);
         auto fee=t.check();
-    	if (fee<1) { //TODO
+    	if (fee<1) { //TODO harcoded minimum fee
             ostringstream err;
             err << "Failed check. fees are " << fee;
 			ret.first=err.str();
@@ -348,10 +378,12 @@ pair<string,cash::tx> c::tx_make_p2pkh(const tx_make_p2pkh_input& i) { //non-emp
 		}
 
 		if (i.sendover) {
-			send(t);
+            string r=send(peer,t);
+			if (unlikely(!r.empty())) {
+                ret.first=r;
+            }
 //			cout << "sent." << endl;
 		}
-
         return move(ret);
 }
 
