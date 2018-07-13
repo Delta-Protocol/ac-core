@@ -56,23 +56,28 @@ public class EllipticCryptography {
 
     public BigInteger generatePrivateKey() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
         KeyPair keyPair = generateKeyPair();
-        PrivateKey privateKey = privateKeyFromKeyPair(keyPair);
+        return getBigIntegerFromKeyPair(keyPair);
+        
+    }
+
+    private BigInteger getBigIntegerFromKeyPair(KeyPair keypair){
+        return new BigInteger(keypair.getPrivate().getEncoded());
+    }
+
+    public PrivateKey privateKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException{
+        
+        return factory.generatePrivate(new PKCS8EncodedKeySpec(keypair.getPrivate().getEncoded()));
+    }
+
+    private BigInteger getBigIntegerFromPrivateKey(PrivateKey privateKey){
         return new BigInteger(privateKey.getEncoded());
     }
 
-    public static PrivateKey privateKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException{
-        
-            
-            return factory.generatePrivate(new PKCS8EncodedKeySpec(keypair.getPrivate().getEncoded()));
-        
-    }
-
-    public static PublicKey publicKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException {
-
+    public PublicKey publicKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException {
         return factory.generatePublic(new X509EncodedKeySpec(keypair.getPublic().getEncoded()));
     }
 
-    public KeyPair generateKeyPair() throws NoSuchAlgorithmException,InvalidAlgorithmParameterException, NoSuchProviderException {
+    public static KeyPair generateKeyPair() throws NoSuchAlgorithmException,InvalidAlgorithmParameterException, NoSuchProviderException {
 
         KeyPairGenerator generator = KeyPairGenerator.getInstance("ECDSA");
         generator.initialize(curve_params);
@@ -85,8 +90,10 @@ public class EllipticCryptography {
         aKA.doPhase(pubKeyB, true);
         return aKA.generateSecret();
     }
-
-    public static ECPoint publicPointFromPrivate(BigInteger privKey) {
+    /*private PublicKey publicKeyFromBytes(Byte[] publicKey){
+        return factory.generatePublic(new X509EncodedKeySpec(
+    }*/
+    public ECPoint publicPointFromPrivate(BigInteger privKey) {
         /*
          * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group order,
          * but that could change in future versions.

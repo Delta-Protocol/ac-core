@@ -8,7 +8,7 @@ public class MainTest{
             SymmetricEncryptionTests symmetricEncryptionTests = new SymmetricEncryptionTests();
             EllipticCryptographyTests ellipticCryptographyTests = new EllipticCryptographyTests();
             ellipticCryptographyTests.testEllipticCryptography();
-            symmetricEncryptionTests.test_symmetric_encryption();
+            symmetricEncryptionTests.testSymmetricEncryption();
             
 
             System.out.println("Java tests PASSED");

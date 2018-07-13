@@ -18,17 +18,24 @@ public class SymmetricEncryptionTests{
         KeyPair b;
         KeyPair c;
 
-    public boolean test_symmetric_encryption()throws GeneralSecurityException{
+    public boolean testSymmetricEncryption()throws GeneralSecurityException{
     
         try{
             
             ec = EllipticCryptography.getInstance();
             a = ec.generateKeyPair();
             b = ec.generateKeyPair();
-            b = ec.generateKeyPair();
+            c = ec.generateKeyPair();
+
+            PrivateKey priv_a = ec.privateKeyFromKeyPair(a);
+            PublicKey pub_a = ec.publicKeyFromKeyPair(a);
+            PrivateKey priv_b = ec.privateKeyFromKeyPair(b);
+            PublicKey pub_b = ec.publicKeyFromKeyPair(b);
+            PrivateKey priv_c = ec.privateKeyFromKeyPair(c);
+            PublicKey pub_c = ec.publicKeyFromKeyPair(c);
 
             //test that encryption then decryption will retrieve original plaintext.
-            test_encrypt_decrypt("encrypt this"																																);
+            assert(test_encrypt_decrypt("encrypt this"																														));
             assert(test_encrypt_decrypt(""																																	));
             assert(test_encrypt_decrypt(",./;'#[]-=123456DFJLSKDFJERUEIUR  \n rtr"  																						));
             assert(test_encrypt_decrypt("0"																																	));
@@ -45,9 +52,9 @@ public class SymmetricEncryptionTests{
             assert(test_decrypt_multiple("The plaintext should be the same each time we decrypt"));
 
             //test that message can't be decoded with the wrong key.
-            assert(!test_encrypt_decrypt_keys("encrypt this", a.getPrivate(),	a.getPublic(), c.getPrivate(), b.getPublic()));
+            assert(!test_encrypt_decrypt_keys("test that message can't be decoded with the wrong key", priv_a, pub_b, priv_c, pub_a));
 
-            //decrypting invalid ciphertext should return an empty vector.
+            //decrypting invalid ciphertext should return an empty vector. 
             assert(test_decrypt_nulls(""));
             assert(test_decrypt_nulls("this string hasn't been encrypted so decryption will fail"));
         }
@@ -67,20 +74,19 @@ public class SymmetricEncryptionTests{
         PrivateKey priv_b = ec.privateKeyFromKeyPair(b);
         PublicKey pub_b = ec.publicKeyFromKeyPair(b);
 
-        return test_encrypt_decrypt_keys(plaintext_string, priv_a, pub_a, priv_b, pub_b);
+        return test_encrypt_decrypt_keys(plaintext_string, priv_a, pub_b, priv_b, pub_a);
     }
 
-    public boolean test_encrypt_decrypt_keys(String plaintext_string, PrivateKey priv_a, PublicKey pub_a, PrivateKey priv_b, PublicKey pub_b) throws GeneralSecurityException{
-        System.out.println("encrypting :" + plaintext_string);
+    public boolean test_encrypt_decrypt_keys(String plaintext_string, PrivateKey priv_a, PublicKey pub_b, PrivateKey priv_b, PublicKey pub_a) throws GeneralSecurityException{
+       
         byte[] plaintext = plaintext_string.getBytes();
-        System.out.println("encrypting as bytes:" + plaintext);
+        
         SymmetricEncryption se_a= new SymmetricEncryption(priv_a,pub_b);
         byte[] ciphertext = se_a.encrypt(plaintext);
-        System.out.println("ciphertext as bytes:" + ciphertext);
+       
         SymmetricEncryption se_b= new SymmetricEncryption(priv_b,pub_a);
         byte[] decodedtext = se_b.decrypt(ciphertext);
-        System.out.println("decrypted :" + decodedtext.toString());
-        
+       
         return Arrays.equals(plaintext,decodedtext);
     }
 
@@ -112,7 +118,7 @@ public class SymmetricEncryptionTests{
         byte[] ciphertext = ciphertext_string.getBytes();
         SymmetricEncryption se = new SymmetricEncryption(priv_a,pub_b);
         byte[] decryptedtext = se.decrypt(ciphertext);
-        return decryptedtext.length == 0;
+        return Arrays.equals(decryptedtext,new byte[0]);
     }
 
     public boolean test_decrypt_multiple(String plaintext_string) throws GeneralSecurityException{
@@ -131,8 +137,8 @@ public class SymmetricEncryptionTests{
         byte[] ciphertext = se_a.encrypt(plaintext);
 
         SymmetricEncryption se_b = new SymmetricEncryption(priv_b,pub_a);
-        byte[] decryptedtext1 = se_b.decrypt(plaintext);
-        byte[] decryptedtext2 = se_b.decrypt(plaintext);
+        byte[] decryptedtext1 = se_b.decrypt(ciphertext);
+        byte[] decryptedtext2 = se_b.decrypt(ciphertext);
      
         return Arrays.equals(decryptedtext1,decryptedtext2);
     }

@@ -13,6 +13,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 
+import java.nio.charset.StandardCharsets;
+
 public class SymmetricEncryption {
 
     private static final SecureRandom random = new SecureRandom();
@@ -21,41 +23,41 @@ public class SymmetricEncryption {
     private byte[] key;
     private byte[] iv;
 
-    public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
+    public SymmetricEncryption(byte[] sharedKey) throws GeneralSecurityException {
+        
         Security.addProvider(new BouncyCastleProvider());
         cipher = Cipher.getInstance("AES/GCM/NoPadding");
         iv = new byte[iv_size];
-        key = EllipticCryptography.getInstance().generateSharedKey(priv_a,pub_b);
-        /*for (int i = 0; i < key.length; i++) {
-             
-            System.out.println("key: " + key[i]); 
-        }*/
+        key = sharedKey;
+    }
+
+    public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
+        
+        this(EllipticCryptography.getInstance().generateSharedKey(priv_a,pub_b));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
-        random.nextBytes(iv);
-        System.out.println("iv on encrypt: " + iv);
-        /*for (int i = 0; i < iv.length; i++) {
-             
-            System.out.println("iv: " + iv[i]); 
-        }*/
         
+        random.nextBytes(iv);
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
         return Arrays.concatenate(cipher.doFinal(plaintext), iv);
     }
 
-    public byte[] decrypt(byte[] encrypted) throws GeneralSecurityException {   
-    
+    //Decrypt returns an empty byte array if the ciphertext is invalid. Invalid ciphertext would 
+    //otherwise cause an exception as the algorithm tries to authenticate the ciphertext.
+    public byte[] decrypt(byte[] encrypted) {    
+        
+        byte[] emptyArray = new byte[0];
         try{
-            iv = Arrays.copyOfRange(encrypted, encrypted.length - iv_size , encrypted.length - 1);
-            System.out.println("iv on decrypt: " + iv);
+            int messageLength = encrypted.length - iv_size;
+            if(messageLength<=0){return emptyArray;}
+            iv = Arrays.copyOfRange(encrypted, messageLength , encrypted.length);
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
-            return cipher.doFinal(Arrays.copyOfRange(encrypted, 0, encrypted.length - iv_size));
+            return cipher.doFinal(Arrays.copyOfRange(encrypted, 0, messageLength));
         }
         catch(Exception e){
-            return null;
-        }
-        
+            return emptyArray;
+        }      
     }
 
 }

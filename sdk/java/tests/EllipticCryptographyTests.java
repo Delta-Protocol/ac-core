@@ -18,16 +18,24 @@ public class EllipticCryptographyTests{
     public boolean testEllipticCryptography() throws GeneralSecurityException {
         
         try{
-            
             ec = EllipticCryptography.getInstance();
+            assert(testKeyPairGeneration());
             assert(testSharedSecret());
         }
-            catch(GeneralSecurityException e){
-                throw new GeneralSecurityException("elliptic cryptography test failed on: " + e);
-            }
-            return true;
+        catch(GeneralSecurityException e){
+            throw new GeneralSecurityException("elliptic cryptography test failed on: " + e);
+        }
+        return true;
+    }
 
+
+    private boolean testKeyPairGeneration() throws GeneralSecurityException{
         
+        KeyPair a = ec.generateKeyPair();
+        KeyPair b = ec.generateKeyPair();
+
+        // add code to check keypairs aren't equal
+        return true;
     }
 
     private boolean testSharedSecret() throws GeneralSecurityException {
@@ -41,11 +49,8 @@ public class EllipticCryptographyTests{
 
         byte[] key1 = ec.generateSharedKey(priv_a, pub_b);
         byte[] key2 = ec.generateSharedKey(priv_b, pub_a);
-
-        System.out.println("generated same secret key: " + Arrays.equals(key1,key2)); 
         
         return Arrays.equals(key1,key2);
 
-        
     }
 }
