@@ -1,14 +1,12 @@
-#include <us/gov/crypto/symmetric_encryption.h>
+#include "us/gov/crypto/symmetric_encryption.h"
 
 #include <iostream>
 #include <string>
-#include <us/gov/crypto/ec.h>
+#include "us/gov/crypto/ec.h"
 #include <vector>
 
 using namespace std;
 using namespace us::gov::crypto;
-using std::begin;
-using std::end;
 
 int main ( int argc, char *argv[] )
 {
@@ -25,29 +23,24 @@ int main ( int argc, char *argv[] )
         
     }
     else {
-        cout<<"provided private key: " << argv[1] << "\n" << "provided public key: " << argv[2] << "\n" << "provided command: " << argv[3] << "\n" << "provided message: " << argv[4] << endl;
+        //cout<<"provided private key: " << argv[1] << "\n" << "provided public key: " << argv[2] << "\n" << "provided command: " << argv[3] << "\n" << "provided message: " << argv[4] << endl;
         ec::keys k;
         std::string argv1(argv[1]);
-        k.priv.from_b58(argv1);
+        k.priv=ec::keys::priv_t::from_b58(argv1);
+        k.pub=ec::keys::pub_t::from_b58(argv[2]);
         
-        cout << k.priv.to_b58() << endl;
+        string command(argv[3]);
 
-        std::string argv2(argv[2]);
-        k.pub.from_b58(argv2);
-        
-        cout << k.pub.to_b58() << endl; 
+        string message_string(argv[4]);
 
-        std::string message_string(argv[4]);
-        cout << message_string << endl;
         vector<unsigned char> message(message_string.begin(),message_string.end());
         
         symmetric_encryption s_e(k.priv,k.pub);
-        if(argv[3]=="encrypt"){
+        if(command=="encrypt"){
         
-           //vector<unsigned char> encrypted = s_e.encrypt(message);
-           //string encrypted_string(encrypted.begin(), encrypted.end());
-
-           //cout << encrypted_string << endl;
+           vector<unsigned char> encrypted = s_e.encrypt(message);
+           string encrypted_string(encrypted.begin(), encrypted.end());
+           cout << encrypted_string << endl;
         }
     }
 }
