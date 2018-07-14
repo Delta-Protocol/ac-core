@@ -33,24 +33,6 @@ void c::add(app*app) {
 	//app->parent=this;
 	apps_.emplace(app->get_id(),app);
 }
-/*
-void c::start_new_blockchain(const string& addr) {
-    assert(!addr.empty());
-    auto pool=new diff();
-    auth_app->pool->to_hall.push_back(make_pair(peerd.id.pub.hash(),addr));
-    auto* mg=create_local_deltas();
-    assert(mg!=0);
-    pool->allow(*mg);
-    pool->add(mg);
-    pool->end_adding();
-    save(*pool);
-    if (!import(*pool)) {
-        cerr << "Error creating blockchain" << endl;
-        exit(1);
-    }
-    delete pool;
-}
-*/
 
 c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
 }
@@ -375,6 +357,7 @@ void c::save(const diff& bl) const {
 	fn << blocksdir()+"/"+bl.hash().to_b58();
 	
 	{
+cout << "RBF SAVE CHECK << endl;
 cout << "file " << fn.str() << endl;
 	ofstream os(fn.str());
 	bl.to_stream(os);
@@ -408,17 +391,6 @@ cout << "file " << fn.str() << endl;
 	}
 	delete b;	
 }
-/*
-void c::save_block(const string& content) const {
-	unsigned char h[crypto::double_hash256::OUTPUT_SIZE];
-	crypto::double_hash256 h;
-	h.write(content);
-	h.finalize(hash);
-	string hash=crypto::b58::encode(h,h+crypto::double_hash256::OUTPUT_SIZE);
-	ofstream os(blocksdir+"/"+hash);
-	bl.to_stream(os);
-}
-*/
 
 string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
 	return auth_app->get_random_node(rng,exclude_addrs);
