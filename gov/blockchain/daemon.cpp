@@ -357,7 +357,7 @@ void c::save(const diff& bl) const {
 	fn << blocksdir()+"/"+bl.hash().to_b58();
 	
 	{
-cout << "RBF SAVE CHECK << endl;
+cout << "------------RBF SAVE CHECK------------" << endl;
 cout << "file " << fn.str() << endl;
 	ofstream os(fn.str());
 	bl.to_stream(os);
