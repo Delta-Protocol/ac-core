@@ -23,7 +23,6 @@ socket::client* c::create_client(int sock) {
 
 void c::daemon_timer() { // network mutation
 	pub_t p=adjust_peer_number();
-
 	check_latency(p);
 
 //	auto nis=in_service();
@@ -86,18 +85,18 @@ cout << "add peers" << endl;
 	while(n>0) {
 		string addr=get_random_peer(exclude);
 		if (!addr.empty()) {
-cout << "addr " << addr << endl;
+//cout << "addr " << addr << endl;
 			if (exclude.find(addr)==exclude.end()) {
 				exclude.emplace(addr);
 				auto* p=create_client(0);
-cout << "connecting to address " << addr << endl;
+//cout << "connecting to address " << addr << endl;
 				if (p->connect(addr,16672)) {
-cout << "connected to address " << addr << endl;
+//cout << "connected to address " << addr << endl;
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);
 				}
 				else {
-					cout << "peerd: unable to connect, deleting peer" << endl;
+//					cout << "peerd: unable to connect, deleting peer" << endl;
 					delete p;
 				}
 			}
