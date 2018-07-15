@@ -54,7 +54,7 @@ bool c::receive_and_process(client* scl) {
 }
 
 bool c::process_work(peer_t *c) {
-	auto r=c->recv_response(); //complete_datagram();
+	auto r=c->recv(); //complete_datagram();
 	if (unlikely(!r.first.empty())) {
 		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		assert(!r.second);
@@ -62,6 +62,7 @@ bool c::process_work(peer_t *c) {
 		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		return true; //processed work
 	}
+    assert(r.second!=0);
 	if (unlikely(!r.second->completed())) { 
 		cout << "socket: daemon: recv partial datagram. returning to listening pool" << endl;
 		return true;

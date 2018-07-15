@@ -1,3 +1,4 @@
+/*
 #ifndef USGOV_b31c225ca9360a034d03497ef22865c0b5c8d70c183eb98b4aedf857d721ab0a
 #define USGOV_b31c225ca9360a034d03497ef22865c0b5c8d70c183eb98b4aedf857d721ab0a
 
@@ -19,11 +20,11 @@ struct os {
 struct posix:os {
         virtual ssize_t recv(int sockfd, void *buf, size_t len, int flags) override { 
 		auto r=::recv(sockfd,buf,len,flags); 
-		//cout << "net: os(posix): recv from " << sockfd << " " << r << " bytes" << endl;
+//		cout << "net: os(posix): recv from " << sockfd << " " << r << " bytes" << endl;
 		return r;
 	}
         virtual ssize_t write(int fd, const void *buf, size_t count) override {
-		//cout << "net: os(posix): write " << count << " bytes" << endl;
+//		cout << "net: os(posix): write " << count << " bytes" << endl;
 		return ::write(fd,buf,count); 
 	}
 };
@@ -41,4 +42,4 @@ struct sim:os {
 }}
 
 #endif
-
+*/

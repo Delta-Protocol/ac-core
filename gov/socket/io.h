@@ -1,3 +1,4 @@
+/*
 #ifndef USGOV_7f241fe1275bd94e413870e5de9bcb3246978771fa902243ebc9ab5eb5e1ddb0
 #define USGOV_7f241fe1275bd94e413870e5de9bcb3246978771fa902243ebc9ab5eb5e1ddb0
 
@@ -30,3 +31,4 @@ namespace socket {
 
 #endif
 
+*/

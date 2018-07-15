@@ -18,12 +18,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <us/gov/net.h>
+//#include <us/gov/net.h>
 
 using namespace std;
 typedef us::gov::socket::server c;
 
-unique_ptr<us::gov::net::os> c::os=make_unique<us::gov::net::posix>();
+//unique_ptr<us::gov::net::os> c::os=make_unique<us::gov::net::posix>();
 
 c::server():port(0) {
 }
@@ -379,22 +379,20 @@ void c::run() {
 	}
 
 	signal_handler::_this.add(this);
-	char discard[30]; //loopback recv buffer, up to 30 wake up signals
+	char discard[4]; //loopback recv buffer, up to 30 wake up signals
 	while (true) {
-		if (thread_::_this.terminated) {
-			break;
-		}
+		if (unlikely(thread_::_this.terminated)) break;
 		FD_ZERO(&read_fd_set);
 		FD_SET(sock,&read_fd_set);
 		FD_SET(loopback,&read_fd_set);
 		vector<int> sl=clients.update();
 		for (auto& i:sl) FD_SET(i,&read_fd_set);
-		if (::select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0) {
+		if (unlikely(::select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0)) {
 			cerr << "error in select" << endl;
 			continue;
 		}
-		if (FD_ISSET(loopback, &read_fd_set)) {
-			int r=os->recv(loopback,&discard,30,0);
+		if (unlikely(FD_ISSET(loopback, &read_fd_set))) {
+            ::recv(loopback,&discard,4,0);
 		}
 		if (FD_ISSET(sock, &read_fd_set)) {
 			int nnew;
@@ -415,10 +413,10 @@ void c::run() {
 		}
 		for (int i:sl) { //Service all the sockets with input pending.
 			cout << "socket: server: scanning fd " << i << endl;
-			if (!FD_ISSET (i, &read_fd_set)) continue;
+			if (likely(!FD_ISSET (i, &read_fd_set))) continue;
 			cout << "socket: server: fd " << i << " is set" << endl;
 			auto c=clients.find(i); //no need lock , this thread is the only that changes size of clients
-			if (c==clients.end()) {
+			if (unlikely(c==clients.end())) {
 				cerr << "data arrived for an unknown fd " << i << endl;
 				continue;
 			}

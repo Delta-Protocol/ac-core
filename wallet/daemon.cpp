@@ -14,17 +14,21 @@ c::~wallet_daemon() {
 }
 
 bool c::send_error_response(peer_t *c, datagram*d, const string& error) {
-	c->send(us::wallet::protocol::response,"E "+error);
-	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	delete d;
+//	this_thread::sleep_for(500ms); //TODO check if we can do it better
+	c->send(new datagram(us::wallet::protocol::response,"E "+error));
+//cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWwW Sleep 500ms"  << endl;
+//	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	return true;
 }
 
 bool c::send_response(peer_t *c, datagram*d, const string& payload) {
-	c->send(us::wallet::protocol::response,payload);
-	this_thread::sleep_for(500ms); //TODO check if we can do it better
-cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW Sleep 500ms"  << endl;
 	delete d;
+//cout << "WDaemon sending response " << payload << endl;
+//	this_thread::sleep_for(500ms); //TODO check if we can do it better
+	c->send(new datagram(us::wallet::protocol::response,payload));
+//cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW Sleep 500ms"  << endl;
+//	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	return true;
 }
 
@@ -73,6 +77,10 @@ bool c::process_work(socket::peer_t *c0, datagram*d) {
 			bool detailed=d->parse_string()=="1";
 			ostringstream ans;
    			local_api::balance(detailed,ans);
+//cout << "ANSWERING : " << ans.str() << endl;
+//cout << "In 5 seconds" << endl;
+//this_thread::sleep_for(5s);
+//cout << "now" << endl;
 			return send_response(c,d,ans.str());
 		}
 		break;

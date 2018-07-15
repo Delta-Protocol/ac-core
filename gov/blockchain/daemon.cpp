@@ -400,7 +400,7 @@ void c::query_block(const diff::hash_t& hash) {
 	auto n=get_random_edge();
 	if (n==0) return;
 //	cout << "querying diff " << hash << " to " << n->pubkey << endl;
-	n->send(protocol::query_block,hash.to_b58());
+	n->send(new datagram(protocol::query_block,hash.to_b58()));
 }
 
 string c::load_block(const string& block_hash_b58) const {
@@ -484,7 +484,7 @@ void c::send(const local_deltas& g, peer_t* exclude) {
 	string msg=os.str();
 	for (auto& i:get_nodes()) {
 		if (i==exclude) continue; //dont relay to the original sender
-		i->send(protocol::local_deltas,msg);
+		i->send(new datagram(protocol::local_deltas,msg));
 	}
 }
 
@@ -530,7 +530,7 @@ cout << "voting for tip be: " << h << endl;
 	os << h << " " << peerd.id.pub << " " << signature;
 	string msg=os.str();
 	for (auto& i:get_people()) {
-		i->send(protocol::vote_tip,msg);
+		i->send(new datagram(protocol::vote_tip,msg));
 	}
 }
 
@@ -554,7 +554,7 @@ cout << "Received vote from " << pubkey << " head be " << block_hash_b58 << endl
 		if (auth_app->my_stage()==peer_t::node) { //dont relay if I am not a node
 			for (auto& i:get_people()) {
 				if (i==c) continue; //dont relay to the original sender
-				i->send(protocol::vote_tip,s);
+				i->send(new datagram(protocol::vote_tip,s));
 			}
 		}
 	}
@@ -617,7 +617,7 @@ void c::process_query_block(peer_t *c, datagram*d) {
 	cout << content << "<" << endl;
 	cout << "---END---" << endl;
 */
-	c->send(protocol::block,content);
+	c->send(new datagram(protocol::block,content));
 }
 
 void c::process_block(peer_t *c, datagram*d) {
@@ -899,7 +899,7 @@ cout << "processing sysop data request " << d->parse_string() << endl;
 	string response=i->second.command(d->parse_string());
 	delete d;
 cout << "sending response: " << response << endl;
-	p->send(us::gov::protocol::sysop,response);
+	p->send(new datagram(us::gov::protocol::sysop,response));
 	return true;
 }
 

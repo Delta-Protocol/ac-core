@@ -191,7 +191,7 @@ void shell_echo(thinfo* info) {
         if (finished22) break;
 
 		if (FD_ISSET (cli.sock, &read_fd_set)) {
-			pair<string,datagram*> r=cli.recv_response();
+			pair<string,datagram*> r=cli.recv();
             if (!r.first.empty()) {
                 assert(r.second==0);
                 cerr << r.first << endl;

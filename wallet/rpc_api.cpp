@@ -11,12 +11,10 @@ using namespace std;
 using datagram=socket::datagram;
 
 c::rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port):walletd_host(walletd_host), walletd_port(walletd_port), b(k,0) {
-
 }
 
 c::~rpc_api() {
 }
-
 
 void c::ask(int service, ostream&os) {
 	ask(service,"",os);
@@ -24,7 +22,7 @@ void c::ask(int service, ostream&os) {
 
 void c::ask(int service, const string& args, ostream&os) {
 	if (sock==0) {
-		cout << "Iniciando auth" << endl;
+//		cout << "Iniciando auth" << endl;
 		if (!connect(walletd_host,walletd_port,true)) {
 			os << "Error. Unable to connect to wallet daemon.";
 			return;
@@ -56,9 +54,13 @@ void c::ask(int service, const string& args, ostream&os) {
 */
 	//socket::datagram* response=socket::peer_t::send_recv(walletd_host, walletd_port, d);
     if (unlikely(!r.first.empty())) {
+//cout << "ZZCCZZZZZZ" << endl;
+//r.second->dump(cout);
         os << r.first;
     }
     else {
+//cout << "ZZZZZZZZ" << endl;
+//r.second->dump(cout);
         //cout << "datagram" << response->size() << endl;
     	os << r.second->parse_string();
 	    delete r.second;

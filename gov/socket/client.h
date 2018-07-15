@@ -31,32 +31,31 @@ namespace socket {
 		string address() const;
 		virtual void ready() {}
 
-		string send(char d) const;
+        pair<string,datagram*> send_recv(datagram* d); 
+//		string send(char d) const;
 		string send(datagram* d) const;
 		string send(const datagram& d) const;
-		string send(int service, const string& payload);
+//		string send(int service, const string& payload);
+        pair<string,datagram*> recv(); //caller owns the returning object
 
 		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
 		bool init_sock(const string& host, uint16_t port, bool block=false);
 
-		virtual void on_connect() {
-            cout << "SOCKET client ONCONNECT" << endl;
-        }
+		virtual void on_connect() {}
 
 		void dump(ostream& os) const;
 
         void run_dialogue();
 
         //highest level function to receive a response
-        pair<string,datagram*> recv_response(); //caller owns the returning object
 
 private:
         //lower level functions:
-		pair<string,datagram*> complete_datagram();
-		pair<string,datagram*> complete_datagram(int timeout_seconds);
+		//pair<string,datagram*> complete_datagram();
+//		pair<string,datagram*> recv(int timeout_seconds);
 
 
-		datagram* curd{0};
+//		datagram* curd{0};
 
 public:
 		int sock;

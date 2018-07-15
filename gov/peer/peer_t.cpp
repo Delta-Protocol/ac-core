@@ -31,7 +31,7 @@ bool c::connect(const string& host, uint16_t port, bool block) {
 }
 
 void c::on_connect() {
-cout << "PEER ONCONNECT" << endl;
+//cout << "PEER ONCONNECT" << endl;
     b::on_connect();
 	since=chrono::steady_clock::now();
 	//stage=connected;
@@ -44,7 +44,7 @@ bool c::ping() {
 	lock_guard<mutex> lock(mx);
 	sent_ping=chrono::steady_clock::now();
 	}
-	return send(protocol::ping,"ping").empty();
+	return send(new datagram(protocol::ping,"ping")).empty();
 }
 
 
@@ -79,7 +79,7 @@ bool c::process_work(datagram* d) { //executed by thread from pool
      switch(d->service) {
          case protocol::ping: {
 			delete d;
-			send(protocol::pong,"pong");
+			send(new datagram(protocol::pong,"pong"));
 			break;
 		 }
          case protocol::pong: {

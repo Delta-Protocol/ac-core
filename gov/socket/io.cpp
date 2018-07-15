@@ -15,6 +15,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
+/*
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "datagram.h"
@@ -40,6 +41,6 @@ string io::send(int sock, char d) {
         }
 	return "";
 }
-
+*/
 
 

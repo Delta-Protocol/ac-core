@@ -70,7 +70,7 @@ bool client::connect(const string& host, uint16_t port, bool block) {
         return false;
     }
 	addr=host;
-cout << "calling on_connect" << endl;
+//cout << "calling on_connect" << endl;
     on_connect();
 	return true;
 }
@@ -80,8 +80,6 @@ void client::disconnect() {
 	if (unlikely(sock==0)) return;
 	close(sock);
 	sock=0;
-    delete curd;
-    curd=0;
 }
 
 void client::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t port) {
@@ -145,12 +143,29 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 		sock=0;
 		return false;
 	}
+    struct timeval tv;
+    tv.tv_sec = 3; //timeout_seconds;
+    tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
 	return true;
 }
 
 //busy-polling all sockets http://www.wangafu.net/~nickm/libevent-book/01_intro.html
 
+pair<string,datagram*> c::send_recv(datagram* d) {
+//cout << "send_recv" << endl;
+    pair<string,datagram*> ans;
+    ans.first=send(d);
+    if (unlikely(!ans.first.empty())) {
+        ans.second=0;
+        return move(ans);
+    }
+    return recv();
+}
 
+
+/*
 string c::send(int service, const string& payload) {
 	datagram* d=new datagram(service,payload);
     auto r=send(d);
@@ -167,42 +182,50 @@ string c::send(char d) const {
 	}
 	return io::send(sock,d); 
 }
+*/
 
-pair<string,datagram*> c::recv_response() { //caller owns the returning object
+pair<string,datagram*> c::recv() { //caller owns the returning object
+//cout << "RECEIVING" << endl;
     pair<string,datagram*> r;
+    r.second=new datagram();
     while(!program::_this.terminated) {
-        r=complete_datagram(socket::response_timeout_secs);
-        if (unlikely(!r.first.empty())) {
-            return move(r);
-//cout << "d=0" << endl;
+        string ans=r.second->recv(sock); //,socket::response_timeout_secs);
+//cout << "ANS recv datagram: " << ans << endl;
+        if (unlikely(!ans.empty())) {
+            r.first=ans;
+	        delete r.second;
+            r.second=0;
+            break;
         }
-        assert(r.second!=0); 
-        if (unlikely(!r.second->completed())) { 
-            continue;
+        if (likely(r.second->completed())) { 
+//cout << "completed" << endl;
+            break;
         }
     }
     return move(r);
 }
 
 
-
+/*
 //if completed the caller is responsible to delete it, otherwise it is just a weak pointer
-pair<string,datagram*> c::complete_datagram(int timeout_seconds) {
+pair<string,datagram*> c::complete_datagram(datagram& curd, int timeout_seconds) {
+//return complete_datagram();
     if (!curd) curd=new datagram();
 	auto r=curd->recv(sock,timeout_seconds);
 	if (unlikely(!r.empty())) {
         delete curd;
         curd=0;
-		return make_pair(r,(datagram*)0);
+	    return make_pair(r,(datagram*)0);
     }
     if (curd->completed()) {
         auto t=curd;
         curd=0;
-		return make_pair("",t);
+	    return make_pair("",t);
     }
-	return make_pair("",curd);
+    return make_pair("",curd);
 }
-
+*/
+/*
 pair<string,datagram*> c::complete_datagram() {
 	if (!curd) curd=new datagram();
 	auto r=curd->recv(sock);
@@ -218,23 +241,27 @@ pair<string,datagram*> c::complete_datagram() {
 	}
 	return make_pair("",curd);
 }
-
-
+*/
 string c::send(datagram* d) const { 
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
 	}
-	assert(d); 
-	return io::send(sock,d); 
+	assert(d);
+//cout << "Sending datagram :" << endl; 
+//d->dump(cout);
+//	return io::send(sock,d); 
+	return d->send(sock);
 }
 
 string c::send(const datagram& d) const {
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
 	}
-	return io::send(sock,d); 
+//	return io::send(sock,d); 
+	return d.send(sock);
 }
 
 void c::dump(ostream& os) const {
 	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
 }
+

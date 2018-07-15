@@ -12,7 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <us/gov/signal_handler.h>
-#include <us/gov/net.h>
+//#include <us/gov/net.h>
 #include "client.h"
 #include "datagram.h"
 
@@ -104,7 +104,7 @@ namespace socket {
 		void dump(ostream& os) const;
 	
 		pub_t active() const { return clients.active(); }
-		static unique_ptr<net::os> os;
+//		static unique_ptr<net::os> os;
 		int sock{0};
 		clients_t clients;
 	};

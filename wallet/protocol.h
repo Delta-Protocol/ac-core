@@ -24,6 +24,8 @@ namespace protocol {
 
 	static constexpr uint16_t response{wallet_base+0};
 
+//    constexpr static array<const char*,num_params> paramstr={"minimum_fee"/*,"floating_point_pos"*/};
+
 }
 }}
 

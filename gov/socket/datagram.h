@@ -16,9 +16,6 @@
 namespace us { namespace gov {
 namespace socket {
 
-    static constexpr int response_timeout_secs={3};
-
-
 	using namespace std;
 	struct datagram:vector<uint8_t> {
 		typedef vector<uint8_t> b;
@@ -48,6 +45,8 @@ namespace socket {
 		vector<string> parse_strings() const;
 		string parse_string() const;
 		uint16_t parse_uint16() const;
+
+        void dump(ostream&) const;
 	private:
 		uint32_t decode_size() const;
 		uint16_t decode_service() const;

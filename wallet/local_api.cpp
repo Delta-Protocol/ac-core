@@ -18,7 +18,7 @@ c::~local_api() {
 
 bool c::bring_up_backend(ostream&os) {
     if (endpoint.connected()) return true;
-cout << "---connecting" << endl;
+//cout << "---connecting" << endl;
     if (!endpoint.connect(backend_host,backend_port,true)) {
         cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
         os << "Error. Backend is unreachable.";
@@ -29,12 +29,13 @@ cout << "---connecting" << endl;
 
 void c::balance(bool detailed, ostream&os) {
     if (!bring_up_backend(os)) return;
-cout << "---connected" << endl;
+//cout << "---connected" << endl;
 	refresh(endpoint);
 	if (detailed) {
 		extended_balance(os);
 	}
 	else {
+//cout << "Writting " << wallet::balance() << endl;
 		os << wallet::balance();
 	}
 }

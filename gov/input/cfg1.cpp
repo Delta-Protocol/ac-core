@@ -25,7 +25,7 @@ c c::load(const string& home) {
         auto x=b::load(home);
 
             string keyfile=abs_file(home,"k");
-                cout << "Loading conf from " << keyfile << endl;
+//                cout << "Loading conf from " << keyfile << endl;
                 if (!file_exists(keyfile)) {
                         cout << "Generating cryptographic keys..."; cout.flush();
                         crypto::ec::keys k=crypto::ec::keys::generate();
@@ -44,20 +44,6 @@ c c::load(const string& home) {
                     //mv k -> k.bad TODO
                     exit(1);
                 }
-
-
-       string blocks_dir=abs_file(home,"blocks");
-        cout << "making sure dir for blocks exists" << endl;
-        if (!ensure_dir(blocks_dir)) {
-        cerr << "Cannot create blocks dir " << blocks_dir << endl;
-        exit(1);
-        }
-
-        string locking_dir=abs_file(home,"locking");
-            if (!ensure_dir(locking_dir)) {
-            cerr << "Cannot create locking-programs dir " << locking_dir << endl;
-            exit(1);
-        }
 
 
        return c(pk,x.home);

@@ -394,7 +394,7 @@ cout << "CASH_QUERY" << endl;
 
 cout << "CASH_RESPONSE " << os.str() << endl;
 
-	c->send(protocol::cash_response,os.str());
+	c->send(new datagram(protocol::cash_response,os.str()));
 }
 /*
 bool c::process_work(peer_t *c, datagram*d) {

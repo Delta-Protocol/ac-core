@@ -16,7 +16,6 @@ namespace socket {
 		virtual ~peer_t();
 		virtual bool process_work(datagram* d) { return false; }
 //		static pair<string,datagram*> send_recv(const string&addr, uint16_t port, datagram*d);
-        pair<string,datagram*> send_recv(datagram* d); 
 
 		virtual void ready() override;
 		void dump(ostream& os) const;

@@ -23,22 +23,22 @@
 
 using namespace std;
 using namespace us::gov::socket;
+typedef us::gov::socket::datagram c;
 
+constexpr size_t c::h;
+constexpr size_t c::maxsize;
 
-constexpr size_t datagram::h;
-constexpr size_t datagram::maxsize;
-
-datagram::datagram(): dend(0) {
+c::datagram(): dend(0) {
 }
 
-datagram::datagram(uint16_t service):service(service) {
+c::datagram(uint16_t service):service(service) {
 	resize(h);
 	encode_size(size());
 	encode_service(service);
 	dend=size();
 }
 
-datagram::datagram(uint16_t service, uint16_t payload):service(service) {
+c::datagram(uint16_t service, uint16_t payload):service(service) {
 	resize(h+2);
 	encode_size(size());
 	encode_service(service);
@@ -47,7 +47,7 @@ datagram::datagram(uint16_t service, uint16_t payload):service(service) {
 	dend=size();
 }
 
-datagram::datagram(uint16_t service, const string& payload):service(service) {
+c::datagram(uint16_t service, const string& payload):service(service) {
 	assert(h+payload.size()<maxsize);
 	resize(h+payload.size());
 	encode_size(size());
@@ -56,7 +56,7 @@ datagram::datagram(uint16_t service, const string& payload):service(service) {
 	dend=size();
 }
 
-void datagram::encode_size(uint32_t sz) {
+void c::encode_size(uint32_t sz) {
 	assert(h==6);
 	assert(size()>=h); //This is little-endian
 	(*this)[0]=sz&0xff;
@@ -65,7 +65,7 @@ void datagram::encode_size(uint32_t sz) {
 	(*this)[3]=sz>>24&0xff;
 }
 
-uint32_t datagram::decode_size() const {
+uint32_t c::decode_size() const {
 	assert(size()>3);
 	uint32_t sz=(*this)[0];
 	sz|=(*this)[1]<<8;
@@ -74,36 +74,41 @@ uint32_t datagram::decode_size() const {
 	return sz;
 }
 
-void datagram::encode_service(uint16_t svc) {
+void c::encode_service(uint16_t svc) {
 	assert(h==6);
 	assert(size()>=h);
 	(*this)[4]=svc&0xff;
 	(*this)[5]=svc>>8&0xff;
 }
 
-uint16_t datagram::decode_service() const {
+uint16_t c::decode_service() const {
 	assert(size()>5);
 	uint16_t svc=(*this)[4];
 	svc|=(*this)[5]<<8;
 	return svc;
 }
 
-bool datagram::completed() const {
+bool c::completed() const {
+//cout << "completed?: size=" << size() << " dend=" << dend << endl << " decodedsz=" << decode_size() << endl;
 	return dend==size() && !empty();
 }
-
-string datagram::recv(int sock, int timeout_seconds) {
-   	struct timeval tv;
-    tv.tv_sec = timeout_seconds;
-   	tv.tv_usec = 0;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+/*
+string c::recv(int sock, int timeout_seconds) {
 	return recv(sock);
 }
+*/
+string c::recv(int sock) {
+    //static constexpr int response_timeout_secs={3};
+/*
+   	struct timeval tv;
+    tv.tv_sec = 3; //timeout_seconds;
+   	tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+*/
 
-string datagram::recv(int sock) {
 	if (dend<h) {
 		if (size()<h) resize(h);
-		ssize_t nread = server::os->recv(sock, &(*this)[dend], h-dend, 0);
+		ssize_t nread = ::recv(sock, &(*this)[dend], h-dend, 0);
 		if (unlikely(nread<=0)) {
 			if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
 				cout << "socket: client: 1 EINPROGRESS fd" << sock  << endl;
@@ -112,7 +117,7 @@ string datagram::recv(int sock) {
 			}
 			else {
 //				error=nread==0?1:2;
-    			return "Error. Timeout waiting for data from peer.";
+    			return "Error. Connection ended by peer.";
 			}
 		}
 		dend+=nread;
@@ -130,12 +135,12 @@ string datagram::recv(int sock) {
             return "";
         }
 	}
-	ssize_t nread = server::os->recv(sock, &(*this)[dend], size()-dend,0);
+	ssize_t nread = ::recv(sock, &(*this)[dend], size()-dend,0);
 	if (nread<=0) {
 		if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
 			cout << "socket: client: EINPROGRESS fd" << sock  << endl;
 //			error=4;
-   			return "Error. Timeout waiting for data from peer.";
+   			return "Error.3 Timeout waiting for data from peer.";
 		}
 		else {
 //			error=nread==0?1:2;
@@ -146,22 +151,22 @@ string datagram::recv(int sock) {
 	return "";
 }
 
-string datagram::send(int sock) const {
+string c::send(int sock) const {
 	if (unlikely(size()>=maxsize)) {
         return "Error. Datagram is too big.";
     }
 	uint8_t sz[h];
-	auto nbytes = server::os->write(sock, &(*this)[0], size());
-	if (nbytes < 0) {
+	auto n = ::write(sock, &(*this)[0], size());
+	if (unlikely(n<0)) {
 		return "Error. While wrtting to socket";
 	}
-	if (nbytes!=size()) {
+	if (unlikely(n!=size())) {
 		return "Error. Unexpected write size while wrtting to socket";
 	}
 	return "";
 }
 
-datagram::hash_t datagram::compute_hash() const {
+c::hash_t c::compute_hash() const {
 	hasher_t hasher;
 	hasher.write(reinterpret_cast<const unsigned char*>(&*begin()),size());
 	hasher_t::value_type v;
@@ -169,7 +174,7 @@ datagram::hash_t datagram::compute_hash() const {
 	return move(v);
 }
 
-vector<string> datagram::parse_strings() const {
+vector<string> c::parse_strings() const {
 	vector<string> ans;
 	ans.reserve(100);
 	const unsigned char *s=0;
@@ -189,14 +194,23 @@ vector<string> datagram::parse_strings() const {
 	return move(ans);
 }
 
-string datagram::parse_string() const {
+string c::parse_string() const {
 	return string(reinterpret_cast<const char*>(&*(begin()+h)),size()-h);
 }
 
-uint16_t datagram::parse_uint16() const {
+uint16_t c::parse_uint16() const {
 	if (size()!=h+2) return 0;
 	uint16_t pl=(*this)[h];
 	pl|=(*this)[h+1]<<8;
 	return pl;
+}
+
+void c::dump(ostream&os) const {
+os << "size " << size() << endl;
+os << "service " << decode_service() << endl;
+os << "payload size " << decode_size() << endl;
+os << "payload as str " << parse_string() << endl;
+os << "completed " << completed() << endl;
+
 }
 

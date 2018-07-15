@@ -71,6 +71,7 @@ cash::hash_t c::new_address() {
 	save();
 	return move(h);
 }
+
 cash::hash_t c::add_address(const crypto::ec::keys::priv_t& key) {
 	if (!gov::crypto::ec::keys::verify(key)) {
 		cerr << "Invalid private key" << endl;
@@ -83,6 +84,7 @@ cash::hash_t c::add_address(const crypto::ec::keys::priv_t& key) {
 	save();
 	return move(h);
 }
+
 const crypto::ec::keys* c::get_keys(const cash::hash_t& address) const {
 	auto i=find(address);
 	if (i==end()) return 0;
@@ -164,10 +166,10 @@ string c::refresh(socket::peer_t& peer) {
 	cash::app::query_accounts_t addresses;
 	addresses.reserve(size());
 	for (auto&i:*this) {
-cout << "addr " << i.first << endl;
+//cout << "addr " << i.first << endl;
 		addresses.emplace_back(i.first);
 	}
-cout << "query accounts" << endl;
+//cout << "query accounts" << endl;
 	auto r=query_accounts(peer,addresses);
     if (likely(r.first.empty())) data=move(r.second);
     return r.first;
@@ -317,7 +319,7 @@ pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, cons
 			if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,ret.second)) {	
 				i.locking_program_input="";
 				//ostringstream os;
-                cout << "warning, cannot unlock account " << i.address << endl;  //not an error, an input can be left unsigned
+                cerr << "warning, cannot unlock account " << i.address << endl;  //not an error, an input can be left unsigned
                 //ret.first=os.str(); 
 			}
 		}
