@@ -4,6 +4,7 @@
 
 #include "api.h"
 #include "peer_t.h"
+#include <chrono>
 
 
 namespace us { namespace wallet {
@@ -36,6 +37,9 @@ private:
 	string walletd_host;
 	uint16_t walletd_port;
 
+    bool connect_walletd(ostream&);
+    chrono::steady_clock::time_point connected_since;
+    
 
 };
 

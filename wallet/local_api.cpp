@@ -16,7 +16,7 @@ c::local_api(const string& homedir, const string& backend_host, uint16_t backend
 c::~local_api() {
 }
 
-bool c::bring_up_backend(ostream&os) {
+bool c::connect_backend(ostream&os) {
     if (endpoint.connected()) return true;
 //cout << "---connecting" << endl;
     if (!endpoint.connect(backend_host,backend_port,true)) {
@@ -24,19 +24,20 @@ bool c::bring_up_backend(ostream&os) {
         os << "Error. Backend is unreachable.";
         return false;
     }
+    connected_since=chrono::steady_clock::now();
     return true;
 }
 
 void c::balance(bool detailed, ostream&os) {
-    if (!bring_up_backend(os)) return;
+    if (!connect_backend(os)) return;
 //cout << "---connected" << endl;
 	refresh(endpoint);
 	if (detailed) {
-		extended_balance(os);
+	    extended_balance(os);
 	}
 	else {
 //cout << "Writting " << wallet::balance() << endl;
-		os << wallet::balance();
+	    os << wallet::balance();
 	}
 }
 
@@ -54,7 +55,7 @@ void c::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 }
 
 void c::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream& os) {
-    if (!bring_up_backend(os)) return;
+    if (!connect_backend(os)) return;
 
     auto tx=wallet::tx_make_p2pkh(endpoint,i);
     if (tx.first.empty())
@@ -64,7 +65,7 @@ void c::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream& os) {
 }
 
 void c::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) {
-    if (!bring_up_backend(os)) return;
+    if (!connect_backend(os)) return;
 
     auto tx=wallet::tx_sign(endpoint, txb58, sigcodei, sigcodeo);
 	if (tx.first.empty())
@@ -74,7 +75,7 @@ void c::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigc
 }
 
 void c::tx_send(const string&txb58, ostream&os) {
-    if (!bring_up_backend(os)) return;
+    if (!connect_backend(os)) return;
 
 	string e=wallet::send(endpoint, cash::tx::from_b58(txb58));
     if (e.empty()) {

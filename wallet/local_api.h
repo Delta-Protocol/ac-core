@@ -5,6 +5,7 @@
 #include "wallet.h"
 #include "pairing.h"
 #include <us/gov/socket.h>
+#include <chrono>
 
 namespace us { namespace wallet {
 using namespace std;
@@ -28,7 +29,8 @@ struct local_api:api, wallet, pairing {
 	virtual void unpair(const pub_t&, ostream&os) override;
 	virtual void list_devices(ostream&os) override;
 
-    bool bring_up_backend(ostream&os);
+    bool connect_backend(ostream&os);
+    chrono::steady_clock::time_point connected_since;
 
     socket::peer_t endpoint;
 };

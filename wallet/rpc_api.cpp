@@ -16,52 +16,39 @@ c::rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port):w
 c::~rpc_api() {
 }
 
+
+bool c::connect_walletd(ostream&os) {
+    if (sock!=0) return true;
+//cout << "---connecting" << endl;
+    if (!connect(walletd_host,walletd_port,true)) {
+        cerr << "wallet: unable to connect to " << walletd_host << ":" << walletd_port << endl;
+		os << "Error. Unable to connect to wallet daemon.";
+        return false;
+    }
+    auto r=run_auth();
+    if (unlikely(!r.empty())) {
+         os << r;
+         return false;
+    }
+    connected_since=chrono::steady_clock::now();
+    return true;
+}
+
 void c::ask(int service, ostream&os) {
 	ask(service,"",os);
 }
 
+//chrono::steady_clock::time_point
+
 void c::ask(int service, const string& args, ostream&os) {
-	if (sock==0) {
-//		cout << "Iniciando auth" << endl;
-		if (!connect(walletd_host,walletd_port,true)) {
-			os << "Error. Unable to connect to wallet daemon.";
-			return;
-		}
-        auto r=run_auth();
-        if (unlikely(!r.empty())) {
-            os << r;
-            return;
-        }
-	}
+	if (!connect_walletd(os)) return;
+
 	datagram* d=new datagram(service,args);
-
     auto r=send_recv(d);
-
-//    send(d);
-//    auto r=recv_response(); //complete_datagram(3);
-
-        
-
-//        auto response=new datagram();
-/*
-        while (!response->completed()) {
-                if (!response->complete_datagram(sock,2)) {
-                        delete response;
-                        os << "Error. Connected but unable to receive a response.";
-			return;
-                }
-        }
-*/
-	//socket::datagram* response=socket::peer_t::send_recv(walletd_host, walletd_port, d);
     if (unlikely(!r.first.empty())) {
-//cout << "ZZCCZZZZZZ" << endl;
-//r.second->dump(cout);
         os << r.first;
     }
     else {
-//cout << "ZZZZZZZZ" << endl;
-//r.second->dump(cout);
-        //cout << "datagram" << response->size() << endl;
     	os << r.second->parse_string();
 	    delete r.second;
     }

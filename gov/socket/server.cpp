@@ -412,9 +412,9 @@ void c::run() {
             }
 		}
 		for (int i:sl) { //Service all the sockets with input pending.
-			cout << "socket: server: scanning fd " << i << endl;
+			//cout << "socket: server: scanning fd " << i << endl;
 			if (likely(!FD_ISSET (i, &read_fd_set))) continue;
-			cout << "socket: server: fd " << i << " is set" << endl;
+			//cout << "socket: server: fd " << i << " is set" << endl;
 			auto c=clients.find(i); //no need lock , this thread is the only that changes size of clients
 			if (unlikely(c==clients.end())) {
 				cerr << "data arrived for an unknown fd " << i << endl;
