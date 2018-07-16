@@ -1,7 +1,6 @@
 #ifndef USGOV_bf993116c1d89300316c0dd4fa2ef165d5b9128da89d33c44cfe50e95622fce8
 #define USGOV_bf993116c1d89300316c0dd4fa2ef165d5b9128da89d33c44cfe50e95622fce8
 
-#include <us/gov/net/os.h>
 #include <us/gov/socket/daemon.h>
 #include <vector>
 #include <thread>

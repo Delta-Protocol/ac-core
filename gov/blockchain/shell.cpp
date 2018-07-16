@@ -3,7 +3,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <us/gov/net/os.h>
 #include <us/gov/auth/daemon.h>
 #include <chrono>
 #include <cassert>

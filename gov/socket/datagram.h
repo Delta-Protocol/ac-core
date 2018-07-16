@@ -10,7 +10,6 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
-#include <us/gov/net.h>
 #include <us/gov/crypto/ripemd160.h>
 
 namespace us { namespace gov {

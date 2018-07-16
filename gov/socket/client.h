@@ -10,7 +10,6 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
-#include <us/gov/net.h>
 #include "datagram.h"
 #include "io.h"
 #include <iostream>

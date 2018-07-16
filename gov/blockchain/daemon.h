@@ -1,7 +1,6 @@
 #ifndef USGOV_c13d19f0c3971de6c878039137bc456aee76c735c59394602b4d3ee39130825d
 #define USGOV_c13d19f0c3971de6c878039137bc456aee76c735c59394602b4d3ee39130825d
 
-#include <us/gov/net.h>
 #include <us/gov/auth.h>
 #include "diff.h"
 #include "peer_t.h"

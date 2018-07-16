@@ -1,7 +1,6 @@
 #ifndef USGOV_e71c29d5f8c07b8000435dfe6a5f1e49605b1b2041dad14a3ac898464ed5dd49
 #define USGOV_e71c29d5f8c07b8000435dfe6a5f1e49605b1b2041dad14a3ac898464ed5dd49
 
-#include <us/gov/net.h>
 #include <us/gov/socket/peer_t.h>
 #include <vector>
 #include <thread>
