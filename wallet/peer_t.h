@@ -17,9 +17,12 @@ struct peer_t: gov::auth::peer_t {
 
         virtual const keys& get_keys() const override;
 
+        virtual void verification_completed() override;
+
         peer_t(const keys&, int sock);
         virtual ~peer_t();
  
+        stage_t stage{denied};
         keys k;
 };
 

@@ -15,3 +15,16 @@ const c::keys& c::get_keys() const {
     return k;
 }
 
+void c::verification_completed() {
+
+    pair<string,datagram*> r=recv();
+
+    if (r.first.empty()) {
+        if (r.second->parse_string()=="authorized") {
+            stage=authorized;
+        }
+        delete r.second;
+    }
+    assert(r.second==0);
+}
+
