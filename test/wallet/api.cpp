@@ -58,7 +58,7 @@ struct test_api : rpc_api {
 
 using namespace us::gov::socket;
 
-
+gam
 struct test_client: client {
 	
 	test_client(int sock):client(sock) {

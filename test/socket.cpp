@@ -280,20 +280,50 @@ void testing_socket_datagram(){
 	k3b.test_payloadString(13, "miden 0 miden");
 
 
+	TestDatagram l3(-100, "0 0--%^*& (*&^6-0-75gj00 ");
+	l3.test_data( 31 , 31    , 65436     , 0 ,"26AMHWW1fTm65x7oBwEHpUpwTVCQ",1);
+	TestPayloadString l3b(-100,  "0 0--%^*& (*&^6-0-75gj00 ");         
+	l3b.test_payloadString(25, "0 0--%^*& (*&^6-0-75gj00 ");
 
-	bool showResults= true; 
+
+	TestDatagram m3(2147483647, " 0 ");
+	m3.test_data( 9 , 9    , 65535     , 0 ,"juhNKRux67Uv4ji2k9dFMnmVSir",1);
+	TestPayloadString m3b(2147483647,  " 0 " );         
+	m3b.test_payloadString( 3 , " 0 ");
+
+
+	TestDatagram n3(-2147483647, "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 ");
+	n3.test_data( 170 , 170    , 1     , 0 ,"4UNpGamqVspG9ztPHwK9JC4dt2YV",1);
+	TestPayloadString n3b(-2147483647,  "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 " );         
+	n3b.test_payloadString( 164 , "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 ");
+
+
+	TestDatagram o3(-23647 , "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 ");
+	o3.test_data( 1063 , 1063    , 41889     , 0 ,"2dWbqRnHzVtQe9jeatuk6Pf9D2Ee",1);
+	TestPayloadString o3b(-23647,  "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 " );         
+	o3b.test_payloadString( 1057 , "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 ");
+
+
 	
+	TestDatagram p3(-123456789, "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0");
+	p3.test_data( 1792 , 1792    , 13035     , 0 ,"iomD1gz3ZS6kdi7QdrEAmDQiFyp",1);
+	TestPayloadString p3b(-123456789,  "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0" );         
+	p3b.test_payloadString( 1786 , "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0");
+
+
+
+	bool showResults= true; //true == show testing results 
 	if( showResults == true ) {
-	//......1...
-	test_1(0);  //[serviceNumber]
+	//......1...............//[serviceNumber]
+	test_1(0);  
 	test_1(1);
 	test_1(10);
 	test_1(100);
 	test_1(1000);
 	test_1(13515);
 
-	//......2.....
-	test_2( 0     , 0     ); // [ serviceNumber ] [ payloadNumber ]
+	//......2...............// [ serviceNumber ] [ payloadNumber ]
+	test_2( 0     , 0     ); 
 	test_2( 1     , 2     );
 	test_2( 100   , 0     );
 	test_2( 1000  , 1000  );
@@ -301,8 +331,8 @@ void testing_socket_datagram(){
 	test_2( 65536 , 65536 );
 	test_2( 0     , 65536 );
 
-	//......3........
-	test_3( 0     , "zz"  ); // [ serviceNumber ] [ payloadString ]  
+	//......3...............// [ serviceNumber ] [ payloadString ]
+	test_3( 0     , "zz"  );   
 	test_3( 100   , ""    );	
 	test_3( 65537 , ""    );
 	test_3( 65536 , ""    );
@@ -310,25 +340,18 @@ void testing_socket_datagram(){
 	test_3( 111   , "a"   );
 	test_3( 65536 , "0"   );
 	test_3( 13564 , "123-)(*&^%$£!`~@'#?><"    );
-	test_3( 2140000000 , "123456\n78  _  _"	   ); 
-	test_3( -2140000000 , "0_+_)(*&0*(0^$%^^_0");  // --> overflow > 2140000000
-	test_3(-1      ,  "miden 0 miden"          );
+	test_3( 2147483648 , "123456\n78  _  _"	   ); //  overflow >= 2147483649 | -2147483649
+	test_3( -2147483648 , "0_+_)(*&0*(0^$%^^_0");  
+	test_3( -1      , "miden 0 miden"          );
+	test_3( -100   ,"0 0--%^*& (*&^6-0-75gj00 ");
+	test_3( 2147483647   ,  " 0 "     	   );
+	test_3( -2147483647   ,  "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 " );	
+	test_3( -23647   ,  "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 " );
 
-
-
-	test_3(-100    ,  "00--%^*& (*&^6-00-75ruhgj00" );
-	test_3(-12     ,  "12345 0 12345"        );
-	test_3(-999    ,  "..::-0-::..."    	 );
-	test_3(-2365   ,  "..-%^*&-0-0 (*&75r.::");
-	test_3(-0      ,  "0"			 );
-	test_3(-1001  ,  ""     		 );
-	test_3( 698   ,  "0000 "     		 );		
-
-
-
-
-
+	test_3( -123456789   ,  "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0" );
 }
+
+
 
 }
 
@@ -339,7 +362,7 @@ void testing_socket_datagram(){
 
 
 
-//-----------------------------------test:-->---Socket-Communication------------------------------------------------------|
+//-----------------------------------test:-->---testing_socket_communication()---------------------------------------------------|
 
 using namespace us::gov::socket;
 
@@ -401,7 +424,7 @@ struct tests:vector<pair<TestDatagram,datagram>>, test_server {
 	//---run server thread---
 	tests():test_server(1060) {
 
-	//	thread t(&server::run, &s);//----------------------> 
+	//	thread t(&server::run, &s); //----------------------> 
 
 	//	this_thread::sleep_for(100ms);
 

@@ -13,11 +13,11 @@ int main() {
 
 
 
-	//testing_split_function(); 		//dfs --works!
+	//testing_split_function(); 		//dfs 	 --works!
 	
 
 	testing_socket_datagram(); 		//socket --works!
-	//testing_socket_communication(); 	--frozen--
+	//testing_socket_communication(); 	--errors--
 
 	
 	//test_symmetric_encryption();
