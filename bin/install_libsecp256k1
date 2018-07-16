@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# @TODO platform check to see if it has enough resoureces to enable testing
+
 rm -rf secp256k1
 
 git clone https://github.com/bitcoin-core/secp256k1
@@ -7,7 +9,7 @@ cd secp256k1
 ./autogen.sh
 ./configure --enable-experimental --enable-module-ecdh --disable-dependency-tracking --enable-benchmark=no  --enable-coverage=no --enable-tests=no --enable-openssl-tests=no --enable-exhaustive-tests=no
 make
-./tests && (exit 1)
+#./tests && (exit 1)
 make install && (exit 1)
 cd ..
 rm -r secp256k1
