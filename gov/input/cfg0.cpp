@@ -94,10 +94,13 @@ string c::abs_file(const string& home, const string& fn) {
 }
 
 c c::load(const string& home) {
+    check_platform();
+
     if (!ensure_dir(home)) {
          cerr << "Cannot create home dir " << home << endl;
          exit(1);
     }
+
     return c(home);
 }
 

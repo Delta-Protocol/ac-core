@@ -38,7 +38,7 @@ struct params {
 		    exit(1);
 	    }
 	    homedir=env_p;
-	    homedir+="/.us";
+	    homedir+="/.us/wallet";
 	}
     void dump(ostream& os) const {
         os << "home: " << homedir << endl;
@@ -122,6 +122,11 @@ if (p.advanced) {
     os << "  unpair <pubkey>        Revoke authorization to the specified device." << endl;
     os << "  list_devices           Prints the list of recognized devices." << endl;
     os << endl;
+
+    os << "net:" << endl;
+    os << "  ping [gov|wallet]      Daemon-is-alive check" << endl;
+    os << endl;
+    
 }
 
 }
@@ -290,18 +295,35 @@ Json::Value to_json(const string& s) {
 
 
 void run_local(string command, args_t& args, const params& p) {
+/*
 	if (!us::gov::input::cfg::ensure_dir(p.homedir)) {
 		cerr << "could not create " << p.homedir << endl;
 		exit(1);
 	}
+*/
+/*
+    string wallet_file=p.homedir+"/keys";
+    if (cfg::file_exists(wallet_file)) wallet_file.clear();
 
+//  p.homedir+="/gov";
+
+
+    if (!wallet_file.empty()) {
+        ofstream os(wallet_file);
+        os << conf.keys.priv;
+        cout << "created wallet at " << wallet_file << endl;
+    }
+
+*/
+
+    auto f=cfg1::load(p.homedir);
 
 	api* papi;
 	if (p.offline) {
 		papi=new local_api(p.homedir,p.backend_host,p.backend_port); //rpc to node
 	}
 	else {
-		papi=new rpc_api(cfg1::load(p.homedir).keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon
+		papi=new rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon
 	}
 	api& wapi=*papi;
 
@@ -356,6 +378,13 @@ void run_local(string command, args_t& args, const params& p) {
 	else if (command=="list_devices") {
 		wapi.list_devices(os);
 	}
+	else if (command=="ping") {
+		auto w=args.next<string>();
+        if (w=="gov")
+    		wapi.ping_gov(os);
+        else
+    		wapi.ping_wallet(os);
+	}
 	else {
 		help(p);
 	}
@@ -375,9 +404,6 @@ void run_local(string command, args_t& args, const params& p) {
 
 
 int main(int argc, char** argv) {
-
-    cfg::check_platform();
-
 	args_t args(argc,argv);
 	params p;
 	string command=parse_options(args,p);

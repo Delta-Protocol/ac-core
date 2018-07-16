@@ -33,6 +33,8 @@ struct api {
 	virtual void pair(const pub_t&, const string& name, ostream&os)=0;
 	virtual void unpair(const pub_t&, ostream&os)=0;
 	virtual void list_devices(ostream&os)=0;
+	virtual void ping_gov(ostream&os)=0;
+	virtual void ping_wallet(ostream&os)=0;
 
 	void gen_keys(ostream&os);
 };

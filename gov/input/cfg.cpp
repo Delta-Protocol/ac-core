@@ -28,6 +28,7 @@ c c::load(const string& home) {
 
        string blocks_dir=abs_file(home,"blocks");
 //        cout << "making sure dir for blocks exists" << endl;
+
         if (!ensure_dir(blocks_dir)) {
         cerr << "Cannot create blocks dir " << blocks_dir << endl;
         exit(1);

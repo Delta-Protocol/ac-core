@@ -30,6 +30,9 @@ struct rpc_api:api, peer_t {
 	virtual void pair(const pub_t&, const string& name, ostream&os) override;
 	virtual void unpair(const pub_t&, ostream&os) override;
 	virtual void list_devices(ostream&os) override;
+    virtual void ping_gov(ostream&) override;
+    virtual void ping_wallet(ostream&) override;
+
 private:
 	void ask(int service, ostream&os);
 	void ask(int service, const string& args, ostream&os);

@@ -28,7 +28,7 @@ string c::filename() const {
 bool c::load() {
 	auto file=filename();
 //cout << "loading from " << file << endl;
-	if (!us::gov::input::cfg::file_exists(file)) return true;
+	if (!us::gov::input::cfg::file_exists(file)) return false;
 	ifstream f(file);
 	while(f.good()) {
 		string pkb58;

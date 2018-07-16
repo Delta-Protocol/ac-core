@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	cfg1 conf=cfg1::load(p.homedir);
+	cfg conf=cfg::load(p.homedir);
 
 	if (!conf.keys.pub.valid) {
 		cerr << "Invalid node pubkey" << endl;

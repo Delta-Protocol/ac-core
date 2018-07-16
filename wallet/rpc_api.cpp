@@ -16,7 +16,6 @@ c::rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port):w
 c::~rpc_api() {
 }
 
-
 bool c::connect_walletd(ostream&os) {
     if (sock!=0) return true;
 //cout << "---connecting" << endl;
@@ -110,5 +109,13 @@ void c::unpair(const pub_t& pk, ostream&os) {
 
 void c::list_devices(ostream&os) {
 	ask(us::wallet::protocol::list_devices_query,os);
+}
+
+void c::ping_gov(ostream&os) {
+	ask(us::wallet::protocol::ping_gov,os);
+}
+
+void c::ping_wallet(ostream&os) {
+	ask(us::wallet::protocol::ping,os);
 }
 

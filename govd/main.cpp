@@ -29,7 +29,7 @@ struct params {
             exit(1);
         }
         homedir=env_p;
-    	homedir+="/.us";
+    	homedir+="/.us/gov";
 	}
     void dump(ostream& os) const {
         os << "home: " << homedir << endl;
@@ -289,31 +289,15 @@ void open_shell(thinfo& i) {
 
 int main(int argc, char** argv) {
 
-    cfg::check_platform();
+//    cfg::check_platform();
 
 	params p;
 	if(!parse_cmdline(argc,argv,p)) return 1;
 
-
     p.dump(cout);
 
-	if (!cfg::ensure_dir(p.homedir)) {
-		cerr << "Cannot create dir " << p.homedir << endl;
-		exit(1);
-	}
-
-    string wallet_file=p.homedir+"/wallet";
-    if (cfg::file_exists(wallet_file)) wallet_file.clear();
-
-	p.homedir+="/gov";
 
 	cfg conf=cfg::load(p.homedir);
-
-    if (!wallet_file.empty()) {
-        ofstream os(wallet_file);
-        os << conf.keys.priv;
-        cout << "created wallet at " << wallet_file << endl;
-    }
 
 	if (!conf.keys.pub.valid) {
 		cerr << "Invalid node pubkey" << endl;

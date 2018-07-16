@@ -151,6 +151,18 @@ bool c::process_work(socket::peer_t *c0, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
+		case us::wallet::protocol::ping: {
+			ostringstream ans;
+			local_api::ping_wallet(ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
+		case us::wallet::protocol::ping_gov: {
+			ostringstream ans;
+			local_api::ping_gov(ans);
+			return send_response(c,d,ans.str());
+		}
+		break;
 		default: break;
 	}
 	return false;

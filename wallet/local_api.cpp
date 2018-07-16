@@ -10,7 +10,7 @@ using namespace std;
 
 using datagram=socket::datagram;
 
-c::local_api(const string& homedir, const string& backend_host, uint16_t backend_port):wallet(homedir, backend_host, backend_port), pairing(homedir) {
+c::local_api(const string& homedir, const string& backend_host, uint16_t backend_port): wallet(homedir, backend_host, backend_port), pairing(homedir) {
 }
 
 c::~local_api() {
@@ -113,3 +113,28 @@ void c::unpair(const pub_t& pk, ostream&os) {
 void c::list_devices(ostream&os) {
     devices.dump(os);
 }
+
+#include <us/gov/socket/datagram.h>
+#include <utility>
+#include <string>
+using us::gov::socket::datagram;
+
+void c::ping_gov(ostream& os) {
+
+    if (!connect_backend(os)) return;
+
+
+    auto r=endpoint.send_recv(new datagram(us::gov::protocol::ping,""));
+    if (!r.first.empty()) {
+        os <<r.first;
+        return;
+    }
+    os << r.second->parse_string();
+    delete r.second;
+}
+
+void c::ping_wallet(ostream& os) {
+    os << "I am the wallet";
+}
+
+
