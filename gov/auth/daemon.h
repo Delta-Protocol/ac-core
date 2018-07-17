@@ -1,38 +1,30 @@
-#ifndef USGOV_c487b00055e53547e15c0855b22f83a7c8fb4700de16953d93bac9768cf373a9
-#define USGOV_c487b00055e53547e15c0855b22f83a7c8fb4700de16953d93bac9768cf373a9
+#ifndef USGOV_c009bd5d681264adabb9cdbf5de437c3b84e5676690f277d47a56ef5388b9837
+#define USGOV_c009bd5d681264adabb9cdbf5de437c3b84e5676690f277d47a56ef5388b9837
 
-#include <us/gov/peer.h>
-#include "peer_t.h"
-#include <us/gov/socket.h>
+#include <us/gov/id/daemon.h>
 
 namespace us { namespace gov {
 namespace auth {
 
 using namespace std;
 
-struct daemon:peer::daemon {
-	typedef peer::daemon b;
-	typedef peer_t::keys keys;
+struct daemon:id::daemon {
+	typedef id::daemon b;
 
-	using datagram=socket::datagram;
-
-	daemon(const keys&);
-        daemon(const keys&, uint16_t port, uint16_t edges);
+	daemon();
+    daemon(uint16_t port, uint16_t edges);
 	virtual ~daemon();
 
-	virtual socket::client* create_client(int sock) override;
+	virtual socket::client* create_client(int sock) override=0;
 	void dump(ostream& os) const;
 
 	virtual bool process_work(socket::peer_t *p, datagram*d) override;
-	//virtual void report_in_service(vector<peer::peer_t*>&) override;
 
-	keys id; //my id {priv,pub} keys, pub exposed to network
 };
 
 
 }
-}
-}
+}}
 
 #endif
 

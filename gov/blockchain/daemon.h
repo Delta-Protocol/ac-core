@@ -49,12 +49,16 @@ namespace blockchain {
 		struct networking:dfs::daemon {
 			typedef dfs::daemon b;
 			using b::keys;
-			networking(const keys& k, blockchain::daemon* parent): b(k), parent(parent) {}
-			networking(const keys& k, uint16_t port, uint16_t edges, blockchain::daemon* parent, const vector<string>& seed_nodes): b(k, port, edges), parent(parent), seed_nodes(seed_nodes) {}
+			networking(blockchain::daemon* parent): parent(parent) {}
+			networking(uint16_t port, uint16_t edges, blockchain::daemon* parent, const vector<string>& seed_nodes): b(port, edges), parent(parent), seed_nodes(seed_nodes) {}
 			virtual bool process_work(socket::peer_t *c, datagram*d) override;
 			virtual bool process_evidence(relay::peer_t *c, datagram*d) override;
 			bool process_work_sysop(peer::peer_t *c, datagram*d);
 			virtual string get_random_peer(const unordered_set<string>& exclude) const override; //returns ipaddress //there exist a possibility of returning "" even though there were eligible items available
+
+            virtual const keys& get_keys() const override {
+                return parent->id;
+            }
 
 			virtual socket::client* create_client(int sock) override {
 				auto p=new peer_t(sock);
@@ -185,6 +189,9 @@ namespace blockchain {
 		apps apps_;
 		auth::app* auth_app;
 
+		void print_performances(ostream&) const;
+		string timestamp() const;
+
 //        void start_new_blockchain(const string& addr);
 
 		struct votes_t:unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> { // <pubkey,pair<hash,count>>
@@ -211,6 +218,8 @@ namespace blockchain {
 		string home;
 
 		mutable mt19937_64 rng;
+
+        keys id;
 
 	};
 

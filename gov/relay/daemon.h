@@ -14,10 +14,10 @@ using namespace std;
 	using socket::datagram;
 	struct daemon : auth::daemon {
 		typedef auth::daemon b;
-		daemon(const keys&);
- 		daemon(const keys&, uint16_t port, uint16_t edges);
+		daemon();
+ 		daemon(uint16_t port, uint16_t edges);
 		virtual ~daemon();
-        	virtual socket::client* create_client(int sock) override;
+        virtual socket::client* create_client(int sock) override;
 		void clear_evidences();
 		void dump(ostream&os) const;
 

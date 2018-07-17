@@ -14,8 +14,9 @@ namespace blockchain {
 		shell(daemon&d):d(d) {}
 		void help(ostream&) const;
 		string command(const string& cmd);
+
 		daemon& d;
-		int level{3};
+		int level{5};
 		int cur_app{-1};
 		string memory_cmd_lvl; //commands compatible across level, repeatable after level changes
 	};

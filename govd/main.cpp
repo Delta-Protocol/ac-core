@@ -9,7 +9,6 @@
 using namespace us::gov;
 using namespace std;
 using socket::datagram;
-using us::gov::input::cfg;
 
 void sig_handler(int s) {
     cout << "main: Caught signal " << s << endl;
@@ -29,7 +28,7 @@ struct params {
             exit(1);
         }
         homedir=env_p;
-    	homedir+="/.us/gov";
+    	homedir+="/.us";
 	}
     void dump(ostream& os) const {
         os << "home: " << homedir << endl;
@@ -42,7 +41,7 @@ struct params {
 	uint16_t edges{10};
 	bool daemon{false};
 	bool shell{false};
-	uint16_t simul_num_nodes_deployed{0};
+	//uint16_t simul_num_nodes_deployed{0};
     string homedir;
     string sysophost{"127.0.0.1"};
 };
@@ -127,6 +126,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 			}
 			continue;
 		}
+/*
 		if (inp=="-deploy_ports ") {
 			if (i<argc) {
 				string se=argv[i++];
@@ -144,6 +144,7 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 			}
 			continue;
 		}
+*/
 		if (inp=="-h") {
 			help();
 			exit(0);
@@ -160,11 +161,15 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 #include <fstream>
 #include <us/gov/input.h>
 
+using us::gov::input::cfg_id;
+
+//RPC
 struct thinfo {
-	thinfo(const params& p, const cfg& conf): p(p), conf(conf) {
+
+	thinfo(const params& p): p(p), conf(cfg_id::load(p.homedir+"/gov")) {
 	}
 	const params& p;
-	const cfg& conf;
+	const cfg_id& conf;
 	blockchain::peer_t* peer{0};
 
 };
@@ -218,8 +223,50 @@ void shell_echo(thinfo* info) {
 }
 
 #include <us/gov/blockchain/protocol.h>
+#include <us/gov/auth/auth_peer.h>
 
-void open_shell(thinfo& i) {
+
+
+struct shell_client: us::gov::auth::auth_peer {
+	shell_client(const keys& k): k(k) {
+	}
+        virtual const keys& get_keys() override {
+		return k;
+	}
+	const keys& k;
+};
+
+
+
+void open_shell(const params&p) {
+
+
+	signal(SIGINT,sig_handler);
+	signal(SIGTERM,sig_handler);
+	signal(SIGPIPE, SIG_IGN);
+
+//	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
+
+	using us::gov::input::cfg_id;
+	string homedir=p.homedir+"/gov";
+	cfg_id conf=cfg_id::load(homedir);
+
+	shell_client peer(conf.keys);
+	if (!peer.connect(p.sysophost,p.port,true)) {
+		cerr << "Cannot connect to " << p.sysophost << ":" << p.port << endl;
+		return;
+	}
+	peer.run_auth();
+
+	
+
+//	shell_daemon d(cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
+//	d.run();
+
+
+/*
+	thinfo i(p);
+
 	blockchain::peer_t cli(0);
 	i.peer=&cli;
 	
@@ -278,7 +325,22 @@ void open_shell(thinfo& i) {
 	//this_thread::sleep_for(chrono::seconds(1));
 	cli.disconnect();
 	th.join();
-	
+	*/
+}
+
+void run_daemon(const params&p) {
+	using us::gov::input::cfg_daemon;
+	string homedir=p.homedir+"/gov";
+	cfg_daemon conf=cfg_daemon::load(homedir);
+	cout << "Node public key is " << conf.keys.pub << endl;
+	signal(SIGINT,sig_handler);
+	signal(SIGTERM,sig_handler);
+	signal(SIGPIPE, SIG_IGN);
+	blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
+	d.sysop_allowed=p.shell;
+	d.add(new cash::app());
+	d.run();
+	cout << "main: exited normally" << (thread_::_this.terminated?", terminated by signal":"") << endl;
 }
 
 #include <cstdlib>
@@ -296,29 +358,11 @@ int main(int argc, char** argv) {
 
     p.dump(cout);
 
-
-	cfg conf=cfg::load(p.homedir);
-
-	if (!conf.keys.pub.valid) {
-		cerr << "Invalid node pubkey" << endl;
-		exit(1);
-	}
-
-	cout << "Node public key is " << conf.keys.pub << endl;
 	if (p.daemon) {
-		signal(SIGINT,sig_handler);
-		signal(SIGTERM,sig_handler);
-		signal(SIGPIPE, SIG_IGN);
-		blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
-		d.sysop_allowed=p.shell;
-		d.add(new cash::app());
-
-		d.run();
-		cout << "main: exited normally" << (thread_::_this.terminated?", terminated by signal":"") << endl;
+		run_daemon(p);
 	}
-	else {
-		thinfo i(p,conf);
-		open_shell(i);
+	else { //RPC to govd - sysop
+		open_shell(p);
 	}
 	return 0;
 }

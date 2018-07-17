@@ -27,6 +27,8 @@ struct cfg0 {
 
 };
 
+typedef cfg0 cfg_filesystem;
+
 }
 }}
                                                                 

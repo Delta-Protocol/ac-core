@@ -3,7 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <us/gov/auth/daemon.h>
+#include <us/gov/auth.h>
 #include <chrono>
 #include <cassert>
 #include <sstream>
@@ -56,6 +56,14 @@ os << "Free Software licenced under GPL·" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	if (level==3) {
+		os << "Level " << level << " (auth) help:" << endl;
+		os << "s|server    Dumps daemon info." << endl;
+	}
+	if (level==4) {
+		os << "Level " << level << " (relay) help:" << endl;
+		os << "s|server    Dumps daemon info." << endl;
+	}
+	if (level==5) { //change init level to this in shell.h
 		os << "Level " << level << " (blockchain) help:" << endl;
 		os << "s|server    Dumps networking info." << endl;
 		os << "y|syncd     Dumps data sync info." << endl;
@@ -63,6 +71,7 @@ os << "Free Software licenced under GPL·" << endl;
 		os << "app <id>    Enter app shell." << endl;
 		os << "add_node <address>    connects to the specified node." << endl;
 		os << "seeds                 Display current seed nodes." << endl;
+		os << "performances          Print performances" << endl;
 		os << "home                  Display current home directory." << endl;
 		os << "mutate                Renew neighbours." << endl;
 
@@ -109,9 +118,12 @@ string c::command(const string& cmdline) {
 			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os);
 		}
 		else if (level==2) {
-			dynamic_cast<const us::gov::auth::daemon&>(d.peerd).dump(os);
+			dynamic_cast<const us::gov::auth::id_daemon&>(d.peerd).dump(os);
 		}
 		else if (level==3) {
+			dynamic_cast<const us::gov::relay::daemon&>(d.peerd).dump(os);
+		}
+		else if (level==4) {
 			d.peerd.dump(os);
 		}
 		else {
@@ -161,6 +173,9 @@ string c::command(const string& cmdline) {
     		os << i << endl;
         }
     }
+    else if (cmd=="performances") {
+	d.print_performances(os);
+    }
     else if (cmd=="home") {
    		os << d.home << endl;
     }
@@ -175,4 +190,7 @@ string c::command(const string& cmdline) {
 	}
 	return os.str();
 }
+
+
+
 

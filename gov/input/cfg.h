@@ -20,6 +20,7 @@ struct cfg: cfg1 {
     vector<string> seed_nodes;
 };
 
+typedef cfg cfg_daemon;
 
 }
 }}

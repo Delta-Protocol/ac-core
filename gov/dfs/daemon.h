@@ -13,10 +13,9 @@ namespace dfs { //distributed file system
 
 	struct daemon:relay::daemon {
 		typedef relay::daemon b;
-		using b::keys; 
 
-		daemon(const keys& k):b(k) {}
-		daemon(const keys& k, uint16_t port, uint16_t edges):b(k, port,edges) {}
+		daemon() {}
+		daemon(uint16_t port, uint16_t edges):b(port,edges) {}
 		virtual ~daemon() {}
 
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;

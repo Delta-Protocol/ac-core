@@ -9,8 +9,10 @@ typedef us::gov::blockchain::peer_t c;
 constexpr array<const char*,c::num_stages> c::stagestr;
 
 void c::verification_completed() {
+    b::verification_completed();
+
 	cout << "blockchain: daemon: verification_completed" << endl;
-	if (stage_peer!=us::gov::auth::peer_t::verified || stage_me!=us::gov::auth::peer_t::verified) {
+	if (stage_peer!=us::gov::auth::id_peer::verified || stage_me!=us::gov::auth::id_peer::verified) {
 		cout << "disconnected peer, both sides successful verification is required." << endl;
 		disconnect();
 		return;
@@ -24,4 +26,8 @@ void c::dump(ostream& os) const {
 	os << this << " stage: " << stagestr[stage] << endl;
 }
 
+
+const keys& c::get_keys() const {
+    return static_cast<const daemon*>(parent)->get_keys();
+}
 

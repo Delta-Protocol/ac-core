@@ -44,7 +44,7 @@ namespace socket {
 
 		void dump(ostream& os) const;
 
-        void run_dialogue();
+        //void run_dialogue();
 
         //highest level function to receive a response
 

@@ -35,7 +35,7 @@ bool c::send_response(peer_t *c, datagram*d, const string& payload) {
 bool c::process_work(socket::peer_t *c0, datagram*d) {
     if (b::process_work(c0,d)) return true;
 
-    if (static_cast<auth::peer_t*>(c0)->stage_peer!=auth::peer_t::verified) {
+    if (static_cast<auth::id_peer*>(c0)->stage_peer!=auth::id_peer::verified) {
         return false;
     }
     peer_t* c=static_cast<peer_t*>(c0);

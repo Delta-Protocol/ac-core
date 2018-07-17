@@ -44,7 +44,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 
 
     string filename() const;
-
+	bool file_exists() const;
 	bool load();
 	bool save() const;
 

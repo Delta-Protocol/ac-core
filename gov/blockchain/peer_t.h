@@ -25,6 +25,8 @@ namespace blockchain {
 		void dump(ostream& os) const;
 
 		virtual void verification_completed() override;
+
+           virtual const keys& get_keys() const override;
 /*
 public:
         stage_t get_stage() const { return stage; }

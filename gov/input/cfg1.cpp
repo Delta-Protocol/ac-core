@@ -13,6 +13,10 @@ using namespace us::gov::input;
 typedef us::gov::input::cfg1 c;
 
 c::cfg1(const keys_t::priv_t& privk, const string& home): keys(privk), b(home) {
+	if (!keys.pub.valid) {
+		cerr << "Invalid node pubkey" << endl;
+		exit(1);
+	}
 }
 
 c::cfg1(const cfg1& other): keys(other.keys), b(other) {
@@ -44,7 +48,6 @@ c c::load(const string& home) {
                     //mv k -> k.bad TODO
                     exit(1);
                 }
-
 
 /*
         string blocks_dir=abs_file(home,"blocks");

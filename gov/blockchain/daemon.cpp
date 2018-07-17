@@ -13,11 +13,11 @@ void c::constructor() {
 	add(auth_app);
 }
 
-c::daemon(const keys& k): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(k, this), sysops(*this), syncdemon(this) { //dependency order
+c::daemon(const keys& k): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(this), sysops(*this), syncdemon(this), id(k) { //dependency order
 	constructor();	
 }
 
-c::daemon(const keys& k, const string& home, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(k, port, edges, this, seed_nodes), home(home), syncdemon(this), sysops(*this) { //dependency order
+c::daemon(const keys& k, const string& home, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(port, edges, this, seed_nodes), home(home), syncdemon(this), sysops(*this), id(k) { //dependency order
 	constructor();	
 }
 
@@ -927,4 +927,38 @@ void c::dump(ostream& os) const {
 	os << "Hello from blockchain::daemon" << endl;
 
 }
+string c::timestamp() const {
+	return "NOW"; //TODO
+}
+
+void c::print_performances(ostream& os) const {
+	os << "US node " << peerd.id.pub << " " << timestamp() << endl;
+	os << "Resources" << endl;
+	os << "  Network" << endl;
+	os << "  Storage" << endl;
+	os << "  CPU" << endl;
+	os << "Time series by indicator" << endl;
+	os << "  DiffHash Histogram" << endl;
+	os << "       current: #1st-80%, #2nd-05%" << endl;
+	os << "        1m ago: #1st-80%, #2nd-05%" << endl;
+	os << "        2m ago: #1st-80%, #2nd-05%" << endl;
+	os << "        3m ago: #1st-80%, #2nd-05%" << endl;
+	os << "        4m ago: #1st-80%, #2nd-05%" << endl;
+	os << "        5m ago: #1st-80%, #2nd-05%" << endl;
+	os << "  51% vote power attack" << endl;
+	os << "       current: 0%" << endl;
+	os << "        1m ago: 0%" << endl;
+	os << "        2m ago: 0%" << endl;
+	os << "        3m ago: 0%" << endl;
+	os << "        4m ago: 0%" << endl;
+	os << "        5m ago: 0%" << endl;
+	os << "  Missed tip" << endl;
+	os << "       current: No" << endl;
+	os << "        1m ago: No" << endl;
+	os << "        2m ago: No" << endl;
+	os << "        3m ago: No" << endl;
+	os << "        4m ago: Yes" << endl;
+	os << "        5m ago: No" << endl;
+}
+
 

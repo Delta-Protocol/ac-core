@@ -8,10 +8,13 @@ typedef us::wallet::wallet c;
 
 
 c::wallet(const string& datapath, const string& backend_host, uint16_t backend_port):datapath(datapath), backend_host(backend_host), backend_port(backend_port){
+	load();
+/*
 	if (!load()) {
 		cerr << "cannot find wallet file in " << datapath << endl;
 		exit(1);
 	}
+*/
 }
 
 c::~wallet() {
@@ -20,10 +23,13 @@ c::~wallet() {
 }
 
 string c::filename() const {
-	auto file=datapath+"/wallet";
+    auto file=datapath+"/keys";
     return file;
 }
 
+bool c::file_exists() const {
+	return us::gov::input::cfg::file_exists(filename());
+}
 
 bool c::load() {
 	auto file=filename();

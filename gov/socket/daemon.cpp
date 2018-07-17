@@ -29,6 +29,11 @@ void c::on_finish() {
 }
 
 void c::run() {
+	if (pool==0) {
+		cerr << "Error. No worker threads available" << endl;
+		return;
+	}
+
 	using namespace std::chrono_literals;
 	thread listen(&server::run,this);
 	thread_::_this.sleep_for(1s);

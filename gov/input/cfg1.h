@@ -23,6 +23,8 @@ struct cfg1: cfg0 {
 
 };
 
+typedef cfg1 cfg_id;
+
 }
 }}
                                                                 

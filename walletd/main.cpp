@@ -38,7 +38,7 @@ struct params {
 		    exit(1);
 	    }
 	    homedir=env_p;
-	    homedir+="/.us/wallet";
+	    homedir+="/.us";
 	}
     void dump(ostream& os) const {
         os << "home: " << homedir << endl;
@@ -148,37 +148,6 @@ void run_fcgi(const params& p) {
    }
 }
 #endif
-
-using us::gov::input::cfg;
-using us::gov::input::cfg1;
-
-void run_daemon(const params& p) {
-	signal(SIGINT,sig_handler);
-	signal(SIGTERM,sig_handler);
-	signal(SIGPIPE, SIG_IGN);
-
-//	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
-
-	wallet_daemon d(cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
-
-#ifdef FCGI
-    if (p.fcgi) {
-        thread* wt=0;
-        w3api::fcgi_t::api=&d;
-
-        wt=new thread([&](){d.run(); if (fcgi) fcgi->terminate(); });
-        run_fcgi(p);
-        wt->join();
-        delete wt;
-    }
-    else {
-        d.run();
-    }
-#else
-    d.run();
-#endif
-}
-
 
 #include <us/wallet/protocol.h>
 
@@ -294,6 +263,37 @@ Json::Value to_json(const string& s) {
 #endif
 
 
+using us::gov::input::cfg;
+using us::gov::input::cfg1;
+
+void run_daemon(const params& p) {
+	signal(SIGINT,sig_handler);
+	signal(SIGTERM,sig_handler);
+	signal(SIGPIPE, SIG_IGN);
+
+//	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
+
+	wallet_daemon d(cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
+
+#ifdef FCGI
+    if (p.fcgi) {
+        thread* wt=0;
+        w3api::fcgi_t::api=&d;
+
+        wt=new thread([&](){d.run(); if (fcgi) fcgi->terminate(); });
+        run_fcgi(p);
+        wt->join();
+        delete wt;
+    }
+    else {
+        d.run();
+    }
+#else
+    d.run();
+#endif
+}
+
+
 void run_local(string command, args_t& args, const params& p) {
 /*
 	if (!us::gov::input::cfg::ensure_dir(p.homedir)) {
@@ -315,15 +315,17 @@ void run_local(string command, args_t& args, const params& p) {
     }
 
 */
-
-    auto f=cfg1::load(p.homedir);
+	auto homedir=p.homedir+"/wallet";
+	auto gov_homedir=p.homedir+"/wallet";
 
 	api* papi;
 	if (p.offline) {
-		papi=new local_api(p.homedir,p.backend_host,p.backend_port); //rpc to node
+		papi=new local_api(homedir,p.backend_host,p.backend_port); //rpc to node
 	}
 	else {
-		papi=new rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon
+		using us::gov::input::cfg_id;
+		auto f=cfg_id::load(homedir+"/rpc_client");
+		papi=new rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
 	}
 	api& wapi=*papi;
 
