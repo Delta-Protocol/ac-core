@@ -100,8 +100,6 @@ string c::keys::priv_t::to_b58() const {
 	return b58::encode(&*begin(),&*end());
 }
 
-
-
 string c::keys::pub_t::to_b58() const {
 	if (unlikely(!valid)) return "";
 	unsigned char out[33];
@@ -130,6 +128,7 @@ string c::keys::pub_t::to_hex() const {
 c::keys::priv_t c::keys::priv_t::from_b58(const string& s) {
 	priv_t k;
 	if (!b58::decode(s.c_str(),k)) {
+        k.zero();
 		cerr << "Error reading private key. " << s << endl;
 	}
 	return move(k);

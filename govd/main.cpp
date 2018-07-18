@@ -114,8 +114,11 @@ struct shell_client: us::gov::auth::peer_t {
 
 void open_shell(const params&p) {
 	using us::gov::input::cfg_id;
-	string homedir=p.homedir+"/gov";
+
+	string govhomedir=p.homedir+"/gov";
+	string homedir=govhomedir+"/rpc_client";
 	cfg_id conf=cfg_id::load(homedir);
+
 
 	shell_client peer(conf.keys);
 	if (!peer.connect(p.sysophost,p.port,true)) {
@@ -184,6 +187,27 @@ void run_daemon(const params&p) {
 	cout << "main: exited normally" << (thread_::_this.terminated?", terminated by signal":"") << endl;
 }
 
+//daemon only allows sysop connection from the same owner (i.e. same priv key k)
+//if a gov daemon is running in the same homedir
+//copy daemon priv key into the rpc_client device-id
+void sysop_localhost_allow(const params& p) {
+	string homedir=p.homedir+"/gov";
+	string rpchomedir=homedir+"/rpc_client";
+    auto k=cfg_id::load_priv_key(homedir);
+    auto rpck=cfg_id::load_priv_key(rpchomedir);
+    if (k.first && !rpck.first) {
+       if (!p.daemon) {
+            cfg_id::write_k(rpchomedir,k.second);
+       }
+    }
+    else if (!k.first && rpck.first) {
+       if (p.daemon) {
+            cfg_id::write_k(homedir,rpck.second);
+       }
+    }
+}
+
+
 int main(int argc, char** argv) {
     args_t args(argc,argv);
     params p;
@@ -193,6 +217,8 @@ int main(int argc, char** argv) {
         cerr << "Error. Unrecognized command " << command << endl;
         exit(1);
     }
+
+    sysop_localhost_allow(p);
 
 	signal(SIGINT,sig_handler);
 	signal(SIGTERM,sig_handler);

@@ -44,6 +44,11 @@ c c::load(const string& home) {
     //seed nodes 
         vector<string> addrs;
                 string seeds_file=abs_file(home,"nodes.manual");
+        if (!file_exists(seeds_file)) {
+            ofstream f(seeds_file);
+            f << '\n';
+        }
+
   //              cout << "reading " << seeds_file << endl;
                 ifstream f(seeds_file);
                 while(f.good()) {

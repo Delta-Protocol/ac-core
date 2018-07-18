@@ -103,7 +103,7 @@ struct genesis_daemon: blockchain::daemon {
     void start_new_blockchain(const string& addr) {
         assert(!addr.empty());
         auto pool=new diff();
-        auth_app->pool->to_hall.push_back(make_pair(peerd.id.pub.hash(),addr));
+        auth_app->pool->to_hall.push_back(make_pair(id.pub.hash(),addr));
         auto* mg=create_local_deltas();
         assert(mg!=0);
         pool->allow(*mg);

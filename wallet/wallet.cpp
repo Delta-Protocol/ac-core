@@ -85,9 +85,10 @@ cash::hash_t c::add_address(const crypto::ec::keys::priv_t& key) {
 	}
 	crypto::ec::keys k(key);
 	auto h=k.pub.compute_hash();
-	emplace(h,move(k));
-	need_save=true;
-	save();
+	if (emplace(h,move(k)).second) {
+	    need_save=true;
+    	save();
+    }
 	return move(h);
 }
 

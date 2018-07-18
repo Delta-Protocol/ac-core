@@ -1,5 +1,0 @@
-#!/bin/sh
-#LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" walletd/us-wallet -d -fcgi
-#LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" gdb --args walletd/us-wallet -d
-LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" walletd/us-wallet -d
-

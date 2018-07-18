@@ -19,6 +19,7 @@ struct local_api:api, wallet, pairing {
 	virtual void balance(bool detailed, ostream&os) override;
 	virtual void dump(ostream&os) override;
 	virtual void new_address(ostream&os) override;
+    using wallet::add_address;
 	virtual void add_address(const priv_t& privkey, ostream&os) override;
 	virtual void tx_make_p2pkh(const api::tx_make_p2pkh_input&, ostream&os) override;
 	virtual void tx_sign(const string&txb58, sigcode_t inputs, sigcode_t outputs, ostream&os) override;
