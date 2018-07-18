@@ -64,84 +64,43 @@ void help(const params& p) {
 	cout << "  -h            Print this help and exit " << endl;
 }
 
-bool parse_cmdline(int argc, char** argv, params& p) {
-	int i=1;
-	while (i<argc) {
-		string inp=argv[i++];
-		if (inp=="-p") {
-			if (i<argc) {
-				string sp=argv[i++];
-				try {
-					p.port=stoi(sp);
-				}
-				catch(...) {
-					cerr << "port is not a valid number";
-					return false;
-				}
-			}
-			else {
-				cerr << "I need the port number, please." << endl;
-				return false;
-			}
-			continue;
+using us::gov::input::args_t;
+
+string parse_options(args_t& args, params& p) {
+    string cmd;
+    while(true) {
+        cmd=args.next<string>();
+		if (cmd=="-p") {
+            p.port=args.next<uint16_t>();
 		}
-		if (inp=="-d") {
+		else if (cmd=="-d") {
 			p.daemon=true;
-			continue;
 		}
-		if (inp=="-ds") {
+		else if (cmd=="-ds") {
 			p.daemon=true;
 			p.shell=true;
-			continue;
 		}
-		if (inp=="-e") {
-			if (i<argc) {
-				string se=argv[i++];
-				try {
-					p.edges=stoi(se);
-				}
-				catch(...) {
-					cerr << "num edges is not a valid number";
-					return false;
-				}
-			}
-			else {
-				cerr << "I need the number of edges." << endl;
-				return false;
-			}
-			continue;
+		else if (cmd=="-e") {
+            p.edges=args.next<uint16_t>();
 		}
-		if (inp=="-home") {
-			if (i<argc) {
-				p.homedir=argv[i++];
-			}
-			else {
-				cerr << "I need a directory." << endl;
-				return false;
-			}
-			continue;
+		else if (cmd=="-home") {
+			p.homedir=args.next<string>();
 		}
-		if (inp=="-host") {
-			if (i<argc) {
-				p.sysophost=argv[i++];
-			}
-			else {
-				cerr << "I need an address." << endl;
-				return false;
-			}
-			continue;
+		else if (cmd=="-host") {
+			p.sysophost=args.next<string>();
 		}
-		if (inp=="-h") {
+		else if (cmd=="-h") {
 			help(p);
 			exit(0);
 		}
-		cerr << "Unrecognized option " << inp << ". invoke with -h for help." << endl;
-		return false;
-	}
-	return true;
+        else {
+            break;
+        }
+    }
+    return cmd;
 }
 
-#include <us/gov/crypto.h>
+
 #include <string.h>
 #include <iomanip>
 #include <fstream>
@@ -168,11 +127,13 @@ void open_shell(const params&p) {
 
 	shell_client peer(conf.keys);
 	if (!peer.connect(p.sysophost,p.port,true)) {
+        p.dump(cerr);
 		cerr << "Cannot connect to " << p.sysophost << ":" << p.port << endl;
 		return;
 	}
 	auto r=peer.run_auth();
 	if (!r.empty()) {
+        p.dump(cerr);
 		cerr << r << endl;
 		return;
 	}
@@ -180,11 +141,13 @@ void open_shell(const params&p) {
     {
         auto r=peer.recv();
         if (!r.first.empty()) {
+            p.dump(cerr);
             cerr << r.first << endl;
             cerr << "us.gov is rejecting sysop connections. See -ds option." << endl;
             return;
         }
         if (r.second->parse_string()!="go ahead") {
+            p.dump(cerr);
             cerr << "unknown protocol" << endl;
             return;
         }
@@ -213,6 +176,7 @@ void open_shell(const params&p) {
 }
 
 void run_daemon(const params&p) {
+    p.dump(cout);
 	using us::gov::input::cfg_daemon;
 	string homedir=p.homedir+"/gov";
 	cfg_daemon conf=cfg_daemon::load(homedir);
@@ -225,9 +189,14 @@ void run_daemon(const params&p) {
 }
 
 int main(int argc, char** argv) {
-	params p;
-	if(!parse_cmdline(argc,argv,p)) return 1;
-    p.dump(cout);
+    args_t args(argc,argv);
+    params p;
+    string command=parse_options(args,p);
+
+    if (!command.empty()) {
+        cerr << "Error. Unrecognized command " << command << endl;
+        exit(1);
+    }
 
 	signal(SIGINT,sig_handler);
 	signal(SIGTERM,sig_handler);

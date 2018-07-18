@@ -160,7 +160,7 @@ string parse_options(args_t& args, params& p) {
         if (cmd=="-wp") {
         	p.walletd_port=args.next<int>();
         }
-        if (cmd=="-lp") {
+        else if (cmd=="-lp") {
         	p.listening_port=args.next<uint16_t>();
         }
         else if (cmd=="-whost") {
