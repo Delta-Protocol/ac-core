@@ -22,6 +22,7 @@ struct peer_t: id::peer_t {
         virtual void verification_completed() override;
 
 	virtual bool authorize(const pubkey_t& p) const;
+ void dump(ostream& os) const;
 
         //virtual string run_auth() override;
 

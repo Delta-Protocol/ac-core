@@ -1,5 +1,6 @@
 #include "peer_t.h"
 #include "daemon.h"
+#include "protocol.h"
 
 using namespace us::gov::blockchain;
 using namespace std;
@@ -25,6 +26,12 @@ void c::verification_completed() {
 	}
 */
 	static_cast<daemon::networking*>(parent)->parent->auth_app->basic_auth_completed(this);
+    if (!static_cast<daemon::networking*>(parent)->parent->sysop_allowed) {
+        disconnect();
+    }
+    else {
+        send(new datagram(us::gov::protocol::sysop,"go ahead"));
+    }
 }
 
 

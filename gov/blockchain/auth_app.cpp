@@ -18,14 +18,8 @@ c::~app() {
 	delete pool;
 }
 
-//const c::keys& c::get_keys() const {
-//	assert(parent!=0);
-//	return parent->peerd.id; 
-//}
-
 us::gov::blockchain::peer_t::stage_t c::my_stage() const {
 	if (cache_my_stage!=peer_t::unknown) return cache_my_stage;
-//	auto k=get_keys().pub.hash();
 	auto k=node_pubkey.hash();
 	if (db.nodes.find(k)!=db.nodes.end()) {
 		cache_my_stage=peer_t::node;
@@ -48,7 +42,7 @@ void c::run() {
 }
 
 void c::basic_auth_completed(peer_t* p) {
-	cout << "APP auth_app, basic_auth_completed for " <<  p->pubkey <<  " " << p->pubkey.hash() << endl;
+	cout << "APP auth_app, basic_auth_completed for " <<  p->pubkey << endl;
 
 	if (p->pubkey==node_pubkey) { //parent->peerd.id.pub) {  ///sysop connection, this connection requires a shell
 		p->stage=peer_t::sysop;

@@ -661,13 +661,11 @@ cout << "PROCESSING DATAGRAM " << d->service << endl;
 	if (protocol::is_node_protocol(d->service)) { //high priority
 cout << "NODE PROTOCOL " << d->service << endl;
 		if (parent->process_work(static_cast<peer_t*>(c),d)) return true;
-cerr << "ERROR           NOT handled by specialists! " << d->service << endl;
 	}
 
 	if (protocol::is_app_query(d->service)) {
 cout << "QUERY PROTOCOL " << d->service << endl;
 		if (parent->process_app_query(static_cast<peer_t*>(c),d)) return true;
-cout << "NOT handled by specialists! " << d->service << endl;
 	}
 
 	if (b::process_work(c,d)) { //ping, evidences, auth
@@ -734,6 +732,7 @@ cout << "PW sysop" << endl;
 				delete d;
 				c->send(new datagram(protocol::sysop,"Sysop operation is not allowed."));
 				c->disconnect();
+                cout << "Disconnected sysop connection. see -ds option." << endl;
 				return true;
 			}
 			return sysops.process_work(c, d); //traslate the msg to sysopland

@@ -29,7 +29,7 @@ c c::load(const string& home) {
         auto x=b::load(home);
 
             string keyfile=abs_file(home,"k");
-                cout << "Loading conf from " << keyfile << endl;
+//                cout << "Loading conf from " << keyfile << endl;
                 if (!file_exists(keyfile)) {
                         cout << "Generating cryptographic keys..."; cout.flush();
                         crypto::ec::keys k=crypto::ec::keys::generate();

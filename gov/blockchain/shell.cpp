@@ -17,7 +17,7 @@ using namespace std;
 
 
 void c::help(ostream& os) const {
-
+/*
 os << "us.gov" << endl;
 os << "======" << endl;
 os << "" << endl;
@@ -38,38 +38,45 @@ os << "" << endl;
 os << "2.2. submit changes" << endl;
 
 os << "" << endl;
-os << "Free Software licenced under GPL·" << endl;
+*/
+os << "This is Free Software licenced under GNU Affero General Public Licence (AGPL). " << endl;
+os << "Obtain a copy of the licence here: https://www.gnu.org/licenses/agpl.txt" << endl;
 
 	os << "us.gov ; Introspective Shell" << endl;
 	os << "h              Shows this help." << endl;
 	os << "l, level [int]    Change level. Current level is " << level << endl;
-	os << "      level 0 - socket" << endl;
-	os << "      level 1 - peer" << endl;
-	os << "      level 2 - id" << endl;
-	os << "      level 3 - auth" << endl;
-	os << "      level 4 - relay" << endl;
-	os << "      level 5 - blockchain" << endl;
+	os << "      " << (level==0?'>':' ') << "level 0 - socket" << endl;
+	os << "      " << (level==1?'>':' ') << "level 1 - peer" << endl;
+	os << "      " << (level==2?'>':' ') << "level 2 - id" << endl;
+	os << "      " << (level==3?'>':' ') << "level 3 - auth" << endl;
+	os << "      " << (level==4?'>':' ') << "level 4 - relay" << endl;
+	os << "      " << (level==5?'>':' ') << "level 5 - dfs" << endl;
+	os << "      " << (level==6?'>':' ') << "level 6 - blockchain" << endl;
 	if (level==0) {
 		os << "Level " << level << " (socket) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
-	if (level==1) {
+	else if (level==1) {
 		os << "Level " << level << " (peer) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
-	if (level==2) {
+	else if (level==2) {
 		os << "Level " << level << " (id) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
-	if (level==3) {
+	else if (level==3) {
 		os << "Level " << level << " (auth) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
-	if (level==4) {
+	else if (level==4) {
 		os << "Level " << level << " (relay) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
-	if (level==5) { //change init level to this in shell.h
+	else if (level==5) {
+		os << "Level " << level << " (dfs) help:" << endl;
+		os << "s|server    Dumps daemon info." << endl;
+	}
+	else if (level==6) { //change init level to this in shell.h
 		os << "Level " << level << " (blockchain) help:" << endl;
 		os << "s|server    Dumps networking info." << endl;
 		os << "y|syncd     Dumps data sync info." << endl;

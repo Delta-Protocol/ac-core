@@ -1,4 +1,0 @@
-#!/bin/sh
-#LD_LIBRARY_PATH=gov gdb --args govd/us-gov
-LD_LIBRARY_PATH=gov:/usr/lib govd/us-gov $@
-

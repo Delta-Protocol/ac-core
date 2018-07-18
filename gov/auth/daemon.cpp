@@ -29,6 +29,12 @@ bool c::process_work(socket::peer_t *p, datagram*d) {
 
 void c::dump(ostream& os) const {
 	os << "Hello from auth::daemon" << endl;
+    os << "active:" << endl;
+    auto a=active();
+    vector<peer_t*>& v=reinterpret_cast<vector<peer_t*>&>(a);
+    for (auto& i:v) {
+        i->dump(os);
+    }
 }
 
 

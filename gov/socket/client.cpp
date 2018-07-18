@@ -66,7 +66,7 @@ bool client::connect(const string& host, uint16_t port, bool block) {
 	disconnect();
 	lock_guard<mutex> lock(mx);
 	if (!init_sock(host, port, block)) {
-        cerr << "Could not init socket for " << host << ":" << port << endl;
+//        cerr << "Could not init socket for " << host << ":" << port << endl;
         return false;
     }
 	addr=host;
@@ -115,7 +115,7 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 	int r=::connect(sock, (struct sockaddr *) &servername, sizeof (servername));
 	if (r<0) {
 		if (errno==EINPROGRESS) {
-			cout << "socket: client: ::connect in progress fd" << sock  << endl;
+//			cout << "socket: client: ::connect in progress fd" << sock  << endl;
 
             typedef chrono::high_resolution_clock clock;
             using namespace chrono_literals;
@@ -130,7 +130,7 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 	            int a=getpeername(sock, (struct sockaddr*)&addr, &lena);
 	            if (a==0) break;
                 if (chrono::duration_cast<std::chrono::milliseconds>(clock::now() - t1).count()>500) {
-           			cout << "socket: client: ::connect in progress fd" << sock  << " timeout!" << endl;
+           			//cout << "socket: client: ::connect in progress fd" << sock  << " timeout!" << endl;
                     return false; //timeout
                 }
                 this_thread::sleep_for(10ms);
@@ -138,7 +138,7 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 //   			cout << "socket: client: ::connect in progress fd" << sock  << " no longer INPROGRESS" << endl;
 			return true;
 		}
-		cout << "socket: client: ::connect failed " << sock << " error: " << r << endl;
+		//cout << "socket: client: ::connect failed " << sock << " error: " << r << endl;
 		::close(sock);
 		sock=0;
 		return false;

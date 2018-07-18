@@ -10,15 +10,12 @@ using namespace us::gov;
 using namespace std;
 using socket::datagram;
 
-
-
 void sig_handler(int s) {
     cout << "main: Caught signal " << s << endl;
     signal_handler::_this.finish();
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
     signal(SIGPIPE,SIG_DFL);
-
 }
 
 using namespace std::chrono_literals;
@@ -35,30 +32,35 @@ struct params {
 	}
     void dump(ostream& os) const {
         os << "home: " << homedir << endl;
-        os << "sysophost: " << sysophost << ":" << port << endl;
-        os << "edges: " << edges << endl;
-        os << "port: " << port << endl;
+        if (daemon) {
+            os << "run daemon" << endl;
+            os << "  listening port: " << port << endl;
+            os << "  edges: " << edges << endl;
+            os << "  sysop shell: " << boolalpha << shell << endl;
+        }
+        else {
+            os << "run rpc shell" << endl;
+            os << "  host: " << sysophost << ":" << port << endl;
+        }
     }
 
 	uint16_t port{16672};
 	uint16_t edges{10};
 	bool daemon{false};
 	bool shell{false};
-	//uint16_t simul_num_nodes_deployed{0};
     string homedir;
     string sysophost{"127.0.0.1"};
 };
 
-void help() {
-	params p;
+void help(const params& p) {
 	cout << "us-govd [options]" << endl;
 	cout << "Options are:" << endl;
 	cout << "  -d            Run daemon " << endl;
-	cout << "  -ds           Run daemon with sysop shell" << endl;
-	cout << "  -p <port>     Listening port, default " << p.port << endl;
-	cout << "  -e <edges>    Max num neightbours, default " << p.edges << endl;
-	cout << "  -home <homedir>   Set home directory (default is ~/.us) " << endl;
-	cout << "  -host <address>   Specify where the daemon is running, defaults to localhost" << endl;
+	cout << "  -ds           Run daemon with sysop shell. " << boolalpha << p.shell << endl;
+	cout << "  -p <port>     Listening port. " << p.port << endl;
+	cout << "  -e <edges>    Max num neightbours " << p.edges << endl;
+	cout << "  -home <homedir>   Set home directory. " << p.homedir << endl;
+	cout << "  -host <address>   daemon host. " << p.sysophost << endl;
 	cout << "  -h            Print this help and exit " << endl;
 }
 
@@ -129,27 +131,8 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 			}
 			continue;
 		}
-/*
-		if (inp=="-deploy_ports ") {
-			if (i<argc) {
-				string se=argv[i++];
-				try {
-					p.simul_num_nodes_deployed=stoi(se);
-				}
-				catch(...) {
-					cerr << "num nodes is not a valid number";
-					return false;
-				}
-			}
-			else {
-				cerr << "I need the number of nodes." << endl;
-				return false;
-			}
-			continue;
-		}
-*/
 		if (inp=="-h") {
-			help();
+			help(p);
 			exit(0);
 		}
 		cerr << "Unrecognized option " << inp << ". invoke with -h for help." << endl;
@@ -166,18 +149,6 @@ bool parse_cmdline(int argc, char** argv, params& p) {
 
 using us::gov::input::cfg_id;
 
-//RPC
-struct thinfo {
-
-	thinfo(const params& p): p(p), conf(cfg_id::load(p.homedir+"/gov")) {
-	}
-	const params& p;
-	const cfg_id& conf;
-	blockchain::peer_t* peer{0};
-
-};
-
-
 #include <us/gov/blockchain/protocol.h>
 #include <us/gov/auth/peer_t.h>
 
@@ -191,10 +162,6 @@ struct shell_client: us::gov::auth::peer_t {
 };
 
 void open_shell(const params&p) {
-	signal(SIGINT,sig_handler);
-	signal(SIGTERM,sig_handler);
-	signal(SIGPIPE, SIG_IGN);
-
 	using us::gov::input::cfg_id;
 	string homedir=p.homedir+"/gov";
 	cfg_id conf=cfg_id::load(homedir);
@@ -210,7 +177,20 @@ void open_shell(const params&p) {
 		return;
 	}
 
-	cout << "us.gov Introspective Shell" << endl;
+    {
+        auto r=peer.recv();
+        if (!r.first.empty()) {
+            cerr << r.first << endl;
+            cerr << "us.gov is rejecting sysop connections. See -ds option." << endl;
+            return;
+        }
+        if (r.second->parse_string()!="go ahead") {
+            cerr << "unknown protocol" << endl;
+            return;
+        }
+    }
+
+	cout << "*us.gov* Introspective Shell" << endl;
 	cout << "Connected to us.gov at " << p.sysophost << ":" << p.port << endl;
 	cout << "Type h for help." << endl;
 
@@ -230,74 +210,6 @@ void open_shell(const params&p) {
 		cout << ans.second->parse_string() << endl;
 		delete ans.second;
 	}
-
-
-//	shell_daemon d(cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
-//	d.run();
-
-
-/*
-	thinfo i(p);
-
-	blockchain::peer_t cli(0);
-	i.peer=&cli;
-	
-	cout << "us.gov Introspective Shell" << endl;
-	cout << "Connecting to daemon at localhost:" << i.p.port << endl;
-	if (!cli.connect(i.p.sysophost,i.p.port,true)) {
-		cerr << "Cannot connect to " << i.p.sysophost << ":" << i.p.port << endl;
-		return;
-	}
-	//cout << "Start thread" << endl;
-	thread th(&shell_echo,&i);
-	//cout << "/Start thread" << endl;
-	cout << "Connecting to daemon at localhost:" << i.p.port << endl;
-
-	//cli.ping();
-
-	cout << "Authenticating..."; cout.flush();
-	while (true) {
-		if (cli.stage_peer==auth::peer_t::verified && cli.stage_me==auth::peer_t::verified) break;
-		if (cli.stage_peer==auth::peer_t::verified_fail || cli.stage_me==auth::peer_t::verified_fail) {
-			cerr << "Authentication failed." << endl;
-			exit(1);
-		}
-		if (cli.stage!=blockchain::peer_t::unknown && cli.stage!=blockchain::peer_t::sysop) {
-			cerr << "Authentication failed." << endl;
-			exit(1);
-		}
-
-		this_thread::sleep_for(chrono::seconds(1));
-		cout << "."; cout.flush();		
-	}	
-	cout << endl;
-	while (!finished22) {
-		cout << "> "; cout.flush();
-		string line;
-		getline(cin,line);
-		if (line=="q") {
-//			cout << ".." << endl;
-			break;
-		}
-		datagram* d=new datagram(us::gov::protocol::sysop,line);
-//cout << "sending " << us::gov::protocol::sysop << " " <<line << endl;
-		cli.send(d);
-		{
-		unique_lock<mutex> lock(mx22);
-		ready22=false;
-		cv22.wait(lock,[]{return ready22;});
-		}
-
-	}
-	cli.send(new datagram(protocol::ping));
-
-	unique_lock<mutex> lock(mx22);
-	cv22.wait(lock,[]{return finished23;});
-
-	//this_thread::sleep_for(chrono::seconds(1));
-	cli.disconnect();
-	th.join();
-	*/
 }
 
 void run_daemon(const params&p) {
@@ -305,9 +217,6 @@ void run_daemon(const params&p) {
 	string homedir=p.homedir+"/gov";
 	cfg_daemon conf=cfg_daemon::load(homedir);
 	cout << "Node public key is " << conf.keys.pub << endl;
-	signal(SIGINT,sig_handler);
-	signal(SIGTERM,sig_handler);
-	signal(SIGPIPE, SIG_IGN);
 	blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 	d.sysop_allowed=p.shell;
 	d.add(new cash::app());
@@ -315,20 +224,14 @@ void run_daemon(const params&p) {
 	cout << "main: exited normally" << (thread_::_this.terminated?", terminated by signal":"") << endl;
 }
 
-#include <cstdlib>
-#include <us/gov/crypto.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
 int main(int argc, char** argv) {
-
-//    cfg::check_platform();
-
 	params p;
 	if(!parse_cmdline(argc,argv,p)) return 1;
-
     p.dump(cout);
+
+	signal(SIGINT,sig_handler);
+	signal(SIGTERM,sig_handler);
+	signal(SIGPIPE, SIG_IGN);
 
 	if (p.daemon) {
 		run_daemon(p);

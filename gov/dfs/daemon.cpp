@@ -81,6 +81,10 @@ string c::resolve_filename(const string& filename) {
 }
 
 
+void c::dump(ostream&os) const {
+    os << "Hello from dfs::daemon" << endl;
+    os << "Nothing to say here yet" << endl;    
+}
 
 
 

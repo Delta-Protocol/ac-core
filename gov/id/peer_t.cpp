@@ -23,7 +23,7 @@ void c::on_connect() { //called only on the initiator, the caller side.
 }
 
 void c::dump(ostream& os) const {
-	os << this << "- I am (to peer): " << stagestr[stage_me] << "; Peer is (to me): " << stagestr[stage_peer] << endl;
+	os << this << ' ' << pubkey << "- peer says I am " << stagestr[stage_me] << "; I say peer is " << stagestr[stage_peer] << endl;
 
 }
 
