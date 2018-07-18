@@ -98,6 +98,7 @@ void c::tx_check(const string&txb58, ostream&os) {
 void c::pair(const pub_t& pk, const string& name, ostream&os) {
 	ostringstream si;
 	si << pk << ' ' << name;
+//cout << "asking " << si.str() << endl;
 	ask(us::wallet::protocol::pair_query,si.str(),os);
 }
 

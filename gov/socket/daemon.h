@@ -28,7 +28,7 @@ struct daemon: server {
 	void send(int num, peer_t* exclude, datagram* d);
 
 	virtual bool receive_and_process(client*) override;
-	bool process_work(peer_t *c);
+	void process_work(peer_t *c);
 	virtual bool process_work(peer_t *c, datagram*d) { return false; }
 
 	virtual void daemon_timer() {}

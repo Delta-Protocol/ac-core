@@ -6,8 +6,6 @@ using namespace us::wallet;
 using namespace std;
 typedef us::wallet::wallet_daemon c;
 
-
-
 c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), local_api(home,backend_host,backend_port), id(k) {
     assert(!home.empty());
 }
@@ -181,6 +179,7 @@ socket::client* c::create_client(int sock) {
 
 
 bool c::authorize(const pub_t& p) const {
+cout << "Request for authorization " << p << endl;
     return devices.authorize(p);
 }
 

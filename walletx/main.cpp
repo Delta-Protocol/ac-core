@@ -352,9 +352,14 @@ void run_local(string command, args_t& args, const params& p) {
 	}
 	else if (command=="pair") {
 		api::pub_t pub=args.next<api::pub_t>();
-	    auto name=args.next<string>();
+        if (!pub.valid) {
+            os << "Error: Invalid public key";
+        }
+        else {
+    	    auto name=args.next<string>();
 //cout << "-- " << name << endl;
-		wapi.pair(pub,name,os);
+	    	wapi.pair(pub,name,os);
+        }
 	}
 	else if (command=="unpair") {
 		api::pub_t pub=args.next<api::pub_t>();

@@ -51,7 +51,7 @@ void c::new_address(ostream&os) {
 
 void c::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	auto a=wallet::add_address(privkey);
-	os << a << endl;
+	os << a;
 }
 
 void c::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream& os) {
@@ -59,9 +59,9 @@ void c::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream& os) {
 
     auto tx=wallet::tx_make_p2pkh(endpoint,i);
     if (tx.first.empty())
-    	os << tx.second << endl;
+    	os << tx.second;
     else 
-    	os << tx.first << endl;
+    	os << tx.first;
 }
 
 void c::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigcode_t sigcodeo, ostream&os) {
@@ -69,9 +69,9 @@ void c::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigc
 
     auto tx=wallet::tx_sign(endpoint, txb58, sigcodei, sigcodeo);
 	if (tx.first.empty())
-	    os << tx.second << endl;
+	    os << tx.second;
 	else
-	    os << tx.first << endl;
+	    os << tx.first;
 }
 
 void c::tx_send(const string&txb58, ostream&os) {
@@ -79,10 +79,10 @@ void c::tx_send(const string&txb58, ostream&os) {
 
 	string e=wallet::send(endpoint, cash::tx::from_b58(txb58));
     if (e.empty()) {
-	    os << "Successfully sent :)" << endl;
+	    os << "Successfully sent :)";
     }
     else {
-	    os << e << endl;
+	    os << e;
     }
 }
 
@@ -95,19 +95,23 @@ void c::tx_check(const string&txb58, ostream&os) {
 	cash::tx t=cash::tx::from_b58(txb58);
 	auto fee=t.check();
 	if (fee<=0) {
-		os << "Individual inputs and fees must be positive." << endl;
+		os << "Individual inputs and fees must be positive.";
 	}
-	os << "Looks ok." << endl;
+	os << "Looks ok.";
 }
 
 void c::pair(const pub_t& pk, const string& name, ostream&os) {
+    if (!pk.valid) {
+        os << "Error: invalid public key.";
+        return;
+    }
     devices.pair(pk,name);
-	os << "done." << endl;
+	os << "done.";
 }
 
 void c::unpair(const pub_t& pk, ostream&os) {
     devices.unpair(pk);
-	os << "done." << endl;
+	os << "done.";
 }
 
 void c::list_devices(ostream&os) {
@@ -134,7 +138,7 @@ void c::ping_gov(ostream& os) {
 }
 
 void c::ping_wallet(ostream& os) {
-    os << "I am the wallet";
+    os << "pong";
 }
 
 
