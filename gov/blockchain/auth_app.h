@@ -278,7 +278,7 @@ namespace auth { //blockchain network support, this service is free
 		};
 */
 		
-		pubkey_t node_pubkey;
+		const pubkey_t& node_pubkey;
 
 
 		db_t db;

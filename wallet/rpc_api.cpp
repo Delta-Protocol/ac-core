@@ -10,7 +10,7 @@ using namespace std;
 
 using datagram=socket::datagram;
 
-c::rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port):walletd_host(walletd_host), walletd_port(walletd_port), b(k,0) {
+c::rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port):walletd_host(walletd_host), walletd_port(walletd_port), b(0), id(k) {
 }
 
 c::~rpc_api() {

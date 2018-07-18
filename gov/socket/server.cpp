@@ -21,6 +21,7 @@
 //#include <us/gov/net.h>
 
 using namespace std;
+using namespace us::gov::socket;
 typedef us::gov::socket::server c;
 
 //unique_ptr<us::gov::net::os> c::os=make_unique<us::gov::net::posix>();
@@ -336,6 +337,9 @@ void c::clients_t::wait::dump(ostream& os) const {
 		{ i->dump(os); }
 }
 
+client* c::create_client(int sock) {
+	return new client(sock);
+}
 
 
 #include <us/gov/likely.h>

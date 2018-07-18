@@ -7,7 +7,7 @@ typedef us::wallet::wallet_daemon c;
 
 
 
-c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(k,port,2), local_api(home,backend_host,backend_port) {
+c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), local_api(home,backend_host,backend_port), id(k) {
 }
 
 c::~wallet_daemon() {
@@ -35,10 +35,25 @@ bool c::send_response(peer_t *c, datagram*d, const string& payload) {
 bool c::process_work(socket::peer_t *c0, datagram*d) {
     if (b::process_work(c0,d)) return true;
 
-    if (static_cast<auth::id_peer*>(c0)->stage_peer!=auth::id_peer::verified) {
+    peer_t* c=static_cast<peer_t*>(c0);
+    switch(d->service) {
+	case us::wallet::protocol::ping: {
+		ostringstream ans;
+		local_api::ping_wallet(ans);
+		return send_response(c,d,ans.str());
+	}
+	break;
+	case us::wallet::protocol::ping_gov: {
+		ostringstream ans;
+		local_api::ping_gov(ans);
+		return send_response(c,d,ans.str());
+	}
+	break;
+    }
+
+    if (static_cast<auth::peer_t*>(c0)->stage!=auth::peer_t::authorized) {
         return false;
     }
-    peer_t* c=static_cast<peer_t*>(c0);
 	switch(d->service) {
 		case us::wallet::protocol::tx_make_p2pkh_query: {
 			istringstream is(d->parse_string());
@@ -148,18 +163,6 @@ bool c::process_work(socket::peer_t *c0, datagram*d) {
 			ostringstream ans;
 			local_api::list_devices(ans);
 
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::ping: {
-			ostringstream ans;
-			local_api::ping_wallet(ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::ping_gov: {
-			ostringstream ans;
-			local_api::ping_gov(ans);
 			return send_response(c,d,ans.str());
 		}
 		break;

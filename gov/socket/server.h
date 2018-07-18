@@ -24,7 +24,7 @@ namespace socket {
 		server(uint16_t port);
 		virtual ~server();
 
-		virtual client* create_client(int sock)=0;
+		virtual client* create_client(int sock);
 
 		virtual void on_finish() override;
 

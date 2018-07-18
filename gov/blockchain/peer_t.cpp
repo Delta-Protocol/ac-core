@@ -12,12 +12,19 @@ void c::verification_completed() {
     b::verification_completed();
 
 	cout << "blockchain: daemon: verification_completed" << endl;
+    if (us::gov::auth::peer_t::stage!=us::gov::auth::peer_t::authorized) {
+		cout << "disconnected peer, not authorized." << endl;
+		disconnect();
+		return;
+    }
+/*
 	if (stage_peer!=us::gov::auth::id_peer::verified || stage_me!=us::gov::auth::id_peer::verified) {
 		cout << "disconnected peer, both sides successful verification is required." << endl;
 		disconnect();
 		return;
 	}
-	reinterpret_cast<daemon::networking*>(parent)->parent->auth_app->basic_auth_completed(this);
+*/
+	static_cast<daemon::networking*>(parent)->parent->auth_app->basic_auth_completed(this);
 }
 
 
@@ -28,6 +35,6 @@ void c::dump(ostream& os) const {
 
 
 const keys& c::get_keys() const {
-    return static_cast<const daemon*>(parent)->get_keys();
+    return static_cast<daemon::networking*>(parent)->get_keys();
 }
 

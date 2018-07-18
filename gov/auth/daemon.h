@@ -15,7 +15,7 @@ struct daemon:id::daemon {
     daemon(uint16_t port, uint16_t edges);
 	virtual ~daemon();
 
-	virtual socket::client* create_client(int sock) override=0;
+//	virtual socket::client* create_client(int sock) override=0;
 	void dump(ostream& os) const;
 
 	virtual bool process_work(socket::peer_t *p, datagram*d) override;

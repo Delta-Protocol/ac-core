@@ -14,13 +14,13 @@ c::daemon(uint16_t port, uint16_t edges): b(port,edges) {
 
 c::~daemon() {
 }
-
+/*
 socket::client* c::create_client(int sock) {
 	auto p=new peer_t(sock);
 	p->parent=this;
 	return p;
 }
-
+*/
 bool c::process_evidence(peer_t *c, datagram*d) {
 	return false;
 }

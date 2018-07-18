@@ -9,7 +9,7 @@ using namespace std;
 typedef us::gov::blockchain::daemon c;
 
 void c::constructor() {
-	auth_app=new auth::app(peerd.id.pub);
+	auth_app=new auth::app(id.pub);
 	add(auth_app);
 }
 
@@ -321,19 +321,19 @@ void c::run() {
 }
 
 string c::networking::get_random_peer(const unordered_set<string>& exclude_addrs) const { //returns ipaddress
-cout << "exclude: ";
+//cout << "exclude: ";
 for (auto&i:exclude_addrs) cout << i << " ";
-cout << "my pubkey is " << id.pub << endl;
+//cout << "my pubkey is " << id.pub << endl;
 	auto n=parent->get_random_node(exclude_addrs);
-cout << "auth_app->get_random_node=" << n << endl;
+//cout << "auth_app->get_random_node=" << n << endl;
 	if (n.empty() && !seed_nodes.empty()) {
-cout << "no nodes . using seeds " << endl;
+//cout << "no nodes . using seeds " << endl;
 		uniform_int_distribution<> d(0, seed_nodes.size()-1);
 		for (int j=0; j<10; ++j) {
 			auto i=seed_nodes.begin();
 			advance(i,d(parent->rng));
 			if (exclude_addrs.find(*i)==exclude_addrs.end()) {
-cout << "found " << *i << endl;
+//cout << "found " << *i << endl;
 				return *i;
 			}
 		}
@@ -515,19 +515,19 @@ local_deltas* c::create_local_deltas() {
 		delete mg;
 		return 0;
 	}
-	mg->sign(peerd.id);
+	mg->sign(id);
 	return mg;
 }
 
 void c::vote_tip(const diff& b) {
 	const diff::hash_t& h=b.hash();
 	//assert(!h.empty());
-	votes.add(peerd.id.pub.hash(),h);
+	votes.add(id.pub.hash(),h);
 
 cout << "voting for tip be: " << h << endl;
-	string signature=crypto::ec::instance.sign_encode(peerd.id.priv,h.to_b58());
+	string signature=crypto::ec::instance.sign_encode(id.priv,h.to_b58());
 	ostringstream os;
-	os << h << " " << peerd.id.pub << " " << signature;
+	os << h << " " << id.pub << " " << signature;
 	string msg=os.str();
 	for (auto& i:get_people()) {
 		i->send(new datagram(protocol::vote_tip,msg));
@@ -932,7 +932,7 @@ string c::timestamp() const {
 }
 
 void c::print_performances(ostream& os) const {
-	os << "US node " << peerd.id.pub << " " << timestamp() << endl;
+	os << "US node " << id.pub << " " << timestamp() << endl;
 	os << "Resources" << endl;
 	os << "  Network" << endl;
 	os << "  Storage" << endl;

@@ -3,7 +3,7 @@
 #define USGOV_be7dc84108784c4af35dada40b3f9b325e2d9f0782781c75529a2c286e0cfa5c
 
 #include "api.h"
-#include "peer_t.h"
+#include <us/gov/auth/peer_t.h>
 #include <chrono>
 
 
@@ -11,7 +11,7 @@ namespace us { namespace wallet {
 
 using namespace std;
 
-struct rpc_api:api, peer_t {
+struct rpc_api:api, gov::auth::peer_t {
 	typedef peer_t b;
 	using b::pub_t;
 
@@ -33,6 +33,8 @@ struct rpc_api:api, peer_t {
     virtual void ping_gov(ostream&) override;
     virtual void ping_wallet(ostream&) override;
 
+    inline virtual const keys& get_keys() const override { return id; }
+
 private:
 	void ask(int service, ostream&os);
 	void ask(int service, const string& args, ostream&os);
@@ -40,6 +42,7 @@ private:
 	string walletd_host;
 	uint16_t walletd_port;
 
+	const keys& id;
     bool connect_walletd(ostream&);
     chrono::steady_clock::time_point connected_since;
     

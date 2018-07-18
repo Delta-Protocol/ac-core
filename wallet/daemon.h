@@ -24,6 +24,9 @@ struct wallet_daemon: auth::daemon, local_api {
 	virtual ~wallet_daemon();
 	virtual bool process_work(socket::peer_t*, datagram*) override;
 
+   inline virtual const keys& get_keys() const override { return id; }
+
+	const keys& id;
   //  string backend_host;
   //  uint16_t backend_port;
 

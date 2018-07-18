@@ -31,7 +31,7 @@ bool c::process_work(socket::peer_t *p, datagram*d) {
 
 void c::dump(ostream& os) const {
 	os << "Hello from id::daemon" << endl;
-	os << "This node public key: " << id.pub << endl;
+	os << "This node public key: " << get_keys().pub << endl;
 	os << "active:" << endl;
 	auto a=active();
 	vector<peer_t*>& v=reinterpret_cast<vector<peer_t*>&>(a);

@@ -223,14 +223,14 @@ void shell_echo(thinfo* info) {
 }
 
 #include <us/gov/blockchain/protocol.h>
-#include <us/gov/auth/auth_peer.h>
+#include <us/gov/auth/peer_t.h>
 
 
 
-struct shell_client: us::gov::auth::auth_peer {
+struct shell_client: us::gov::auth::peer_t {
 	shell_client(const keys& k): k(k) {
 	}
-        virtual const keys& get_keys() override {
+        virtual const keys& get_keys() const override {
 		return k;
 	}
 	const keys& k;

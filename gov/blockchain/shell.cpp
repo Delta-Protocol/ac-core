@@ -111,22 +111,22 @@ string c::command(const string& cmdline) {
 		if (!memory_cmd_lvl.empty()) command(memory_cmd_lvl);
 	}
 	else if (cmd=="server" || cmd=="s") {
-		if (level==0) {
-			dynamic_cast<const us::gov::socket::server&>(d.peerd).dump(os);
-		}
-		else if (level==1) {
-			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os);
-		}
-		else if (level==2) {
-			dynamic_cast<const us::gov::auth::id_daemon&>(d.peerd).dump(os);
-		}
-		else if (level==3) {
-			dynamic_cast<const us::gov::relay::daemon&>(d.peerd).dump(os);
-		}
-		else if (level==4) {
-			d.peerd.dump(os);
-		}
-		else {
+		switch(level) {
+		case 0:
+			dynamic_cast<const us::gov::socket::server&>(d.peerd).dump(os); break;
+		case 1:
+			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os); break;
+		case 2:
+			dynamic_cast<const us::gov::id::daemon&>(d.peerd).dump(os); break;
+		case 3:
+			dynamic_cast<const us::gov::auth::daemon&>(d.peerd).dump(os); break;
+		case 4:
+			dynamic_cast<const us::gov::relay::daemon&>(d.peerd).dump(os); break;
+		case 5:
+			dynamic_cast<const us::gov::dfs::daemon&>(d.peerd).dump(os); break;
+		case 6:
+			d.peerd.dump(os); break;
+		default:
 			os << "No daemon at level " << level << endl;
 		}
 		memory_cmd_lvl=cmd;
