@@ -10,12 +10,15 @@ using namespace us::gov;
 using namespace std;
 using socket::datagram;
 
+
+
 void sig_handler(int s) {
     cout << "main: Caught signal " << s << endl;
     signal_handler::_this.finish();
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
-	signal(SIGPIPE,SIG_DFL);
+    signal(SIGPIPE,SIG_DFL);
+
 }
 
 using namespace std::chrono_literals;
@@ -174,58 +177,9 @@ struct thinfo {
 
 };
 
-condition_variable cv22;
-mutex mx22;
-bool ready22{false};
-bool finished22{false};
-bool finished23{false};
-void shell_echo(thinfo* info) {
-	blockchain::peer_t&cli=*info->peer;
-	fd_set read_fd_set;
-	blockchain::daemon demon(info->conf.keys);
-	demon.sysop_allowed=true;
-	cli.parent=&demon.peerd;
-
-	while (!finished22) {
-		FD_ZERO(&read_fd_set);
-		FD_SET(cli.sock,&read_fd_set);
-		if (::select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0) {
-			cout << "Error in select" << endl;
-			continue;
-		}
-        if (finished22) break;
-
-		if (FD_ISSET (cli.sock, &read_fd_set)) {
-			pair<string,datagram*> r=cli.recv();
-            if (!r.first.empty()) {
-                assert(r.second==0);
-                cerr << r.first << endl;
-                break;
-            }
-			if (demon.peerd.process_work_sysop(&cli,r.second)) {
-				continue;
-			}
-			if (r.second->service!=us::gov::protocol::sysop) {
-				delete r.second;
-				continue;
-			}
-			cout << r.second->parse_string() << endl;
-			delete r.second;
-			{
-			unique_lock<mutex> lock(mx22);
-			ready22=true;
-			}
-			cv22.notify_all();
-		}
-	}
-    finished23=true;
-	cv22.notify_all();
-}
 
 #include <us/gov/blockchain/protocol.h>
 #include <us/gov/auth/peer_t.h>
-
-
 
 struct shell_client: us::gov::auth::peer_t {
 	shell_client(const keys& k): k(k) {
@@ -236,16 +190,10 @@ struct shell_client: us::gov::auth::peer_t {
 	const keys& k;
 };
 
-
-
 void open_shell(const params&p) {
-
-
 	signal(SIGINT,sig_handler);
 	signal(SIGTERM,sig_handler);
 	signal(SIGPIPE, SIG_IGN);
-
-//	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
 
 	using us::gov::input::cfg_id;
 	string homedir=p.homedir+"/gov";
@@ -256,9 +204,33 @@ void open_shell(const params&p) {
 		cerr << "Cannot connect to " << p.sysophost << ":" << p.port << endl;
 		return;
 	}
-	peer.run_auth();
+	auto r=peer.run_auth();
+	if (!r.empty()) {
+		cerr << r << endl;
+		return;
+	}
 
-	
+	cout << "us.gov Introspective Shell" << endl;
+	cout << "Connected to us.gov at " << p.sysophost << ":" << p.port << endl;
+	cout << "Type h for help." << endl;
+
+	while (!signal_handler::_this.terminated) {
+		cout << "> "; cout.flush();
+		string line;
+		getline(cin,line);
+		if (line=="q") {
+			break;
+		}
+		datagram* d=new datagram(us::gov::protocol::sysop,line);
+		auto ans=peer.send_recv(d);
+		if (!ans.first.empty()) {
+			cerr << ans.first << endl;
+			break;
+		}
+		cout << ans.second->parse_string() << endl;
+		delete ans.second;
+	}
+
 
 //	shell_daemon d(cfg1::load(p.homedir).keys, p.listening_port, p.homedir, p.backend_host, p.backend_port);
 //	d.run();

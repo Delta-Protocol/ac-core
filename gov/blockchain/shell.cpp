@@ -42,7 +42,13 @@ os << "Free Software licenced under GPL·" << endl;
 
 	os << "us.gov ; Introspective Shell" << endl;
 	os << "h              Shows this help." << endl;
-	os << "l level [int]    Shows/set the current depth level." << endl;
+	os << "l, level [int]    Change level. Current level is " << level << endl;
+	os << "      level 0 - socket" << endl;
+	os << "      level 1 - peer" << endl;
+	os << "      level 2 - id" << endl;
+	os << "      level 3 - auth" << endl;
+	os << "      level 4 - relay" << endl;
+	os << "      level 5 - blockchain" << endl;
 	if (level==0) {
 		os << "Level " << level << " (socket) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
@@ -52,7 +58,7 @@ os << "Free Software licenced under GPL·" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	if (level==2) {
-		os << "Level " << level << " (auth) help:" << endl;
+		os << "Level " << level << " (id) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	if (level==3) {
@@ -69,7 +75,7 @@ os << "Free Software licenced under GPL·" << endl;
 		os << "y|syncd     Dumps data sync info." << endl;
 		os << "apps        List apps." << endl;
 		os << "app <id>    Enter app shell." << endl;
-		os << "add_node <address>    connects to the specified node." << endl;
+		os << "add_node <address>    Connects to the specified node." << endl;
 		os << "seeds                 Display current seed nodes." << endl;
 		os << "performances          Print performances" << endl;
 		os << "home                  Display current home directory." << endl;
@@ -77,7 +83,7 @@ os << "Free Software licenced under GPL·" << endl;
 
 	}
 	else {
-		os << "No help page for this level, sorry." << endl;
+		os << "No help page for level " << level << endl;
 	}
 
 }

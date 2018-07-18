@@ -314,9 +314,9 @@ string c::shell_command(const string& cmdline) {
 
 void c::dump_policies(ostream& os) const {
 	lock_guard<mutex> lock(mx_policies);
-	os << policies_traits::num_params << " consensuated variables:" << endl;
+	os << policies_traits::num_params << " consensus variables:" << endl;
 	for (int i=0; i<policies_traits::num_params; ++i) {
-		os << "  " << i << ". " << policies_traits::paramstr[i] << " [avg] consensuated value: " << policies[i] << " local value:" << policies_local[i] << endl;
+		os << "  " << i << ". " << policies_traits::paramstr[i] << " [avg] consensus value: " << policies[i] << " local value:" << policies_local[i] << endl;
 	}
 }
 

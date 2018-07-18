@@ -131,7 +131,6 @@ void c::add(local_deltas* ld) {
 	uint64_t work=0;
 	{
 	lock_guard<mutex> lock(mx);
-	//mg.create_consensuated_app_gut(*this);
 	for (auto& i:*ld) {
 		work+=add(i.first,i.second);
 		i.second=0;
