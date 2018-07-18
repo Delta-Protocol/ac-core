@@ -11,12 +11,21 @@ typedef us::gov::crypto::ec c;
 
 c c::instance;
 
+
+static void secperr_callback(const char* str, void* data) {
+    cerr << "libsecp256k1: " << str << endl;
+    #ifdef DEBUG
+    abort();
+    #endif
+}
+
 c::ec() {
 	ctx=secp256k1_context_create(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY); ///context to do EC operations
 	if (ctx==0) {
 		cerr << "Could not initialize EC context." << endl;
 		exit(1);
 	}
+    secp256k1_context_set_illegal_callback(ctx, secperr_callback, 0);
 }
 
 c::~ec() {
@@ -149,14 +158,15 @@ c::keys::pub_t c::keys::pub_t::from_b58(const string& s) {
 		//assert(false);
 		//exit(1);//TODO not exit
 	}
-	if (v.size()!=33) {
-		cerr << "Error reading public key, invalid length." << endl;
+//	if (v.size()!=33) {
+	if (v.empty()) {
+		//cerr << "Error reading public key, invalid length." << endl;
 		k.zero();
 		return move(k);
 		//assert(false);
 		//exit(1);//TODO not exit
 	}
-	if (unlikely(!secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], 33))) {
+	if (unlikely(!secp256k1_ec_pubkey_parse(ec::instance.ctx, &k, &v[0], v.size()))) {
 		cerr << "Error reading public key." << endl;
 		k.zero();
 		return move(k);
@@ -171,12 +181,10 @@ bool c::keys::pub_t::set_b58(const string& s) {
 		//cerr << "Error reading public key, invalid b58 encoding." << endl;
 		return false;
 	}
-/*
 	if (v.size()!=33) {
-		cerr << "Error reading public key, invalid length. " << v.size() << endl;
+//		cerr << "Error reading public key, invalid length. " << v.size() << endl;
 		return false;
 	}
-*/
 	if (unlikely(!secp256k1_ec_pubkey_parse(ec::instance.ctx, this, &v[0], 33))) {
 		//cerr << "Error reading public key, invalid der encoding." << endl;
 		valid=false;

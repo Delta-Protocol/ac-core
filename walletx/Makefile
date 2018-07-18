@@ -2,7 +2,7 @@ CPPS:=$(wildcard *.cpp)
 HS:=$(wildcard *.h)
 LIBS:=-lusgov -luswallet
 FCGILIBS:=-lfastcgipp -ljsoncpp
-CXXFLAGS:=-g -O0
+CXXFLAGS = -g -O0 -std=c++17 -DDEBUG
 
 .PHONY: all
 all: us-wallet

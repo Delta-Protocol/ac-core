@@ -1,5 +1,6 @@
 #include "daemon.h"
 #include "protocol.h"
+#include "peer_t.h"
 
 using namespace us::wallet;
 using namespace std;
@@ -8,6 +9,7 @@ typedef us::wallet::wallet_daemon c;
 
 
 c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), local_api(home,backend_host,backend_port), id(k) {
+    assert(!home.empty());
 }
 
 c::~wallet_daemon() {
@@ -169,5 +171,16 @@ bool c::process_work(socket::peer_t *c0, datagram*d) {
 		default: break;
 	}
 	return false;
+}
+
+socket::client* c::create_client(int sock) {
+    auto p=new peer_t(sock);
+    p->parent=this;
+    return p;
+}
+
+
+bool c::authorize(const pub_t& p) const {
+    return devices.authorize(p);
 }
 

@@ -13,9 +13,10 @@ using namespace std;
 
 using socket::datagram;
 
+struct peer_t;
+
 struct wallet_daemon: auth::daemon, local_api {
 	typedef auth::daemon b;
-	typedef auth::peer_t peer_t;
 	typedef b::keys keys;
 	typedef keys::pub_t pub_t;
 	typedef pub_t::hash_t hash_t;
@@ -26,6 +27,8 @@ struct wallet_daemon: auth::daemon, local_api {
 
    inline virtual const keys& get_keys() const override { return id; }
 
+   virtual socket::client* create_client(int sock) override;
+
 	const keys& id;
   //  string backend_host;
   //  uint16_t backend_port;
@@ -34,6 +37,7 @@ struct wallet_daemon: auth::daemon, local_api {
 	bool send_error_response(peer_t *c, datagram*d, const string& error);
 
 
+    bool authorize(const pub_t& p) const;
 
 };
 

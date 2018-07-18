@@ -298,26 +298,6 @@ void run_daemon(const params& p) {
 
 
 void run_local(string command, args_t& args, const params& p) {
-/*
-	if (!us::gov::input::cfg::ensure_dir(p.homedir)) {
-		cerr << "could not create " << p.homedir << endl;
-		exit(1);
-	}
-*/
-/*
-    string wallet_file=p.homedir+"/keys";
-    if (cfg::file_exists(wallet_file)) wallet_file.clear();
-
-//  p.homedir+="/gov";
-
-
-    if (!wallet_file.empty()) {
-        ofstream os(wallet_file);
-        os << conf.keys.priv;
-        cout << "created wallet at " << wallet_file << endl;
-    }
-
-*/
 	auto homedir=p.homedir+"/wallet";
 	auto gov_homedir=p.homedir+"/wallet";
 

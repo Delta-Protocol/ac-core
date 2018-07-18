@@ -120,7 +120,8 @@ inline ostream& operator << (ostream& os, const ec::keys::pub_t& k) {
 inline istream& operator >> (istream& is, ec::keys::pub_t& k) {
 	string s;
 	is >> s;
-	k.set_b58(s);
+    if (!k.set_b58(s)) is.setstate(ios_base::failbit);
+//	k.set_b58(s);
 	return is;
 }
 
@@ -132,7 +133,8 @@ inline ostream& operator << (ostream& os, const ec::keys::priv_t& k) {
 inline istream& operator >> (istream& is, ec::keys::priv_t& k) {
 	string s;
 	is >> s;
-	k.set_b58(s);
+    if (!k.set_b58(s)) is.setstate(ios_base::failbit);
+// 	k.set_b58(s);
 	return is;
 }
 

@@ -16,12 +16,7 @@ c::daemon() {
 
 c::~daemon() {
 }
-/*
-socket::client* c::create_client(int) {
-	cerr << "this function have to ve overriden" << endl;
-	exit(1);
-}
-*/
+
 bool c::process_work(socket::peer_t *p, datagram*d) {
     if (b::process_work(p,d)) return true;
     return static_cast<peer_t*>(p)->process_work(d);

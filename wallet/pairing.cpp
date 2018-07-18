@@ -8,12 +8,18 @@ using namespace us::wallet;
 string c::device::default_name("my device");
 string c::devices_t::not_found("not found");
 
-
-c::devices_t::devices_t(const string& home) {
-    file=home+"/d";
-    load();
+c::pairing(const string& homedir):devices(homedir) {
+//cout << "home " << homedir << endl;
 }
 
+c::~pairing() {
+}
+
+c::devices_t::devices_t(const string& home): home(home) {
+    assert(!home.empty());
+    //file=home+"/d";
+    load();
+}
 
 void c::devices_t::load() {
 	lock_guard<mutex> lock(mx);
@@ -29,10 +35,10 @@ void c::devices_t::load_() {
     clear();
     ifstream is(home+"/d");
     while (is.good()) {
-        device d=device::from_stream(is);
-	if (d.pub.valid) {
-        	emplace(d.pub.hash(),move(d));
-	}
+        auto d=device::from_stream(is);
+        if (!d.first) break;
+	    if (!d.second.pub.valid) break;
+        emplace(d.second.pub.hash(),d.second);
     }
 }
 
@@ -42,26 +48,49 @@ void c::devices_t::save_() const {
         i.second.to_stream(os);
         os << ' ';
     }
-    cout << "saved devices $home/d" << endl;
+    cout << "saved devices " << (home+"/d") << endl;
 }
 
 void c::device::to_stream(ostream&os) const {
     os << pub << ' ' << name;
 }
 
-c::device c::device::from_stream(istream&is) {
-    device d;
-    pub_t pk;
-    is >> d.pub;
-    is >> d.name;
+pair<bool,c::device> c::device::from_stream(istream&is) {
+    pair<bool,device> d;
+/*
+string x;
+is >> x;
+cout << x << endl;
+assert(false);
+*/
+    //pub_t pk;
+    is >> d.second.pub;
+    is >> d.second.name;
+    d.first=is.good();
     return move(d);
 }
 
 void c::device::dump(ostream& os) const {
-    os << name << ' ' << pub << endl;
+    os << pub << ' ' << name << endl;
 }
 
 #include <us/gov/auth/peer_t.h>
+
+bool c::devices_t::authorize(const pub_t& p) const {
+    lock_guard<mutex> lock(mx);
+    if (empty()) {
+        cout << "authorizing first device " << p << endl;
+        const_cast<c::devices_t&>(*this).emplace(p.hash(),device(p,"First_seen_device"));
+        save_();
+        return true;
+    }
+    if (find(p.hash())!=end()) {
+        cout << "found in the entry list  " << p << endl;
+        return true;
+    }
+    cout << "not authorizing " << p << endl;
+    return false;
+}
 
 string c::devices_t::pair_request() { //return a random message to sign by the requester
 	return us::gov::auth::peer_t::get_random_message();

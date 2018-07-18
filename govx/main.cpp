@@ -109,6 +109,10 @@ struct shell_client: us::gov::auth::peer_t {
         virtual const keys& get_keys() const override {
 		return k;
 	}
+    virtual bool authorize(const pubkey_t& p) const override {
+        return true;
+    }
+
 	const keys& k;
 };
 

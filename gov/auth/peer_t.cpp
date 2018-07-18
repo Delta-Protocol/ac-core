@@ -16,12 +16,15 @@ void c::verification_completed() {
 	if (authorize(pubkey)) {
 		stage=authorized;
 	}
+    else {
+        disconnect();
+    }
 }
-
+/*
 bool c::authorize(const pubkey_t& p) const {
-	return true;
+	return false;
 }
-
+*/
 void c::dump(ostream& os) const {
     os << this << ' ' << pubkey << "- " << stagestr[stage] << endl;
 }

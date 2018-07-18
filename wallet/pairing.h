@@ -13,20 +13,20 @@ struct pairing {
 	typedef gov::crypto::ec::keys::pub_t pub_t;
 	typedef pub_t::hash_t hash_t;
 
-    pairing(const string& homedir):devices(homedir) {
-    }
-    virtual ~pairing() {
-    }
+    pairing(const string& homedir);
+    virtual ~pairing();
 
     struct device {
         device() {
         }
         device(const pub_t& pub, const string& name): pub(pub), name(name) {
         }
+        device(const device& other): pub(other.pub), name(other.name) {
+        }
         static string default_name;
 
         void to_stream(ostream&) const;
-        static device from_stream(istream&);
+        static pair<bool,device> from_stream(istream&);
         void dump(ostream& os) const;
 
         string name;
@@ -45,6 +45,8 @@ struct pairing {
         string file;
         mutable mutex mx;
         string home;
+
+        bool authorize(const pub_t& p) const;
 
         void dump(ostream& os) const;
 

@@ -1,5 +1,7 @@
 #https://gist.github.com/xuhdev/1873316
 
+CXXFLAGS = -g -O0 -std=c++17 -DDEBUG
+
 .PHONY: all
 all: us-gov
 

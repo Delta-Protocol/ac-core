@@ -3,7 +3,7 @@ CPPS := $(wildcard *.cpp)
 OBJS := $(patsubst %.cpp, %.o, $(CPPS))
 HS := $(wildcard *.h)
 INC := ../../..
-CXXFLAGS = -fPIC -O0 -g -std=c++17
+CXXFLAGS = -fPIC -O0 -g -std=c++17 -DDEBUG
 
 ${OBJ}.o: ${OBJS}
 	ld -r -o ${OBJ}.o ${OBJS}

@@ -45,3 +45,7 @@ const keys& c::get_keys() const {
     return static_cast<daemon::networking*>(parent)->get_keys();
 }
 
+bool c::authorize(const pubkey_t&) const { //all identified nodes are authorized
+    return true;
+}
+

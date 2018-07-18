@@ -35,6 +35,8 @@ struct rpc_api:api, gov::auth::peer_t {
 
     inline virtual const keys& get_keys() const override { return id; }
 
+    virtual bool authorize(const pubkey_t& p) const override { return true; }
+
 private:
 	void ask(int service, ostream&os);
 	void ask(int service, const string& args, ostream&os);
