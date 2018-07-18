@@ -39,10 +39,10 @@ os << "2.2. submit changes" << endl;
 
 os << "" << endl;
 */
-os << "This is Free Software licenced under GNU Affero General Public Licence (AGPL). " << endl;
+os << "This is Free Software licensed under GNU Affero General Public Licence (AGPL). " << endl;
 os << "Obtain a copy of the licence here: https://www.gnu.org/licenses/agpl.txt" << endl;
 
-	os << "us.gov ; Introspective Shell" << endl;
+	os << "us.gov ; Introspective Shell. Node id " << d.id.pub << endl;
 	os << "h              Shows this help." << endl;
 	os << "l, level [int]    Change level. Current level is " << level << endl;
 	os << "      " << (level==0?'>':' ') << "level 0 - socket" << endl;

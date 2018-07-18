@@ -5,10 +5,14 @@
 #include <us/gov/socket/datagram.h>
 #include <us/gov/blockchain/protocol.h>
 #include <us/gov/input.h>
+#include <us/gov/blockchain/protocol.h>
+#include <us/gov/auth/peer_t.h>
 
 using namespace us::gov;
 using namespace std;
+using namespace std::chrono_literals;
 using socket::datagram;
+using us::gov::input::cfg_id;
 
 void sig_handler(int s) {
     cout << "main: Caught signal " << s << endl;
@@ -17,8 +21,6 @@ void sig_handler(int s) {
     signal(SIGTERM,SIG_DFL);
     signal(SIGPIPE,SIG_DFL);
 }
-
-using namespace std::chrono_literals;
 
 struct params {
 	params() {
@@ -52,17 +54,18 @@ struct params {
     string sysophost{"127.0.0.1"};
 };
 
-void help(const params& p) {
-	cout << "us-govd [options]" << endl;
-	cout << "Options are:" << endl;
-	cout << "  -d            Run daemon " << endl;
-	cout << "  -ds           Run daemon with sysop shell. " << boolalpha << p.shell << endl;
-	cout << "  -p <port>     Listening port. " << p.port << endl;
-	cout << "  -e <edges>    Max num neightbours " << p.edges << endl;
-	cout << "  -home <homedir>   Set home directory. " << p.homedir << endl;
-	cout << "  -host <address>   daemon host. " << p.sysophost << endl;
-	cout << "  -h            Print this help and exit " << endl;
+void help(const params& p, ostream& os) {
+	os << "us-govd [options]" << endl;
+	os << "Options are:" << endl;
+	os << "  -d            Run daemon " << endl;
+	os << "  -ds           Run daemon with sysop shell. " << boolalpha << p.shell << endl;
+	os << "  -p <port>     Listening port. " << p.port << endl;
+	os << "  -e <edges>    Max num neightbours " << p.edges << endl;
+	os << "  -home <homedir>   Set home directory. " << p.homedir << endl;
+	os << "  -host <address>   daemon host. " << p.sysophost << endl;
+	os << "  -h            Print this help and exit " << endl;
 }
+
 
 using us::gov::input::args_t;
 
@@ -90,7 +93,7 @@ string parse_options(args_t& args, params& p) {
 			p.sysophost=args.next<string>();
 		}
 		else if (cmd=="-h") {
-			help(p);
+			help(p,cout);
 			exit(0);
 		}
         else {
@@ -99,17 +102,6 @@ string parse_options(args_t& args, params& p) {
     }
     return cmd;
 }
-
-
-#include <string.h>
-#include <iomanip>
-#include <fstream>
-#include <us/gov/input.h>
-
-using us::gov::input::cfg_id;
-
-#include <us/gov/blockchain/protocol.h>
-#include <us/gov/auth/peer_t.h>
 
 struct shell_client: us::gov::auth::peer_t {
 	shell_client(const keys& k): k(k) {
@@ -141,12 +133,16 @@ void open_shell(const params&p) {
     {
         auto r=peer.recv();
         if (!r.first.empty()) {
+            assert(r.second==0);
             p.dump(cerr);
             cerr << r.first << endl;
             cerr << "us.gov is rejecting sysop connections. See -ds option." << endl;
             return;
         }
-        if (r.second->parse_string()!="go ahead") {
+        assert(r.second!=0);
+        auto s=r.second->parse_string();
+        delete r.second;
+        if (s!="go ahead") {
             p.dump(cerr);
             cerr << "unknown protocol" << endl;
             return;
@@ -210,4 +206,3 @@ int main(int argc, char** argv) {
 	}
 	return 0;
 }
-

@@ -44,7 +44,7 @@ c c::load(const string& home) {
     //seed nodes 
         vector<string> addrs;
                 string seeds_file=abs_file(home,"nodes.manual");
-                cout << "reading " << seeds_file << endl;
+  //              cout << "reading " << seeds_file << endl;
                 ifstream f(seeds_file);
                 while(f.good()) {
                         string addr;
@@ -52,7 +52,7 @@ c c::load(const string& home) {
                         if (addr.empty()) continue;
                         addrs.push_back(addr);
                 }
-                cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
+//                cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
 
             return cfg(x.keys.priv,x.home,move(addrs));
 }
