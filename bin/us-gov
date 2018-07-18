@@ -1,0 +1,4 @@
+#!/bin/sh
+LD_LIBRARY_PATH=gov:/usr/lib govx/us-gov $@
+#LD_LIBRARY_PATH=gov govx/us-gov $@
+

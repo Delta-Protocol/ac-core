@@ -16,7 +16,7 @@ debug: all
 release: export CXXFLAGS:=${RELEASEFLAGS}
 release: all
 
-all: gov/libusgov.so wallet/libuswallet.so govd/us-gov walletd/us-wallet
+all: gov/libusgov.so wallet/libuswallet.so govx/us-gov walletx/us-wallet
 
 wallet-debug: export CXXFLAGS:=${DEBUGFLAGS}
 wallet-debug: wallet
@@ -24,14 +24,14 @@ wallet-debug: wallet
 wallet-release: export CXXFLAGS:=${RELEASEFLAGS}
 wallet-release: wallet
 
-gov: govd/us-gov
-wallet: walletd/us-wallet
+gov: govx/us-gov
+wallet: walletx/us-wallet
 
 install: release
 	install gov/libusgov.so ${PREFIX}/lib
 	install wallet/libuswallet.so ${PREFIX}/lib
-	install govd/us-gov ${PREFIX}/bin
-	install walletd/us-wallet ${PREFIX}/bin
+	install govx/us-gov ${PREFIX}/bin
+	install walletx/us-wallet ${PREFIX}/bin
 	install etc/init.d/us-wallet /etc/init.d/
 	install etc/init.d/us-gov /etc/init.d/
 	ldconfig
@@ -47,15 +47,15 @@ install-nginx:
 gov/libusgov.so:
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C gov;
 
-govd/us-gov: gov/libusgov.so
-	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C govd;
+govx/us-gov: gov/libusgov.so
+	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C govx;
 
 
 wallet/libuswallet.so: gov/libusgov.so
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C wallet;
 
-walletd/us-wallet: wallet/libuswallet.so
-	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C walletd ;
+walletx/us-wallet: wallet/libuswallet.so
+	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C walletx ;
 
 .PHONY: all
 .PHONY: wallet
@@ -65,6 +65,6 @@ walletd/us-wallet: wallet/libuswallet.so
 
 clean:
 	$(MAKE) clean -C gov; \
-	$(MAKE) clean -C govd; \
+	$(MAKE) clean -C govx; \
 	$(MAKE) clean -C wallet; \
-	$(MAKE) clean -C walletd;
+	$(MAKE) clean -C walletx;

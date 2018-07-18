@@ -1,4 +1,4 @@
 #!/bin/sh
-#LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" gdb --args walletd/us-wallet $@
-LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" walletd/us-wallet $@
+#LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" gdb --args walletx/us-wallet $@
+LD_LIBRARY_PATH="gov:wallet:/usr/local/lib" walletx/us-wallet $@
 
