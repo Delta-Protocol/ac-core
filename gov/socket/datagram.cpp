@@ -1,3 +1,4 @@
+/** @file */
 #include "datagram.h"
 #include <string>
 #include <iostream>
@@ -27,6 +28,15 @@ typedef us::gov::socket::datagram c;
 constexpr size_t c::h;
 constexpr size_t c::maxsize;
 
+struct kk {
+int a;
+};
+
+
+/// \brief  Main function
+/// \param  argc An integer argument count of the command line arguments
+/// \param  argv An argument vector of the command line arguments
+/// \return an integer 0 upon exit success
 c::datagram(): dend(0) {
 }
 
@@ -212,4 +222,7 @@ os << "payload as str " << parse_string() << endl;
 os << "completed " << completed() << endl;
 
 }
+
+
+
 

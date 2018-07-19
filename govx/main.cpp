@@ -212,6 +212,10 @@ void sysop_localhost_allow(const params& p) {
 }
 
 
+/// \brief  Main function
+/// \param  argc An integer argument count of the command line arguments
+/// \param  argv An argument vector of the command line arguments
+/// \return an integer 0 upon exit success
 int main(int argc, char** argv) {
     args_t args(argc,argv);
     params p;
@@ -236,3 +240,10 @@ int main(int argc, char** argv) {
 	}
 	return 0;
 }
+
+
+
+
+
+/** @file */    
+//Doxygen stupidity, thanks anyway

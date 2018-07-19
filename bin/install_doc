@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /var/www/html
+rm /var/www/html/us -r
+cp /root/us/doc/html us -R
+

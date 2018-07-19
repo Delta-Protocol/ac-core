@@ -1,4 +1,4 @@
-#include <us/gov/cash.h>
+##include <us/gov/cash.h>
 #include <us/gov/crypto.h>
 #include <string>
 #include <chrono>
@@ -391,6 +391,10 @@ void run_local(string command, args_t& args, const params& p) {
 
 
 
+/// \brief  Main function
+/// \param  argc An integer argument count of the command line arguments
+/// \param  argv An argument vector of the command line arguments
+/// \return an integer 0 upon exit success
 int main(int argc, char** argv) {
 	args_t args(argc,argv);
 	params p;
@@ -414,4 +418,16 @@ int main(int argc, char** argv) {
     run_local(command,args,p);
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+/** @file */
+//Doxygen stupidity, thanks anyway
 
