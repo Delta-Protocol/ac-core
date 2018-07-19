@@ -76,7 +76,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 
 void c::add_peers(pub_t& a) {
 cout << "add peers" << endl;
-	auto n=edges-a.asize()+1;
+	int n=edges-a.asize()+1; //must be signed
 	unordered_set<string> exclude;
 	for (auto i:a) if (i!=0) exclude.emplace(i->addr);
 	while(n>0) {
