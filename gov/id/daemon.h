@@ -1,17 +1,19 @@
 #ifndef USGOV_d503861e22c19bdbfae6ed39978276fcf121cce8fb47df51d65ca7fb26ff55e9
 #define USGOV_d503861e22c19bdbfae6ed39978276fcf121cce8fb47df51d65ca7fb26ff55e9
 
-#include <us/gov/peer.h>
+#include <us/gov/socket/daemon.h>
 #include <us/gov/crypto.h>
-#include <us/gov/socket.h>
+//#include <us/gov/peer.h>
 
 namespace us { namespace gov {
 namespace id {
 
 using namespace std;
 
-struct daemon:peer::daemon {
-	typedef peer::daemon b;
+//struct daemon:peer::daemon {
+struct daemon:socket::daemon {
+//	typedef peer::daemon b;
+	typedef socket::daemon b;
     typedef crypto::ec::keys keys;
 
 	using datagram=socket::datagram;

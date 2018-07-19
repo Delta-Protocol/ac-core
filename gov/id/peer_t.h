@@ -1,7 +1,8 @@
 #ifndef USGOV_adb8d14e20731e001ab4e0eb7742ff5881fc9a7fabb4666497868c91f9a18570
 #define USGOV_adb8d14e20731e001ab4e0eb7742ff5881fc9a7fabb4666497868c91f9a18570
 
-#include <us/gov/peer/peer_t.h>
+//#include <us/gov/peer/peer_t.h>
+#include <us/gov/socket/peer_t.h>
 #include <us/gov/crypto/crypto.h>
 #include <us/gov/crypto/hash.h>
 
@@ -11,14 +12,16 @@ namespace id {
 	using namespace std;
 
 	struct daemon;
-	struct peer_t:peer::peer_t {
-		typedef peer::peer_t b;
+//	struct peer_t:peer::peer_t {
+	struct peer_t:socket::peer_t {
+//		typedef peer::peer_t b;
+		typedef socket::peer_t b;
 		typedef crypto::ec::keys keys;
 		typedef keys::pub_t pubkey_t;
 		typedef pubkey_t::hash_t pubkeyh_t;
 
 		typedef keys::pub_t pub_t;
-		using datagram=b::datagram;
+		using datagram=socket::datagram;
 
 		enum stage_t {
 			anonymous=0,

@@ -14,13 +14,13 @@ c::daemon(uint16_t port, uint16_t edges): edges(edges), b(port,edges) {
 
 c::~daemon() {
 }
-
+/*
 socket::client* c::create_client(int sock) {
 	auto p=new peer_t(sock);
 	p->parent=this;
 	return p;
 }
-
+*/
 void c::daemon_timer() { // network mutation
     cout << "Connecting to new Neighbours" << endl;
 	pub_t p=adjust_peer_number();

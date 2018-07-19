@@ -46,9 +46,9 @@ os << "Obtain a copy of the licence here: https://www.gnu.org/licenses/agpl.txt"
 	os << "h              Shows this help." << endl;
 	os << "l, level [int]    Change level. Current level is " << level << endl;
 	os << "      " << (level==0?'>':' ') << "level 0 - socket" << endl;
-	os << "      " << (level==1?'>':' ') << "level 1 - peer" << endl;
-	os << "      " << (level==2?'>':' ') << "level 2 - id" << endl;
-	os << "      " << (level==3?'>':' ') << "level 3 - auth" << endl;
+	os << "      " << (level==1?'>':' ') << "level 1 - id" << endl;
+	os << "      " << (level==2?'>':' ') << "level 2 - auth" << endl;
+	os << "      " << (level==3?'>':' ') << "level 3 - peer" << endl;
 	os << "      " << (level==4?'>':' ') << "level 4 - relay" << endl;
 	os << "      " << (level==5?'>':' ') << "level 5 - dfs" << endl;
 	os << "      " << (level==6?'>':' ') << "level 6 - blockchain" << endl;
@@ -57,15 +57,15 @@ os << "Obtain a copy of the licence here: https://www.gnu.org/licenses/agpl.txt"
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	else if (level==1) {
-		os << "Level " << level << " (peer) help:" << endl;
-		os << "s|server    Dumps daemon info." << endl;
-	}
-	else if (level==2) {
 		os << "Level " << level << " (id) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
-	else if (level==3) {
+	else if (level==2) {
 		os << "Level " << level << " (auth) help:" << endl;
+		os << "s|server    Dumps daemon info." << endl;
+	}
+	else if (level==3) {
+		os << "Level " << level << " (peer) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	else if (level==4) {
@@ -128,11 +128,11 @@ string c::command(const string& cmdline) {
 		case 0:
 			dynamic_cast<const us::gov::socket::server&>(d.peerd).dump(os); break;
 		case 1:
-			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os); break;
-		case 2:
 			dynamic_cast<const us::gov::id::daemon&>(d.peerd).dump(os); break;
-		case 3:
+		case 2:
 			dynamic_cast<const us::gov::auth::daemon&>(d.peerd).dump(os); break;
+		case 3:
+			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os); break;
 		case 4:
 			dynamic_cast<const us::gov::relay::daemon&>(d.peerd).dump(os); break;
 		case 5:

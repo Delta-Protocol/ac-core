@@ -1,6 +1,7 @@
 #include "peer_t.h"
 #include "protocol.h"
 #include "daemon.h"
+#include <sstream>
 
 using namespace us::gov::id;
 using namespace std;

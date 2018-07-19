@@ -1,7 +1,8 @@
 #ifndef USGOV_56c4ea14fe04c13aabcd1dd5ef4f05856a66f6515dcb1855f3046da43eea737a
 #define USGOV_56c4ea14fe04c13aabcd1dd5ef4f05856a66f6515dcb1855f3046da43eea737a
 
-#include <us/gov/auth/daemon.h>
+//#include <us/gov/auth/daemon.h>
+#include <us/gov/peer/daemon.h>
 #include "peer_t.h"
 #include <unordered_set>
 #include <iostream>
@@ -12,8 +13,10 @@ namespace relay {
 using namespace std;
 
 	using socket::datagram;
-	struct daemon : auth::daemon {
-		typedef auth::daemon b;
+//	struct daemon : auth::daemon {
+	struct daemon:peer::daemon {
+//		typedef auth::daemon b;
+		typedef peer::daemon b;
 		daemon();
  		daemon(uint16_t port, uint16_t edges);
 		virtual ~daemon();

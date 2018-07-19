@@ -1,10 +1,11 @@
 #ifndef USGOV_bf993116c1d89300316c0dd4fa2ef165d5b9128da89d33c44cfe50e95622fce8
 #define USGOV_bf993116c1d89300316c0dd4fa2ef165d5b9128da89d33c44cfe50e95622fce8
 
-#include <us/gov/socket/daemon.h>
+//#include <us/gov/socket/daemon.h>
+#include <us/gov/auth/daemon.h>
 #include <vector>
 #include <thread>
-#include <condition_variable>
+//#include <condition_variable>
 #include <iostream>
 #include <random>
 #include <algorithm>
@@ -19,12 +20,14 @@ namespace peer {
 
 	using socket::datagram;
 
-	struct daemon: socket::daemon {
-		typedef socket::daemon b;
+//	struct daemon: socket::daemon {
+	struct daemon: auth::daemon {
+//		typedef socket::daemon b;
+		typedef auth::daemon b;
 		daemon();
 		daemon(uint16_t port, uint16_t edges);
 		virtual ~daemon();
-        	virtual socket::client* create_client(int sock) override;
+//        	virtual socket::client* create_client(int sock) override;
 
 		virtual void daemon_timer() override;
 
