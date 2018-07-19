@@ -20,7 +20,7 @@ struct api {
     virtual ~api() { }
 
 	virtual void balance(bool detailed, ostream&)=0;
-	virtual void dump(ostream&)=0;
+	virtual void list(bool showpriv, ostream&)=0;
 
 	virtual void new_address(ostream&)=0;
 	virtual void add_address(const priv_t&, ostream&)=0;

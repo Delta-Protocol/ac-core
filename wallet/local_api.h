@@ -17,7 +17,8 @@ struct local_api:api, wallet, pairing {
 	virtual ~local_api();
 
 	virtual void balance(bool detailed, ostream&os) override;
-	virtual void dump(ostream&os) override;
+    virtual void list(bool showpriv, ostream&) override;
+
 	virtual void new_address(ostream&os) override;
     using wallet::add_address;
 	virtual void add_address(const priv_t& privkey, ostream&os) override;

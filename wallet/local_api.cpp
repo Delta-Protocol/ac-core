@@ -41,17 +41,16 @@ void c::balance(bool detailed, ostream&os) {
 	}
 }
 
-void c::dump(ostream&os) {
-	wallet::dump(os);
+void c::list(bool showpriv, ostream& os) {     
+	wallet::list(showpriv,os);
 }
 
 void c::new_address(ostream&os) {
-	os << wallet::new_address() << endl;
+	os << wallet::new_address();
 }
 
 void c::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
-	auto a=wallet::add_address(privkey);
-	os << a;
+	os << wallet::add_address(privkey);
 }
 
 void c::tx_make_p2pkh(const api::tx_make_p2pkh_input&i, ostream& os) {

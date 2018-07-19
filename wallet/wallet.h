@@ -81,6 +81,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
     pair<string,cash::tx> tx_sign(socket::peer_t&, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
 
 	void dump(ostream& os) const;
+	void list(bool showpriv, ostream& os) const;
 	accounts_query_t data;
 	string datapath;
 	mutable bool need_save{false};

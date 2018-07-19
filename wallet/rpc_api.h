@@ -19,7 +19,7 @@ struct rpc_api:api, gov::auth::peer_t {
 	virtual ~rpc_api();
 
 	virtual void balance(bool detailed, ostream&os) override;
-	virtual void dump(ostream&os) override;
+    virtual void list(bool showpriv, ostream&) override;
 	virtual void new_address(ostream&os) override;
 	virtual void add_address(const priv_t&, ostream&os) override;
 	virtual void tx_make_p2pkh(const tx_make_p2pkh_input&, ostream&os) override;

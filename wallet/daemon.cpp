@@ -75,9 +75,10 @@ bool c::process_work(socket::peer_t *c0, datagram*d) {
 			return send_response(c,d,ans.str());
 		}
 		break;
-		case us::wallet::protocol::dump_query: {
+		case us::wallet::protocol::list_query: {
+			bool showpriv=d->parse_string()=="1";
 			ostringstream ans;
-			local_api::dump(ans);
+			local_api::list(showpriv,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;

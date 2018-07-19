@@ -10,7 +10,7 @@ namespace protocol {
 
 
 	static constexpr uint16_t balance_query{wallet_base+1};
-	static constexpr uint16_t dump_query{wallet_base+2};
+	static constexpr uint16_t list_query{wallet_base+2};
 	static constexpr uint16_t new_address_query{wallet_base+3};
 	static constexpr uint16_t add_address_query{wallet_base+4};
 	static constexpr uint16_t tx_make_p2pkh_query{wallet_base+5};

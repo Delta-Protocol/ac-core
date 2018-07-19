@@ -68,8 +68,8 @@ void c::balance(bool detailed, ostream&os) {
 //}
 }
 
-void c::dump(ostream&os) {
-	ask(us::wallet::protocol::dump_query,os);
+void c::list(bool showpriv, ostream& os) {
+	ask(us::wallet::protocol::list_query,showpriv?"1":"0",os);
 }
 
 void c::new_address(ostream&os) {

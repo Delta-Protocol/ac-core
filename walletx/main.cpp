@@ -95,7 +95,7 @@ void help(const params& p, ostream& os=cout) {
     os << "commands are:" << endl;
     os << "cash:" << endl;
 
-	os << "  balance [0|1]          Displays the spendable amount." << endl;
+	os << "  balance [detailed=0|1]          Displays the spendable amount. Default value for detailed is 0." << endl;
 	os << "  transfer <dest account> <receive amount>      Orders a transfer to <dest account> for an amount. Fees are paid by the sender." << endl;
     if (p.advanced) {
 	  os << "  tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
@@ -111,7 +111,7 @@ void help(const params& p, ostream& os=cout) {
     if (p.advanced) {
 	  os << "  address add <privkey>  Imports a given private key in the wallet" << endl;
     }
-	os << "  list                   Lists the keys/addresses managed by wallet" << endl;
+	os << "  list [show_priv_keys=0|1]   Lists all keys. Default value for show_priv_keys is 0." << endl;
     if (p.advanced) {
 	  os << "  gen_keys               Generates a key pair without adding them to the wallet." << endl;
 	  os << "  priv_key <private key> Gives information about the given private key." << endl;
@@ -329,20 +329,18 @@ void run_local(string command, args_t& args, const params& p) {
 	else if (command=="address") {
 		command=args.next<string>();
 		if (command=="new") {
-            cout << "Address: ";
 			wapi.new_address(os);
 		}
 		else if (command=="add") {
 			crypto::ec::keys::priv_t k=args.next<crypto::ec::keys::priv_t>();
-            cout << "Address: ";
 			wapi.add_address(k,os);
 		}
 		else {
 			help(p);
 		}
 	}
-	else if (command=="dump") {
-		wapi.dump(os);
+	else if (command=="list") {
+		wapi.list(args.next<bool>(false),os);
 	} 
 	else if (command=="balance") {
 		wapi.balance(args.next<bool>(false),os);
