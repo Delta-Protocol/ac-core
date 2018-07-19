@@ -19,12 +19,10 @@
 #include <atomic>
 #include "tx.h"
 
-
 namespace us { namespace gov {
 namespace cash {
 	using namespace std;
 	using socket::datagram;
-	//using blockchain::signature;
 	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using crypto::ec;
@@ -37,12 +35,7 @@ namespace cash {
 	typedef ripemd160 hasher_t;
 	typedef hasher_t::value_type hash_t;
 
-//	typedef uint32_t spend_code_t;
-//	static constexpr spend_code_t no_spend_code{0};
-//	static constexpr spend_code_t min_spend_code{1};
 	static const hash_t min_locking_program(10000);
-
-
 
 	struct app:blockchain::runnable_app {
 		app();
@@ -117,13 +110,9 @@ namespace cash {
 			virtual void end_merge() override;
 			virtual void to_stream(ostream& os) const override;
 			static delta* from_stream(istream& is);
-	//		map<pubkey,address> to_hall; //pubkey
-	//		array<double,policies_traits::num_params> policies;
 			local_delta g;
 			blockchain::majority_merger<local_delta>* m;
-			//cash_t fees{0};
 		};
-
 
 		constexpr static const char* name={"cash"};
 		virtual string get_name() const override { return name; }
@@ -192,17 +181,12 @@ namespace cash {
 			db_t();
 			db_t(db_t&& other);
 			~db_t();
-			//bool move(const string& src, const string& dst, uint64_t amount);
-			//bool move(const tx::end_t& srcs, const tx::end_t& dsts);
 			bool add_(const hash_t&, const cash_t& amount);
-//			bool withdraw_(unsigned int seed, const spend_code_t& sc, const hash_t& k, const cash_t& amount, accounts_t::undo_t&);
-			bool withdraw_(const hash_t& k, const cash_t& amount/*, accounts_t::undo_t&*/);
+			bool withdraw_(const hash_t& k, const cash_t& amount);
 
 			void dump(ostream& os) const;
-			//void clear();
 			cash_t get_newcash();
 			void clear();
-			//typedef unordered_map<string,cash_t> accounts_t;
 			void to_stream(ostream&) const;
 			static db_t from_stream(istream&);
 
@@ -216,7 +200,6 @@ namespace cash {
 
 		virtual void dbhash(hasher_t&) const override;
 		virtual void clear() override;
-
 
 		struct policies_t: blockchain::policies_t<double, policies_traits> {
 			typedef blockchain::policies_t<double, policies_traits> b;
@@ -235,30 +218,7 @@ namespace cash {
 
 	};
 
-
-/*
-//activities in bitcoin layer
-
-//1.
-  collect tx in tx_pool
-
-//2. cycle of T=1 min
-  wait for signal blockchain_ready
-
-  //segment 1 - network exchange of nblocks
-  new nblock_pool
-  copy tx_pool, build my nblock
-  send my nblock
-  receive nblocks, add them to nblock_pool
-
-  //segment 2 - local block settle
-  nblock_pool::get_block() based on head
-  add it to my local blockchain
-*/
 }}
 }
 
-
-
 #endif
-

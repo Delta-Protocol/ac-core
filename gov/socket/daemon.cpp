@@ -41,8 +41,8 @@ void c::run() {
 //	unique_lock<mutex> lock(mx);
 	while(!thread_::_this.terminated) {
 //		clients.read_sockets();
-		//daemon_timer();
-cout << "MUTATION DISABLED" << endl;
+		daemon_timer();
+//cout << "MUTATION DISABLED" << endl;
 //		_ready=false;
 //		cv.wait_for(lock,chrono::seconds(30),[&]{return _ready.load();});  //TODO not every 30 secs but at some safe point in the cycle
 		thread_::_this.sleep_for(chrono::seconds(30));  //TODO not every 30 secs but at some safe point in the cycle

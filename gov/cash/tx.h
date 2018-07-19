@@ -10,7 +10,6 @@
 #include <unordered_set>
 #include <us/gov/signal_handler.h>
 #include <us/gov/crypto/crypto.h>
-//#include <blockchain/block.h>
 #include "protocol.h"
 #include <chrono>
 #include <cassert>
@@ -20,7 +19,6 @@ namespace us { namespace gov {
 namespace cash {
 	using namespace std;
 	using socket::datagram;
-//	using blockchain::signature;
 	using blockchain::local_deltas;
 	using crypto::ripemd160;
 	using crypto::ec;
@@ -54,17 +52,13 @@ namespace cash {
 			void write_pretty(ostream& os) const;
 			static input_t read(istream&);
 
-
 			hash_t address;
-			//spend_code_t spend_code;
 			cash_t prev_balance;
-			cash_t amount;//rename->delta_cash;
+			cash_t amount;
 
 			string locking_program_input;
-
-			//bool verify() const;
-			//string message_to_sign() const;
 		};
+
 		struct output_t {
 			output_t() {}
 			output_t(const hash_t& address, const cash_t& amount, const hash_t& locking_program): address(address), amount(amount), locking_program(locking_program) {
@@ -78,7 +72,9 @@ namespace cash {
 			cash_t amount;
 			hash_t locking_program;
 		};
+
 		typedef unsigned char sigcodes_t;
+
 		struct inputs_t:vector<input_t> {
 			void write_sigmsg(ec::sigmsg_hasher_t&, size_t input_index, sigcode_t sh) const;
 			void write(ostream&) const;
@@ -92,11 +88,11 @@ namespace cash {
 			void write_pretty(ostream& os) const;
 			void read(istream&);
 		};
+
 		static inline sigcodes_t combine(sigcode_t i, sigcode_t o) { return (i<<4)|o; }
 		static inline sigcode_t sigcode_input(sigcodes_t i) { return (sigcode_t)(i>>4); }
 		static inline sigcode_t sigcode_output(sigcodes_t i) { return (sigcode_t)(i&0x0f); }
 		static bool same_sigmsg_across_inputs(sigcodes_t i) { return sigcode_input(i)==sigcode_this || sigcode_output(i)==sigcode_this; }
-
 
 		bool add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount/*, const spend_code_t& spend_code*/);
 		bool add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount, const string& locking_program_input);
@@ -118,13 +114,11 @@ namespace cash {
 		inputs_t inputs;
 		outputs_t outputs;
 		blockchain::diff::hash_t parent_block;
-
 	};
-
 }
 
 static ostream& operator << (ostream&os, const cash::tx& t) {
-	os << t.to_b58() << endl;
+	os << t.to_b58();
 	return os;
 }
 

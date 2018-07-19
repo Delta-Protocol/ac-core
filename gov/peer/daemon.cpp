@@ -22,16 +22,11 @@ socket::client* c::create_client(int sock) {
 }
 
 void c::daemon_timer() { // network mutation
+    cout << "Connecting to new Neighbours" << endl;
 	pub_t p=adjust_peer_number();
 	check_latency(p);
+}
 
-//	auto nis=in_service();
-//	report_in_service(nis);
-}
-/*
-void c::report_in_service(vector<peer_t*>&) {
-}
-*/
 void c::check_latency(const pub_t& a) {
 	for (auto&i:a) {
 		if (i->stage==peer_t::connected) {
@@ -87,7 +82,6 @@ cout << "add peers" << endl;
 	while(n>0) {
 		string addr=get_random_peer(exclude);
 		if (!addr.empty()) {
-//cout << "addr " << addr << endl;
 			if (exclude.find(addr)==exclude.end()) {
 				exclude.emplace(addr);
 				auto* p=create_client(0);
@@ -197,6 +191,4 @@ void c::dump(ostream& os) const {
 	os << "Thread pool size: " << pool->size() << endl;
 	os << "Active: " << endl;
 	active().dump(os);
-
 }
-

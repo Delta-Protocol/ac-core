@@ -96,7 +96,7 @@ void help(const params& p, ostream& os=cout) {
     os << "cash:" << endl;
 
 	os << "  balance [detailed=0|1]          Displays the spendable amount. Default value for detailed is 0." << endl;
-	os << "  transfer <dest account> <receive amount>      Orders a transfer to <dest account> for an amount. Fees are paid by the sender." << endl;
+	os << "  transfer <dest account> <receive amount>      Order a cash transfer to <dest account>. Fees are paid by you, the sender." << endl;
     if (p.advanced) {
 	  os << "  tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
 	  os << "  tx decode <tx_b58>" << endl;
@@ -315,7 +315,7 @@ void run_local(string command, args_t& args, const params& p) {
     ostringstream os;
 
 	if (command=="transfer") { //shortcut to tx fn
-		command=="tx";
+		command="tx";
 		--args.n; //repeat command transfer
 	}
 
