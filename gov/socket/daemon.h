@@ -3,6 +3,7 @@
 
 #include "server.h"
 #include "ctpl_stl.h"
+#include <atomic>
 
 namespace us { namespace gov {
 namespace socket {
@@ -17,9 +18,10 @@ struct daemon: server {
 	virtual ~daemon();
 	virtual client* create_client(int sock) override;
 
-	condition_variable cv;
-	mutex mx;
-	bool ready{false};
+//	condition_variable cv;
+//	mutex mx;
+//	atomic<bool> _ready{false};
+
 	void run();
 	virtual void on_finish() override;
 

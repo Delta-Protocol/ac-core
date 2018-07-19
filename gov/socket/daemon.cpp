@@ -21,11 +21,11 @@ c::~daemon() {
 
 void c::on_finish() {
 	b::on_finish();
-	{
-	unique_lock<mutex> lock(mx);
-	ready=true;
-	}
-	cv.notify_all();
+	//{
+	//unique_lock<mutex> lock(mx);
+//	_ready=true;
+	//}
+//	cv.notify_all();
 }
 
 void c::run() {
@@ -38,14 +38,15 @@ void c::run() {
 	thread listen(&server::run,this);
 	thread_::_this.sleep_for(1s);
 	{
-	unique_lock<mutex> lock(mx);
+//	unique_lock<mutex> lock(mx);
 	while(!thread_::_this.terminated) {
-		clients.read_sockets();
+//		clients.read_sockets();
 		//daemon_timer();
 cout << "MUTATION DISABLED" << endl;
-		ready=false;
-		cv.wait_for(lock,chrono::seconds(30),[&]{return ready;});  //TODO not every 30 secs but at some safe point in the cycle
-		cout << "socket: daemon waked up" << endl;
+//		_ready=false;
+//		cv.wait_for(lock,chrono::seconds(30),[&]{return _ready.load();});  //TODO not every 30 secs but at some safe point in the cycle
+		thread_::_this.sleep_for(chrono::seconds(30));  //TODO not every 30 secs but at some safe point in the cycle
+//		cout << "socket: daemon waked up" << endl;
 	}
 	}
 	listen.join();

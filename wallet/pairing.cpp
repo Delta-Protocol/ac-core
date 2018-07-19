@@ -9,7 +9,6 @@ string c::device::default_name("my device");
 string c::devices_t::not_found("not found");
 
 c::pairing(const string& homedir):devices(homedir) {
-//cout << "home " << homedir << endl;
 }
 
 c::~pairing() {
@@ -17,7 +16,6 @@ c::~pairing() {
 
 c::devices_t::devices_t(const string& home): home(home) {
     assert(!home.empty());
-    //file=home+"/d";
     load();
 }
 
@@ -48,7 +46,7 @@ void c::devices_t::save_() const {
         i.second.to_stream(os);
         os << ' ';
     }
-    cout << "saved devices " << (home+"/d") << endl;
+//    cout << "saved devices " << (home+"/d") << endl;
 }
 
 void c::device::to_stream(ostream&os) const {
@@ -57,13 +55,6 @@ void c::device::to_stream(ostream&os) const {
 
 pair<bool,c::device> c::device::from_stream(istream&is) {
     pair<bool,device> d;
-/*
-string x;
-is >> x;
-cout << x << endl;
-assert(false);
-*/
-    //pub_t pk;
     is >> d.second.pub;
     is >> d.second.name;
     d.first=is.good();
@@ -71,7 +62,7 @@ assert(false);
 }
 
 void c::device::dump(ostream& os) const {
-    os << pub << ' ' << name << endl;
+    os << pub << ' ' << name;
 }
 
 #include <us/gov/auth/peer_t.h>
@@ -79,16 +70,16 @@ void c::device::dump(ostream& os) const {
 bool c::devices_t::authorize(const pub_t& p) const {
     lock_guard<mutex> lock(mx);
     if (empty()) {
-        cout << "authorizing first device " << p << endl;
+ //       cout << "authorizing first device " << p << endl;
         const_cast<c::devices_t&>(*this).emplace(p.hash(),device(p,"First_seen_device"));
         save_();
         return true;
     }
     if (find(p.hash())!=end()) {
-        cout << "found in the entry list  " << p << endl;
+//        cout << "found in the entry list  " << p << endl;
         return true;
     }
-    cout << "not authorizing " << p << endl;
+//    cout << "not authorizing " << p << endl;
     return false;
 }
 
@@ -124,11 +115,7 @@ void c::devices_t::dump(ostream& os) const {
 	lock_guard<mutex> lock(mx);
     for (auto&i:*this) {
         i.second.dump(os);
+        os << endl;
     }
-    if (empty()) {
-        os << "empty" << endl;
-    }
+    os << size() << " devices";
 }
-
-
-

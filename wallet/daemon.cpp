@@ -15,20 +15,13 @@ c::~wallet_daemon() {
 
 bool c::send_error_response(peer_t *c, datagram*d, const string& error) {
 	delete d;
-//	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	c->send(new datagram(us::wallet::protocol::response,"E "+error));
-//cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWwW Sleep 500ms"  << endl;
-//	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	return true;
 }
 
 bool c::send_response(peer_t *c, datagram*d, const string& payload) {
 	delete d;
-//cout << "WDaemon sending response " << payload << endl;
-//	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	c->send(new datagram(us::wallet::protocol::response,payload));
-//cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW Sleep 500ms"  << endl;
-//	this_thread::sleep_for(500ms); //TODO check if we can do it better
 	return true;
 }
 
@@ -179,7 +172,7 @@ socket::client* c::create_client(int sock) {
 
 
 bool c::authorize(const pub_t& p) const {
-cout << "Request for authorization " << p << endl;
+//cout << "Request for authorization " << p << endl;
     return devices.authorize(p);
 }
 

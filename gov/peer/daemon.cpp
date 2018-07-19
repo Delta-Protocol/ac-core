@@ -65,13 +65,15 @@ c::pub_t c::adjust_peer_number() {
 bool c::process_work(socket::peer_t *c, datagram*d) {
 	bool ispong=d->service==protocol::pong;
 	if (c->process_work(d)) {
+/*
 		if (ispong) {
-			{
-			unique_lock<mutex> lock(mx);
-			ready=true;
-			}
+			//{
+			//unique_lock<mutex> lock(mx);
+			_ready.load(true);
+			//}
 			cv.notify_all(); //wake up to start with auth
 		}
+*/
 		return true;
 	}
 	return false;

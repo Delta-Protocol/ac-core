@@ -17,19 +17,26 @@ c::~rpc_api() {
 }
 
 bool c::connect_walletd(ostream&os) {
-    if (sock!=0) return true;
+    if (socket::peer_t::connected()) return true;
 //cout << "---connecting" << endl;
     if (!connect(walletd_host,walletd_port,true)) {
         cerr << "wallet: unable to connect to " << walletd_host << ":" << walletd_port << endl;
 		os << "Error. Unable to connect to wallet daemon.";
         return false;
     }
+//cout << "---running auth" << endl;
     auto r=run_auth();
+//cout << "---run auth " << id::peer_t::stagestr[stage_me] << " " << id::peer_t::stagestr[stage_peer] << endl;
     if (unlikely(!r.empty())) {
          os << r;
          return false;
     }
+    if (!socket::peer_t::connected()) {
+         os << "Auth failed";
+         return false;
+    }
     connected_since=chrono::steady_clock::now();
+//cout << "---connected" << endl;
     return true;
 }
 
@@ -40,6 +47,7 @@ void c::ask(int service, ostream&os) {
 //chrono::steady_clock::time_point
 
 void c::ask(int service, const string& args, ostream&os) {
+//cout << "asking " << service << " " << args << endl;
 	if (!connect_walletd(os)) return;
 
 	datagram* d=new datagram(service,args);
@@ -54,7 +62,10 @@ void c::ask(int service, const string& args, ostream&os) {
 }
 
 void c::balance(bool detailed, ostream&os) {
+//for (int i=0; i<100; ++i) {
 	ask(us::wallet::protocol::balance_query,detailed?"1":"0",os);
+//    os << " ";
+//}
 }
 
 void c::dump(ostream&os) {
@@ -98,7 +109,6 @@ void c::tx_check(const string&txb58, ostream&os) {
 void c::pair(const pub_t& pk, const string& name, ostream&os) {
 	ostringstream si;
 	si << pk << ' ' << name;
-//cout << "asking " << si.str() << endl;
 	ask(us::wallet::protocol::pair_query,si.str(),os);
 }
 
@@ -119,4 +129,3 @@ void c::ping_gov(ostream&os) {
 void c::ping_wallet(ostream&os) {
 	ask(us::wallet::protocol::ping,os);
 }
-

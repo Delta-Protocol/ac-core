@@ -18,8 +18,9 @@ c::~peer_t() {
 }
 
 void c::ready() {
-	parent->ready=true;
-	parent->cv.notify_all();
+    parent->clients.read_sockets();
+//	parent->_ready.store(true);
+//	parent->cv.notify_all();
 }
 
 

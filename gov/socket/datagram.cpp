@@ -112,11 +112,11 @@ string c::recv(int sock) {
 			if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
 				cout << "socket: client: 1 EINPROGRESS fd" << sock  << endl;
 //				error=4;
-    			return "Error. Timeout waiting for data from peer.";
+    			return "Timeout waiting for data from peer.";
 			}
 			else {
 //				error=nread==0?1:2;
-    			return "Error. Connection ended by peer.";
+    			return "Connection ended by peer.";
 			}
 		}
 		dend+=nread;

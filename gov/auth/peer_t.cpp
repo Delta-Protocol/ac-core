@@ -13,12 +13,15 @@ c::~peer_t() {
  
 void c::verification_completed() {
     b::verification_completed();
-	if (authorize(pubkey)) {
-		stage=authorized;
-	}
-    else {
+    if (!verification_is_fine()) {
         disconnect();
+        return;
     }
+   	if (!authorize(pubkey)) {
+        disconnect();
+        return;
+   	}
+   	stage=authorized;
 }
 /*
 bool c::authorize(const pubkey_t& p) const {

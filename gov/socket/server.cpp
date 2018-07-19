@@ -406,7 +406,7 @@ void c::run() {
 				cerr << "error in ::accept 2" << endl;
 				continue;
 			}
-			cout << "socket: server: accepted, creating client for fd " << nnew << endl;
+//			cout << "socket: server: accepted, creating client for fd " << nnew << endl;
 			auto cl=create_client(nnew);
             if (unlikely(banned_throttle(cl->addr))) {
                 delete cl;

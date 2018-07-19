@@ -47,6 +47,8 @@ namespace id {
 		vector<unsigned char> sign(const keys::priv_t& pk, const string& text) const;
 		stage_t verify(const pubkey_t&, const string& signature) const;
 
+        bool verification_is_fine() const { return stage_peer==verified && stage_me==verified; }
+
 		virtual void verification_completed() {}
 
 		daemon* get_parent() { return reinterpret_cast<daemon*>(parent); }
