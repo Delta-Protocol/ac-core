@@ -100,11 +100,11 @@ void help(const params& p, ostream& os=cout) {
 	os << "  transfer <dest account> <receive amount>      Order a cash transfer to <dest account>. Fees are paid by you, the sender." << endl;
     if (p.advanced) {
 	  os << "  tx make_p2pkh <dest account> <amount> <fee> <sigcode_inputs=all> <sigcode_outputs=all> [<send>]" << endl;
+	  os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
 	  os << "  tx decode <tx_b58>" << endl;
 	  os << "  tx check <tx_b58>" << endl;
 	  os << "  tx send <tx_b58>" << endl;
-	  os << "  tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;
-	  os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
+	  //os << "  tx sign <tx_b58> <sigcode_inputs> <sigcode_outputs>" << endl;  //hidden fuctionality
     }
     os << endl;
     os << "keys: (more in advanced mode)" << endl;

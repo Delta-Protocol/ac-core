@@ -50,7 +50,7 @@ namespace cash {
 			void write_sigmsg(ec::sigmsg_hasher_t&) const;
 			void write(ostream&) const;
 			void write_pretty(ostream& os) const;
-			static input_t read(istream&);
+			static pair<string,input_t> read(istream&);
 
 			hash_t address;
 			cash_t prev_balance;
@@ -66,7 +66,7 @@ namespace cash {
 			void write_sigmsg(ec::sigmsg_hasher_t&) const;
 			void write(ostream&) const;
 			void write_pretty(ostream& os) const;
-			static output_t read(istream&);
+			static pair<string,output_t> read(istream&);
 
 			hash_t address;
 			cash_t amount;
@@ -79,14 +79,14 @@ namespace cash {
 			void write_sigmsg(ec::sigmsg_hasher_t&, size_t input_index, sigcode_t sh) const;
 			void write(ostream&) const;
 			void write_pretty(ostream& os) const;
-			void read(istream&);
+			string read(istream&);
 		};
 
 		struct outputs_t:vector<output_t> {
 			void write_sigmsg(ec::sigmsg_hasher_t&, size_t input_index, sigcode_t sh) const;
 			void write(ostream&) const;
 			void write_pretty(ostream& os) const;
-			void read(istream&);
+			string read(istream&);
 		};
 
 		static inline sigcodes_t combine(sigcode_t i, sigcode_t o) { return (i<<4)|o; }
@@ -101,13 +101,13 @@ namespace cash {
 		cash_t check() const; //return fees
 
 		ec::sigmsg_hasher_t::value_type get_hash(const size_t& this_index, sigcodes_t) const;
-		static tx read(istream&);
+		static pair<string,tx> read(istream&);
 
 		void write(ostream&) const;
 		void write_sigmsg(ec::sigmsg_hasher_t&, size_t input_index, sigcodes_t sh) const;
 		void write_pretty(ostream& os) const;
 		string to_b58() const;
-		static tx from_b58(const string&);
+		static pair<string,tx> from_b58(const string&);
 
 		datagram* get_datagram() const;
 

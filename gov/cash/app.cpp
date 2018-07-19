@@ -336,11 +336,15 @@ cout << "SGT-01-RECEIVED EVIDENCE" << endl; //settlement go throught
 	switch(d->service) {
 		case protocol::cash_tx: {
 			string payload=d->parse_string();
-cout << "SGT-01-CASH TX " << payload << endl; 
+//cout << "SGT-01-CASH TX " << payload << endl; 
 			delete d;
-			tx t=tx::from_b58(payload);
-t.write_pretty(cout);
-			process(t); 
+			auto t=tx::from_b58(payload);
+            if (unlikely(!t.first.empty())) {
+               delete d;
+               return true;  
+            }
+//t.write_pretty(cout);
+			process(t.second); 
 			return true;
 		} break;
 	}

@@ -75,29 +75,48 @@ void c::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigc
 
 void c::tx_send(const string&txb58, ostream&os) {
     if (!connect_backend(os)) return;
-
-	string e=wallet::send(endpoint, cash::tx::from_b58(txb58));
-    if (e.empty()) {
-	    os << "Successfully sent :)";
+    auto r=cash::tx::from_b58(txb58);
+    if (unlikely(!r.first.empty())) {
+        os << r.first;
+        return;
     }
-    else {
+	string e=wallet::send(endpoint, r.second);
+    if (unlikely(!e.empty())) {
 	    os << e;
+        return;
     }
+    os << "Successfully sent :)";
 }
 
 void c::tx_decode(const string&txb58, ostream&os) {
-	cash::tx t=cash::tx::from_b58(txb58);
-	t.write_pretty(os);
+	auto r=cash::tx::from_b58(txb58);
+    if (unlikely(!r.first.empty())) {
+        os << r.first;
+        return;
+    }
+	r.second.write_pretty(os);
 }
 
 void c::tx_check(const string&txb58, ostream&os) {
-	cash::tx t=cash::tx::from_b58(txb58);
+	auto r=cash::tx::from_b58(txb58);
+    if (unlikely(!r.first.empty())) {
+        os << "Cannot decode base58";
+        return;
+    }
+    const cash::tx& t=r.second;
+    bool fail=false;
 	auto fee=t.check();
 	if (fee<=0) {
 		os << "Individual inputs and fees must be positive.";
+        fail=true;
 	}
-    if (os.str().empty()) {
-	    os << "Looks ok.";
+	if (false) {
+        if (fail) os << endl;
+		os << "All in all you're just a nother brick in the wall.";
+        fail=true;
+	}
+    if (fail) {
+	    os << "This transaction looks ok.";
     }
 }
 

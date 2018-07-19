@@ -320,8 +320,10 @@ string c::generate_locking_program_input(const cash::tx& t, size_t this_index, c
 pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
 	auto sigcodes=cash::tx::combine(sigcodei,sigcodeo);
 
-    pair<string,cash::tx> ret;
-	ret.second=cash::tx::from_b58(txb58);
+	auto ret=cash::tx::from_b58(txb58);
+    if (unlikely(!ret.first.empty())) {
+        return move(ret);
+    }
 
 	cash::app::query_accounts_t addresses;
 	for (auto&i:ret.second.inputs) {

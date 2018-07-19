@@ -29,11 +29,26 @@ bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& 
 	return true;
 }
 
-c c::read(istream& is) {
-	tx t;
-	t.inputs.read(is);
-	t.outputs.read(is);
-	is >> t.parent_block;
+pair<string,c> c::read(istream& is) {
+	pair<string,c> t;
+    {
+    auto r=t.second.inputs.read(is);
+	if (!r.empty()) {
+        t.first=r;
+        return move(t);       
+    }
+    }
+	auto r=t.second.outputs.read(is);
+	if (!r.empty()) {
+        t.first=r;
+        return move(t);       
+    }
+
+	is >> t.second.parent_block;
+    if (!is.good()) {
+        t.first="Unreadable parent_block";
+        return move(t);       
+    }
 	return move(t);
 }
 
@@ -65,10 +80,17 @@ string c::to_b58() const {
 	return crypto::b58::encode(os.str());
 }
 
-c c::from_b58(const string& s) {
+pair<string,c> c::from_b58(const string& s) {
 	string txt=crypto::b58::decode(s);
 	istringstream is(txt);
-	return read(is);
+    pair<string,c> r;
+	auto x=read(is);
+    if (unlikely(!x.first.empty())) {
+        r.first=x.first;
+        return move(r);
+    }
+    r.second=x.second;
+    return move(r);
 }
 
 void c::inputs_t::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcode_t sc) const {
@@ -79,6 +101,7 @@ void c::inputs_t::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcod
 		(*this)[this_index].write_sigmsg(h);
 	}
 }
+
 void c::inputs_t::write_pretty(ostream& os) const {
 	int n=0;
 	for (auto& i:*this) {
@@ -92,13 +115,22 @@ void c::inputs_t::write(ostream& os) const {
 	os << size() << ' ';
 	for (auto& i:*this) i.write(os);
 }
-void c::inputs_t::read(istream& is) {
+
+string c::inputs_t::read(istream& is) {
 	size_t sz;
 	is >> sz;
+    if (unlikely(sz>100)) { //max number of outputs
+        return "Error. There is a limit of 100 inputs.";
+    }
 	reserve(sz);
 	for (size_t i=0; i<sz; ++i) {
-		push_back(input_t::read(is));
+        auto x=input_t::read(is);
+        if (unlikely(!x.first.empty())) {
+            return x.first;
+        }
+		push_back(x.second);
 	}
+    return "";
 }
 
 void c::outputs_t::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcode_t sc) const {
@@ -123,13 +155,21 @@ void c::outputs_t::write_pretty(ostream& os) const {
 	}
 }
 
-void c::outputs_t::read(istream& is) {
+string c::outputs_t::read(istream& is) {
 	size_t sz;
 	is >> sz;
+    if (unlikely(sz>100)) { //max number of outputs
+        return "Error. There is a limit of 100 outputs.";
+    }
 	reserve(sz);
 	for (size_t i=0; i<sz; ++i) {
-		push_back(output_t::read(is));
+        auto x=output_t::read(is);
+        if (unlikely(!x.first.empty())) {
+            return x.first;
+        }
+	    push_back(x.second);
 	}
+    return "";
 }
 
 void c::input_t::write_sigmsg(ec::sigmsg_hasher_t& h) const {
@@ -164,27 +204,33 @@ void c::output_t::write_pretty(ostream& os) const {
 	os << "    locking_program: " << locking_program << endl;
 }
 
-c::input_t c::input_t::read(istream& is) {
-	input_t o;
+pair<string,c::input_t> c::input_t::read(istream& is) {
+	pair<string,input_t> o0;
+    auto& o=o0.second;
 	is >> o.address;
-//	is >> o.spend_code;
 	is >> o.prev_balance;
 	is >> o.amount;
 	string locking_program_input_b58;
 	is >> locking_program_input_b58;
 	o.locking_program_input=crypto::b58::decode(locking_program_input_b58);
 	if (o.locking_program_input=="-") o.locking_program_input.clear();
-	return move(o);
+    if (unlikely(!is.good())) {
+        o0.first="Error reading transaction input.";
+    }
+	return move(o0);
 }
 
-c::output_t c::output_t::read(istream& is) {
-	output_t o;
+pair<string,c::output_t> c::output_t::read(istream& is) {
+	pair<string,output_t> o0;
+    auto& o=o0.second;
 	is >> o.address;
 	is >> o.amount;
 	is >> o.locking_program;
-	return move(o);
+    if (unlikely(!is.good())) {
+        o0.first="Error reading transaction output.";
+    }
+	return move(o0);
 }
-
 
 bool c::add_output(const hash_t& addr, const cash_t& amount, const hash_t& locking_program) {
 	outputs.push_back(output_t(addr,amount,locking_program));
