@@ -45,7 +45,7 @@ void c::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcodes_t scs) 
 
 void c::write_pretty(ostream& os) const {
 	os << "---transaction---------------" << endl;
-	os << "  parnet_block: " << parent_block << endl;
+	os << "  parent_block: " << parent_block << endl;
 	os << "  -----" << inputs.size() << " inputs-------" << endl;
 	inputs.write_pretty(os);
 	os << "  -----" << outputs.size() << " outputs-------" << endl;

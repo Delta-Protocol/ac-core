@@ -60,7 +60,12 @@ struct params {
 
 
 void help(const params& p, ostream& os=cout) {
-    os << "us-wallet" << endl;
+    os << "us-wallet (";
+    if (p.offline)
+        os << "local";
+    else 
+        os << "rpc";
+    os << " mode)" << endl;
     os << "You can use this software under the terms of the Affero General Public License (AGPL)." << endl;
     os << "Obtain a copy of the licence here: https://www.gnu.org/licenses/agpl.txt" << endl;
     os << endl;
@@ -70,26 +75,22 @@ void help(const params& p, ostream& os=cout) {
 	  os << " -a                Advanced mode." << endl;
     }
     if (p.advanced) {
-      if (p.offline) {
-	    os << " -home <homedir>   homedir. [" << p.homedir << "]" << endl;
+      if (!p.offline) {
+	    os << " -local    Local mode. Use a wallet directory, instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
       }
-	  os << " -d        Run a new wallet-daemon listening on port " << p.listening_port << " (see -lp)" << endl;
-	  os << " -lp       Listening Port." << endl;
-	  os << " -local    Load data from local homedir instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
+      os << " -home <homedir>   homedir. [" << p.homedir << "]  requires -local" << endl;
+	  os << " -d        Run a new wallet-daemon listening on port " << p.listening_port << " (see -lp). Ignored with -local" << endl;
+	  os << " -lp       Listening Port. Ignored with -local" << endl;
 #ifdef FCGI
 	  os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
 	  os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
 #endif
-      if (p.offline) {
-	     os << " RPC to backend(us-gov) parameters:" << endl;
-	     os << " -bhost <address>  us-gov IP address. [" << p.backend_host << "]" << endl;
-	     os << " -bp <port>  TCP port. [" << p.backend_port << "]" << endl;
-      }
-      else {
-	     os << " RPC to wallet-daemon (us-wallet) parameters:" << endl;
-	     os << " -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
-	     os << " -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
-      }
+      os << " RPC to backend(us-gov) parameters:  Requires -local" << endl;
+      os << "   -bhost <address>  us-gov IP address. [" << p.backend_host << "]" << endl;
+      os << "   -bp <port>  TCP port. [" << p.backend_port << "]" << endl;
+      os << " RPC to wallet-daemon (us-wallet) parameters: Conflicts with -local" << endl;
+	  os << "   -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
+	  os << "   -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
     }
     os << endl;
     os << "commands are:" << endl;
@@ -106,7 +107,7 @@ void help(const params& p, ostream& os=cout) {
 	  os << "    sigcodes are: "; cash::tx::dump_sigcodes(cout); cout << endl;
     }
     os << endl;
-    os << "keys:" << endl;
+    os << "keys: (more in advanced mode)" << endl;
 	os << "  address new            Generates a new key-pair, adds the private key to the wallet and prints its asociated address." << endl;
     if (p.advanced) {
 	  os << "  address add <privkey>  Imports a given private key in the wallet" << endl;
@@ -263,6 +264,7 @@ Json::Value to_json(const string& s) {
 
 
 using us::gov::input::cfg;
+using us::gov::input::cfg0;
 using us::gov::input::cfg1;
 
 void run_daemon(const params& p) {
@@ -303,6 +305,7 @@ void run_local(string command, args_t& args, const params& p) {
 
 	api* papi;
 	if (p.offline) {
+		cfg0::load(homedir);
 		papi=new local_api(homedir,p.backend_host,p.backend_port); //rpc to node
 	}
 	else {

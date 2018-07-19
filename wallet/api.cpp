@@ -13,10 +13,11 @@ using datagram=socket::datagram;
 void api::priv_key(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	if (!crypto::ec::keys::verify(privkey)) {
 		os << "The private key is incorrect.";
+        return;
 	}
 	auto pub=crypto::ec::keys::get_pubkey(privkey);
 	os << "Public key: " << pub << endl;
-	os << "Public key hash: " << pub.compute_hash();
+	os << "Address: " << pub.compute_hash();
 }
 
 void api::gen_keys(ostream&os) {

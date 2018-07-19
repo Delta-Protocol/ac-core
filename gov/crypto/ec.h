@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include "double_sha256.h"
+#include <us/gov/likely.h>
 
 namespace us { namespace gov {
 namespace crypto {
@@ -55,20 +56,21 @@ struct ec {
 
 		struct priv_t: array<unsigned char,32> {
 			priv_t() {
+                zero();
 			}
 			priv_t(const string& b58) {
-				set_b58(b58);
+				if (unlikely(!set_b58(b58))) zero();
 			}
 			priv_t(const char* b58) {
-				set_b58(b58);
+				if (unlikely(!set_b58(b58))) zero();
 			}
 			string to_b58() const;
 			static priv_t from_b58(const string&);
 			bool set_b58(const string&);
 			inline void zero() { memset(this,0,32); }
+            bool is_zero() const;
 		};
-
-		
+	
 
 		keys() {}
 		keys(const priv_t&); //call keys::verify before contructing keys
@@ -120,7 +122,10 @@ inline ostream& operator << (ostream& os, const ec::keys::pub_t& k) {
 inline istream& operator >> (istream& is, ec::keys::pub_t& k) {
 	string s;
 	is >> s;
-    if (!k.set_b58(s)) is.setstate(ios_base::failbit);
+    if (!k.set_b58(s)) {
+        is.setstate(ios_base::failbit);
+        k.zero();
+    }
 //	k.set_b58(s);
 	return is;
 }
@@ -133,7 +138,10 @@ inline ostream& operator << (ostream& os, const ec::keys::priv_t& k) {
 inline istream& operator >> (istream& is, ec::keys::priv_t& k) {
 	string s;
 	is >> s;
-    if (!k.set_b58(s)) is.setstate(ios_base::failbit);
+    if (!k.set_b58(s)) {
+        is.setstate(ios_base::failbit);
+        k.zero();
+    }
 // 	k.set_b58(s);
 	return is;
 }

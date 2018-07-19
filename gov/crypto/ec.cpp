@@ -105,6 +105,12 @@ string c::keys::to_hex(const priv_t& privkey) {
 	return os.str();
 }
 
+bool c::keys::priv_t::is_zero() const {
+    for (int i=0; i<32; i+=8)
+        if (*reinterpret_cast<const uint64_t*>(&this[i])!=0) return false;
+    return true;
+}
+
 string c::keys::priv_t::to_b58() const {
 	return b58::encode(&*begin(),&*end());
 }
@@ -138,7 +144,7 @@ c::keys::priv_t c::keys::priv_t::from_b58(const string& s) {
 	priv_t k;
 	if (!b58::decode(s.c_str(),k)) {
         k.zero();
-		cerr << "Error reading private key. " << s << endl;
+//		cerr << "Error reading private key. " << s << endl;
 	}
 	return move(k);
 }
@@ -335,8 +341,8 @@ bool c::verify(const keys::pub_t& pk, const string& text, const string& signatur
 	return verify(pk, hash, signature_der_b58);
 }
 
-bool c::keys::verify(const keys::priv_t& privkey) {
-	return secp256k1_ec_seckey_verify(ec::instance.ctx,&privkey[0])==1;
+bool c::keys::verify(const keys::priv_t& k) {
+	return !k.is_zero() && secp256k1_ec_seckey_verify(ec::instance.ctx,&k[0])==1;
 }
 
 c::keys::pub_t c::keys::get_pubkey(const priv_t& privk) {

@@ -96,7 +96,9 @@ void c::tx_check(const string&txb58, ostream&os) {
 	if (fee<=0) {
 		os << "Individual inputs and fees must be positive.";
 	}
-	os << "Looks ok.";
+    if (os.str().empty()) {
+	    os << "Looks ok.";
+    }
 }
 
 void c::pair(const pub_t& pk, const string& name, ostream&os) {
