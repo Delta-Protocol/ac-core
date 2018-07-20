@@ -1,0 +1,8 @@
+
+cd cash/android
+./gradlew assembleRelease
+
+find -name "*.apk"
+
+
+

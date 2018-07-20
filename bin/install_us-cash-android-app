@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cp cash/android/app/build/outputs/apk/release/us.cash-v1-release.apk /var/www/html/
+

@@ -69,12 +69,19 @@ RUN AN INTROSPECTIVE SHELL INTO GOV PROCESS
         2 execute 
           us-gov -host <ipaddress>
 
-BUILD ANDROID US-CASH APP
+BUILD & INSTALL ANDROID US-CASH APP
     apt install openjdk-10-jdk
 
-    cd cash/android
-    ./gradlew assembleRelease
+    bin/build_us-cash-android-app
 
     find the generated apk at:
     ./app/build/outputs/apk/release/us.cash-v1-release.apk
+    
+    INSTALL
+    execute:
+    bin/install_us-cash-android-app
+
+    The installer can then be retrieved, using the mobile browser, from:
+    http://<NODE_IP>/us.cash-v1-release.apk
+
     
