@@ -33,8 +33,8 @@ struct wallet_daemon: auth::daemon, local_api {
   //  string backend_host;
   //  uint16_t backend_port;
 
-	bool send_response(peer_t *c, datagram*d, const string& payload);
-	bool send_error_response(peer_t *c, datagram*d, const string& error);
+	bool send_response(socket::peer_t *c, datagram*d, const string& payload);
+	bool send_error_response(socket::peer_t *c, datagram*d, const string& error);
 
 
     bool authorize(const pub_t& p) const;

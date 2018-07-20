@@ -107,6 +107,9 @@ string c::recv(int sock, int timeout_seconds) {
 }
 */
 string c::recv(int sock) {
+	if (unlikely(sock==0)) {
+        return "Error. Connection is closed.";
+    }
     //static constexpr int response_timeout_secs={3};
 /*
    	struct timeval tv;
@@ -164,13 +167,16 @@ string c::send(int sock) const {
 	if (unlikely(size()>=maxsize)) {
         return "Error. Datagram is too big.";
     }
+	if (unlikely(sock==0)) {
+        return "Error. Connection is closed.";
+    }
 	uint8_t sz[h];
 	auto n = ::write(sock, &(*this)[0], size());
 	if (unlikely(n<0)) {
-		return "Error. While wrtting to socket";
+		return "Error. Failure writting to socket.";
 	}
 	if (unlikely(n!=size())) {
-		return "Error. Unexpected write size while wrtting to socket";
+		return "Error. Unexpected returning size while wrtting to socket";
 	}
 	return "";
 }

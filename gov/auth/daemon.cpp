@@ -19,7 +19,7 @@ c::~daemon() {
 
 bool c::process_work(socket::peer_t *p, datagram*d) {
     if (b::process_work(p,d)) return true;
-cout << "auth dmn: I should process tyhis" << endl;
+cout << "auth daemon: I should process this? " << d->service << endl;
     return static_cast<peer_t*>(p)->process_work(d);
 }
 

@@ -30,8 +30,9 @@ struct local_api:api, wallet, pairing {
 	virtual void pair(const pub_t&, const string& name, ostream&os) override;
 	virtual void unpair(const pub_t&, ostream&os) override;
 	virtual void list_devices(ostream&os) override;
-    virtual void ping_gov(ostream&) override;
-    virtual void ping_wallet(ostream&) override;
+    virtual void ping(ostream&) override;
+//    virtual void ping_gov(ostream&) override;
+//    virtual void ping_wallet(ostream&) override;
 
     bool connect_backend(ostream&os);
     chrono::steady_clock::time_point connected_since;

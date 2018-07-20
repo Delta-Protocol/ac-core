@@ -89,10 +89,6 @@ void c::incorporate(client*c) {
 
 }
 
-void c::disconnect(client*c) {
-	c->disconnect();
-}
-
 bool c::clients_t::is_here(client* c) const {
 	{
 	lock_guard<mutex> lock(mx);
@@ -363,10 +359,11 @@ void c::run() {
 		program::_this.finish();
 		return;
 	}
-	if (!clients.locli.connect("127.0.0.1",port)) {
+	auto r=clients.locli.connect("127.0.0.1",port);
+    if (unlikely(!r.empty())) {
 		close(sock);
 		sock=0;
-		cerr << "failed connecting the loopback client" << endl;
+		cerr << "failed connecting the loopback client. " << r << endl;
 		program::_this.finish();
 		return;
 	}

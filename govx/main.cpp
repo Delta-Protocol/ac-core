@@ -125,12 +125,13 @@ void open_shell(const params&p) {
 
 
 	shell_client peer(conf.keys);
-	if (!peer.connect(p.sysophost,p.port,true)) {
+    auto r=peer.connect(p.sysophost,p.port,true);
+    if (!r.empty()) {
         p.dump(cerr);
-		cerr << "Cannot connect to " << p.sysophost << ":" << p.port << endl;
+		cerr << "Cannot connect to " << p.sysophost << ":" << p.port << ". " << r << endl;
 		return;
 	}
-	auto r=peer.run_auth();
+	r=peer.run_auth();
 	if (!r.empty()) {
         p.dump(cerr);
 		cerr << r << endl;

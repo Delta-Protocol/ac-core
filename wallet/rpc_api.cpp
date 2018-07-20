@@ -8,6 +8,7 @@ typedef us::wallet::rpc_api c;
 using namespace us::wallet;
 using namespace std;
 
+
 using datagram=socket::datagram;
 
 c::rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port):walletd_host(walletd_host), walletd_port(walletd_port), b(0), id(k) {
@@ -19,13 +20,14 @@ c::~rpc_api() {
 bool c::connect_walletd(ostream&os) {
     if (socket::peer_t::connected()) return true;
 //cout << "---connecting" << endl;
-    if (!connect(walletd_host,walletd_port,true)) {
-        cerr << "wallet: unable to connect to " << walletd_host << ":" << walletd_port << endl;
-		os << "Error. Unable to connect to wallet daemon.";
+    auto r=connect(walletd_host,walletd_port,true);
+    if (unlikely(!r.empty())) { //connect(walletd_host,walletd_port,true)) {
+//        cerr << r << endl; //"wallet: unable to connect to " << walletd_host << ":" << walletd_port << endl;
+		os << "Error. " << r;
         return false;
     }
 //cout << "---running auth" << endl;
-    auto r=run_auth();
+    r=run_auth();
 //cout << "---run auth " << id::peer_t::stagestr[stage_me] << " " << id::peer_t::stagestr[stage_peer] << endl;
     if (unlikely(!r.empty())) {
          os << r;
@@ -57,6 +59,21 @@ void c::ask(int service, const string& args, ostream&os) {
     }
     else {
     	os << r.second->parse_string();
+	    delete r.second;
+    }
+}
+
+void c::ask_ping(ostream&os) {
+//cout << "asking " << service << " " << args << endl;
+	if (!connect_walletd(os)) return;
+
+	datagram* d=new datagram(us::wallet::protocol::ping,"");
+    auto r=send_recv(d);
+    if (unlikely(!r.first.empty())) {
+        os << "(Error) " << r.first;
+    }
+    else {
+    	os << "Remote wallet says: " << r.second->parse_string();
 	    delete r.second;
     }
 }
@@ -122,10 +139,11 @@ void c::list_devices(ostream&os) {
 	ask(us::wallet::protocol::list_devices_query,os);
 }
 
-void c::ping_gov(ostream&os) {
-	ask(us::wallet::protocol::ping_gov,os);
+void c::ping(ostream&os) {
+	ask_ping(os);
 }
-
+/*
 void c::ping_wallet(ostream&os) {
 	ask(us::wallet::protocol::ping,os);
 }
+*/

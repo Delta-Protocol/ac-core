@@ -13,39 +13,51 @@ c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&
 c::~wallet_daemon() {
 }
 
-bool c::send_error_response(peer_t *c, datagram*d, const string& error) {
+bool c::send_error_response(socket::peer_t *c, datagram*d, const string& error) {
 	delete d;
 	c->send(new datagram(us::wallet::protocol::response,"E "+error));
 	return true;
 }
 
-bool c::send_response(peer_t *c, datagram*d, const string& payload) {
+bool c::send_response(socket::peer_t *c, datagram*d, const string& payload) {
 	delete d;
 	c->send(new datagram(us::wallet::protocol::response,payload));
 	return true;
 }
 
-bool c::process_work(socket::peer_t *c0, datagram*d) {
-    if (b::process_work(c0,d)) return true;
-
-    peer_t* c=static_cast<peer_t*>(c0);
+bool c::process_work(socket::peer_t *c, datagram*d) {
+cout << "PW" << endl;
+//    peer_t* c=static_cast<peer_t*>(c0);
     switch(d->service) {
+	case us::wallet::protocol::ping: {
+		ostringstream ans;
+		local_api::ping(ans);
+		return send_response(c,d,ans.str());
+    }
+    break;
+/*
 	case us::wallet::protocol::ping: {
 		ostringstream ans;
 		local_api::ping_wallet(ans);
 		return send_response(c,d,ans.str());
 	}
 	break;
+*/
+/*
 	case us::wallet::protocol::ping_gov: {
 		ostringstream ans;
 		local_api::ping_gov(ans);
 		return send_response(c,d,ans.str());
 	}
 	break;
+*/
     }
 
-    if (static_cast<auth::peer_t*>(c0)->stage!=auth::peer_t::authorized) {
-        return false;
+    if (b::process_work(c,d)) return true;
+
+    if (static_cast<auth::peer_t*>(c)->stage!=auth::peer_t::authorized) {
+        delete d;
+        return true;
     }
 	switch(d->service) {
 		case us::wallet::protocol::tx_make_p2pkh_query: {

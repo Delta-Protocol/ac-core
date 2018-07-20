@@ -22,7 +22,7 @@ namespace socket {
 		client();
 		client(int sock);
 		virtual ~client();
-		virtual bool connect(const string& host, uint16_t port, bool block=false);
+		virtual string connect(const string& host, uint16_t port, bool block=false);
 		virtual void disconnect();
 
         inline bool connected() const { return sock!=0; }
@@ -32,13 +32,13 @@ namespace socket {
 
         pair<string,datagram*> send_recv(datagram* d); 
 //		string send(char d) const;
-		string send(datagram* d) const;
-		string send(const datagram& d) const;
+		string send(datagram* d);
+		string send(const datagram& d);
 //		string send(int service, const string& payload);
         pair<string,datagram*> recv(); //caller owns the returning object
 
 		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
-		bool init_sock(const string& host, uint16_t port, bool block=false);
+		string init_sock(const string& host, uint16_t port, bool block=false);
 
 		virtual void on_connect() {}
 

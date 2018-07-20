@@ -50,6 +50,7 @@ struct params {
     bool fcgi{false};
     bool json{false};
 #endif
+    bool help{false};
     bool advanced{false};
     uint16_t listening_port{16673};
     string homedir;
@@ -126,7 +127,7 @@ void help(const params& p, ostream& os=cout) {
       os << endl;
 
       os << "net:" << endl;
-      os << "  ping [gov|wallet]      Daemon-is-alive check" << endl;
+      os << "  ping                   endpoint check" << endl;
       os << endl;
     }
 }
@@ -192,6 +193,9 @@ string parse_options(args_t& args, params& p) {
         	p.json=true;
         }
 #endif
+        else if (cmd=="-h") {
+        	p.help=true;
+        }
         else {
             break;
         }
@@ -370,16 +374,12 @@ void run_local(string command, args_t& args, const params& p) {
 		wapi.list_devices(os);
 	}
 	else if (command=="ping") {
-		auto w=args.next<string>();
-        if (w=="gov")
-    		wapi.ping_gov(os);
-        else
-    		wapi.ping_wallet(os);
+   		wapi.ping(os);
 	}
 	else {
+        cerr << "Invalid command " << command << endl;
 		help(p);
 	}
-//cout << "deleting" << endl;
 	delete papi;
 
 #ifdef FCGI
@@ -402,6 +402,11 @@ int main(int argc, char** argv) {
 	args_t args(argc,argv);
 	params p;
 	string command=parse_options(args,p);
+
+    if (p.help) {
+        help(p);
+        return 0;
+    }
 
 #ifdef FCGI
     if (!p.daemon && p.fcgi) {

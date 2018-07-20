@@ -22,7 +22,7 @@ namespace protocol {
 	static constexpr uint16_t unpair_query{wallet_base+11};
 	static constexpr uint16_t list_devices_query{wallet_base+12};
 	static constexpr uint16_t ping{wallet_base+13};
-	static constexpr uint16_t ping_gov{wallet_base+14};
+//	static constexpr uint16_t ping_gov{wallet_base+14};
 
 	static constexpr uint16_t response{wallet_base+0};
 

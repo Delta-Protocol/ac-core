@@ -39,8 +39,6 @@ namespace peer {
 		virtual ~peer_t();
 		//datagram* complete_datagram();
 
-		virtual bool connect(const string& host, uint16_t port, bool block=false) override;
-
 		virtual void on_connect() override;
 
 		//bool process_work(datagram* d);

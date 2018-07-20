@@ -36,7 +36,7 @@ c::~client() {
 	disconnect();
 }
 
-string client::address() const {
+string c::address() const {
 	struct sockaddr_storage addr;
 	socklen_t len=sizeof addr;
 //    cout << "========================================================" << endl;
@@ -62,27 +62,28 @@ string client::address() const {
 	return ipstr;
 }
 
-bool client::connect(const string& host, uint16_t port, bool block) {
-	disconnect();
+string c::connect(const string& host, uint16_t port, bool block) {
+	assert(sock==0); //disconnect();
 	lock_guard<mutex> lock(mx);
-	if (!init_sock(host, port, block)) {
+	string r=init_sock(host, port, block);
+	if (!r.empty()) {
 //        cerr << "Could not init socket for " << host << ":" << port << endl;
-        return false;
+        return r;
     }
 	addr=host;
 //cout << "calling on_connect" << endl;
     on_connect();
-	return true;
+	return "";
 }
 
-void client::disconnect() {
+void c::disconnect() {
 	lock_guard<mutex> lock(mx);
 	if (unlikely(sock==0)) return;
 	close(sock);
 	sock=0;
 }
 
-void client::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t port) {
+void c::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t port) {
 	struct hostent *hostinfo;
 	name->sin_family = AF_INET;
 	name->sin_port = htons (port);
@@ -97,14 +98,15 @@ void client::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint
 #include <fcntl.h>
 #include <chrono>
 #include <thread>
-bool c::init_sock(const string& host, uint16_t port, bool block) {
+#include <sstream>
+
+string c::init_sock(const string& host, uint16_t port, bool block) {
 	sockaddr_in servername;
-	sock=::socket(PF_INET, SOCK_STREAM, 0);// Create the socket.
-	if (sock < 0) {
-          perror("socket (client)");
+	if (unlikely(sock!=0)) {
 	  sock=0;
-	  return false;
+      return "socket is non zero.";
 	}
+	sock=::socket(PF_INET, SOCK_STREAM, 0);// Create the socket.
 	{
 	auto flags = fcntl(sock, F_GETFL, 0);
 	if (!block) flags|=O_NONBLOCK;
@@ -113,7 +115,7 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 
 	init_sockaddr (&servername, host.c_str(), port);//Connect to the server.
 	int r=::connect(sock, (struct sockaddr *) &servername, sizeof (servername));
-	if (r<0) {
+	if (unlikely(r<0)) {
 		if (errno==EINPROGRESS) {
 //			cout << "socket: client: ::connect in progress fd" << sock  << endl;
 
@@ -131,24 +133,25 @@ bool c::init_sock(const string& host, uint16_t port, bool block) {
 	            if (a==0) break;
                 if (chrono::duration_cast<std::chrono::milliseconds>(clock::now() - t1).count()>500) {
            			//cout << "socket: client: ::connect in progress fd" << sock  << " timeout!" << endl;
-                    return false; //timeout
+                    return "Error. Timeout obtaining peername";
                 }
                 this_thread::sleep_for(10ms);
             }
 //   			cout << "socket: client: ::connect in progress fd" << sock  << " no longer INPROGRESS" << endl;
-			return true;
+			return "";
 		}
 		//cout << "socket: client: ::connect failed " << sock << " error: " << r << endl;
 		::close(sock);
 		sock=0;
-		return false;
+        ostringstream os;
+        os << "Connection refused. errno=" << errno;
+        return os.str();
 	}
     struct timeval tv;
     tv.tv_sec = 3; //timeout_seconds;
     tv.tv_usec = 0;
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
-
-	return true;
+	return "";
 }
 
 //busy-polling all sockets http://www.wangafu.net/~nickm/libevent-book/01_intro.html
@@ -195,6 +198,7 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
             r.first=ans;
 	        delete r.second;
             r.second=0;
+            disconnect();
             break;
         }
         if (likely(r.second->completed())) { 
@@ -242,7 +246,7 @@ pair<string,datagram*> c::complete_datagram() {
 	return make_pair("",curd);
 }
 */
-string c::send(datagram* d) const { 
+string c::send(datagram* d) { 
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
 	}
@@ -250,15 +254,23 @@ string c::send(datagram* d) const {
 //cout << "Sending datagram :" << endl; 
 //d->dump(cout);
 //	return io::send(sock,d); 
-	return d->send(sock);
+	auto r=d->send(sock);
+    if (unlikely(!r.empty())) {
+        disconnect();
+    }
+    return r;
 }
 
-string c::send(const datagram& d) const {
+string c::send(const datagram& d) {
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
 	}
 //	return io::send(sock,d); 
-	return d.send(sock);
+	auto r=d.send(sock);
+    if (unlikely(!r.empty())) {
+        disconnect();
+    }
+	return r;
 }
 
 void c::dump(ostream& os) const {

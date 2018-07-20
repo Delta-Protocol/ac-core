@@ -26,7 +26,7 @@ socket::client* c::create_client(int sock) {
 
 bool c::process_work(socket::peer_t *p, datagram*d) {
     if (b::process_work(p,d)) return true;
-cout << "I should proc this" << endl;
+//cout << "I should proc this" << endl;
     return static_cast<peer_t*>(p)->process_work(d);
 }
 

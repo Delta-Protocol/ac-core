@@ -19,9 +19,10 @@ c::~local_api() {
 bool c::connect_backend(ostream&os) {
     if (endpoint.connected()) return true;
 //cout << "---connecting" << endl;
-    if (!endpoint.connect(backend_host,backend_port,true)) {
-        cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
-        os << "Error. Backend is unreachable.";
+    auto r=endpoint.connect(backend_host,backend_port,true);
+    if (!r.empty()) {
+//        cerr << r << endl; //"wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
+        os << "Error. " << r;
         return false;
     }
     connected_since=chrono::steady_clock::now();
@@ -142,7 +143,7 @@ void c::list_devices(ostream&os) {
 #include <utility>
 #include <string>
 using us::gov::socket::datagram;
-
+/*
 void c::ping_gov(ostream& os) {
 
     if (!connect_backend(os)) return;
@@ -156,9 +157,20 @@ void c::ping_gov(ostream& os) {
     os << r.second->parse_string();
     delete r.second;
 }
-
-void c::ping_wallet(ostream& os) {
-    os << "pong";
+*/
+void c::ping(ostream& os) {
+    os << "I am responsive. The backend... ";
+    if (!connect_backend(os)) {
+        return;
+    }
+    auto r=endpoint.send_recv(new datagram(us::gov::protocol::ping,""));
+    if (!r.first.empty()) {
+        assert(r.second==0);
+        os << "is not responding (Error): " << r.first;
+        return;
+    }
+    os << "is also responsive, it said: " << r.second->parse_string();
+    delete r.second;
 }
 
 

@@ -80,7 +80,8 @@ cout << "add peers" << endl;
 				exclude.emplace(addr);
 				auto* p=create_client(0);
 //cout << "connecting to address " << addr << endl;
-				if (p->connect(addr,16672)) {
+				string r=p->connect(addr,16672);
+                if (likely(r.empty())) {
 //cout << "connected to address " << addr << endl;
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);
@@ -114,7 +115,7 @@ void c::purge_slow(pub_t&a) {
 	for (auto& i:a) {
 		if (i->stage==peer_t::exceed_latency) {
 			cout << "peer: daemon: disconnection slow peer" << endl;
-			disconnect(i);
+			i->disconnect();
 		}
 		else {
 			copy.emplace_back(i);
@@ -145,7 +146,7 @@ void c::purge_excess(pub_t& a) {
 	while (a.asize()>edges) {
 		auto i=oldest(a);
 		if (i==a.end()) break;
-		disconnect(*i);
+		(*i)->disconnect();
 		*i=0;
 	}
 	pub_t copy;

@@ -25,13 +25,6 @@ c::peer_t(int sock): b(sock), stage(service)/*,latency(100ms)*/ {
 c::~peer_t() {
 }
 
-bool c::connect(const string& host, uint16_t port, bool block) {
-	if (b::connect(host, port, block)) {
-		return true;
-	}
-	return false;
-}
-
 void c::on_connect() {
     b::on_connect();
 //	since=chrono::steady_clock::now();

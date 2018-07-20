@@ -30,12 +30,15 @@ struct rpc_api:api, gov::auth::peer_t {
 	virtual void pair(const pub_t&, const string& name, ostream&os) override;
 	virtual void unpair(const pub_t&, ostream&os) override;
 	virtual void list_devices(ostream&os) override;
-    virtual void ping_gov(ostream&) override;
-    virtual void ping_wallet(ostream&) override;
+    virtual void ping(ostream&) override;
+//    virtual void ping_gov(ostream&) override;
+//    virtual void ping_wallet(ostream&) override;
 
     inline virtual const keys& get_keys() const override { return id; }
 
     virtual bool authorize(const pubkey_t& p) const override { return true; }
+
+    void ask_ping(ostream&os);
 
 private:
 	void ask(int service, ostream&os);

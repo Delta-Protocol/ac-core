@@ -32,7 +32,6 @@ namespace socket {
 
 		datagram* read_from_client(int sock);
 		int make_socket (uint16_t port);
-		void disconnect(client*);
 		void incorporate(client*); //keep listening to this client who is already connected
 
 		uint16_t port;
