@@ -32,7 +32,11 @@ bool c::connect_backend(ostream&os) {
 void c::balance(bool detailed, ostream&os) {
     if (!connect_backend(os)) return;
 //cout << "---connected" << endl;
-	refresh(endpoint);
+	auto r=refresh(endpoint);
+    if (unlikely(!r.empty())) {
+        os << r;
+        return;
+    }
 	if (detailed) {
 	    extended_balance(os);
 	}

@@ -672,7 +672,8 @@ bool c::process_evidence(peer_t *c, datagram*d) {
 bool c::process_app_query(peer_t *c, datagram*d) {
 cout << "BLOCKCHAIN: process_query " << d->service << endl;
         if (!syncdemon.in_sync()) {
-		cout << "ignoring query, I am syncing" << endl;
+        c->send(new datagram(us::gov::protocol::error,"Service temporarily unavailable. Syncing."));
+ //		cout << "ignoring query, I am syncing" << endl;
 		delete d;
 		return true;
 	}

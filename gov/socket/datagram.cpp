@@ -123,7 +123,7 @@ string c::recv(int sock) {
 		ssize_t nread = ::recv(sock, &(*this)[dend], h-dend, 0);
 		if (unlikely(nread<=0)) {
 			if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
-				cout << "socket: client: 1 EINPROGRESS fd" << sock  << endl;
+//				cout << "socket: client: 1 EINPROGRESS fd" << sock  << endl;
 //				error=4;
     			return "Timeout waiting for data from peer.";
 			}

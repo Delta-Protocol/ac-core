@@ -143,6 +143,12 @@ pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const c
         return move(ret);
     }
 
+    if (response.second->service==us::gov::protocol::error) {
+        ret.first=response.second->parse_string();
+        delete response.second;
+        return move(ret);
+    }
+
 	auto r=response.second->parse_string(); 
 	delete response.second;
 
@@ -330,6 +336,10 @@ pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, cons
 		addresses.emplace_back(i.address);
 	}
 	pair<string,wallet::accounts_query_t> r=query_accounts(peer,addresses);
+    if (unlikely(!r.first.empty())) {
+        ret.first=r.first;
+        return ret;
+    }
     auto& bases=r.second;
 //	bases.dump(cout);
 //    string err;
