@@ -1,1 +1,80 @@
-genesis directory is not meant to exist in node's git
+HOWTOFAQ
+
+The root directory of the sources is 'us', the directorory from which you should have opened this file.
+All relative directories (those not starting with /) mentioned here are based on the previous root directory.
+
+BUILD, DEBUG & INSTALL US-GOV and US-WALLET
+    make clean
+
+    build:
+    make release   or   make
+
+    binaries generated:
+        government unit:
+            gov/libusgov.so       - shared library, kernel with core algorithms.
+            govx/us-gov           - thin front-end, command-line based.
+
+        wallet unit:
+            wallet/libuswallet.so - shared library, keys housekeeping algorithms.
+            walletx/us-wallet     - thin front-end, command-line based.
+
+    run without installing:
+        bin/us-gov
+        bin/us-wallet
+        these 'binaries' are shell script wrappers
+
+    debug with gdb
+        1 edit the wrapper launchers (see just above) 
+        2 there are two lines there, one of them is commented out.
+        3 swap these comment marks. (alternamte between normal and debug modes)
+        4 run the program normally, gdb will take control of it.
+        
+    install
+        type
+        make install
+
+        the prefix is /usr/local
+
+CREATE A GENESIS BLOCK
+    genesis directory is not meant to exist in node's git
+    
+    1-build the binary
+    cd genesis
+    make clean
+    make
+    
+    2-find by yourself what is going to be the WAN Ip address of this node.
+    3.execute
+    ./genesis <IP>
+
+CONTROL DAEMONS
+    /etc/init.d/us-gov start|stop
+    /etc/init.d/us-wallet start|stop
+
+LISTENING PORTS
+    us-gov listens on port 16672
+    us-wallet listens on port 16673
+
+WHERE IS THE NODE PRIVATE KEY?
+    ~/.us/gov/k
+
+RUN AN INTROSPECTIVE SHELL INTO GOV PROCESS
+    only if you can tell the private-key of the node 
+
+    a) gov daemon is reachable at localhost
+        1 just execute 
+          us-gov 
+    b) otherwise, is reachable at a remote host
+        1 write the node key at ~/.us/gov/k        
+        2 execute 
+          us-gov -host <ipaddress>
+
+BUILD ANDROID US-CASH APP
+    apt install openjdk-10-jdk
+
+    cd cash/android
+    ./gradlew assembleRelease
+
+    find the generated apk at:
+    ./app/build/outputs/apk/release/us.cash-v1-release.apk
+    
