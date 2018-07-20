@@ -132,7 +132,7 @@ pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const c
 	pair<string,accounts_query_t> ret;
 	socket::datagram* d=addresses.get_datagram();
 	if (unlikely(!d)) {
-        ret.first="Error. Making datagram from addresses.";
+        ret.first="Error. Wallet contains no addresses.";
         return move(ret);
     }
 

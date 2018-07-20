@@ -37,6 +37,9 @@ c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
 }
 
 void c::syncd::run() {
+    static constexpr int reset_countdown=100;
+    int query_reps{reset_countdown};
+    hash_t last_queryed;
 	while(!program::_this.terminated) {
 //		cout << "SYNCD: Start" << endl;
 		hash_t he(0), ta(0), cu(0);
@@ -64,9 +67,24 @@ void c::syncd::run() {
 				}
 				else {
 					cout << "SYNCD: querying file for " << cu << endl;
+                    if (last_queryed!=cu) {
+                        last_queryed=cu;
+                        query_reps=100;
+                    }
+                    else {
+                        cout << "countown to clearing " << query_reps << endl;
+                        if (--query_reps==0) { // TODO we are in a deadlock
+                            {
+            				lock_guard<mutex> lock(mx); 
+                            head=cur=tail=0;
+                            }
+                            cout << "triggering db reset" << endl;
+                            d->clear();
+                        }
+                    }
 					d->query_block(cu);
 //					cout << "SYNCD: going to sleep for 2 secs." << endl;
-					wait(chrono::seconds(2)); //TODO better
+					wait(chrono::seconds(1)); //TODO better
 //					cout << "SYNCD: waked up " << endl;
 				}
 				if (program::_this.terminated) return;

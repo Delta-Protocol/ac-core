@@ -121,6 +121,8 @@ namespace blockchain {
 			hash_t cur;
 			hash_t tail;
 			bool resume{false};
+
+
 		};
 
 		bool need_sync(const string& target) const;
