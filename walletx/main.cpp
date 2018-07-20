@@ -303,6 +303,25 @@ void run_daemon(const params& p) {
 }
 
 
+//if a gov daemon is running in the same homedir
+//import gov priv key into the wallet
+void import_gov_k(api& x, const params& p) {
+	using us::gov::input::cfg_id;
+    string govhomedir=p.homedir+"/gov";
+    if (!cfg_id::file_exists(cfg_id::k_file(govhomedir))) {
+        return;
+    }
+    auto k=cfg_id::load_priv_key(govhomedir);
+    if (k.first) {
+        ostream nullos(0);
+        x.add_address(k.second,nullos);
+    }
+    else {
+        cerr << "Error. cannot read key file " << cfg_id::k_file(govhomedir) << endl;
+        exit(1);
+    }
+}
+
 void run_local(string command, args_t& args, const params& p) {
 	auto homedir=p.homedir+"/wallet";
 	auto gov_homedir=p.homedir+"/wallet";
@@ -311,6 +330,7 @@ void run_local(string command, args_t& args, const params& p) {
 	if (p.offline) {
 		cfg0::load(homedir);
 		papi=new local_api(homedir,p.backend_host,p.backend_port); //rpc to node
+        import_gov_k(*papi,p);
 	}
 	else {
 		using us::gov::input::cfg_id;
