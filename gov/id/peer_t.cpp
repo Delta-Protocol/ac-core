@@ -171,7 +171,8 @@ const c::keys& c::get_keys() const {
 }
 
 bool c::process_work(datagram*d) {
-    if (b::process_work(d)) return true;
+    //if (b::process_work(d)) return true;
+
     switch(d->service) {
         case protocol::id_request: process_request(d,get_keys()); break;
         case protocol::id_peer_challenge: process_peer_challenge(d,get_keys()); break;

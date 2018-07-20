@@ -30,7 +30,6 @@ void c::add(app*app) {
 		cerr << "Fatal error: App collision. Two apps with same id." << endl;
 		exit(1);
 	}
-	//app->parent=this;
 	apps_.emplace(app->get_id(),app);
 }
 
@@ -39,12 +38,12 @@ c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
 
 void c::syncd::run() {
 	while(!program::_this.terminated) {
-		cout << "SYNCD: Start" << endl;
+//		cout << "SYNCD: Start" << endl;
 		hash_t he(0), ta(0), cu(0);
 		{
 			vector<hash_t> patches;
 			while(true) {
-				cout << "SYNCD: begin iteration " << endl;
+//				cout << "SYNCD: begin iteration " << endl;
 				{
 				lock_guard<mutex> lock(mx); 
 				if (cur==tail) break;
@@ -55,10 +54,10 @@ void c::syncd::run() {
 				cu=cur;
 				}
 				if (cu==he) patches.clear();
-				cout << "SYNCD: head:" << he << " cur: " << cu << " tail: " << ta << " ;" << patches.size() << " patches" << endl;
+//				cout << "SYNCD: head:" << he << " cur: " << cu << " tail: " << ta << " ;" << patches.size() << " patches" << endl;
 				hash_t prev;
 				if (d->get_prev(cu,prev)) { //file exists, read it 
-					cout << "SYNCD: found file for " << cu << endl;
+//					cout << "SYNCD: found file for " << cu << endl;
 					patches.push_back(cu);
 					lock_guard<mutex> lock(mx); 
 					cur=prev;
@@ -66,9 +65,9 @@ void c::syncd::run() {
 				else {
 					cout << "SYNCD: querying file for " << cu << endl;
 					d->query_block(cu);
-					cout << "SYNCD: going to sleep for 2 secs." << endl;
+//					cout << "SYNCD: going to sleep for 2 secs." << endl;
 					wait(chrono::seconds(2)); //TODO better
-					cout << "SYNCD: waked up " << endl;
+//					cout << "SYNCD: waked up " << endl;
 				}
 				if (program::_this.terminated) return;
 			}
@@ -82,14 +81,14 @@ void c::syncd::run() {
                 }
 			}
 		}
-		cout << "SYNCD: going to sleep indefinitely" << endl;
+//		cout << "SYNCD: going to sleep indefinitely" << endl;
 		wait();
-		cout << "SYNCD: waked up " << endl;
+//		cout << "SYNCD: waked up " << endl;
 	}
 }
 
 void c::syncd::update(const diff::hash_t& h, const diff::hash_t& t) {
-cout << "syncd: UPDATE head " << h << " tail " << t << endl;
+//cout << "syncd: UPDATE head " << h << " tail " << t << endl;
 	{
 	lock_guard<mutex> lock(mx); 
 	cur=head=h;
@@ -99,7 +98,7 @@ cout << "syncd: UPDATE head " << h << " tail " << t << endl;
 	update();
 }
 void c::syncd::update(const diff::hash_t& t) {
-cout << "syncd: UPDATE tail " << t << endl;
+//cout << "syncd: UPDATE tail " << t << endl;
 	{
 	lock_guard<mutex> lock(mx); 
 	tail=t;
@@ -109,7 +108,7 @@ cout << "syncd: UPDATE tail " << t << endl;
 	update();
 }
 void c::syncd::update() {
-	cout << "SYNCD: received wakeup signal " << endl;
+//	cout << "SYNCD: received wakeup signal " << endl;
 	cv.notify_all();
 }
 void c::syncd::wait() {
@@ -143,7 +142,7 @@ void c::syncd::dump(ostream& os) const {
 
 #include <fstream>
 bool c::patch_db(const vector<diff::hash_t>& patches) { //this is syncd thread
-	cout << "Applying " << patches.size() << " patches" << endl;
+cout << "Applying " << patches.size() << " patches" << endl;
 	for (auto i=patches.rbegin(); i!=patches.rend(); ++i) {
 		const diff::hash_t& hash=*i;
 		string filename=blocksdir()+"/"+hash.to_b58();
@@ -177,7 +176,7 @@ bool c::patch_db(const vector<diff::hash_t>& patches) { //this is syncd thread
 	lock_guard<mutex> lock(mx_import); 
 	lbi=last_block_imported;
 	}
-cout << "Updating tail of syncd: " << lbi << endl;
+//cout << "Updating tail of syncd: " << lbi << endl;
 	syncdemon.update(lbi);	
 	return true;
 }
@@ -203,25 +202,25 @@ diff::hash_t c::get_last_block_imported() const {
 
 
 void c::stage1(cycle_t& data) {
-cout << "stage1 NB1 " << data.new_block << endl;
+//cout << "stage1 NB1 " << data.new_block << endl;
 	if (!data.new_block) return;
 	if (auth_app->my_stage()!=peer_t::node) return;
-cout << "stage1 VOTETIP " << endl;
+//cout << "stage1 VOTETIP " << endl;
 	vote_tip(*data.new_block);
-cout << "NB1 " << data.new_block << endl;
-cout << "/stage1" << endl;
+//cout << "NB1 " << data.new_block << endl;
+//cout << "/stage1" << endl;
 }
 
 bool c::stage2(cycle_t& cycle) {
-cout << "stage2 votes.size=" << votes.size() << endl;
+//cout << "stage2 votes.size=" << votes.size() << endl;
 	diff::hash_t hash=votes.select();
-	cout << "NB Voting process result: diff with hash " << hash << endl;
-	cout << "Last block imported (syncd tail) before importing=" << get_last_block_imported() << endl;
+cout << "Voting process result: diff hash " << hash << endl;
+//	cout << "Last block imported (syncd tail) before importing=" << get_last_block_imported() << endl;
 	if (!hash.is_zero()) {
 		cout << "NB2 " << cycle.new_block << endl;
 
 		if (cycle.new_block) {
-			cout << "cycle.new_block->hash() " << cycle.new_block->hash() << endl;
+//			cout << "cycle.new_block->hash() " << cycle.new_block->hash() << endl;
 			if (hash==cycle.new_block->hash()) {
 		//cout << "save" << endl;
 				save(*cycle.new_block);
@@ -234,7 +233,7 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 			delete cycle.new_block;
 			cycle.new_block=0;
 		}
-		cout << "Last block imported before updating syncd (syncd tail)=" << get_last_block_imported() << endl;
+//		cout << "Last block imported before updating syncd (syncd tail)=" << get_last_block_imported() << endl;
 		syncdemon.update(hash,get_last_block_imported()); //head,tail
 		while (!syncdemon.in_sync() && !program::_this.terminated) {
 			cout << "syncing" << endl;
@@ -243,13 +242,10 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 		}
 		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false;
 	}
-//	if (auth_app->my_stage()!=peer_t::node) return false;
 
-	//int min_in_week=0;
-	//b->checkpoint=min_in_week==0; //once a week the closure block contains a ref to a checkpoint block
     if (!auth_app->is_node()) return false;
 
-	auto* mg=create_local_deltas(); //send my gut to the network
+	auto* mg=create_local_deltas();
 	if (mg!=0) {
 		send(*mg);
 		{
@@ -262,7 +258,7 @@ cout << "stage2 votes.size=" << votes.size() << endl;
 }
 
 void c::stage3(cycle_t& cycle) {
-cout << "stage3 NB3 " << cycle.new_block << endl;
+//cout << "stage3 NB3 " << cycle.new_block << endl;
 	assert(cycle.new_block==0);
 	{
 	lock_guard<mutex> lock(mx_pool);
@@ -270,7 +266,7 @@ cout << "stage3 NB3 " << cycle.new_block << endl;
 	cycle.new_block=pool;
 	pool=new diff();
 	}
-cout << "NB3 2 " << cycle.new_block << endl;
+//cout << "NB3 2 " << cycle.new_block << endl;
 	cycle.new_block->prev=get_last_block_imported();
 }
 
@@ -355,10 +351,9 @@ string c::blocksdir() const {
 void c::save(const diff& bl) const {
 	ostringstream fn;
 	fn << blocksdir()+"/"+bl.hash().to_b58();
-	
+#ifdef DEBUG	
 	{
-cout << "------------RBF SAVE CHECK------------" << endl;
-cout << "file " << fn.str() << endl;
+cout << "------------RBF SAVE CHECK------------" << "file " << fn.str() << endl;
 	ofstream os(fn.str());
 	bl.to_stream(os);
 	}
@@ -390,6 +385,7 @@ cout << "file " << fn.str() << endl;
 		assert(false);
 	}
 	delete b;	
+#endif
 }
 
 string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
@@ -432,13 +428,11 @@ bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
 	ifstream is(filename);
 	if (!is.good()) return false;
 	is >> prev;
-	//if (prev.size()==1) prev.clear(); //genesis block
 	return true;
 }
 
 peer_t* c::get_random_edge() {
-//	vector<peer_t*> n=get_nodes();
-    auto n=get_people(); //peerd.in_service();   sysops are not taken into account
+    auto n=get_people(); //sysops are not taken into account
     cout << n.size() << " nodes available" << endl;
 	if (n.empty()) return 0;
 	uniform_int_distribution<> d(0, n.size()-1);
@@ -477,7 +471,6 @@ void c::update_peers_state() {
 	}
 }
 
-
 void c::send(const local_deltas& g, peer_t* exclude) {
 	ostringstream os;
 	g.to_stream(os);
@@ -502,7 +495,7 @@ local_deltas* c::create_local_deltas() {
 	{
     lock_guard<mutex> lock(peerd.mx_evidences); //pause reception of evidences while changing app pools
 	for (auto&i:apps_) {
-  cout << "===>create app gut for app " << i.first << endl;
+//  cout << "===>create app gut for app " << i.first << endl;
 		auto* amg=i.second->create_local_delta(); //
 		if (amg!=0) {
 			mg->emplace(i.first,amg);
@@ -521,7 +514,6 @@ local_deltas* c::create_local_deltas() {
 
 void c::vote_tip(const diff& b) {
 	const diff::hash_t& h=b.hash();
-	//assert(!h.empty());
 	votes.add(id.pub.hash(),h);
 
 cout << "voting for tip be: " << h << endl;
@@ -564,16 +556,9 @@ cout << "Received vote from " << pubkey << " head be " << block_hash_b58 << endl
 void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 	auto s=d->parse_string();
 	delete d;
-//cout << "RECeived miner gut" << endl;
-//cout << "----" << endl;
-//cout << s << endl;
-//cout << "----" << endl;
 	istringstream is(s);
 	local_deltas* g=local_deltas::from_stream(is);
 	if (!g) return;
-//cout << "----" << endl;
-//g->to_stream(cout);
-//cout << "----" << endl;
 	/// discard if not properly signed
 	if (unlikely(!g->verify())) {
 		delete g;
@@ -611,12 +596,6 @@ void c::process_query_block(peer_t *c, datagram*d) {
 		cout << "block not found in HD, ignoring." << endl;
 		return;
 	}
-/*
-	cout << "Sending content of block " << hash_b58 << endl;
-	cout << "---BEGIN--- " << content.size() << " bytes" << endl;
-	cout << content << "<" << endl;
-	cout << "---END---" << endl;
-*/
 	c->send(new datagram(protocol::block,content));
 }
 
@@ -624,12 +603,6 @@ void c::process_block(peer_t *c, datagram*d) {
 	auto content=d->parse_string();
 	delete d;
 	istringstream is(content);
-/*
-	cout << "Received content of block " << endl;
-	cout << "---BEGIN--- " << content.size() << " bytes" << endl;
-	cout << content << "<" << endl;
-	cout << "---END---" << endl;
-*/
 	diff* b=diff::from_stream(is);
 	if (b==0) return;
 	cout << "Received content of block " << b->hash() << " from " << c->addr << endl;
@@ -637,22 +610,21 @@ void c::process_block(peer_t *c, datagram*d) {
 
 	string filename=blocksdir()+"/"+b->hash().to_b58();
 	if (!file_exists(filename)) { //TODO write under different name and then rename atomically
-		cout << "Saving it to disk " << filename << endl;
+//		cout << "Saving it to disk " << filename << endl;
 		{
 		ofstream os(filename);
 		os << content;
 		}
-		cout << "waking up sync demon after saving the block" << endl;
+//		cout << "waking up sync demon after saving the block" << endl;
 		syncdemon.update();
 	}
-	else {
-		cout << "File exists, ignoring. " << filename << endl;
-	}
+//	else {
+//		cout << "File exists, ignoring. " << filename << endl;
+//	}
 	delete b;
 }
 
 bool c::networking::process_evidence(relay::peer_t *c, datagram*d) {
-//cout << "PROCESSING EVIDENCE " << d->service << endl;
 	return parent->process_evidence(reinterpret_cast<peer_t*>(c),d);
 }
 
@@ -674,17 +646,14 @@ cout << "QUERY PROTOCOL " << d->service << endl;
 cout << "WARNING, NOT handled at all " << d->service << endl;
 	return false;
 }
+
 bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
-//cout << "BLOCKCHAIN: A" << endl;
 	if (b::process_work(c,d)) return true;
-//cout << "BLOCKCHAIN: B" << endl;
 	return false;
 }
 
-
 bool c::process_evidence(peer_t *c, datagram*d) {
-	send(*d, c); //relay
-
+	send(*d, c); //relay TODO - check relay daemon
         if (!syncdemon.in_sync()) {
 		cout << "ignoring evidence processing, I am syncing" << endl;
 		delete d;
@@ -695,7 +664,6 @@ bool c::process_evidence(peer_t *c, datagram*d) {
 	for (auto&i:apps_) {
 		if (i.second->process_evidence(c,d)) {
 			processed=true;
-			//break; //any app can use evidences designed by other apps
 		}
 	}
 	return processed;
@@ -710,22 +678,18 @@ cout << "BLOCKCHAIN: process_query " << d->service << endl;
 	}
 	bool processed=false;
 	for (auto&i:apps_) {
-//		if (!i.second->in_service()) continue;
 		if (i.second->process_query(c,d)) {
 			processed=true;
 			break;
 		}
 	}
-//cout << "d" << endl;
-
 	return processed;
 }
 
 bool c::process_work(peer_t *c, datagram*d) {
-cout << "BLOCKCHAIN: PW process_work " << d->service << endl;
-
+//cout << "BLOCKCHAIN: PW process_work " << d->service << endl;
 	if (d->service==protocol::sysop) {
-cout << "PW sysop" << endl;
+//cout << "PW sysop" << endl;
 		bool alowed_sysop=sysop_allowed;
 		if (c->stage==peer_t::sysop) { //Is peer a sysop?
 			if (!sysop_allowed) {
@@ -738,7 +702,7 @@ cout << "PW sysop" << endl;
 			return sysops.process_work(c, d); //traslate the msg to sysopland
 		}
 		else {
-cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
+//cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
 			delete d;
 			c->disconnect();
 //			c->send(new datagram(protocol::sysop,"Sysop operation is not allowed."));
@@ -768,10 +732,8 @@ cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
 		}
 	}
 	if (!syncdemon.in_sync()) {
-		//delete d;
 		cout << "missing command cause I am syncing" << endl;
-		//return true;
-		return false; //
+		return false;
 	}
 	switch(d->service) {
 		case protocol::local_deltas: {
@@ -790,7 +752,7 @@ void c::set_last_block_imported_(const diff::hash_t& h) {
 }
 
 void c::clear() {
-	//cout << "DB cleared" << endl; //TODO
+//cout << "DB cleared" << endl; //TODO
 	for (auto&i:apps_) {
         i.second->clear();
 	}
@@ -805,8 +767,7 @@ void c::set_last_block_imported(const diff::hash_t& h) {
 
 bool c::import(const diff& b) {
         lock_guard<mutex> lock(mx_import); 
-	cout << "blockchain: importing diff " << b.hash() << endl;
-
+//	cout << "blockchain: importing diff " << b.hash() << endl;
         if (b.prev!=last_block_imported) {
                 cout << "block not in sequence." << b.prev << " " << last_block_imported << endl;
                 return false;
@@ -821,22 +782,9 @@ bool c::import(const diff& b) {
 		if (a->second==auth_app) {
 			update_peers_state();
 		}
-		//for (auto& g: b) {
-		//	auto ag=g.second->get_app_gut(i.second->get_id());
-		//	if (ag!=0) i.second->import(*ag);
-		//}
-		//i.second->import(*ag);
-		//auto* cg=i.second->create_closure_gut(b);
-		//if (cg!=0) i.second->import(*cg);
 	}
 	set_last_block_imported_(b.hash());
-	//syncdemon.update(b.hash()); //tail
-
-	//cached_dbhash_ok=false;
-
 	return true;
-
-//return false;
 }
 
 
@@ -844,11 +792,11 @@ void c::votes_t::clear() {
 	lock_guard<mutex> lock(mx);
 	b::clear();
 }
+
 bool c::votes_t::add(const pubkey_t::hash_t& h,const diff::hash_t& v) {
-cout << "Adding vote " << h << endl;
+//cout << "Adding vote " << h << endl;
 	auto i=find(h);
 	if (i!=end()) {
-		//++i->second.second;
 		return false; //not new to me
 	}
 	emplace(h,make_pair(v,1));
@@ -864,11 +812,11 @@ diff::hash_t c::votes_t::select() {
 		auto a=x.find(i.second.first);
 		if (a!=x.end()) {
 			a->second++;
-			cout << "VOTE count for " << i.second.first << " is " << a->second << endl;
+//			cout << "VOTE count for " << i.second.first << " is " << a->second << endl;
 		}
 		else {
 			x.emplace(i.second.first,1);
-			cout << "VOTE count for " << i.second.first << " is 1" << endl;
+//			cout << "VOTE count for " << i.second.first << " is 1" << endl;
 		}
 	}
 	}
@@ -879,7 +827,6 @@ diff::hash_t c::votes_t::select() {
 		if (i.second>=max) {
 			max=i.second;
 			hash=&(i.first);
-//cout << "xx " << i.second.first << endl;
 		}
 	}
 	auto ans=*hash;
@@ -889,7 +836,7 @@ diff::hash_t c::votes_t::select() {
 
 bool c::sysops_t::process_work(peer_t *p, datagram*d) {
 	if (d->service!=protocol::sysop) return false;
-cout << "processing sysop data request " << d->parse_string() << endl;
+//cout << "processing sysop data request " << d->parse_string() << endl;
 	lock_guard<mutex> lock(mx); 
 	auto i=find(p);
 	if (i==end()) {
@@ -897,7 +844,7 @@ cout << "processing sysop data request " << d->parse_string() << endl;
 	}
 	string response=i->second.command(d->parse_string());
 	delete d;
-cout << "sending response: " << response << endl;
+//cout << "sending response: " << response << endl;
 	p->send(new datagram(us::gov::protocol::sysop,response));
 	return true;
 }
@@ -959,5 +906,4 @@ void c::print_performances(ostream& os) const {
 	os << "        4m ago: Yes" << endl;
 	os << "        5m ago: No" << endl;
 }
-
 

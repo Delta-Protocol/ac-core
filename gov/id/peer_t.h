@@ -37,7 +37,7 @@ namespace id {
 
 		virtual void on_connect() override; //backcalled only on the initiator.
 
-        virtual bool process_work(datagram*d) override;
+        bool process_work(datagram*d);
 
 		void process_request(datagram* d, const keys&);
 		void process_peer_challenge(datagram* d, const keys&);

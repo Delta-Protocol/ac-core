@@ -43,12 +43,8 @@ namespace peer {
 
 		virtual void on_connect() override;
 
-		virtual bool process_work(datagram* d);
-		void process_pong();
+		//bool process_work(datagram* d);
 
-		bool is_slow() const; //take a lock before call
-
-		bool ping();
 		void set_mode(int m) {
 			lock_guard<mutex> lock(mx);
 			mode=m;
@@ -61,7 +57,6 @@ namespace peer {
 		chrono::steady_clock::time_point sent_ping;
 		chrono::steady_clock::time_point since;
 		int mode; //0 tor; 1 ip4
-		chrono::microseconds latency;
 		stage_t stage;
 
 	};

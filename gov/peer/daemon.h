@@ -56,7 +56,7 @@ namespace peer {
 
 		virtual string get_random_peer(const unordered_set<string>& exclude) const { return ""; }
 
-		virtual bool process_work(socket::peer_t *c, datagram*d) override;
+//		virtual bool process_work(socket::peer_t *c, datagram*d) override;
 
 		vector<peer_t*> in_service() const;
 		vector<peer_t*> in_service(const pub_t& a) const;

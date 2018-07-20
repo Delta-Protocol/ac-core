@@ -56,23 +56,17 @@ c::pub_t c::adjust_peer_number() {
 	purge_peers(a);
 	return move(a);
 }
-
+/*
 bool c::process_work(socket::peer_t *c, datagram*d) {
+    if (b::process_work(c,d)) return true;
+
 	bool ispong=d->service==protocol::pong;
 	if (c->process_work(d)) {
-/*
-		if (ispong) {
-			//{
-			//unique_lock<mutex> lock(mx);
-			_ready.load(true);
-			//}
-			cv.notify_all(); //wake up to start with auth
-		}
-*/
 		return true;
 	}
 	return false;
 }
+*/
 
 void c::add_peers(pub_t& a) {
 cout << "add peers" << endl;

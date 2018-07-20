@@ -5,12 +5,8 @@
 
 namespace us { namespace gov {
 namespace protocol {
-	static constexpr uint16_t protocol_suffix{0};
-	static inline bool is_node_protocol(const uint16_t& i) { return (i&3)==protocol_suffix; } 
 
-	static constexpr uint16_t peer_base{100};
-	static constexpr uint16_t ping{((peer_base+1)<<2)+protocol_suffix};
-	static constexpr uint16_t pong{((peer_base+2)<<2)+protocol_suffix};
+	static constexpr uint16_t peer_base{300};
 }
 }}
 

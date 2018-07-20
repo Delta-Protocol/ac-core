@@ -126,7 +126,6 @@ inline istream& operator >> (istream& is, ec::keys::pub_t& k) {
         is.setstate(ios_base::failbit);
         k.zero();
     }
-//	k.set_b58(s);
 	return is;
 }
 
@@ -142,7 +141,6 @@ inline istream& operator >> (istream& is, ec::keys::priv_t& k) {
         is.setstate(ios_base::failbit);
         k.zero();
     }
-// 	k.set_b58(s);
 	return is;
 }
 
