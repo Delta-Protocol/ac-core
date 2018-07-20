@@ -79,6 +79,11 @@ void c::keys::dump(ostream& os) const {
 	os << endl;
 }
 
+c::keys::pub_t& c::keys::pub_t:: operator =(const string& b58) {
+    from_b58(b58);
+    return *this;
+}
+
 
 c::keys::pub_t::hash_t c::keys::pub_t::compute_hash() const {
     if (unlikely(!valid)) return 0;

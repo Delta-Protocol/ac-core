@@ -183,7 +183,7 @@ bool c::process_work(datagram*d) {
     return true;
 }
 
-string c::run_auth() {
+string c::run_auth_responder() {
     assert(parent==0); //this object should not be managed by a daemon to use this function
 
     while(!program::_this.terminated) {

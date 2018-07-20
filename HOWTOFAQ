@@ -35,6 +35,12 @@ BUILD, DEBUG & INSTALL US-GOV and US-WALLET
 
         the prefix is /usr/local
 
+BUILD THE JAVA SDK
+    cd sdk/java
+    ./make
+    will jenerate the jar:
+    us-wallet-sdk.jar
+
 CREATE A GENESIS BLOCK
     genesis directory is not meant to exist in node's git
     

@@ -35,6 +35,7 @@ struct ec {
 				}
 				return hash_cached;
 			}
+            pub_t& operator =(const string&);
 			hash_t compute_hash() const;
 			string to_b58() const;
 			string to_hex() const;

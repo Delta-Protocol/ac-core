@@ -131,7 +131,7 @@ void open_shell(const params&p) {
 		cerr << "Cannot connect to " << p.sysophost << ":" << p.port << ". " << r << endl;
 		return;
 	}
-	r=peer.run_auth();
+	r=peer.run_auth_responder();
 	if (!r.empty()) {
         p.dump(cerr);
 		cerr << r << endl;

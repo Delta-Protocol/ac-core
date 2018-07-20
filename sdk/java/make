@@ -25,6 +25,7 @@ fi
 echo "using javac=$javac"
 
 function all {
+    clean
 	getdeps
 	mkdir -p classes
 	$javac -d classes -cp "libs/core-1.58.0.0.jar:libs/pg-1.54.0.0.jar:libs/pkix-1.54.0.0.jar:libs/prov-1.58.0.0.jar:classes" src/*.java

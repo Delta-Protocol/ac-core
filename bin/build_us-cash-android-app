@@ -1,3 +1,6 @@
+cd sdk/java
+./make
+cd ../..
 
 cd cash/android
 ./gradlew assembleRelease

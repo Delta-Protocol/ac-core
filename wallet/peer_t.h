@@ -16,6 +16,16 @@ struct peer_t: auth::peer_t {
         return static_cast<wallet_daemon*>(parent)->authorize(p);
    }
    virtual const keys& get_keys() const;
+
+
+    //TODO remove when java implements run_auth_responder
+   virtual string run_auth_responder() override {
+        stage_peer=verified;
+        stage_me=verified;
+        pubkey="25hWPEdydrHRapxuh4DjW5K5W4mHkNefew1zZ63dkGuoc";
+        return "";
+   }
+
 };
 
 }}

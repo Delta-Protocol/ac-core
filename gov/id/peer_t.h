@@ -23,7 +23,7 @@ namespace id {
 		typedef keys::pub_t pub_t;
 		using datagram=socket::datagram;
 
-		enum stage_t {
+		enum stage_t { //coupled with sdk/java/src/Wallet.java
 			anonymous=0,
 			verified,
 			verified_fail,
@@ -57,7 +57,7 @@ namespace id {
 		daemon* get_parent() { return reinterpret_cast<daemon*>(parent); }
 
         virtual const keys& get_keys() const;
-        virtual string run_auth();
+        virtual string run_auth_responder();
 
 		/// For every edge in the graph of nodes there are two nodes on each end, each node has an instance of this class, 
 		/// If one of these nodes is me and the other is peer

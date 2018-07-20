@@ -26,8 +26,9 @@ bool c::connect_walletd(ostream&os) {
 		os << "Error. " << r;
         return false;
     }
+
 //cout << "---running auth" << endl;
-    r=run_auth();
+    r=run_auth_responder();
 //cout << "---run auth " << id::peer_t::stagestr[stage_me] << " " << id::peer_t::stagestr[stage_peer] << endl;
     if (unlikely(!r.empty())) {
          os << r;
@@ -37,6 +38,7 @@ bool c::connect_walletd(ostream&os) {
          os << "Auth failed";
          return false;
     }
+
     connected_since=chrono::steady_clock::now();
 //cout << "---connected" << endl;
     return true;
