@@ -17,7 +17,7 @@ int main() {
 	
 
 	testing_socket_datagram(); 		//socket --works!
-	//testing_socket_communication(); 	--errors--
+	testing_socket_communication(); 	//--errors--
 
 	
 	//test_symmetric_encryption();

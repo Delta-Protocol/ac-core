@@ -218,11 +218,11 @@ void testing_wallet_api()
 	
 //   [ip-wallet_Host] [Wallet_port] [g_port]      [address]                 [amoundSend]  [fees] 	          [privKey] 			  [timer]   [sec] [addToWallet]
 
-	test("127.0.0.1" , 16673 , 16671 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000000   ,   1000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 70 , false );
-	test("127.0.0.1" , 16674 , 16670 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000000   ,   2000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 70 , false );
-	test("127.0.0.1" , 16675 , 16669 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  3000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 70 , false );
-	test("127.0.0.1" , 16676 , 16671 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  4000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 70 , false );
-	test("127.0.0.1" , 16677 , 16670 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  1234560   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 70 , false );
+	test("127.0.0.1" , 16673 , 16671 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000000   ,   1000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );
+	test("127.0.0.1" , 16674 , 16670 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000000   ,   2000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );
+	test("127.0.0.1" , 16675 , 16669 , "B2D7drjckG2Vdju2GQeYWSA4EEJ"  ,  3000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
+	test("127.0.0.1" , 16676 , 16671 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  4000000   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
+	test("127.0.0.1" , 16677 , 16670 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  1234560   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
 
       }
 }
