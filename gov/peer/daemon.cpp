@@ -14,13 +14,7 @@ c::daemon(uint16_t port, uint16_t edges): edges(edges), b(port,edges) {
 
 c::~daemon() {
 }
-/*
-socket::client* c::create_client(int sock) {
-	auto p=new peer_t(sock);
-	p->parent=this;
-	return p;
-}
-*/
+
 void c::daemon_timer() { // network mutation
     cout << "Connecting to new Neighbours" << endl;
 	pub_t p=adjust_peer_number();
@@ -36,18 +30,18 @@ void c::check_latency(const pub_t& a) {
 	}
 }
 
-c::pub_t c::connected_peers() const { 
+c::pub_t c::connected_peers() const {
 	auto a=active();
 	pub_t r;
 	for (auto&i:a) {
 		if (i->stage==peer_t::connected) r.push_back(i);
 	}
-	return move(r); 
+	return move(r);
 }
 
-c::pub_t c::active() const { 
+c::pub_t c::active() const {
 	auto a=b::active();
-	return move( reinterpret_cast<pub_t&>(a) ); 
+	return move( reinterpret_cast<pub_t&>(a) );
 }
 
 c::pub_t c::adjust_peer_number() {
@@ -56,17 +50,6 @@ c::pub_t c::adjust_peer_number() {
 	purge_peers(a);
 	return move(a);
 }
-/*
-bool c::process_work(socket::peer_t *c, datagram*d) {
-    if (b::process_work(c,d)) return true;
-
-	bool ispong=d->service==protocol::pong;
-	if (c->process_work(d)) {
-		return true;
-	}
-	return false;
-}
-*/
 
 void c::add_peers(pub_t& a) {
 cout << "add peers" << endl;
