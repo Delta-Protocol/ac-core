@@ -232,11 +232,10 @@ void c::stage1(cycle_t& data) {
 bool c::stage2(cycle_t& cycle) {
 //cout << "stage2 votes.size=" << votes.size() << endl;
 	diff::hash_t hash=votes.select();
-cout << "Voting process result: diff hash " << hash << endl;
+cout << "Voting process result: diff " << hash << endl;
 //	cout << "Last block imported (syncd tail) before importing=" << get_last_block_imported() << endl;
 	if (!hash.is_zero()) {
-		cout << "NB2 " << cycle.new_block << endl;
-
+//		cout << "NB2 " << cycle.new_block << endl;
 		if (cycle.new_block) {
 //			cout << "cycle.new_block->hash() " << cycle.new_block->hash() << endl;
 			if (hash==cycle.new_block->hash()) {
@@ -534,7 +533,7 @@ void c::vote_tip(const diff& b) {
 	const diff::hash_t& h=b.hash();
 	votes.add(id.pub.hash(),h);
 
-cout << "voting for tip be: " << h << endl;
+cout << "voting for tip: " << h << endl;
 	string signature=crypto::ec::instance.sign_encode(id.priv,h.to_b58());
 	ostringstream os;
 	os << h << " " << id.pub << " " << signature;
@@ -624,7 +623,6 @@ void c::process_block(peer_t *c, datagram*d) {
 	diff* b=diff::from_stream(is);
 	if (b==0) return;
 	cout << "Received content of block " << b->hash() << " from " << c->addr << endl;
-
 
 	string filename=blocksdir()+"/"+b->hash().to_b58();
 	if (!file_exists(filename)) { //TODO write under different name and then rename atomically
