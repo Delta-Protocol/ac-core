@@ -43,7 +43,6 @@ void c::run() {
 
 void c::basic_auth_completed(peer_t* p) {
 //	cout << "APP auth_app, basic_auth_completed for " <<  p->pubkey << endl;
-
 	if (p->pubkey==node_pubkey) { //parent->peerd.id.pub) {  ///sysop connection, this connection requires a shell
 		p->stage=peer_t::sysop;
 //		cout << "SYSOP " << endl;
@@ -221,8 +220,7 @@ blockchain::peer_t::stage_t app::db_t::get_stage(const pubkeyh_t& key) const {
 
 
 us::gov::blockchain::app::local_delta* c::create_local_delta() {
-	cout << "app: auth: create_local_delta " << endl;
-
+	//cout << "app: auth: create_local_delta " << endl;
 	add_policies();
 	lock_guard<mutex> lock(mx_pool);
 	auto full=pool;
