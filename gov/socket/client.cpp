@@ -206,6 +206,7 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
             break;
         }
     }
+cout << "SOCKET: recv datagram " << r.second->service << " of size " << r.second->size() << " bytes. HASH " << r.second->compute_hash() << d->compute_hash() << endl;
     return move(r);
 }
 
@@ -258,6 +259,8 @@ string c::send(datagram* d) {
     if (unlikely(!r.empty())) {
         disconnect();
     }
+cout << "SOCKET: sent datagram " << d->service << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << d->compute_hash() << endl;
+    delete d;
     return r;
 }
 
@@ -270,6 +273,7 @@ string c::send(const datagram& d) {
     if (unlikely(!r.empty())) {
         disconnect();
     }
+cout << "SOCKET: sent datagram " << d.service << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << d.compute_hash() << endl;
 	return r;
 }
 
