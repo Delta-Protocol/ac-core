@@ -32,14 +32,10 @@ namespace socket {
 
 
 		bool completed() const;
-		
 		hash_t compute_hash() const;
 
-//		void* wp();
-//		uint32_t remaining() const;
-		string send(int sock) const;
-		string recv(int sock);
-		string recv(int sock, int timeout_seconds);
+		string sendto(int sock) const;
+		string recvfrom(int sock);
 
 		vector<string> parse_strings() const;
 		string parse_string() const;

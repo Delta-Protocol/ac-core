@@ -39,16 +39,8 @@ c::~client() {
 string c::address() const {
 	struct sockaddr_storage addr;
 	socklen_t len=sizeof addr;
-//    cout << "========================================================" << endl;
-//    cout << "len0 " << len << endl;
 	int a=getpeername(sock, (struct sockaddr*)&addr, &len);
 	if (a!=0) return "";
-    //len contains the actual size of the name returned in bytes
-//    cout << "len  " << len << endl;
-//    cout << "INET6_ADDRSTRLEN " << INET6_ADDRSTRLEN << endl;
-
-
-//	char ipstr[INET6_ADDRSTRLEN]; // deal with both IPv4 and IPv6
 	char ipstr[len]; // deal with both IPv4 and IPv6
 	if (addr.ss_family == AF_INET) {
 	    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
@@ -67,11 +59,9 @@ string c::connect(const string& host, uint16_t port, bool block) {
 	lock_guard<mutex> lock(mx);
 	string r=init_sock(host, port, block);
 	if (!r.empty()) {
-//        cerr << "Could not init socket for " << host << ":" << port << endl;
         return r;
     }
 	addr=host;
-//cout << "calling on_connect" << endl;
     on_connect();
 	return "";
 }
@@ -117,8 +107,6 @@ string c::init_sock(const string& host, uint16_t port, bool block) {
 	int r=::connect(sock, (struct sockaddr *) &servername, sizeof (servername));
 	if (unlikely(r<0)) {
 		if (errno==EINPROGRESS) {
-//			cout << "socket: client: ::connect in progress fd" << sock  << endl;
-
             typedef chrono::high_resolution_clock clock;
             using namespace chrono_literals;
 
@@ -128,19 +116,15 @@ string c::init_sock(const string& host, uint16_t port, bool block) {
             struct sockaddr_storage addr;
             socklen_t lena=sizeof addr;
             while(true) {
-//    			cout << "socket: client: ::connect in progress fd" << sock  << " looping" << endl;
 	            int a=getpeername(sock, (struct sockaddr*)&addr, &lena);
 	            if (a==0) break;
-                if (chrono::duration_cast<std::chrono::milliseconds>(clock::now() - t1).count()>500) {
-           			//cout << "socket: client: ::connect in progress fd" << sock  << " timeout!" << endl;
+	            if (chrono::duration_cast<std::chrono::milliseconds>(clock::now() - t1).count()>500) {
                     return "Error. Timeout obtaining peername";
                 }
                 this_thread::sleep_for(10ms);
             }
-//   			cout << "socket: client: ::connect in progress fd" << sock  << " no longer INPROGRESS" << endl;
-			return "";
+	     return "";
 		}
-		//cout << "socket: client: ::connect failed " << sock << " error: " << r << endl;
 		::close(sock);
 		sock=0;
         ostringstream os;
@@ -154,10 +138,7 @@ string c::init_sock(const string& host, uint16_t port, bool block) {
 	return "";
 }
 
-//busy-polling all sockets http://www.wangafu.net/~nickm/libevent-book/01_intro.html
-
 pair<string,datagram*> c::send_recv(datagram* d) {
-//cout << "send_recv" << endl;
     pair<string,datagram*> ans;
     ans.first=send(d);
     if (unlikely(!ans.first.empty())) {
@@ -167,33 +148,11 @@ pair<string,datagram*> c::send_recv(datagram* d) {
     return recv();
 }
 
-
-/*
-string c::send(int service, const string& payload) {
-	datagram* d=new datagram(service,payload);
-    auto r=send(d);
-	if (unlikely(!r.empty())) {
-		delete d;
-		return move(r);
-	}
-	return "";
-}
-
-string c::send(char d) const { 
-	if (!sock) {
-		return "Error. Not connected client.";
-	}
-	return io::send(sock,d); 
-}
-*/
-
 pair<string,datagram*> c::recv() { //caller owns the returning object
-//cout << "RECEIVING" << endl;
     pair<string,datagram*> r;
     r.second=new datagram();
     while(!program::_this.terminated) {
-        string ans=r.second->recv(sock); //,socket::response_timeout_secs);
-//cout << "ANS recv datagram: " << ans << endl;
+        string ans=r.second->recvfrom(sock); //,socket::response_timeout_secs);
         if (unlikely(!ans.empty())) {
             r.first=ans;
 	        delete r.second;
@@ -202,7 +161,6 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
             break;
         }
         if (likely(r.second->completed())) { 
-//cout << "completed" << endl;
             break;
         }
     }
@@ -210,56 +168,16 @@ cout << "SOCKET: recv datagram " << r.second->service << " of size " << r.second
     return move(r);
 }
 
-
-/*
-//if completed the caller is responsible to delete it, otherwise it is just a weak pointer
-pair<string,datagram*> c::complete_datagram(datagram& curd, int timeout_seconds) {
-//return complete_datagram();
-    if (!curd) curd=new datagram();
-	auto r=curd->recv(sock,timeout_seconds);
-	if (unlikely(!r.empty())) {
-        delete curd;
-        curd=0;
-	    return make_pair(r,(datagram*)0);
-    }
-    if (curd->completed()) {
-        auto t=curd;
-        curd=0;
-	    return make_pair("",t);
-    }
-    return make_pair("",curd);
-}
-*/
-/*
-pair<string,datagram*> c::complete_datagram() {
-	if (!curd) curd=new datagram();
-	auto r=curd->recv(sock);
-	if (unlikely(!r.empty())) {
-		delete curd;
-		curd=0;
-		return make_pair(r,(datagram*)0);
-	}
-	if (curd->completed()) {
-		auto t=curd;
-		curd=0;
-		return make_pair("",t);
-	}
-	return make_pair("",curd);
-}
-*/
 string c::send(datagram* d) { 
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
 	}
 	assert(d);
-//cout << "Sending datagram :" << endl; 
-//d->dump(cout);
-//	return io::send(sock,d); 
-	auto r=d->send(sock);
+	auto r=d->sendto(sock);
     if (unlikely(!r.empty())) {
         disconnect();
     }
-cout << "SOCKET: sent datagram " << d->service << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << d->compute_hash() << endl;
+cout << "SOCKET: sent datagram " << d->service << " of size " << d->size() << " bytes. HASH " << d->compute_hash()<< endl;
     delete d;
     return r;
 }
@@ -268,16 +186,14 @@ string c::send(const datagram& d) {
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
 	}
-//	return io::send(sock,d); 
-	auto r=d.send(sock);
+	auto r=d.sendto(sock);
     if (unlikely(!r.empty())) {
         disconnect();
     }
-cout << "SOCKET: sent datagram " << d.service << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << d.compute_hash() << endl;
+cout << "SOCKET: sent datagram " << d.service << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << endl;
 	return r;
 }
 
 void c::dump(ostream& os) const {
 	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
 }
-

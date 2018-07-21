@@ -2,6 +2,7 @@
 
 pwd=`pwd`
 
+
 if [ "_$1" == "_clean" ]; then
 	cd ../..
 	cd sdk/java
@@ -11,10 +12,14 @@ if [ "_$1" == "_clean" ]; then
 	exit 0
 fi
 
+echo "wallet sdk"
+
 cd ../..
 cd sdk/java
-./make all
+./make all && (exit 1)
 cd $pwd
+
+echo "android sdk"
 
 if [ ! -d android_sdk ]; then
     mkdir android_sdk
@@ -29,8 +34,10 @@ if [ ! -d android_sdk ]; then
     cd ..
 fi
 
+echo "assembe apk with gradle"
+
 ANDROID_HOME=android_sdk ./gradlew assembleRelease  && (exit 1)
-cp app/build/outputs/apk/release/us.cash-v1-release.apk /var/www/html/
+#cp app/build/outputs/apk/release/us.cash-v1-release.apk /var/www/html/
 
 
 

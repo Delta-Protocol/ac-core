@@ -32,11 +32,6 @@ struct kk {
 int a;
 };
 
-
-/// \brief  Main function
-/// \param  argc An integer argument count of the command line arguments
-/// \param  argv An argument vector of the command line arguments
-/// \return an integer 0 upon exit success
 c::datagram(): dend(0) {
 }
 
@@ -98,47 +93,30 @@ uint16_t c::decode_service() const {
 }
 
 bool c::completed() const {
-//cout << "completed?: size=" << size() << " dend=" << dend << endl << " decodedsz=" << decode_size() << endl;
 	return dend==size() && !empty();
 }
-/*
-string c::recv(int sock, int timeout_seconds) {
-	return recv(sock);
-}
-*/
-string c::recv(int sock) {
-	if (unlikely(sock==0)) {
-        return "Error. Connection is closed.";
-    }
-    //static constexpr int response_timeout_secs={3};
-/*
-   	struct timeval tv;
-    tv.tv_sec = 3; //timeout_seconds;
-   	tv.tv_usec = 0;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
-*/
 
+string c::recvfrom(int sock) {
+	if (unlikely(sock==0)) {
+            return "Error. Connection is closed.";
+        }
 	if (dend<h) {
 		if (size()<h) resize(h);
 		ssize_t nread = ::recv(sock, &(*this)[dend], h-dend, 0);
 		if (unlikely(nread<=0)) {
 			if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
-//				cout << "socket: client: 1 EINPROGRESS fd" << sock  << endl;
-//				error=4;
-    			return "Timeout waiting for data from peer.";
+    			    return "Timeout waiting for data from peer.";
 			}
 			else {
-//				error=nread==0?1:2;
-    			return "Connection ended by peer.";
+    			    return "Connection ended by peer.";
 			}
 		}
 		dend+=nread;
 		if (dend<h) {
-            return ""; //need to recv more
-        }
+                     return ""; //need to recv more
+                }
 		uint32_t sz=decode_size();
 		if (sz>maxsize) {
-			//error=3;
 			return "Error. Incoming datagram is too big.";
 		}
 		resize(sz);
@@ -150,12 +128,9 @@ string c::recv(int sock) {
 	ssize_t nread = ::recv(sock, &(*this)[dend], size()-dend,0);
 	if (nread<=0) {
 		if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
-			cout << "socket: client: EINPROGRESS fd" << sock  << endl;
-//			error=4;
    			return "Error.3 Timeout waiting for data from peer.";
 		}
 		else {
-//			error=nread==0?1:2;
 			return "Error. Incoming datagram is too big.";
 		}
 	}
@@ -163,13 +138,13 @@ string c::recv(int sock) {
 	return "";
 }
 
-string c::send(int sock) const {
+string c::sendto(int sock) const {
 	if (unlikely(size()>=maxsize)) {
-        return "Error. Datagram is too big.";
-    }
+            return "Error. Datagram is too big.";
+        }
 	if (unlikely(sock==0)) {
-        return "Error. Connection is closed.";
-    }
+            return "Error. Connection is closed.";
+        }
 	uint8_t sz[h];
 	auto n = ::write(sock, &(*this)[0], size());
 	if (unlikely(n<0)) {
@@ -226,9 +201,5 @@ os << "service " << decode_service() << endl;
 os << "payload size " << decode_size() << endl;
 os << "payload as str " << parse_string() << endl;
 os << "completed " << completed() << endl;
-
 }
-
-
-
 
