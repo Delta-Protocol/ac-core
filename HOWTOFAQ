@@ -35,12 +35,6 @@ BUILD, DEBUG & INSTALL US-GOV and US-WALLET
 
         the prefix is /usr/local
 
-BUILD THE JAVA SDK
-    cd sdk/java
-    ./make
-    will jenerate the jar:
-    us-wallet-sdk.jar
-
 CREATE A GENESIS BLOCK
     genesis directory is not meant to exist in node's git
     
@@ -75,10 +69,18 @@ RUN AN INTROSPECTIVE SHELL INTO GOV PROCESS
         2 execute 
           us-gov -host <ipaddress>
 
-BUILD & INSTALL ANDROID US-CASH APP
-    apt install openjdk-10-jdk
+BUILD THE JAVA SDK
+    cd sdk/java
+    ./make
+    will jenerate the jar:
+    us-wallet-sdk.jar
 
-    bin/build_us-cash-android-app
+BUILD & INSTALL ANDROID US-CASH APP
+    - note: USE JDK-8 - 9 and 10 wont work with android sdk
+    apt install openjdk-8-jdk or oracle
+
+    cd cash/android
+    JAVA_HOME=<your jdk8> ./make
 
     find the generated apk at:
     ./app/build/outputs/apk/release/us.cash-v1-release.apk
