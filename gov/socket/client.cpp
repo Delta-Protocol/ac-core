@@ -164,11 +164,11 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
             break;
         }
     }
-cout << "SOCKET: recv datagram " << r.second->service << " of size " << r.second->size() << " bytes. HASH " << r.second->compute_hash() << endl;
+cout << "SOCKET: recv datagram " << r.second->service << " of size " << r.second->size() << " bytes. HASH " << r.second->compute_hash() << " from " << addr << endl;
     return move(r);
 }
 
-string c::send(datagram* d) { 
+string c::send(datagram* d) { //don't call send(&d) perf
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
 	}
@@ -177,7 +177,7 @@ string c::send(datagram* d) {
     if (unlikely(!r.empty())) {
         disconnect();
     }
-cout << "SOCKET: sent datagram " << d->service << " of size " << d->size() << " bytes. HASH " << d->compute_hash()<< endl;
+cout << "SOCKET: sent datagram " << d->service << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << " to " << addr << endl;
     delete d;
     return r;
 }
@@ -190,7 +190,7 @@ string c::send(const datagram& d) {
     if (unlikely(!r.empty())) {
         disconnect();
     }
-cout << "SOCKET: sent datagram " << d.service << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << endl;
+cout << "SOCKET: sent datagram " << d.service << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
 	return r;
 }
 
