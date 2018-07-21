@@ -62,15 +62,15 @@ cout << "add peers" << endl;
 			if (exclude.find(addr)==exclude.end()) {
 				exclude.emplace(addr);
 				auto* p=create_client(0);
-//cout << "connecting to address " << addr << endl;
+cout << "connecting to address " << addr << endl;
 				string r=p->connect(addr,16672);
                 if (likely(r.empty())) {
-//cout << "connected to address " << addr << endl;
+cout << "connected to address " << addr << endl;
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);
 				}
 				else {
-//					cout << "peerd: unable to connect, deleting peer" << endl;
+					cout << "peerd: unable to connect, deleting peer" << endl;
 					delete p;
 				}
 			}
