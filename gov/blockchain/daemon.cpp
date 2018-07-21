@@ -369,12 +369,12 @@ string c::blocksdir() const {
 void c::save(const diff& bl) const {
 	ostringstream fn;
 	fn << blocksdir()+"/"+bl.hash().to_b58();
-#ifdef DEBUG	
 	{
-cout << "------------RBF SAVE CHECK------------" << "file " << fn.str() << endl;
 	ofstream os(fn.str());
 	bl.to_stream(os);
 	}
+#ifdef DEBUG
+cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << fn.str() << endl;
 	if (!file_exists(fn.str())) {
 		cerr << "file should be in the filesystem, I just saved it" << endl;
 		print_stacktrace();
@@ -507,7 +507,7 @@ void c::send(const datagram& g, peer_t* exclude) {
 }
 
 local_deltas* c::create_local_deltas() {
-	cout << "blockchain: create_local_deltas" << endl;
+//	cout << "blockchain: create_local_deltas" << endl;
 	auto* mg=new local_deltas();
 
 	{

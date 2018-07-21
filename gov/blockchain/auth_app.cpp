@@ -42,11 +42,11 @@ void c::run() {
 }
 
 void c::basic_auth_completed(peer_t* p) {
-	cout << "APP auth_app, basic_auth_completed for " <<  p->pubkey << endl;
+//	cout << "APP auth_app, basic_auth_completed for " <<  p->pubkey << endl;
 
 	if (p->pubkey==node_pubkey) { //parent->peerd.id.pub) {  ///sysop connection, this connection requires a shell
 		p->stage=peer_t::sysop;
-		cout << "SYSOP " << endl;
+//		cout << "SYSOP " << endl;
 		return;
 	}
 	{
@@ -54,7 +54,7 @@ void c::basic_auth_completed(peer_t* p) {
 	auto i=db.nodes.find(p->pubkey.hash());
 	if (i!=db.nodes.end()) {
 		p->stage=peer_t::node;
-		cout << "NODE " << endl;
+//		cout << "NODE " << endl;
 		return;
 	}
 	}
@@ -85,7 +85,7 @@ void c::add_growth_transactions(unsigned int seed) {
 
 	double growth=policies[policies_traits::network_growth]; //percentage
 	if (abs(growth)<1e-8) return; // no growth
-	
+
 	int min_growth=round(policies[policies_traits::network_min_growth]);
 	default_random_engine generator(seed);
 	db_t::nodes_t* src;
@@ -95,7 +95,7 @@ void c::add_growth_transactions(unsigned int seed) {
 	int s;
 	lock_guard<mutex> lock(db.mx_hall);
 	lock_guard<mutex> lock2(db.mx_nodes);
-	
+
 	if (growth>=0) {
 		size_t nh=db.hall.size();
 		s=floor((double)nh*growth);
@@ -122,19 +122,16 @@ void c::add_growth_transactions(unsigned int seed) {
 			r=distribution(generator);
 			if (!uniq.insert(r).second) continue;
 			if (r>=src->size()) continue;
-			break;				
+			break;
 		}
 		advance(p,r);
 		dst->emplace(*p);
 		src->erase(p);
-	}	
+	}
 }
-/*
-void c::on_begin_cycle() {
-}
-*/
+
 int us::gov::blockchain::auth::app::local_delta::app_id() const {
-	return app::id(); 
+	return app::id();
 }
 
 void us::gov::blockchain::auth::app::local_delta::to_stream(ostream& os) const {
@@ -156,10 +153,8 @@ void us::gov::blockchain::auth::app::local_delta::from_stream(istream& is) {
 		is >> addr;
 		to_hall.push_back(make_pair(pkeyh,addr));
 	}
-
 	b::from_stream(is);
 }
-
 
 void us::gov::blockchain::auth::app::delta::to_stream(ostream& os) const {
 	os << to_hall.size() << " ";
@@ -236,9 +231,8 @@ us::gov::blockchain::app::local_delta* c::create_local_delta() {
 }
 
 #include <random>
-
 void c::db_t::dump(ostream& os) const {
-	cout << "Auth app db dump" << endl;
+//	cout << "Auth app db dump" << endl;
 	{
 	lock_guard<mutex> lock(mx_nodes);
 	cout << nodes.size() << " nodes:" << endl;

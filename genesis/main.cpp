@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
 
 //    cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
     d.start_new_blockchain(address);
-    cout << "New blockchain has been created." << endl;
+    cout << "New blockchain has been created. home is " << p.homedir << endl;
 	return 0;
 }
 
