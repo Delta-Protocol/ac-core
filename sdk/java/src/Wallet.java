@@ -481,5 +481,9 @@ public boolean process_work(Datagram d) {
         return ask(protocol_ping,"");
     }
 
+    public String pair() {
+        return ask(protocol_pair_query,"");
+    }
+
 
 }

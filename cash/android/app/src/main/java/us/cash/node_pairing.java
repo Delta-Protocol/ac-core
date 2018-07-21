@@ -19,17 +19,22 @@ public class node_pairing extends AppCompatActivity {
     private Button test;
 
 
-    void test_result(final String balance, final String node_addr, final int node_port) {
+    void test_result(final String report, final String node_addr, final int node_port) {
         runOnUiThread(new Thread(new Runnable() {
             public void run() {
                 final app a=(app)getApplication();
                 try {
                     a.w.set_walletd_host(node_addr);
                     a.w.set_walletd_port(node_port);
-                    if (balance == "?") {
-                        Toast.makeText(getApplicationContext(), "Nice try, but wrong", Toast.LENGTH_LONG).show();
+                    if (report == "?") {
+                        Toast.makeText(getApplicationContext(), "FAIL, Wallet is unreachable at " + a.w.walletd_host()+":"+a.w.walletd_port(), Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(node_pairing.this, "walletd is alive at " + a.w.walletd_host()+":"+a.w.walletd_port(), Toast.LENGTH_LONG).show();
+                        if (report.contains("Error")) {
+                            Toast.makeText(node_pairing.this, "Wallet found at " + a.w.walletd_host()+":"+a.w.walletd_port()+". It is reporting some problem: "+report, Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            Toast.makeText(node_pairing.this, "SUCCESS!, wallet found at " + a.w.walletd_host()+":"+a.w.walletd_port()+". It says: "+report, Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
                 catch (IOException e) {
@@ -93,7 +98,7 @@ public class node_pairing extends AppCompatActivity {
                 try {
                     a.w.set_walletd_host(address);
                     a.w.set_walletd_port(tcpport);
-                    String b = a.w.balance(false);
+                    String b = a.w.ping();
                     test_result(b, address, tcpport);
                 } catch (IOException e) {
                     Log.e("Wallet", e.toString());
@@ -152,7 +157,7 @@ public class node_pairing extends AppCompatActivity {
            a.w.set_walletd_host(addr.getText().toString());
            final int tcpport=Integer.parseInt(port.getText().toString());
            a.w.set_walletd_port(tcpport);
-           //a.w.pair
+           a.w.pair();
            finish();
        }
        catch (IOException e) {
