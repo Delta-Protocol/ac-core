@@ -754,22 +754,27 @@ bool c::process_work(peer_t *c, datagram*d) {
 
 	switch(d->service) {
 		case protocol::query_block: {
-			process_query_block(c,d); 
+			process_query_block(c,d);
 			return true;
 		}
 		case protocol::block: {
-			process_block(c,d); 
+			process_block(c,d);
 			return true;
 		}
 		case protocol::vote_tip: {
-			process_vote_tip(c,d); 
+			process_vote_tip(c,d);
 			return true;
 		}
 	}
 	if (!syncdemon.in_sync()) {
-		cout << "missing command cause I am syncing" << endl;
-		delete d;
-		return true;
+		if (d->service>>2>=protocol::blockchain_base) {
+			cout << "dismissing command cause I am syncing" << endl;
+			delete d;
+			return true;
+		}
+		else {
+			return false; //route to auth, dfs, etc
+		}
 	}
 	switch(d->service) {
 		case protocol::local_deltas: {
