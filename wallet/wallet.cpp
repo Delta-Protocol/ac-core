@@ -136,13 +136,11 @@ pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const c
         return move(ret);
     }
 
-	pair<string,datagram*> response=peer.send_recv(d);
-    
+	pair<string,datagram*> response=peer.send_recv(d,us::gov::protocol::cash_response);
     if (unlikely(!response.first.empty())) {
         ret.first=response.first; //"Error. Backend is not answering.";
         return move(ret);
     }
-
     if (response.second->service==us::gov::protocol::error) {
         ret.first=response.second->parse_string();
         delete response.second;
@@ -161,7 +159,7 @@ pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const c
         ostringstream os;
         os << "Error. Backend reported: " << err;
         ret.first=os.str();
-cerr << err << endl;
+//cerr << err << endl;
 	}
 	else {
 		for (auto&i:addresses) {

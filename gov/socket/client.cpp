@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <us/gov/signal_handler.h>
 #include <us/gov/likely.h>
+#include "protocol.h"
 
 
 typedef us::gov::socket::client c;
@@ -139,6 +140,17 @@ string c::init_sock(const string& host, uint16_t port, bool block) {
 	return "";
 }
 
+
+pair<string,datagram*> c::send_recv(datagram* d,uint16_t expected_service) {
+    pair<string,datagram*> ans;
+    ans.first=send(d);
+    if (unlikely(!ans.first.empty())) {
+        ans.second=0;
+        return move(ans);
+    }
+    return recv(expected_service);
+}
+
 pair<string,datagram*> c::send_recv(datagram* d) {
     pair<string,datagram*> ans;
     ans.first=send(d);
@@ -182,6 +194,30 @@ cout << "      : " << d.parse_string() << endl;
 #endif
 
 
+pair<string,datagram*> c::recv(uint16_t expected_service) { //caller owns the returning object
+    auto r=recv();
+    if (!r.first.empty()) {
+        return move(r);
+    }
+    datagram*d=r.second;
+    while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
+        if (d->service==us::gov::protocol::error) {
+            return move(r);
+        }
+        if (d->service==expected_service) {
+            break;
+        }
+        else {
+            delete d;
+        }
+        auto r=recv();
+        if (!r.first.empty()) {
+            return move(r);
+        }
+        d=r.second;
+    }
+    return make_pair("",d);
+}
 
 
 pair<string,datagram*> c::recv() { //caller owns the returning object

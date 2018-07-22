@@ -167,29 +167,13 @@ void c::ping(ostream& os) {
     if (!connect_backend(os)) {
         return;
     }
-    auto r=endpoint.send_recv(new datagram(us::gov::protocol::ping,""));
+    auto r=endpoint.send_recv(new datagram(us::gov::protocol::ping,""),us::gov::protocol::pong);
     if (!r.first.empty()) {
         assert(r.second==0);
         os << "is not responding (Error): " << r.first;
         return;
     }
     datagram* d=r.second;
-    while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
-        if (d->service==us::gov::protocol::pong) {
-            break;
-        }
-        else {
-            os << "-";
-            delete d;
-        }
-        auto r=endpoint.recv();
-        if (!r.first.empty()) {
-            assert(r.second==0);
-            os << "is not responding (Error): " << r.first;
-            return;
-        }
-        d=r.second;
-    }
     os << "is also responsive, it said: " << d->parse_string();
     if (!r.first.empty()) {
         assert(r.second==0);

@@ -118,6 +118,16 @@ bool c::process_evidence(peer_t *c, datagram*d) {
 	return false;
 }
 
+datagram* c::query_accounts_t::get_datagram() const {
+                if (empty()) return 0;
+                ostringstream os;
+                os << size() << ' ';
+                for (auto&i:*this) {    
+                    os << i << ' ';
+                }
+                return new socket::datagram(protocol::cash_query,os.str());
+}
+
 c::query_accounts_t c::query_accounts_t::from_string(const string&s) {
 	int n;
 	istringstream is(s);

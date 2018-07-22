@@ -140,15 +140,7 @@ namespace cash {
 			void add(const hash_t& v) {	
 				emplace_back(v);
 			}
-			datagram* get_datagram() const {
-				if (empty()) return 0;
-				ostringstream os;
-				os << size() << ' ';
-				for (auto&i:*this) {	
-					os << i << ' ';
-				}
-				return new socket::datagram(protocol::cash_query,os.str());
-			}
+			datagram* get_datagram() const;
 			static query_accounts_t from_datagram(datagram*);
 			static query_accounts_t from_string(const string&);
 		};

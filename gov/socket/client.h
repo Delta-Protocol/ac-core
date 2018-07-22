@@ -30,6 +30,9 @@ namespace socket {
 		string address() const;
 		virtual void ready() {}
 
+        pair<string,datagram*> recv(uint16_t expected_service);
+        pair<string,datagram*> send_recv(datagram* d,uint16_t expected_service);
+
 	        pair<string,datagram*> send_recv(datagram* d); 
 		string send(datagram* d);
 		string send(const datagram& d);
