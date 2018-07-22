@@ -754,7 +754,8 @@ bool c::process_work(peer_t *c, datagram*d) {
 	}
 	if (!syncdemon.in_sync()) {
 		cout << "missing command cause I am syncing" << endl;
-		return false;
+		delete d;
+		return true;
 	}
 	switch(d->service) {
 		case protocol::local_deltas: {
