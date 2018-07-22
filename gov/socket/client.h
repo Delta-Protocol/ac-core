@@ -25,17 +25,15 @@ namespace socket {
 		virtual string connect(const string& host, uint16_t port, bool block=false);
 		virtual void disconnect();
 
-        inline bool connected() const { return sock!=0; }
+	        inline bool connected() const { return sock!=0; }
 
 		string address() const;
 		virtual void ready() {}
 
-        pair<string,datagram*> send_recv(datagram* d); 
-//		string send(char d) const;
+	        pair<string,datagram*> send_recv(datagram* d); 
 		string send(datagram* d);
 		string send(const datagram& d);
-//		string send(int service, const string& payload);
-        pair<string,datagram*> recv(); //caller owns the returning object
+        	pair<string,datagram*> recv(); //caller owns the returning object
 
 		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
 		string init_sock(const string& host, uint16_t port, bool block=false);
@@ -43,18 +41,6 @@ namespace socket {
 		virtual void on_connect() {}
 
 		void dump(ostream& os) const;
-
-        //void run_dialogue();
-
-        //highest level function to receive a response
-
-private:
-        //lower level functions:
-		//pair<string,datagram*> complete_datagram();
-//		pair<string,datagram*> recv(int timeout_seconds);
-
-
-//		datagram* curd{0};
 
 public:
 		int sock;
