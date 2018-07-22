@@ -36,7 +36,8 @@ start() {
 stop() {
       echo -n "Stopping us-wallet: "
 #echo      killall -q -w -u $USER /usr/bin/spawn-fcgi
-      killall -q -w -u $USER us-wallet
+      p=`which us-wallet`
+      killall -q -w -u $USER $p
       RETVAL=$?
       echo "$API_NAME. $RETVAL"
 }
