@@ -121,6 +121,7 @@ void help(const params& p, ostream& os=cout) {
     os << endl;
     if (p.advanced) {
       os << "device pairing:" << endl;
+      os << "  device_id              Show this device Id. (Only RPC mode)" << endl;
       os << "  pair <pubkey> <name>   Authorize the device identified by its public key to operate the wallet. Give it a name." << endl;
       os << "  unpair <pubkey>        Revoke authorization to the specified device." << endl;
       os << "  list_devices           Prints the list of recognized devices." << endl;
@@ -303,10 +304,11 @@ void run_daemon(const params& p) {
 }
 
 
+	using us::gov::input::cfg_id;
+
 //if a gov daemon is running in the same homedir
 //import gov priv key into the wallet
 void import_gov_k(api& x, const params& p) {
-	using us::gov::input::cfg_id;
     string govhomedir=p.homedir+"/gov";
     if (!cfg_id::file_exists(cfg_id::k_file(govhomedir))) {
         return;
@@ -375,6 +377,15 @@ void run_local(string command, args_t& args, const params& p) {
 	else if (command=="gen_keys") {
 		wapi.gen_keys(os);
 	}
+    else if (command=="device_id") {
+        if (p.offline) {
+            cout << "Not such a thing for a local wallet";
+        }
+        else {
+            auto f=cfg_id::load(homedir+"/rpc_client");
+            cout << f.keys.pub;
+        }
+    }
 	else if (command=="pair") {
 		api::pub_t pub=args.next<api::pub_t>();
         if (!pub.valid) {
