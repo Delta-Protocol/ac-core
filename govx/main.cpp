@@ -184,7 +184,7 @@ void run_daemon(const params&p) {
 	using us::gov::input::cfg_daemon;
 	string homedir=p.homedir+"/gov";
 	cfg_daemon conf=cfg_daemon::load(homedir);
-	cout << "Node public key is " << conf.keys.pub << endl;
+	cout << "Node public key is " << conf.keys.pub << " address " << conf.keys.pub.hash() << endl;
 	blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 	d.sysop_allowed=p.shell;
 	d.add(new cash::app());

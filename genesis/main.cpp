@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	cout << "Node public key is " << conf.keys.pub << endl;
+        cout << "Node public key is " << conf.keys.pub << " address " << conf.keys.pub.hash() << endl;
 	genesis_daemon d(conf.keys,conf.home); //,0,0,vector<string>());
 
 //    cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
