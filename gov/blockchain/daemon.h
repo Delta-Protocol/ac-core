@@ -102,7 +102,6 @@ namespace blockchain {
 		struct syncd: us::gov::signal_handler::callback {
 			typedef diff::hash_t hash_t;
 			syncd(daemon* d);
-	
 			void dump(ostream& os) const;
 
 			void run();
@@ -121,6 +120,12 @@ namespace blockchain {
 			hash_t cur;
 			hash_t tail;
 			bool resume{false};
+
+			void signal_file_arrived();
+
+		        condition_variable cv_wait4file;
+		        mutex mx_wait4file;
+			bool file_arrived{false};
 
 
 		};

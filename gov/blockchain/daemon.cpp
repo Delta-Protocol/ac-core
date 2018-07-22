@@ -84,11 +84,18 @@ void c::syncd::run() {
 			                        }
 			                    }
 					}
+{
+       unique_lock<mutex> lock(mx_wait4file);
+       if (!file_arrived) cv.wait_for(lock, 3s, [&]{ return file_arrived; });
+       file_arrived=false;
+}
+/*
 					else {
 //					cout << "SYNCD: going to sleep for 2 secs." << endl;
 						wait(chrono::seconds(2)); //TODO better
 					}
 //					cout << "SYNCD: waked up " << endl;
+*/
 				}
 				if (program::_this.terminated) return;
 			}
@@ -106,6 +113,11 @@ void c::syncd::run() {
 		wait();
 //		cout << "SYNCD: waked up " << endl;
 	}
+}
+
+void c::syncd::signal_file_arrived() {
+       file_arrived=true;
+       cv.notify_all();
 }
 
 void c::syncd::update(const diff::hash_t& h, const diff::hash_t& t) {
@@ -191,17 +203,16 @@ cout << "Applying " << patches.size() << " patches" << endl;
 		}
 		delete b;
 	}
-	
+
 	diff::hash_t lbi;
 	{
-	lock_guard<mutex> lock(mx_import); 
+	lock_guard<mutex> lock(mx_import);
 	lbi=last_block_imported;
 	}
 //cout << "Updating tail of syncd: " << lbi << endl;
-	syncdemon.update(lbi);	
+	syncdemon.update(lbi);
 	return true;
 }
-
 
 const diff::hash_t& c::dbhash_off() const {
 	if (!cached_dbhash_ok) {
@@ -209,7 +220,7 @@ const diff::hash_t& c::dbhash_off() const {
 		for (auto&i:apps_) {
 			i.second->dbhash(h);
 		}
-		h.finalize(cached_dbhash);	
+		h.finalize(cached_dbhash);
 		cached_dbhash_ok=true;
 	}
 	return cached_dbhash;
@@ -217,7 +228,7 @@ const diff::hash_t& c::dbhash_off() const {
 
 
 diff::hash_t c::get_last_block_imported() const {
-	lock_guard<mutex> lock(mx_import); 
+	lock_guard<mutex> lock(mx_import);
 	return last_block_imported;
 }
 
@@ -623,7 +634,7 @@ void c::process_block(peer_t *c, datagram*d) {
 	delete d;
 	istringstream is(content);
 	diff* b=diff::from_stream(is);
-	if (b==0) return;
+	if (unlikely(b==0)) return;
 	cout << "Received content of block " << b->hash() << " from " << c->addr << endl;
 
 	string filename=blocksdir()+"/"+b->hash().to_b58();
@@ -634,7 +645,8 @@ void c::process_block(peer_t *c, datagram*d) {
 		os << content;
 		}
 //		cout << "waking up sync demon after saving the block" << endl;
-		syncdemon.update();
+//		syncdemon.update();
+		syncdemon.signal_file_arrived();
 	}
 //	else {
 //		cout << "File exists, ignoring. " << filename << endl;
