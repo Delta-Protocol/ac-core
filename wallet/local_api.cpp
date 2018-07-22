@@ -173,8 +173,29 @@ void c::ping(ostream& os) {
         os << "is not responding (Error): " << r.first;
         return;
     }
-    os << "is also responsive, it said: " << r.second->parse_string();
-    delete r.second;
+    datagram* d=r.second;
+    while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
+        if (d->service==us::gov::protocol::pong) {
+            break;
+        }
+        else {
+            delete d;
+        }
+        auto r=endpoint.recv();
+        if (!r.first.empty()) {
+            assert(r.second==0);
+            os << "is not responding (Error): " << r.first;
+            return;
+        }
+        d=r.second;
+    }
+    os << "is also responsive, it said: " << d->parse_string();
+    if (!r.first.empty()) {
+        assert(r.second==0);
+        os << "is not responding (Error): " << r.first;
+        return;
+    }
+    delete d;
 }
 
 

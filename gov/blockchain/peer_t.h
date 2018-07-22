@@ -14,10 +14,11 @@ namespace blockchain {
 			sysop,
 			out,
 			hall,
-			node,
+			 node,
+            wallet,
 			num_stages
 		};
-		constexpr static array<const char*,num_stages> stagestr={"unknown","sysop","out","hall","node"};
+		constexpr static array<const char*,num_stages> stagestr={"unknown","sysop","out","hall","node","wallet"};
 
 		peer_t(int sock):b(sock) {}
 		virtual ~peer_t() {}
