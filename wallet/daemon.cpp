@@ -1,3 +1,4 @@
+
 #include "daemon.h"
 #include "protocol.h"
 #include "peer_t.h"
@@ -176,6 +177,6 @@ bool c::authorize(const pub_t& p) const {
 //cout << "Request for authorization " << p << "... ";
 //    bool b=devices.authorize(p);
 //cout << boolalpha << b << endl;
-    return b;
+//    return b;
 }
 

@@ -56,7 +56,7 @@ c::datagram(uint16_t service, const string& payload):service(service) {
 	resize(h+payload.size());
 	encode_size(size());
 	encode_service(service);
-	::memcpy(&(*this)[h],payload.c_str(),payload.size());
+	::memcpy(&(*this)[h],payload.c_str(),payload.size()); //no trailing zro
 	dend=size();
 }
 
@@ -163,7 +163,7 @@ c::hash_t c::compute_hash() const {
 	hasher.finalize(v);
 	return move(v);
 }
-
+/*
 vector<string> c::parse_strings() const {
 	vector<string> ans;
 	ans.reserve(100);
@@ -183,9 +183,15 @@ vector<string> c::parse_strings() const {
 	}
 	return move(ans);
 }
-
+*/
 string c::parse_string() const {
-	return string(reinterpret_cast<const char*>(&*(begin()+h)),size()-h);
+    int sz=size()-h+1;
+    if (unlikely(sz<2)) return ""; //minimum 2bytes for a non-empty c string
+    char cstr[sz];
+    memcpy(cstr,&*(cbegin()+h),sz-1);
+    cstr[sz-1]='\0';
+    return string(cstr);
+//	return string(reinterpret_cast<const char*>(&*(begin()+h)),size()-h);
 }
 
 uint16_t c::parse_uint16() const {
