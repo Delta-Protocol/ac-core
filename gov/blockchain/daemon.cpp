@@ -59,10 +59,10 @@ void c::syncd::run() {
 				if (cu==he) patches.clear();
 //				cout << "SYNCD: head:" << he << " cur: " << cu << " tail: " << ta << " ;" << patches.size() << " patches" << endl;
 				hash_t prev;
-				if (d->get_prev(cu,prev)) { //file exists, read it 
+				if (d->get_prev(cu,prev)) { //file exists, read it
 //					cout << "SYNCD: found file for " << cu << endl;
 					patches.push_back(cu);
-					lock_guard<mutex> lock(mx); 
+					lock_guard<mutex> lock(mx);
 					cur=prev;
 				}
 				else {
@@ -76,7 +76,7 @@ void c::syncd::run() {
 			                        cout << "countown to clearing " << query_reps << endl;
 			                        if (--query_reps==0) { // TODO we are in a deadlock
 			                            {
-			            		    lock_guard<mutex> lock(mx); 
+			            		    lock_guard<mutex> lock(mx);
 			                            head=cur=tail=0;
 			                            }
 			                            cout << "triggering db reset" << endl;
@@ -84,8 +84,10 @@ void c::syncd::run() {
 			                        }
 			                    }
 					}
+					else {
 //					cout << "SYNCD: going to sleep for 2 secs." << endl;
-					wait(chrono::seconds(1)); //TODO better
+						wait(chrono::seconds(2)); //TODO better
+					}
 //					cout << "SYNCD: waked up " << endl;
 				}
 				if (program::_this.terminated) return;
