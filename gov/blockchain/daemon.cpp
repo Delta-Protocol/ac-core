@@ -371,7 +371,7 @@ cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << fn.str()
 		print_stacktrace();
 		assert(false);
 	}
-	ifstream is(fn.str());  //TODO remove this check
+	ifstream is(fn.str());
 	if (!is.good()) {
 		cerr << "file should be good in the filesystem, I just saved it" << endl;
 		print_stacktrace();
