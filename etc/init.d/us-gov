@@ -27,7 +27,8 @@ start() {
 
 stop() {
       echo -n "Stopping us-gov: "
-      killall -q -w -u $USER us-gov
+      p=`which us-gov`
+      killall -q -w -u $USER $p
       RETVAL=$?
 }
 
