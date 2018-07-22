@@ -71,7 +71,7 @@ void c::disconnect() {
 	if (unlikely(sock==0)) return;
 	close(sock);
 	sock=0;
-    print_stacktrace();
+    //print_stacktrace();
 }
 
 void c::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t port) {
