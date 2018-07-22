@@ -230,27 +230,20 @@ void c::stage1(cycle_t& data) {
 }
 
 bool c::stage2(cycle_t& cycle) {
-//cout << "stage2 votes.size=" << votes.size() << endl;
 	diff::hash_t hash=votes.select();
 cout << "Voting process result: diff " << hash << endl;
-//	cout << "Last block imported (syncd tail) before importing=" << get_last_block_imported() << endl;
-	if (!hash.is_zero()) {
-//		cout << "NB2 " << cycle.new_block << endl;
-		if (cycle.new_block) {
-//			cout << "cycle.new_block->hash() " << cycle.new_block->hash() << endl;
-			if (hash==cycle.new_block->hash()) {
-		//cout << "save" << endl;
+	if (likely(!hash.is_zero())) {
+		if (likely(cycle.new_block)) {
+			if (likely(hash==cycle.new_block->hash())) {
 				save(*cycle.new_block);
 				if (!import(*cycle.new_block)) {
-                    clear();
-					//assert(false);
-					//exit(1);
+			                clear();
+					cerr << "DB CLEARED" << endl;
 				}
 			}
 			delete cycle.new_block;
 			cycle.new_block=0;
 		}
-//		cout << "Last block imported before updating syncd (syncd tail)=" << get_last_block_imported() << endl;
 		syncdemon.update(hash,get_last_block_imported()); //head,tail
 		while (!syncdemon.in_sync() && !program::_this.terminated) {
 			cout << "syncing" << endl;
@@ -260,7 +253,7 @@ cout << "Voting process result: diff " << hash << endl;
 		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false;
 	}
 
-    if (!auth_app->is_node()) return false;
+	if (unlikely(!auth_app->is_node())) return false;
 
 	auto* mg=create_local_deltas();
 	if (mg!=0) {
@@ -275,7 +268,6 @@ cout << "Voting process result: diff " << hash << endl;
 }
 
 void c::stage3(cycle_t& cycle) {
-//cout << "stage3 NB3 " << cycle.new_block << endl;
 	assert(cycle.new_block==0);
 	{
 	lock_guard<mutex> lock(mx_pool);
@@ -283,7 +275,6 @@ void c::stage3(cycle_t& cycle) {
 	cycle.new_block=pool;
 	pool=new diff();
 	}
-//cout << "NB3 2 " << cycle.new_block << endl;
 	cycle.new_block->prev=get_last_block_imported();
 }
 
@@ -334,23 +325,24 @@ void c::run() {
 }
 
 string c::networking::get_random_peer(const unordered_set<string>& exclude_addrs) const { //returns ipaddress
-//cout << "exclude: ";
+cout << "exclude: ";
 for (auto&i:exclude_addrs) cout << i << " ";
+cout << endl;
+
 //cout << "my pubkey is " << id.pub << endl;
 	auto n=parent->get_random_node(exclude_addrs);
 cout << "auth_app->get_random_node=" << n << endl;
-	if (n.empty() && !seed_nodes.empty()) {
-//cout << "no nodes . using seeds " << endl;
+	if (unlikely(n.empty()) && !seed_nodes.empty()) {
+cout << "no nodes . using seeds " << endl;
 		uniform_int_distribution<> d(0, seed_nodes.size()-1);
 		for (int j=0; j<10; ++j) {
 			auto i=seed_nodes.begin();
 			advance(i,d(parent->rng));
 			if (exclude_addrs.find(*i)==exclude_addrs.end()) {
-//cout << "found " << *i << endl;
+cout << "found " << *i << endl;
 				return *i;
 			}
 		}
-		
 	}
 	if (!n.empty()) cout << "Random node at " << n << endl;
 	return move(n);
@@ -401,12 +393,14 @@ cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << fn.str()
 		print_stacktrace();
 		assert(false);
 	}
-	delete b;	
+	delete b;
 #endif
 }
 
 string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
-	return auth_app->get_random_node(rng,exclude_addrs);
+	auto s=auth_app->get_random_node(rng,exclude_addrs);
+cout << "get rnd node from authapp " << s << endl;
+	return s;
 }
 
 void c::query_block(const diff::hash_t& hash) {
