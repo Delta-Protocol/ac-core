@@ -27,7 +27,7 @@ bool process_work(datagram*d) {
 
 
 virtual void on_connect() override {
-//cout << "ONCONNECT" << endl;
+cout << "ONCONNECT" << endl;
     socket::peer_t::on_connect();
 //    initiate_dialogue();
     
@@ -35,7 +35,7 @@ virtual void on_connect() override {
 
     //TODO remove when java implements run_auth_responder
    virtual string run_auth_responder() override {
-//cout << "AUTH RESPONDER" << endl;
+cout << "AUTH RESPONDER" << endl;
         verification_completed();
         return "";
    }

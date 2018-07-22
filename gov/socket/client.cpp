@@ -148,6 +148,31 @@ pair<string,datagram*> c::send_recv(datagram* d) {
     return recv();
 }
 
+#ifdef DEBUG
+#include <us/gov/stacktrace.h>
+#include <fstream>
+
+void interceptor(const datagram& d) {
+typedef unordered_set<uint16_t> dt;
+static dt svc;
+static int i=0;
+if (++i%100==0) { //reload file
+    i=0;
+    svc.clear();
+    ifstream f("/tmp/interceptor");
+    
+    while (f.good()) {
+        uint16_t s;
+        f >> s;
+        svc.emplace(s);
+    }
+
+    if (svc.find(d.service)!=svc.end()) print_stacktrace(); 
+}
+}
+#endif
+
+
 pair<string,datagram*> c::recv() { //caller owns the returning object
     pair<string,datagram*> r;
     r.second=new datagram();
@@ -162,13 +187,14 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
         }
         if (likely(r.second->completed())) {
 cout << "SOCKET: recv datagram " << r.second->service << " " << r.second->service_str() << " of size " << r.second->size() << " bytes. HASH " << r.second->compute_hash() << " from " << addr << endl;
+   #ifdef DEBUG
+   interceptor(*r.second);
+   #endif
             break;
         }
     }
     return move(r);
 }
-
-#include <us/gov/stacktrace.h>
 
 string c::send(datagram* d) { //don't call send(&d) perf
 	if (unlikely(!sock)) {
@@ -181,12 +207,9 @@ string c::send(datagram* d) { //don't call send(&d) perf
     }
     else {
 cout << "SOCKET: sent datagram " << d->service << " " << d->service_str() << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << " to " << addr << endl;
-/*
-if (d->service_str()=="P.6.4") {
-    print_stacktrace();
-
-}
-*/
+   #ifdef DEBUG
+   interceptor(*d);
+   #endif
     }
     delete d;
     return r;
@@ -202,11 +225,10 @@ string c::send(const datagram& d) {
     }
 	else {
 cout << "SOCKET: sent datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
-/*
-if (d.service_str()=="P.6.4") {
-    print_stacktrace();
-}
-*/
+
+   #ifdef DEBUG
+   interceptor(d);
+   #endif
 	}
 	return r;
 }
