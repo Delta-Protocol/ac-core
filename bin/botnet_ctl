@@ -6,7 +6,8 @@ cmd=$1
 function install() {
 IP=$1
 echo "installing sw node $IP"
-#(ssh $IP cd us; (git pull) && (make clean) && (make install)) &
+(ssh $IP cd us; (git pull) && (make clean) && (make release) && (make install)) &
+#(ssh $IP cd us; (git pull) && (make release) && (make install)) &
 echo "Ret code for $IP $?"
 }
 function stopgov() {
@@ -37,6 +38,11 @@ echo "Ret code for $IP $?"
 nodes="10.84.172.66 10.84.172.55 10.84.172.54 10.84.172.52 10.84.172.50"
 
 
+if [ "_$cmd" == "_pull" ]; then
+    for n in $nodes; do
+        ssh $n cd us; git pull
+    done
+fi
 if [ "_$cmd" == "_install" ]; then
     for n in $nodes; do
         install $n
@@ -60,6 +66,15 @@ fi
 if [ "_$cmd" == "_startg" ]; then
     for n in $nodes; do
         startgov $n
+    done
+fi
+if [ "_$cmd" == "_restart" ]; then
+    for n in $nodes; do
+echo $n
+        stopwallet $n
+        stopgov $n
+        startgov $n
+        startwallet $n
     done
 fi
 
