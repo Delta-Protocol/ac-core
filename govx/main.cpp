@@ -169,7 +169,7 @@ void open_shell(const params&p) {
 			break;
 		}
 		datagram* d=new datagram(us::gov::protocol::sysop,line);
-		auto ans=peer.send_recv(d);
+		auto ans=peer.send_recv(d,us::gov::protocol::sysop);
 		if (!ans.first.empty()) {
 			cerr << ans.first << endl;
 			break;

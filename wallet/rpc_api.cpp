@@ -55,7 +55,7 @@ void c::ask(int service, const string& args, ostream&os) {
 	if (!connect_walletd(os)) return;
 
 	datagram* d=new datagram(service,args);
-    auto r=send_recv(d);
+    auto r=send_recv(d); //TODO use expected answer
     if (unlikely(!r.first.empty())) {
         os << r.first;
     }

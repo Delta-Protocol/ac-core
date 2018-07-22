@@ -147,21 +147,7 @@ void c::list_devices(ostream&os) {
 #include <utility>
 #include <string>
 using us::gov::socket::datagram;
-/*
-void c::ping_gov(ostream& os) {
 
-    if (!connect_backend(os)) return;
-
-
-    auto r=endpoint.send_recv(new datagram(us::gov::protocol::ping,""));
-    if (!r.first.empty()) {
-        os <<r.first;
-        return;
-    }
-    os << r.second->parse_string();
-    delete r.second;
-}
-*/
 void c::ping(ostream& os) {
     os << "I am responsive. The backend... ";
     if (!connect_backend(os)) {
