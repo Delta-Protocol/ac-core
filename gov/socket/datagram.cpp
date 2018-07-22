@@ -203,3 +203,14 @@ os << "payload as str " << parse_string() << endl;
 os << "completed " << completed() << endl;
 }
 
+#include <sstream>
+string c::service_str(uint16_t svc) {
+    static constexpr const char *x{"PEQ_"};
+    ostringstream os;
+    os << x[svc&3] << ".";
+    auto m=svc>>2;
+    uint16_t l=m/100;
+    os << l << "." << m%100;
+    return os.str();
+}
+

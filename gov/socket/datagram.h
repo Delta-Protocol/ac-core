@@ -33,6 +33,8 @@ namespace socket {
 
 		bool completed() const;
 		hash_t compute_hash() const;
+        static string service_str(uint16_t svc);
+        inline string service_str() const { return service_str(service); }
 
 		string sendto(int sock) const;
 		string recvfrom(int sock);
