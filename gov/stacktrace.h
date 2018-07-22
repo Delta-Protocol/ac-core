@@ -1,15 +1,16 @@
-#ifndef _STACKTRACE_H_
-#define _STACKTRACE_H_
+#ifndef USGOV_49d1d337b2a0fc5c7d3988c513a828859517ba9520f1dbc3182719bf4ee878d6
+#define USGOV_49d1d337b2a0fc5c7d3988c513a828859517ba9520f1dbc3182719bf4ee878d6
+#ifdef DEBUG
 
 #include <stdio.h>
 #include <stdlib.h>
 //#include <libunwind.h>
-//#include <execinfo.h>
-//#include <cxxabi.h>
+#include <execinfo.h>
+#include <cxxabi.h>
 
-
-static inline void print_stacktrace() { //FILE *out = stderr, unsigned int max_frames = 63) {
 /*
+static inline void print_stacktrace() { //FILE *out = stderr, unsigned int max_frames = 63) {
+
   unw_cursor_t cursor; unw_context_t uc;
   unw_word_t ip, sp;
 
@@ -20,15 +21,14 @@ static inline void print_stacktrace() { //FILE *out = stderr, unsigned int max_f
     unw_get_reg(&cursor, UNW_REG_SP, &sp);
     printf ("ip = %lx, sp = %lx\n", (long) ip, (long) sp);
   }
-*/
-}
 
-/*
+}
+*/
+
 // stacktrace.h (c) 2008, Timo Bingmann from http://idlebox.net/
 // published under the WTFPL v2.0
 // Print a demangled stack backtrace of the caller function to FILE* out. 
-static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63)
-{
+static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63) {
     fprintf(out, "stack trace:\n");
 
     // storage array for stack trace address data
@@ -106,6 +106,5 @@ static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames 
     free(funcname);
     free(symbollist);
 }
-*/
 #endif
-
+#endif

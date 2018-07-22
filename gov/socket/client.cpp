@@ -168,6 +168,8 @@ cout << "SOCKET: recv datagram " << r.second->service_str() << " of size " << r.
     return move(r);
 }
 
+#include <us/gov/stacktrace.h>
+
 string c::send(datagram* d) { //don't call send(&d) perf
 	if (unlikely(!sock)) {
 		return "Error. Sending datagram before connecting.";
@@ -179,6 +181,10 @@ string c::send(datagram* d) { //don't call send(&d) perf
     }
     else {
 cout << "SOCKET: sent datagram " << d->service_str() << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << " to " << addr << endl;
+if (d->service_str()=="P.6.4") {
+    print_stacktrace();
+
+}
     }
     delete d;
     return r;
@@ -201,3 +207,4 @@ cout << "SOCKET: sent datagram " << d.service_str() << " of size " << d.size() <
 void c::dump(ostream& os) const {
 	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
 }
+
