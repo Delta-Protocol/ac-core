@@ -60,6 +60,10 @@ c::datagram(uint16_t service, const string& payload):service(service) {
 	dend=size();
 }
 
+c::datagram(uint16_t service, vector<uint8_t>&&) {
+assert(false);
+}
+
 void c::encode_size(uint32_t sz) {
 	assert(h==6);
 	assert(size()>=h); //This is little-endian
@@ -184,13 +188,26 @@ vector<string> c::parse_strings() const {
 	return move(ans);
 }
 */
+#include <us/gov/id/protocol.h>
+#include <us/gov/dfs/protocol.h>
+#include <sstream>
 string c::parse_string() const {
+if (service==protocol::id_peer_status) {
+    ostringstream os;
+    os << "(uint16)" << parse_uint16();
+    return os.str();
+}
+else if (service==protocol::file_response) {
+    return "[binary]";
+}
+else {
     int sz=size()-h+1;
     if (unlikely(sz<2)) return ""; //minimum 2bytes for a non-empty c string
     char cstr[sz];
     memcpy(cstr,&*(cbegin()+h),sz-1);
     cstr[sz-1]='\0';
     return string(cstr);
+}
 //	return string(reinterpret_cast<const char*>(&*(begin()+h)),size()-h);
 }
 

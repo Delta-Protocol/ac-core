@@ -27,8 +27,8 @@ namespace socket {
 		datagram();
 		datagram(uint16_t service);
 		datagram(uint16_t service, uint16_t);
-		datagram(uint16_t service, const string&);
-		datagram(uint16_t service, vector<uint8_t>&&) {}
+        datagram(uint16_t service, const string&);
+		datagram(uint16_t service, vector<uint8_t>&&);
 
 
 		bool completed() const;
