@@ -67,22 +67,23 @@ void c::syncd::run() {
 				}
 				else {
 					cout << "SYNCD: querying file for " << cu << endl;
-                    if (last_queryed!=cu) {
-                        last_queryed=cu;
-                        query_reps=100;
-                    }
-                    else {
-                        cout << "countown to clearing " << query_reps << endl;
-                        if (--query_reps==0) { // TODO we are in a deadlock
-                            {
-            				lock_guard<mutex> lock(mx); 
-                            head=cur=tail=0;
-                            }
-                            cout << "triggering db reset" << endl;
-                            d->clear();
-                        }
-                    }
-					d->query_block(cu);
+					if (likely(d->query_block(cu)!=0)) { //the petition was delivered
+			                    if (last_queryed!=cu) {
+                        			last_queryed=cu;
+			                        query_reps=100;
+			                    }
+			                    else {
+			                        cout << "countown to clearing " << query_reps << endl;
+			                        if (--query_reps==0) { // TODO we are in a deadlock
+			                            {
+			            		    lock_guard<mutex> lock(mx); 
+			                            head=cur=tail=0;
+			                            }
+			                            cout << "triggering db reset" << endl;
+			                            d->clear();
+			                        }
+			                    }
+					}
 //					cout << "SYNCD: going to sleep for 2 secs." << endl;
 					wait(chrono::seconds(1)); //TODO better
 //					cout << "SYNCD: waked up " << endl;
@@ -403,11 +404,16 @@ cout << "get rnd node from authapp " << s << endl;
 	return s;
 }
 
-void c::query_block(const diff::hash_t& hash) {
+peer_t* c::query_block(const diff::hash_t& hash) {
 	auto n=get_random_edge();
-	if (n==0) return;
+	if (unlikely(n==0)) return n;
 //	cout << "querying diff " << hash << " to " << n->pubkey << endl;
-	n->send(new datagram(protocol::query_block,hash.to_b58()));
+	auto r=n->send(new datagram(protocol::query_block,hash.to_b58()));
+	if (unlikely(!r.empty())) {
+		cerr << "delivery failed. " << r << endl;
+		return 0;
+	}
+	return n;
 }
 
 string c::load_block(const string& block_hash_b58) const {
