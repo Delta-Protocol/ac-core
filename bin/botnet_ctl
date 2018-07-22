@@ -85,6 +85,13 @@ echo $n
     done
 fi
 
+if [ "_$cmd" == "_balance" ]; then
+    for n in $nodes; do
+echo -n "$n - "
+        us-wallet -whost $n balance
+    done
+fi
+
 
 
 
