@@ -97,6 +97,24 @@ echo -n "$n - "
         ssh $n "cat ~/.us/gov/blocks/head"
     done
 fi
+if [ "_$cmd" == "_bin" ]; then
+    for n in $nodes; do
+echo -n "$n - "
+        ssh $n "md5sum /usr/local/lib/libusgov.so; "
+    done
+    for n in $nodes; do
+echo -n "$n - "
+        ssh $n "md5sum /usr/local/lib/libuswallet.so; "
+    done
+    for n in $nodes; do
+echo -n "$n - "
+        ssh $n "md5sum /usr/local/bin/us-gov; "
+    done
+    for n in $nodes; do
+echo -n "$n - "
+        ssh $n "md5sum /usr/local/bin/us-wallet; "
+    done
+fi
 
 
 
