@@ -42,7 +42,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 		}
 		return process_evidence(static_cast<peer_t*>(c),d);
 	}
-cout << "relay_dmn:passing downstream" << endl;
+//cout << "relay_dmn:passing downstream" << endl;
 	return b::process_work(c,d);
 }
 

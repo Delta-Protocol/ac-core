@@ -171,7 +171,17 @@ if (++i%100==0) { //reload file
     if (svc.find(d.service)!=svc.end()) print_stacktrace(); 
 }
 }
+
+void dump_d(string prefix, const datagram& d) {
+cout << "SOCKET: " << prefix << " datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
+cout << "      : " << d.parse_string() << endl;
+}
+
+
+
 #endif
+
+
 
 
 pair<string,datagram*> c::recv() { //caller owns the returning object
@@ -187,9 +197,9 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
             break;
         }
         if (likely(r.second->completed())) {
-cout << "SOCKET: recv datagram " << r.second->service << " " << r.second->service_str() << " of size " << r.second->size() << " bytes. HASH " << r.second->compute_hash() << " from " << addr << endl;
    #ifdef DEBUG
-   interceptor(*r.second);
+   dump_d("recv", *r.second); 
+//   interceptor(*r.second);
    #endif
             break;
         }
@@ -207,10 +217,13 @@ string c::send(datagram* d) { //don't call send(&d) perf
         disconnect();
     }
     else {
-cout << "SOCKET: sent datagram " << d->service << " " << d->service_str() << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << " to " << addr << endl;
+
    #ifdef DEBUG
-   interceptor(*d);
+   dump_d("sent", *d); 
+//   interceptor(*r.second);
    #endif
+
+
     }
     delete d;
     return r;
@@ -225,11 +238,12 @@ string c::send(const datagram& d) {
         disconnect();
     }
 	else {
-cout << "SOCKET: sent datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
 
    #ifdef DEBUG
-   interceptor(d);
+   dump_d("sent", d); 
+//   interceptor(*r.second);
    #endif
+
 	}
 	return r;
 }
