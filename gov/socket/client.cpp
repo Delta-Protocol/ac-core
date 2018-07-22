@@ -172,7 +172,7 @@ if (++i%100==0) { //reload file
 }
 }
 
-void dump_d(string prefix, const datagram& d) {
+void dump_d(string prefix, const datagram& d, const string& addr) {
 cout << "SOCKET: " << prefix << " datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
 cout << "      : " << d.parse_string() << endl;
 }
@@ -198,7 +198,7 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
         }
         if (likely(r.second->completed())) {
    #ifdef DEBUG
-   dump_d("recv", *r.second); 
+   dump_d("recv", *r.second, addr); 
 //   interceptor(*r.second);
    #endif
             break;
@@ -219,7 +219,7 @@ string c::send(datagram* d) { //don't call send(&d) perf
     else {
 
    #ifdef DEBUG
-   dump_d("sent", *d); 
+   dump_d("sent", *d, addr); 
 //   interceptor(*r.second);
    #endif
 
@@ -240,7 +240,7 @@ string c::send(const datagram& d) {
 	else {
 
    #ifdef DEBUG
-   dump_d("sent", d); 
+   dump_d("sent", d, addr); 
 //   interceptor(*r.second);
    #endif
 
