@@ -179,6 +179,7 @@ void c::ping(ostream& os) {
             break;
         }
         else {
+            os << "-";
             delete d;
         }
         auto r=endpoint.recv();
