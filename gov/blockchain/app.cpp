@@ -47,14 +47,15 @@ c::delta* c::delta::create(int id) {
 c::delta* c::delta::create(int id, istream& is) {
 	if (id==auth::app::id()) return auth::app::delta::from_stream(is);
 	if (id==cash::app::id()) return cash::app::delta::from_stream(is);
+#if DEBUG
 	cerr << "Attempting to create a non-recognized app: " << id << endl;
 	char str[256];
 	is.get(str,256);
 	cerr << str << " ..." << endl;
 
 	print_stacktrace();
-
         assert(false);
+#endif
 	return 0;
 }
 
