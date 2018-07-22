@@ -28,7 +28,7 @@ static inline void print_stacktrace() { //FILE *out = stderr, unsigned int max_f
 // stacktrace.h (c) 2008, Timo Bingmann from http://idlebox.net/
 // published under the WTFPL v2.0
 // Print a demangled stack backtrace of the caller function to FILE* out. 
-static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63) {
+static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 10) {
     fprintf(out, "stack trace:\n");
 
     // storage array for stack trace address data

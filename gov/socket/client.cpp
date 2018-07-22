@@ -65,12 +65,13 @@ string c::connect(const string& host, uint16_t port, bool block) {
     on_connect();
 	return "";
 }
-
+#include <us/gov/stacktrace.h>
 void c::disconnect() {
 	lock_guard<mutex> lock(mx);
 	if (unlikely(sock==0)) return;
 	close(sock);
 	sock=0;
+    print_stacktrace();
 }
 
 void c::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t port) {

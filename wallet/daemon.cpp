@@ -26,34 +26,15 @@ bool c::send_response(socket::peer_t *c, datagram*d, const string& payload) {
 }
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
-//cout << "recv datagram " << endl;
-d->dump(cout);
-//    peer_t* c=static_cast<peer_t*>(c0);
     switch(d->service) {
 	case us::wallet::protocol::ping: {
-cout << "PING" << endl;
+//cout << "PING" << endl;
 		ostringstream ans;
 		local_api::ping(ans);
-cout << ans.str() << endl;
+//cout << ans.str() << endl;
 		return send_response(c,d,ans.str());
     }
     break;
-/*
-	case us::wallet::protocol::ping: {
-		ostringstream ans;
-		local_api::ping_wallet(ans);
-		return send_response(c,d,ans.str());
-	}
-	break;
-*/
-/*
-	case us::wallet::protocol::ping_gov: {
-		ostringstream ans;
-		local_api::ping_gov(ans);
-		return send_response(c,d,ans.str());
-	}
-	break;
-*/
     }
 
     if (b::process_work(c,d)) return true;
@@ -191,7 +172,10 @@ socket::client* c::create_client(int sock) {
 
 
 bool c::authorize(const pub_t& p) const {
-cout << "Request for authorization " << p << endl;
     return devices.authorize(p);
+//cout << "Request for authorization " << p << "... ";
+//    bool b=devices.authorize(p);
+//cout << boolalpha << b << endl;
+    return b;
 }
 
