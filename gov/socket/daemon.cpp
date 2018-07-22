@@ -34,7 +34,9 @@ void c::run() {
 	thread_::_this.sleep_for(1s);
 	{
 	while(!thread_::_this.terminated) {
-		thread_::_this.sleep_for(chrono::seconds(300));  //TODO not every 30 secs but at some safe point in the cycle
+		cout << "Triggered Timer (mutation) v=30 secs" << endl;
+		daemon_timer();
+		thread_::_this.sleep_for(chrono::seconds(30));  //TODO not every 30 secs but at some safe point in the cycle
 	}
 	}
 	listen.join();
