@@ -339,26 +339,26 @@ void c::run() {
 }
 
 string c::networking::get_random_peer(const unordered_set<string>& exclude_addrs) const { //returns ipaddress
-cout << "exclude: ";
-for (auto&i:exclude_addrs) cout << i << " ";
-cout << endl;
+//cout << "exclude: ";
+//for (auto&i:exclude_addrs) cout << i << " ";
+//cout << endl;
 
 //cout << "my pubkey is " << id.pub << endl;
 	auto n=parent->get_random_node(exclude_addrs);
-cout << "auth_app->get_random_node=" << n << endl;
+//cout << "auth_app->get_random_node=" << n << endl;
 	if (unlikely(n.empty()) && !seed_nodes.empty()) {
-cout << "no nodes . using seeds " << endl;
+//cout << "no nodes . using seeds " << endl;
 		uniform_int_distribution<> d(0, seed_nodes.size()-1);
 		for (int j=0; j<10; ++j) {
 			auto i=seed_nodes.begin();
 			advance(i,d(parent->rng));
 			if (exclude_addrs.find(*i)==exclude_addrs.end()) {
-cout << "found " << *i << endl;
+//cout << "found " << *i << endl;
 				return *i;
 			}
 		}
 	}
-	if (!n.empty()) cout << "Random node at " << n << endl;
+//	if (!n.empty()) cout << "Random node at " << n << endl;
 	return move(n);
 }
 
@@ -413,7 +413,7 @@ cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << fn.str()
 
 string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
 	auto s=auth_app->get_random_node(rng,exclude_addrs);
-cout << "get rnd node from authapp " << s << endl;
+//cout << "get rnd node from authapp " << s << endl;
 	return s;
 }
 
@@ -525,7 +525,6 @@ local_deltas* c::create_local_deltas() {
 	{
     lock_guard<mutex> lock(peerd.mx_evidences); //pause reception of evidences while changing app pools
 	for (auto&i:apps_) {
-//  cout << "===>create app gut for app " << i.first << endl;
 		auto* amg=i.second->create_local_delta(); //
 		if (amg!=0) {
 			mg->emplace(i.first,amg);
@@ -589,8 +588,7 @@ void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 	istringstream is(s);
 	local_deltas* g=local_deltas::from_stream(is);
 	if (!g) return;
-	/// discard if not properly signed
-	if (unlikely(!g->verify())) {
+	if (unlikely(!g->verify())) { /// discard if not properly signed
 		delete g;
 		cout << "Failed verification of incoming local_deltas" << endl;
 		return;
@@ -607,15 +605,12 @@ void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 	}
 	send(*g,c); //relay asap, dont relay to the original sender
 
-	/// Add to pool
-	{
+	{	/// Add to pool
 	lock_guard<mutex> lock(mx_pool);
 	pool->add(g);
 	}
 
 }
-
-
 
 void c::process_query_block(peer_t *c, datagram*d) {
 	auto hash_b58=d->parse_string();
@@ -659,14 +654,14 @@ bool c::networking::process_evidence(relay::peer_t *c, datagram*d) {
 }
 
 bool c::networking::process_work(socket::peer_t *c, datagram*d) {
-cout << "PROCESSING DATAGRAM " << d->service << endl;
+//cout << "PROCESSING DATAGRAM " << d->service << endl;
 	if (protocol::is_node_protocol(d->service)) { //high priority
-cout << "NODE PROTOCOL " << d->service << endl;
+//cout << "NODE PROTOCOL " << d->service << endl;
 		if (parent->process_work(static_cast<peer_t*>(c),d)) return true;
 	}
 
 	if (protocol::is_app_query(d->service)) {
-cout << "QUERY PROTOCOL " << d->service << endl;
+//cout << "QUERY PROTOCOL " << d->service << endl;
 		if (parent->process_app_query(static_cast<peer_t*>(c),d)) return true;
 	}
 
@@ -700,7 +695,7 @@ bool c::process_evidence(peer_t *c, datagram*d) {
 }
 
 bool c::process_app_query(peer_t *c, datagram*d) {
-cout << "BLOCKCHAIN: process_query " << d->service << endl;
+//cout << "BLOCKCHAIN: process_query " << d->service << endl;
         if (!syncdemon.in_sync()) {
         c->send(new datagram(us::gov::protocol::error,"Service temporarily unavailable. Syncing."));
  //		cout << "ignoring query, I am syncing" << endl;
@@ -793,13 +788,11 @@ void c::set_last_block_imported_(const diff::hash_t& h) {
 }
 
 void c::clear() {
-//cout << "DB cleared" << endl; //TODO
 	for (auto&i:apps_) {
         i.second->clear();
 	}
 	set_last_block_imported(0);
 }
-
 
 void c::set_last_block_imported(const diff::hash_t& h) {
 	lock_guard<mutex> lock(mx_import); 

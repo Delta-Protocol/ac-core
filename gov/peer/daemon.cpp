@@ -52,9 +52,9 @@ c::pub_t c::adjust_peer_number() {
 }
 
 void c::add_peers(pub_t& a) {
-cout << "add peers" << endl;
-a.dump(cout);
-cout << "--" << endl;
+//cout << "add peers" << endl;
+//a.dump(cout);
+//cout << "--" << endl;
 	int n=edges-a.asize()+1; //must be signed int
 	unordered_set<string> exclude;
 	for (auto i:a) if (i!=0) exclude.emplace(i->addr);
@@ -64,15 +64,15 @@ cout << "--" << endl;
 			if (exclude.find(addr)==exclude.end()) {
 				exclude.emplace(addr);
 				auto* p=create_client(0);
-cout << "connecting to address " << addr << endl;
+//cout << "connecting to address " << addr << endl;
 				string r=p->connect(addr,16672);
                 if (likely(r.empty())) {
-cout << "connected to address " << addr << endl;
+//cout << "connected to address " << addr << endl;
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);
 				}
 				else {
-					cout << "peerd: unable to connect, deleting peer" << endl;
+//					cout << "peerd: unable to connect, deleting peer" << endl;
 					delete p;
 				}
 			}
