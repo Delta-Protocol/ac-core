@@ -91,6 +91,12 @@ echo -n "$n - "
         us-wallet -whost $n balance
     done
 fi
+if [ "_$cmd" == "_head" ]; then
+    for n in $nodes; do
+echo -n "$n - "
+        ssh $n "cat ~/.us/gov/blocks/head"
+    done
+fi
 
 
 
