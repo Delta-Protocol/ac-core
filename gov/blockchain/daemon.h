@@ -149,6 +149,8 @@ namespace blockchain {
 
         void clear(); //clear database
 
+		bool process_sysop_request(peer_t *c, datagram*d);
+
 
 		bool import(const diff& b);
 		diff::hash_t last_block_imported;

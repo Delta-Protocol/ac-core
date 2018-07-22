@@ -703,31 +703,35 @@ cout << "BLOCKCHAIN: process_query " << d->service << endl;
 	return processed;
 }
 
-bool c::process_work(peer_t *c, datagram*d) {
-//cout << "BLOCKCHAIN: PW process_work " << d->service << endl;
-	if (d->service==protocol::sysop) {
-//cout << "PW sysop" << endl;
+
+bool c::process_sysop_request(peer_t *c, datagram*d) {
 		bool alowed_sysop=sysop_allowed;
 		if (c->stage==peer_t::sysop) { //Is peer a sysop?
 			if (!sysop_allowed) {
 				delete d;
-				c->send(new datagram(protocol::sysop,"Sysop operation is not allowed."));
+				//c->send(new datagram(protocol::sysop,"Sysop operation is not allowed."));
 				c->disconnect();
-                cout << "Disconnected sysop connection. see -ds option." << endl;
 				return true;
 			}
-			return sysops.process_work(c, d); //traslate the msg to sysopland
-		}
-		else {
-//cout << "Disconnecting, peer is not a sysop " << c->stage << endl;
-			delete d;
-			c->disconnect();
-//			c->send(new datagram(protocol::sysop,"Sysop operation is not allowed."));
+			if (!sysops.process_work(c, d)) { //traslate the msg to sysopland
+				cerr << "Error , sysop request not handled" << endl;
+				delete d;
+			}
 			return true;
 		}
+		delete d;
+		c->disconnect();
+//		c->send(new datagram(protocol::sysop,"Sysop operation is not allowed."));
+		return true;
+}
+
+bool c::process_work(peer_t *c, datagram*d) {
+//cout << "BLOCKCHAIN: PW process_work " << d->service << endl;
+	if (unlikely(d->service==protocol::sysop)) {
+		if (likely(process_sysop_request(c,d))) return true;
 	}
 
-	if (c->stage==peer_t::sysop) { //only service sysop can be operated by a sysop
+	if (unlikely(c->stage==peer_t::sysop)) { //only service sysop can be operated by a sysop
 		cout << "Sysop connection sending invalid datagrams." << endl;
 		delete d;
 		c->disconnect();
