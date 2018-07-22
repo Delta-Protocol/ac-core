@@ -160,8 +160,8 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
             disconnect();
             break;
         }
-        if (likely(r.second->completed())) { 
-cout << "SOCKET: recv datagram " << r.second->service_str() << " of size " << r.second->size() << " bytes. HASH " << r.second->compute_hash() << " from " << addr << endl;
+        if (likely(r.second->completed())) {
+cout << "SOCKET: recv datagram " << r.second->service << " " << r.second->service_str() << " of size " << r.second->size() << " bytes. HASH " << r.second->compute_hash() << " from " << addr << endl;
             break;
         }
     }
@@ -180,7 +180,7 @@ string c::send(datagram* d) { //don't call send(&d) perf
         disconnect();
     }
     else {
-cout << "SOCKET: sent datagram " << d->service_str() << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << " to " << addr << endl;
+cout << "SOCKET: sent datagram " << d->service << " " << d->service_str() << " of size " << d->size() << " bytes. HASH " << d->compute_hash() << " to " << addr << endl;
 /*
 if (d->service_str()=="P.6.4") {
     print_stacktrace();
@@ -201,7 +201,7 @@ string c::send(const datagram& d) {
         disconnect();
     }
 	else {
-cout << "SOCKET: sent datagram " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
+cout << "SOCKET: sent datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
 /*
 if (d.service_str()=="P.6.4") {
     print_stacktrace();
