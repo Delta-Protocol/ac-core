@@ -14,11 +14,11 @@ void c::constructor() {
 }
 
 c::daemon(const keys& k): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(this), sysops(*this), syncdemon(this), id(k) { //dependency order
-	constructor();	
+	constructor();
 }
 
 c::daemon(const keys& k, const string& home, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::system_clock::now().time_since_epoch().count()), peerd(port, edges, this, seed_nodes), home(home), syncdemon(this), sysops(*this), id(k) { //dependency order
-	constructor();	
+	constructor();
 }
 
 c::~daemon() {
@@ -233,7 +233,7 @@ bool c::stage2(cycle_t& cycle) {
 	diff::hash_t hash=votes.select();
 cout << "Voting process result: diff " << hash << endl;
 	if (likely(!hash.is_zero())) {
-		if (likely(cycle.new_block)) {
+		if (likely(cycle.new_block!=0)) {
 			if (likely(hash==cycle.new_block->hash())) {
 				save(*cycle.new_block);
 				if (!import(*cycle.new_block)) {

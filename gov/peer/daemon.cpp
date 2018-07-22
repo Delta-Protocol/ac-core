@@ -53,7 +53,9 @@ c::pub_t c::adjust_peer_number() {
 
 void c::add_peers(pub_t& a) {
 cout << "add peers" << endl;
-	int n=edges-a.asize()+1; //must be signed
+a.dump(cout);
+cout << "--" << endl;
+	int n=edges-a.asize()+1; //must be signed int
 	unordered_set<string> exclude;
 	for (auto i:a) if (i!=0) exclude.emplace(i->addr);
 	while(n>0) {
