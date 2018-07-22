@@ -23,14 +23,12 @@ start() {
 
 
       RETVAL=$?
-      echo "$API_NAME. $RETVAL"
 }
 
 stop() {
       echo -n "Stopping us-gov: "
       killall -q -w -u $USER us-gov
       RETVAL=$?
-      echo "$API_NAME. $RETVAL"
 }
 
 case "$1" in
@@ -38,7 +36,9 @@ case "$1" in
       start
   ;;
     stop)
+	echo "A"
       stop
+	echo "B"
   ;;
     restart)
       stop
@@ -49,5 +49,6 @@ case "$1" in
       exit 1
   ;;
 esac
+echo "$RETVAL"
 exit $RETVAL
 

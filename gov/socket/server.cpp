@@ -100,22 +100,24 @@ bool c::clients_t::is_here(client* c) const {
 	return false;
 }
 
-void c::clients_t::add(client* c,bool wakeupselect) { 
+void c::clients_t::add(client* c,bool wakeupselect) {
 	assert(!is_here(c));
-	wadd.add(c); 
+	wadd.add(c);
 	if (wakeupselect) read_sockets();
 }
-void c::clients_t::remove(client* c) { 
+void c::clients_t::remove(client* c) {
 	assert(is_here(c));
-	wremove.add(c); 
+	wremove.add(c);
 	read_sockets();
 }
 
 void c::clients_t::read_sockets() {
-	locli.send('W'); //wake up from select
+	static char w='w';
+//	locli.send('W'); //wake up from select
+	::write(locli.sock, &w, 1);
 }
 
-void c::clients_t::hold(client* c) { 
+void c::clients_t::hold(client* c) {
 	{
 	lock_guard<mutex> lock(mx);
 	auto i=find(c->sock);
@@ -125,7 +127,7 @@ void c::clients_t::hold(client* c) {
 	holds.add(c);
 }
 
-void c::clients_t::resume(client* c) { 
+void c::clients_t::resume(client* c) {
 	bool b=holds.remove(c);
 	if(!b) {
 		return;
