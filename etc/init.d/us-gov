@@ -11,23 +11,34 @@ NAME="us-gov"
 
 RETVAL=0
 
+echoret() {
+if [ $1 -eq 0 ]; then
+	echo "SUCCESS"
+else
+	echo "FAIL"
+fi
+}
+
+
 start() {
       echo -n "Starting us-gov: "
 # 	  echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env $PROG"
 
-/sbin/start-stop-daemon --start  --background \
+/sbin/start-stop-daemon --start  --background -o -q \
   --pidfile $PIDFILE --make-pidfile \
   --chuid $USER \
   --startas /usr/bin/pipexec -- -k \
    -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:2>D:1}' '{D:1>L:0}'
 
-
       RETVAL=$?
+      echoret $RETVAL
 }
 
 stop() {
-      /sbin/start-stop-daemon --stop --pidfile $PIDFILE
+      echo -n "Stopping us-gov: "
+      /sbin/start-stop-daemon -q -o --stop --pidfile $PIDFILE 2>/dev/null
       RETVAL=$?
+      echoret $RETVAL
 }
 
 case "$1" in
@@ -39,6 +50,7 @@ case "$1" in
   ;;
     restart)
       stop
+	sleep 1
       start
   ;;
     *)
@@ -46,6 +58,6 @@ case "$1" in
       exit 1
   ;;
 esac
-echo "$RETVAL"
+ps ax | grep "us-gov $DAEMON_ARGS" | grep -v grep
 exit $RETVAL
 
