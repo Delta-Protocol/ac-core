@@ -814,7 +814,9 @@ bool c::import(const diff& b) {
 		auto a=apps_.find(i.first);
 		assert(a!=apps_.end());
 		assert(a->second!=0);
+cout << "chasing " << endl;
 		a->second->import(*i.second,b.proof_of_work);
+cout << "/chasing " << endl;
 		if (a->second==auth_app) {
 			update_peers_state();
 		}
