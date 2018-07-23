@@ -6,32 +6,32 @@ cmd=$1
 function install() {
 IP=$1
 echo "installing sw node $IP"
-(ssh $IP "cd us; (git pull) && (make clean) && (make release) && (make install)") &
-echo "Ret code for $IP $?"
+ssh $IP "cd us; (make install)"
 }
-function stopgov() {
+function rebuild() {
+IP=$1
+echo "building sw node $IP"
+(ssh $IP "cd us; (git pull) && (make clean) && (make release) )") &
+}
+function stopg() {
 IP=$1
 echo "stopping gov $IP"
-(ssh $IP "cd us; /etc/init.d/us-gov stop") &
-echo "Ret code for $IP $?"
+ssh $IP "cd us; /etc/init.d/us-gov stop"
 }
-function stopwallet() {
+function stopw() {
 IP=$1
 echo "stopping gov $IP"
-(ssh $IP "cd us; /etc/init.d/us-wallet stop") &
-echo "Ret code for $IP $?"
+ssh $IP "cd us; /etc/init.d/us-wallet stop"
 }
-function startgov() {
+function startg() {
 IP=$1
 echo "stopping gov $IP"
-(ssh $IP "cd us; /etc/init.d/us-gov start") &
-echo "Ret code for $IP $?"
+ssh $IP "cd us; /etc/init.d/us-gov start"
 }
-function startwallet() {
+function startw() {
 IP=$1
 echo "stopping gov $IP"
-(ssh $IP "cd us; /etc/init.d/us-wallet start") &
-echo "Ret code for $IP $?"
+ssh $IP "cd us; /etc/init.d/us-wallet start"
 }
 
 nodes="10.84.172.66 10.84.172.55 10.84.172.54 10.84.172.52 10.84.172.50"
@@ -39,41 +39,64 @@ nodes="10.84.172.66 10.84.172.55 10.84.172.54 10.84.172.52 10.84.172.50"
 
 if [ "_$cmd" == "_pull" ]; then
     for n in $nodes; do
+        echo $n
         ssh $n "cd us; git pull"
+    done
+fi
+if [ "_$cmd" == "_ps" ]; then
+    for n in $nodes; do
+        echo "$n:"
+        ssh $n "cd us; ps ax | grep us-wallet; ps ax | grep us-gov"
     done
 fi
 if [ "_$cmd" == "_install" ]; then
     for n in $nodes; do
+        echo $n
         install $n
+    done
+fi
+if [ "_$cmd" == "_rebuild" ]; then
+    for n in $nodes; do
+        echo $n
+        rebuild $n
     done
 fi
 if [ "_$cmd" == "_stopw" ]; then
     for n in $nodes; do
-        stopwallet $n
+        echo $n
+        stopw $n
     done
 fi
 if [ "_$cmd" == "_startw" ]; then
     for n in $nodes; do
-        startwallet $n
+        echo $n
+        startw $n
     done
 fi
 if [ "_$cmd" == "_stopg" ]; then
     for n in $nodes; do
-        stopgov $n
+        echo $n
+        stopg $n
     done
 fi
 if [ "_$cmd" == "_startg" ]; then
     for n in $nodes; do
-        startgov $n
+        echo $n
+        startg $n
     done
 fi
-if [ "_$cmd" == "_restart" ]; then
+if [ "_$cmd" == "_start" ]; then
+    for n in $nodes; do
+        echo $n
+        startg $n
+        startw $n
+    done
+fi
+if [ "_$cmd" == "_stop" ]; then
     for n in $nodes; do
 echo $n
-        stopwallet $n
-        stopgov $n
-        startgov $n
-        startwallet $n
+        stopg $n
+        stopw $n
     done
 fi
 
@@ -115,8 +138,6 @@ echo -n "$n - "
         ssh $n "md5sum /usr/local/bin/us-wallet; "
     done
 fi
-
-
 
 
 
