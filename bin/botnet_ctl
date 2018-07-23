@@ -116,15 +116,13 @@ echo $n
         restartw $n
     done
 fi
-<<<<<<< HEAD
+
 if [ "_$cmd" == "_service" ]; then
     for n in $nodes; do
 echo $n
         service $n
     done
 fi
-=======
->>>>>>> parent of 1f7fd12... Merge branch 'master' of ssh://git.acf.atlas:5322/git-server/repos/us
 
 if [ "_$cmd" == "_putkey" ]; then
     for n in $nodes; do
