@@ -3,7 +3,7 @@
 cmd=$1
 
 
-function install() {
+function service() {
 IP=$1
 echo "Full service to node $IP"
 (ssh $IP "cd us; (git pull) && (make clean) && (make release) && (make install) && (/etc/init.d/us-wallet stop) && (/etc/init.d/us-gov stop) && (/etc/init.d/us-wallet start) && (/etc/init.d/us-gov start)") &
@@ -131,9 +131,7 @@ fi
 if [ "_$cmd" == "_service" ]; then
     for n in $nodes; do
 echo $n
-        
-        restartg $n
-        restartw $n
+        service $n
     done
 fi
 
