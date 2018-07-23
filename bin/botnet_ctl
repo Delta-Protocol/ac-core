@@ -5,6 +5,12 @@ cmd=$1
 
 function service() {
 IP=$1
+echo "Full service to node $IP"
+(ssh $IP "cd us; (git pull) && (make clean) && (make release) && (make install) && (/etc/init.d/us-wallet stop) && (/etc/init.d/us-gov stop) && (/etc/init.d/us-wallet start) && (/etc/init.d/us-gov start)") &
+}
+
+function install() {
+IP=$1
 echo "installing sw node $IP"
 ssh $IP "cd us; (make install)"
 }
