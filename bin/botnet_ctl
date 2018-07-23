@@ -50,7 +50,7 @@ nodes="10.84.172.66 10.84.172.55 10.84.172.54 10.84.172.52 10.84.172.50"
 if [ "_$cmd" == "_pull" ]; then
     for n in $nodes; do
         echo $n
-        ssh $n "cd us; git pull"
+        (ssh $n "cd us; git pull") &
     done
 fi
 if [ "_$cmd" == "_ps" ]; then
