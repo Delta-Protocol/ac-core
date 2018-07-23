@@ -11,7 +11,7 @@ ssh $IP "cd us; (make install)"
 function rebuild() {
 IP=$1
 echo "building sw node $IP"
-(ssh $IP "cd us; (git pull) && (make clean) && (make release) )") &
+(ssh $IP "cd us; (git pull) && (make clean) && (make release) ") &
 }
 function stopg() {
 IP=$1
