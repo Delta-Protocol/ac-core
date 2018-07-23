@@ -17,11 +17,19 @@ NAME="us-wallet"
 
 RETVAL=0
 
+echoret() {
+if [ $1 -eq 0 ]; then
+	echo "SUCCESS"
+else
+	echo "FAIL"
+fi
+}
+
 start() {
       echo -n "Starting us-wallet: "
 #     echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env $PROG"
 
-/sbin/start-stop-daemon --start  --background \
+/sbin/start-stop-daemon --start  --background -q -o \
   --pidfile $PIDFILE --make-pidfile \
   --chuid $USER \
   --startas /usr/bin/pipexec -- -k \
@@ -29,13 +37,15 @@ start() {
 
 
       RETVAL=$?
-      echo "$API_NAME. $RETVAL"
+      echoret $RETVAL
 }
 
 
 stop() {
-      /sbin/start-stop-daemon --stop --pidfile $PIDFILE
+      echo -n "Stopping us-wallet: "
+      /sbin/start-stop-daemon -q -o --stop --pidfile $PIDFILE 2>/dev/null
       RETVAL=$?
+      echoret $RETVAL
 }
 
 case "$1" in
@@ -47,6 +57,7 @@ case "$1" in
   ;;
     restart)
       stop
+	sleep 1
       start
   ;;
     *)
@@ -54,5 +65,6 @@ case "$1" in
       exit 1
   ;;
 esac
+ps ax | grep "us-wallet $DAEMON_ARGS" | grep -v grep
 exit $RETVAL
 

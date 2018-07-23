@@ -5,39 +5,52 @@ cmd=$1
 
 function install() {
 IP=$1
-echo "installing sw node $IP"
-ssh $IP "cd us; (make install)"
+echo "Full service to node $IP"
+(ssh $IP "cd us; (git pull) && (make clean) && (make release) && (make install) && (/etc/init.d/us-wallet stop) && (/etc/init.d/us-gov stop) && (/etc/init.d/us-wallet start) && (/etc/init.d/us-gov start)") &
 }
+
+function install() {
+IP=$1
+echo "installing sw node $IP"
+(ssh $IP "cd us; (make install)")  &
+}
+
 function rebuild() {
 IP=$1
 echo "building sw node $IP"
 (ssh $IP "cd us; (git pull) && (make clean) && (make release) ") &
 }
+
 function stopg() {
 IP=$1
 echo "stopping gov $IP"
-ssh $IP "cd us; /etc/init.d/us-gov stop"
+(ssh $IP "cd us; /etc/init.d/us-gov stop") &
 }
+
 function stopw() {
 IP=$1
 echo "stopping wallet $IP"
-ssh $IP "cd us; /etc/init.d/us-wallet stop"
+(ssh $IP "cd us; /etc/init.d/us-wallet stop") &
 }
+
 function startg() {
 IP=$1
 echo "starting gov $IP"
-ssh $IP "cd us; /etc/init.d/us-gov start"
+(ssh $IP "cd us; /etc/init.d/us-gov start") &
 }
+
 function startw() {
 IP=$1
 echo "starting wallet $IP"
-ssh $IP "cd us; /etc/init.d/us-wallet start"
+(ssh $IP "cd us; /etc/init.d/us-wallet start") &
 }
+
 function restartg() {
 IP=$1
 echo "restarting gov $IP"
 ssh $IP "cd us; /etc/init.d/us-gov restart"
 }
+
 function restartw() {
 IP=$1
 echo "restarting gov $IP"
@@ -46,11 +59,10 @@ ssh $IP "cd us; /etc/init.d/us-wallet restart"
 
 nodes="10.84.172.66 10.84.172.55 10.84.172.54 10.84.172.52 10.84.172.50"
 
-
 if [ "_$cmd" == "_pull" ]; then
     for n in $nodes; do
         echo $n
-        ssh $n "cd us; git pull"
+        (ssh $n "cd us; git pull") &
     done
 fi
 if [ "_$cmd" == "_ps" ]; then
@@ -112,6 +124,14 @@ fi
 if [ "_$cmd" == "_restart" ]; then
     for n in $nodes; do
 echo $n
+        restartg $n
+        restartw $n
+    done
+fi
+if [ "_$cmd" == "_service" ]; then
+    for n in $nodes; do
+echo $n
+        
         restartg $n
         restartw $n
     done
