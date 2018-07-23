@@ -495,9 +495,9 @@ void c::update_peers_state() {
 	for (auto& i:peerd.in_service()) {
 		auto p=reinterpret_cast<peer_t*>(i);
 		if (p->stage!=peer_t::sysop) {
-			for (int i=0; i<sizeof(p->pubkey.data); ++i)
-				cout << p->pubkey.data[i]  << " ";
-			cout << endl;
+			//for (int i=0; i<sizeof(p->pubkey.data); ++i)
+			//	cout << p->pubkey.data[i]  << " ";
+			//cout << endl;
 			p->stage=auth_app->db.get_stage(p->pubkey.hash());
 		}
 	}
@@ -814,9 +814,7 @@ bool c::import(const diff& b) {
 		auto a=apps_.find(i.first);
 		assert(a!=apps_.end());
 		assert(a->second!=0);
-cout << "chasing " << endl;
 		a->second->import(*i.second,b.proof_of_work);
-cout << "/chasing " << endl;
 		if (a->second==auth_app) {
 			update_peers_state();
 		}
