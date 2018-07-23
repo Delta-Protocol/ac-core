@@ -20,18 +20,28 @@ ssh $IP "cd us; /etc/init.d/us-gov stop"
 }
 function stopw() {
 IP=$1
-echo "stopping gov $IP"
+echo "stopping wallet $IP"
 ssh $IP "cd us; /etc/init.d/us-wallet stop"
 }
 function startg() {
 IP=$1
-echo "stopping gov $IP"
+echo "starting gov $IP"
 ssh $IP "cd us; /etc/init.d/us-gov start"
 }
 function startw() {
 IP=$1
-echo "stopping gov $IP"
+echo "starting wallet $IP"
 ssh $IP "cd us; /etc/init.d/us-wallet start"
+}
+function restartg() {
+IP=$1
+echo "restarting gov $IP"
+ssh $IP "cd us; /etc/init.d/us-gov restart"
+}
+function restartw() {
+IP=$1
+echo "restarting gov $IP"
+ssh $IP "cd us; /etc/init.d/us-wallet restart"
 }
 
 nodes="10.84.172.66 10.84.172.55 10.84.172.54 10.84.172.52 10.84.172.50"
@@ -97,6 +107,13 @@ if [ "_$cmd" == "_stop" ]; then
 echo $n
         stopg $n
         stopw $n
+    done
+fi
+if [ "_$cmd" == "_restart" ]; then
+    for n in $nodes; do
+echo $n
+        restartg $n
+        restartw $n
     done
 fi
 
