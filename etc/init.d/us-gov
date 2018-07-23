@@ -26,9 +26,7 @@ start() {
 }
 
 stop() {
-      echo -n "Stopping us-gov: "
-      p=`which us-gov`
-      killall -q -w -u $USER $p
+      /sbin/start-stop-daemon --stop --pidfile $PIDFILE
       RETVAL=$?
 }
 
