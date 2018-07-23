@@ -1,7 +1,6 @@
 #!/bin/bash
 
-home=`mktemp -d`
-echo "home dir is $home"
+
 
 #---gov---
 LD_LIBRARY_PATH=gov govd/us-gov -d -home $home -genesis 127.0.0.1
@@ -12,15 +11,19 @@ else
     echo "gov-> FAIL"
 	exit 1;
 
-fi
 
-ls $home
+
+
+#------------start----------------|
 
 
 LD_LIBRARY_PATH=gov govd/us-gov -d -home $home -p 46000 2>&1 >/dev/null &
 sleep 1
 pid=`ps ax | grep gov | grep -v grep | awk '{print $1}'`
 echo "pid=$pid"
+
+
+~/us/bin/user_daemons_ctl  start
 
 
 
@@ -36,21 +39,27 @@ echo "pid2=$pid2"
 #LD_LIBRARY_PATH=wallet:gov walletd/us-wallet -d -wp 46001 b
 #
 
+#------------run-test-------------|
+
+cd
+cd us/test/wallet
+
+g++ -std=c++17 -I../../.. -L../../gov -L../../wallet -lusgov -luswallet main.cpp api.cpp
+
+LD_LIBRARY_PATH=../../gov:../../wallet ./a.out
+
+
+#--------stop---killall-pid------|
+
+~/us/bin/user_daemons_ctl  stop
+
+
+
+
 exit 0
 
 
-a=`LD_LIBRARY_PATH=gov test/unit_tests 2>&1 >/dev/null`
-if [ $? -eq 0 ]; then
-    echo "PASS"
-    exit 0
-fi
-echo "FAIL"
-LD_LIBRARY_PATH=gov gdb -batch -ex "run" -ex "bt" test/unit_tests 2>&1 #| tail -n-3 | cut -d " " -f 4- | tac | nl -n ln | tac | sed "s/^/#/"
 
-if [[ ${home:0:4} = "/tmp" ]] 
-then
-rm -r $home
-fi
 
-exit 1
+
 
