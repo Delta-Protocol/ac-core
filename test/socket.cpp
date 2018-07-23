@@ -536,13 +536,12 @@ using namespace std::chrono_literals;
 void testing_socket_communication(){
 
 
-	//us::gov::socket::datagram
-
+	/*
 	vector<datagram> k;
 	k.push_back( us::gov::socket::datagram( 10 ,"yeah") );
 	k.push_back( us::gov::socket::datagram( 10 , 125   ) );
 	k.push_back( us::gov::socket::datagram( 10 ,"some random string 0x60 yeah  ah") );
-	//https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html
+	//https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html  ...:::ASCII:::...
 	k.push_back(48);
 	k.push_back(32);
 	k.push_back(123);
@@ -551,17 +550,18 @@ void testing_socket_communication(){
 	k.push_back(0xC);
 	k.push_back(0xfd);
 	k.push_back( us::gov::socket::datagram( 10 ,"fluhs 0xF 0xF 0xF df 0xF fd") );
+	*/
 
 
 
-	test_server kk(10060);
-		kk.run();
+	//test_server kk(1060);
+	//	kk.run();
 
-	//us::gov::socket::daemon da(1060 , 10);
+	//us::gov::socket::daemon da(1060 , 1);
 	//	da.run();
-	
 
-	test_client c( 10690 );
+
+	///test_client c( 1060 );
 	//c.connect( "localhost", 1060 , false );
 	//c.send(10, "ooooooooge");
 
@@ -570,9 +570,7 @@ void testing_socket_communication(){
 
 
 	//tests i();
-	
 	//i.push_back( pair<TestDatagram ,datagram > (  TestDatagram(100,12) , us::gov::socket::datagram (100,12) ) );
-
 	//i.run();
 }
 
