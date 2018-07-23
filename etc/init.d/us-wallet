@@ -34,12 +34,8 @@ start() {
 
 
 stop() {
-      echo -n "Stopping us-wallet: "
-#echo      killall -q -w -u $USER /usr/bin/spawn-fcgi
-      p=`which us-wallet`
-      killall -q -w -u $USER $p
+      /sbin/start-stop-daemon --stop --pidfile $PIDFILE
       RETVAL=$?
-      echo "$API_NAME. $RETVAL"
 }
 
 case "$1" in
