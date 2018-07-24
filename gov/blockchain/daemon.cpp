@@ -760,6 +760,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return true;
 		}
 	}
+/*
 	if (!syncdemon.in_sync()) {
 		if (d->service>>2>=protocol::blockchain_base) {
 			cout << "dismissing command cause I am syncing" << endl;
@@ -770,6 +771,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return false; //route to auth, dfs, etc
 		}
 	}
+*/
 	switch(d->service) {
 		case protocol::local_deltas: {
 			process_incoming_local_deltas(c,d); 
