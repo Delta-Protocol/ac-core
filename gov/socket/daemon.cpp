@@ -34,7 +34,7 @@ void c::run() {
 	thread_::_this.sleep_for(1s);
 	{
 	while(!thread_::_this.terminated) {
-		cout << "Triggered Timer (mutation) v=30 secs" << endl;
+		cout << "triggered timer (mutation) v=30 secs" << endl;
 		daemon_timer();
 		thread_::_this.sleep_for(chrono::seconds(30));  //TODO not every 30 secs but at some safe point in the cycle
 	}
@@ -42,11 +42,20 @@ void c::run() {
 	listen.join();
 }
 
-bool c::receive_and_process(client* scl) {
+void c::dump(ostream& os) const {
+    pool->dump(os);
+}
+
+void c::receive_and_process(client* scl) {
 	assert(pool!=0);
 	auto* cl=static_cast<peer_t*>(scl);
-	pool->push([&,cl](int id) { process_work(cl); });
-	return true;
+    if (pool->n_idle()>0) {
+    	pool->push([&,cl](int id) { process_work(cl); });
+    }
+    else { //drop the connection
+        clients.resume(scl);
+        scl->disconnect();
+    }
 }
 
 void c::process_work(peer_t *c) {

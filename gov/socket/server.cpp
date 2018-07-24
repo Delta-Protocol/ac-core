@@ -56,7 +56,7 @@ int c::make_socket (uint16_t port) {
 }
 
 
-bool c::receive_and_process(client*c) {
+void c::receive_and_process(client*c) {
 	clients.resume(c);
 }
 
