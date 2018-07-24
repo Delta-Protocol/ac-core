@@ -9,6 +9,7 @@
 #include <cassert>
 #include <thread>
 #include <chrono>
+#include <mutex>
 #include <us/gov/crypto.h>
 
 
@@ -76,7 +77,11 @@ namespace blockchain {
 		virtual string shell_command(const string& cmdline); //answers to shell commands
 
 		static unsigned int get_seed();
+
 		static hash_t last_block_imported;
+        static mutex mx_last_block_imported;
+
+        blockchain::daemon* parent;
 	};
 
 	struct runnable_app: app {

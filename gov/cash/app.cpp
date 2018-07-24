@@ -146,6 +146,7 @@ cout << "query: " << endl;
 	delete d;
 	return from_string(query);
 }
+#include <us/gov/blockchain/daemon.h>
 
 void c::cash_query(peer_t *c, datagram*d) {
 //cout << "CASH_QUERY" << endl;
@@ -168,8 +169,8 @@ void c::cash_query(peer_t *c, datagram*d) {
 		}
 	}
 	}
-
-	os << ' ' << last_block_imported;
+    
+	os << ' ' << parent->syncdemon.tip(); //last db version
 //cout << "CASH_RESPONSE " << os.str() << endl;
 	c->send(new datagram(protocol::cash_response,os.str()));
 }
@@ -411,11 +412,14 @@ bool c::account_state(const local_delta::batch_t& batch, const hash_t& address, 
 bool c::process(const tx& t) {
 	cout << "cash: Processing transaction " << endl;
 
+    {
+    unique_lock<mutex> lock(mx_last_block_imported);
 	if (t.parent_block!=last_block_imported) {
 		cout << "tx.rejected - base mismatch - " << t.parent_block << " != base:" << last_block_imported << endl; 
                 cerr << "TX REJECTED 1" << endl;
 		return false;
 	}
+    }
 
 	cash_t min_fee;
 	{
@@ -742,6 +746,3 @@ c::db_t::db_t(db_t&& other):supply_left(other.supply_left), block_reward(other.b
 c::db_t::~db_t() {
 	delete accounts;
 }
-
-
-

@@ -8,6 +8,7 @@ using namespace us::gov::blockchain;
 typedef us::gov::blockchain::app c;
 
 diff::hash_t c::last_block_imported{0};
+mutex c::mx_last_block_imported;
 
 unsigned int c::get_seed() {
 	if (last_block_imported.empty()) return 0;
@@ -85,5 +86,3 @@ c::delta* c::delta::create(istream& is) {
 string c::shell_command(const string&) {
 	return "No shell available for this app.";
 }
-
-

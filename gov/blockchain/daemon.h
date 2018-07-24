@@ -110,7 +110,6 @@ namespace blockchain {
         };
         mxvector<datagram> evidences_on_hold;
 
-
         void on_sync();
 		void vote_tip(const diff& b);
 		void dump(ostream& os) const;
@@ -130,6 +129,8 @@ namespace blockchain {
 			void wait();
 			void wait(const chrono::steady_clock::duration& d);
 			virtual void on_finish();
+
+            const hash_t& tip() const;
 
 			daemon* d;
 			condition_variable cv;
@@ -158,7 +159,6 @@ namespace blockchain {
 		bool get_prev(const diff::hash_t& h, diff::hash_t& prev) const;
 
 		void send(const local_deltas& g, peer_t* exclude=0);
-//		void send(const datagram& g, peer_t* exclude=0);
 
 		void stage1(cycle_t&);
 		bool stage2(cycle_t&);

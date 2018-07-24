@@ -5,7 +5,7 @@ typedef us::wallet::peer_t c;
 using namespace std;
 
 c::peer_t(int sock):b(sock) {
-cout << "constructor: verified 25hWPEdydrHRapxuh4DjW5K5W4mHkNefew1zZ63dkGuoc" << endl;
+cout << "wallet: peer device id is 25hWPEdydrHRapxuh4DjW5K5W4mHkNefew1zZ63dkGuoc" << endl;
         stage_peer=verified;
         stage_me=verified;
         pubkey="25hWPEdydrHRapxuh4DjW5K5W4mHkNefew1zZ63dkGuoc";

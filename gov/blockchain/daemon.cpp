@@ -31,9 +31,15 @@ void c::add(app*app) {
 		exit(1);
 	}
 	apps_.emplace(app->get_id(),app);
+    app->parent=this;
 }
 
 c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
+}
+
+const c::syncd::hash_t& c::syncd::tip() const {
+    lock_guard<mutex> lock(mx);
+    return head;
 }
 
 void c::syncd::run() {
@@ -695,12 +701,14 @@ bool c::process_evidence(datagram*d) {
 
 bool c::process_app_query(peer_t *c, datagram*d) {
 //cout << "BLOCKCHAIN: process_query " << d->service << endl;
-        if (!syncdemon.in_sync()) {
+/*
+    if (!syncdemon.in_sync()) {
         c->send(new datagram(us::gov::protocol::error,"Service temporarily unavailable. Syncing."));
  //		cout << "ignoring query, I am syncing" << endl;
 		delete d;
 		return true;
 	}
+*/
 	bool processed=false;
 	for (auto&i:apps_) {
 		if (i.second->process_query(c,d)) {
@@ -807,7 +815,12 @@ bool c::import(const diff& b) {
                 cout << "block not in sequence." << b.prev << " " << last_block_imported << endl;
                 return false;
         }
+    
+    
+    {
+    unique_lock<mutex> lock(app::mx_last_block_imported);
 	app::last_block_imported=last_block_imported;
+    }
 
 	for (auto&i:b) {
 		auto a=apps_.find(i.first);
