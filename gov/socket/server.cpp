@@ -124,8 +124,6 @@ void c::clients_t::hold(client* c) {
 	assert(i!=end());
 	erase(i);
 	}
-cout << "XXXXXXXXXXX add hold " << endl;
- 	c->dump_all(cout);
 	holds.add(c);
 }
 
