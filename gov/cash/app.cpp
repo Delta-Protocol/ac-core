@@ -428,19 +428,17 @@ bool c::process(const tx& t) {
 	}
 
 	if (min_fee<0) {
-                cerr << "TX REJECTED 2" << endl;
+        cerr << "TX REJECTED 2" << endl;
         return false;
     }
-//cout << "SGT-02-tx.check (I>O,fees) " << endl; 
 
 	auto fee=t.check();
 	if (fee<min_fee) {
-                cerr << "TX REJECTED 3" << endl;
+        cerr << "TX REJECTED 3" << endl;
         return false;
     }
 
 	//tx verification
-
 	local_delta::batch_t batch;
 
 	account_t state; 
@@ -450,14 +448,14 @@ bool c::process(const tx& t) {
 		auto& i=t.inputs[j];
 		if (!account_state(batch,i.address,state)) {
 //cout << "SGT-02-tx.Input #" << j << " account_state returned false.DENIED " << endl; 
-                cerr << "TX REJECTED " << endl;
+            cerr << "TX REJECTED " << endl;
 			return false;
 		}
 
 //cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
 		if (!unlock(i.address, j,state.locking_program, i.locking_program_input, t)) {
 //cout << "SGT-02-tx.Input #" << j << " UNABLE TO UNLOCK. denied." << endl; 
-                cerr << "TX REJECTED 4" << endl;
+            cerr << "TX REJECTED 4" << endl;
 			return false;
 		}
 
@@ -494,14 +492,14 @@ bool c::process(const tx& t) {
 //cout << "SGT-02-tx ADD BATCH TO POOL; pool->fees=" << pool->fees << " fee=" << fee << endl;
 	pool->accounts.add(batch);
 //cout << "SGT-02-tx OK" << endl; 
-
+#ifdef DEBUG
 cerr << "TX added to mempool" << endl;
 {
     	lock_guard<mutex> lock(mx_pool);
         pool->accounts.dump(cout);
         cout << "fees: " << pool->fees << endl;
 }
-
+#endif
 	return true;
 }
 

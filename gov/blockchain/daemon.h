@@ -112,6 +112,8 @@ namespace blockchain {
         mxvector<datagram> evidences_on_hold;
 
         void on_sync();
+        void flush_evidences_on_hold();
+
 		void vote_tip(const diff& b);
 		void dump(ostream& os) const;
 		void list_apps(ostream& os) const;

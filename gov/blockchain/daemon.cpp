@@ -672,8 +672,7 @@ bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
 	return false;
 }
 
-
-void c::on_sync() {
+void c::flush_evidences_on_hold() {
     unique_lock<mutex> lock(evidences_on_hold.mx);
     for (auto& e:evidences_on_hold) {
         if (!process_evidence(e)) {
@@ -684,6 +683,10 @@ void c::on_sync() {
         e=0;
     }
     evidences_on_hold.clear();
+}
+
+void c::on_sync() { //while syncing evidences are queued in a separate containew evidences_on_hold
+    flush_evidences_on_hold();
 }
 
 bool c::process_evidence(datagram*d) {
