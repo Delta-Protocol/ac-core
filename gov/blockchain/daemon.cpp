@@ -472,12 +472,12 @@ peer_t* c::get_random_edge() {
 }
 
 vector<peer_t*> c::get_nodes() {
-	vector<peer_t*> v;
-	for (auto& i:peerd.in_service()) {
-		auto p=reinterpret_cast<peer_t*>(i);
-		if (p->stage==peer_t::node) v.push_back(p);
-	}
-	return v;
+    vector<peer_t*> v;
+    for (auto& i:peerd.in_service()) {
+        auto p=static_cast<peer_t*>(i);
+        if (p->stage==peer_t::node) v.push_back(p);
+    }
+    return v;
 }
 
 vector<peer_t*> c::get_people() {
@@ -505,16 +505,9 @@ void c::send(const local_deltas& g, peer_t* exclude) {
 	ostringstream os;
 	g.to_stream(os);
 	string msg=os.str();
-	for (auto& i:get_nodes()) {
+	for (auto& i:peerd.get_nodes()) {
 		if (i==exclude) continue; //dont relay to the original sender
 		i->send(new datagram(protocol::local_deltas,msg));
-	}
-}
-
-void c::send(const datagram& g, peer_t* exclude) {
-	for (auto& i:get_nodes()) {
-		if (i==exclude) continue; //dont relay to the original sender
-		i->send(g);
 	}
 }
 
@@ -678,7 +671,7 @@ bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
 }
 
 bool c::process_evidence(peer_t *c, datagram*d) {
-	send(*d, c); //relay TODO - check relay daemon
+//	send(*d, c); //relay TODO - check relay daemon
         if (!syncdemon.in_sync()) {
 		cout << "ignoring evidence processing, I am syncing" << endl;
 		delete d;

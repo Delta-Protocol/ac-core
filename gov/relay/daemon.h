@@ -24,6 +24,10 @@ using namespace std;
 		void clear_evidences();
 		void dump(ostream&os) const;
 
+        virtual vector<peer_t*> get_nodes()=0;
+        using b::send;
+        void send(const datagram& g, socket::peer_t* exclude=0);
+
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;
 		virtual bool process_evidence(peer_t *c, datagram*d);
 

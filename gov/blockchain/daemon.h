@@ -60,6 +60,11 @@ namespace blockchain {
                 return parent->id;
             }
 
+            virtual vector<relay::peer_t*> get_nodes() override {
+                auto a=parent->get_nodes();
+                return *reinterpret_cast<vector<relay::peer_t*>*>(&a);
+            }
+
 			virtual socket::client* create_client(int sock) override {
 				auto p=new peer_t(sock);
 				p->parent=this;
@@ -139,7 +144,7 @@ namespace blockchain {
 		bool get_prev(const diff::hash_t& h, diff::hash_t& prev) const;
 
 		void send(const local_deltas& g, peer_t* exclude=0);
-		void send(const datagram& g, peer_t* exclude=0);
+//		void send(const datagram& g, peer_t* exclude=0);
 
 		void stage1(cycle_t&);
 		bool stage2(cycle_t&);

@@ -40,13 +40,20 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 		}
 		evidences.emplace(h);
 		}
+        send(*d, c); //relay
+
 		return process_evidence(static_cast<peer_t*>(c),d);
 	}
 //cout << "relay_dmn:passing downstream" << endl;
 	return b::process_work(c,d);
 }
 
-
+void c::send(const datagram& g, socket::peer_t* exclude) {
+    for (auto& i:get_nodes()) {
+        if (i==exclude) continue; //dont relay to the original sender
+        i->send(g);
+    }
+}
 
 void c::dump(ostream& os) const {
 	os << "Hello from relay::daemon" << endl;
