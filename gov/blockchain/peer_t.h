@@ -33,7 +33,7 @@ namespace blockchain {
 
 		virtual void verification_completed() override;
 
-        virtual bool authorize(const pubkey_t& p) const;
+        virtual bool authorize(const pubkey_t& p) const override;
 
            virtual const keys& get_keys() const override;
 /*

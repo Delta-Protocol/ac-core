@@ -9,7 +9,7 @@ using namespace chrono_literals;
 typedef us::gov::peer::peer_t c;
 
 constexpr array<const char*,peer_t::num_stages> peer_t::stagestr;
-constexpr array<const char*,2> peer_t::modestr;
+//constexpr array<const char*,2> peer_t::modestr;
 
 c::peer_t(int sock): b(sock), stage(service)/*,latency(100ms)*/ {
 /*
@@ -85,7 +85,8 @@ namespace {
 
 void c::dump(ostream& os) const {
 //	os << this << "- mode: " << modestr[mode] << "; age: " << age(since) << "; latency: " << latency.count() << "us; stage: " << stagestr[stage] << endl;
-	os << this << "- mode: " << modestr[mode] << " stage: " << stagestr[stage] << endl;
+//	os << this << "- mode: " << modestr[mode] << " stage: " << stagestr[stage] << endl;
+	os << this << "- stage: " << stagestr[stage] << endl;
 }
 
 

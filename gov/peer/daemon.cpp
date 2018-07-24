@@ -122,11 +122,11 @@ c::pub_t::iterator c::oldest(pub_t& v) const {
 	}
 	return o;
 }
-
+/*
 void c::set_mode(int mode) { //0 tor; 1 ip4
 	for (auto i:active()) i->set_mode(mode);
 }
-
+*/
 void c::purge_excess(pub_t& a) {
 	while (a.asize()>edges) {
 		auto i=oldest(a);

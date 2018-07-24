@@ -37,6 +37,7 @@ start() {
 stop() {
       echo -n "Stopping us-gov: "
       /sbin/start-stop-daemon -q -o --stop --pidfile $PIDFILE 2>/dev/null
+
       RETVAL=$?
       echoret $RETVAL
 }

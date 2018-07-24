@@ -170,31 +170,38 @@ fi
 
 if [ "_$cmd" == "_balance" ]; then
     for n in "${nodes[@]}"; do
-echo -n "$n - "
+        echo -n "$n - "
         us-wallet -whost $n balance
     done
 fi
 if [ "_$cmd" == "_head" ]; then
     for n in "${nodes[@]}"; do
-echo -n "$n - "
+        echo -n "$n - "
         ssh $n "cat ~/.us/gov/blocks/head"
     done
 fi
-if [ "_$cmd" == "_ping" ]; then
+if [ "_$cmd" == "_ping" ]; then  #uses us-wallet rpc to send a ping
     for n in "${nodes[@]}"; do
+        echo -n "$n - "
         us-wallet -whost $n ping
     done
 fi
 if [ "_$cmd" == "_rm_auth_devices" ]; then  #deletes device file wallet/d . require wallet daemon restart
     for n in "${nodes[@]}"; do
-echo -n "$n - "
+        echo -n "$n - "
         ssh $n "rm ~/.us/wallet/d"
     done
 fi
 if [ "_$cmd" == "_cat_auth_devices" ]; then  #shows auth device ids
     for n in "${nodes[@]}"; do
-echo -n "$n - "
+        echo -n "$n - "
         ssh $n "cat ~/.us/wallet/d"
+    done
+fi
+if [ "_$cmd" == "_status" ]; then  #show processes
+    for n in "${nodes[@]}"; do
+echo -n "$n - "
+        ssh $n "ps ax | grep us-gov; ps ax | grep us-wallet"
     done
 fi
 if [ "_$cmd" == "_bin" ]; then
