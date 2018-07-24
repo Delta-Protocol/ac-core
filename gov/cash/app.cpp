@@ -96,7 +96,7 @@ bool c::process_query(peer_t *c, datagram*d) {
 	return false;
 }
 
-bool c::process_evidence(peer_t *c, datagram*d) {
+bool c::process_evidence(datagram*d) {
 //cout << "SGT-01-RECEIVED EVIDENCE" << endl; //settlement go throught
 	switch(d->service) {
 		case protocol::cash_tx: {

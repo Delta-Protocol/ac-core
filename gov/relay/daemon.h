@@ -13,14 +13,11 @@ namespace relay {
 using namespace std;
 
 	using socket::datagram;
-//	struct daemon : auth::daemon {
 	struct daemon:peer::daemon {
-//		typedef auth::daemon b;
 		typedef peer::daemon b;
 		daemon();
  		daemon(uint16_t port, uint16_t edges);
 		virtual ~daemon();
-//        virtual socket::client* create_client(int sock) override;
 		void clear_evidences();
 		void dump(ostream&os) const;
 
@@ -29,7 +26,7 @@ using namespace std;
         void send(const datagram& g, socket::peer_t* exclude=0);
 
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;
-		virtual bool process_evidence(peer_t *c, datagram*d);
+		virtual bool process_evidence(datagram*)=0;
 
 		typedef unordered_set<datagram::hash_t> evidences_t;
 		evidences_t evidences;

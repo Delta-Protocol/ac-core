@@ -7,7 +7,6 @@
 using namespace us::gov::blockchain;
 typedef us::gov::blockchain::app c;
 
-//unsigned int c::rng_seed{0};
 diff::hash_t c::last_block_imported{0};
 
 unsigned int c::get_seed() {
@@ -15,8 +14,6 @@ unsigned int c::get_seed() {
 	return *reinterpret_cast<const unsigned int*>(&last_block_imported);
 }
 
-/*
-*/
 #include "auth_app.h"
 #include "policies.h"
 #include <us/gov/cash/app.h>

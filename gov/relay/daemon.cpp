@@ -14,16 +14,6 @@ c::daemon(uint16_t port, uint16_t edges): b(port,edges) {
 
 c::~daemon() {
 }
-/*
-socket::client* c::create_client(int sock) {
-	auto p=new peer_t(sock);
-	p->parent=this;
-	return p;
-}
-*/
-bool c::process_evidence(peer_t *c, datagram*d) {
-	return false;
-}
 
 void c::clear_evidences() {
 	evidences.clear();
@@ -42,7 +32,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 		}
         send(*d, c); //relay
 
-		return process_evidence(static_cast<peer_t*>(c),d);
+		return process_evidence(d);
 	}
 //cout << "relay_dmn:passing downstream" << endl;
 	return b::process_work(c,d);

@@ -68,7 +68,7 @@ namespace blockchain {
 		virtual void dbhash(hasher_t&) const=0; //override and return the hash of the content of your db
 		virtual void import(const delta&, const pow_t&)=0; //override and apply the given delta to your db
 
-		virtual bool process_evidence(peer_t *, datagram*) { return false; } //update your mempool with the given evidence
+		virtual bool process_evidence(datagram*) { return false; } //update your mempool with the given evidence
 		virtual bool process_query(peer_t *, datagram*) { return false; } //override to respond to user's read-only queries
 
 		virtual local_delta* create_local_delta()=0; // override to be able to submit your diff (your mempool)

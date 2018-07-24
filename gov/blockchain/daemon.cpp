@@ -84,18 +84,11 @@ void c::syncd::run() {
 			                        }
 			                    }
 					}
-{
-       unique_lock<mutex> lock(mx_wait4file);
-       if (!file_arrived) cv.wait_for(lock, 3s, [&]{ return file_arrived; });
-       file_arrived=false;
-}
-/*
-					else {
-//					cout << "SYNCD: going to sleep for 2 secs." << endl;
-						wait(chrono::seconds(2)); //TODO better
-					}
-//					cout << "SYNCD: waked up " << endl;
-*/
+                    {
+                       unique_lock<mutex> lock(mx_wait4file);
+                       if (!file_arrived) cv.wait_for(lock, 3s, [&]{ return file_arrived; });
+                       file_arrived=false;
+                    }
 				}
 				if (program::_this.terminated) return;
 			}
@@ -108,10 +101,9 @@ void c::syncd::run() {
                     d->clear();
                 }
 			}
+            d->on_sync();
 		}
-//		cout << "SYNCD: going to sleep indefinitely" << endl;
 		wait();
-//		cout << "SYNCD: waked up " << endl;
 	}
 }
 
@@ -642,8 +634,8 @@ void c::process_block(peer_t *c, datagram*d) {
 	delete b;
 }
 
-bool c::networking::process_evidence(relay::peer_t *c, datagram*d) {
-	return parent->process_evidence(reinterpret_cast<peer_t*>(c),d);
+bool c::networking::process_evidence(datagram*d) {
+	return parent->process_evidence(d);
 }
 
 bool c::networking::process_work(socket::peer_t *c, datagram*d) {
@@ -670,17 +662,31 @@ bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
 	return false;
 }
 
-bool c::process_evidence(peer_t *c, datagram*d) {
+
+void c::on_sync() {
+    unique_lock<mutex> lock(evidences_on_hold.mx);
+    for (auto& e:evidences_on_hold) {
+        if (!process_evidence(e)) {
+            cerr << "Nobody recognized this evidence" << endl;
+            e->dump(cout);
+            delete e;
+        }
+        e=0;
+    }
+    evidences_on_hold.clear();
+}
+
+bool c::process_evidence(datagram*d) {
 //	send(*d, c); //relay TODO - check relay daemon
-        if (!syncdemon.in_sync()) {
-		cout << "ignoring evidence processing, I am syncing" << endl;
-		delete d;
-		return true;
+    if (!syncdemon.in_sync()) {
+  		cout << "holding evidence until sync is completed" << endl;
+        evidences_on_hold.add(d);
+	    return true;
 	}
 
 	bool processed=false;
 	for (auto&i:apps_) {
-		if (i.second->process_evidence(c,d)) {
+		if (i.second->process_evidence(d)) {
 			processed=true;
 		}
 	}
