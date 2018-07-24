@@ -414,8 +414,9 @@ bool c::process(const tx& t) {
 
     {
     unique_lock<mutex> lock(mx_last_block_imported);
-	if (t.parent_block!=last_block_imported) {
-		cout << "tx.rejected - base mismatch - " << t.parent_block << " != base:" << last_block_imported << endl; 
+//	if (t.parent_block!=last_block_imported) {
+	if (t.parent_block!=tip) { //from sync daemon
+		cout << "tx.rejected - base mismatch - " << t.parent_block << " != base:" << tip/* last_block_imported*/ << endl; 
                 cerr << "TX REJECTED 1" << endl;
 		return false;
 	}
