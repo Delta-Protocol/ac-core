@@ -249,7 +249,9 @@ cout << "Voting process result: diff " << hash << endl;
 	if (likely(!hash.is_zero())) {
 		if (likely(cycle.new_block!=0)) {
 			if (likely(hash==cycle.new_block->hash())) {
+cout << "BFORE SAVE" << endl;
 				save(*cycle.new_block);
+cout << "/BFORE SAVE" << endl;
 				if (!import(*cycle.new_block)) {
 			                clear();
 					cerr << "DB CLEARED" << endl;
@@ -493,9 +495,9 @@ void c::update_peers_state() {
 	for (auto& i:peerd.in_service()) {
 		auto p=reinterpret_cast<peer_t*>(i);
 		if (p->stage!=peer_t::sysop) {
-			for (int i=0; i<sizeof(p->pubkey.data); ++i)
-				cout << p->pubkey.data[i]  << " ";
-			cout << endl;
+			//for (int i=0; i<sizeof(p->pubkey.data); ++i)
+			//	cout << p->pubkey.data[i]  << " ";
+			//cout << endl;
 			p->stage=auth_app->db.get_stage(p->pubkey.hash());
 		}
 	}

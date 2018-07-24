@@ -98,6 +98,8 @@ namespace cash {
 		bool add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount, const string& locking_program_input);
 		bool add_output(const hash_t& addr, const cash_t& amount, const hash_t& locking_program);
 
+        tx();
+
 		cash_t check() const; //return fees
 
 		ec::sigmsg_hasher_t::value_type get_hash(const size_t& this_index, sigcodes_t) const;
@@ -114,6 +116,7 @@ namespace cash {
 		inputs_t inputs;
 		outputs_t outputs;
 		blockchain::diff::hash_t parent_block;
+        uint32_t nonce;
 	};
 }
 
