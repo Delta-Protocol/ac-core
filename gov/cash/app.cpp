@@ -23,11 +23,9 @@ namespace std {
 
 }
 
-
 size_t std::hash<us::gov::cash::app::local_delta>::operator() (const us::gov::cash::app::local_delta&g) const {
 	return *reinterpret_cast<const size_t*>(&g.get_hash()[0]);
 }
-
 
 bool c::local_delta::accounts_t::add_input(tx& t, const hash_t& addr, const cash_t& amount) {
 	cash_t prev_balance=0; //TODO
@@ -150,7 +148,7 @@ cout << "query: " << endl;
 }
 
 void c::cash_query(peer_t *c, datagram*d) {
-cout << "CASH_QUERY" << endl;
+//cout << "CASH_QUERY" << endl;
 	query_accounts_t q=query_accounts_t::from_datagram(d);
 
 	ostringstream os;
@@ -172,9 +170,7 @@ cout << "CASH_QUERY" << endl;
 	}
 
 	os << ' ' << last_block_imported;
-
-cout << "CASH_RESPONSE " << os.str() << endl;
-
+//cout << "CASH_RESPONSE " << os.str() << endl;
 	c->send(new datagram(protocol::cash_response,os.str()));
 }
 
@@ -252,7 +248,6 @@ bool c::db_t::add_(const hash_t& k, const cash_t& amount) { //caller has to get 
 	return accounts->pay(k,amount);
 }
 
-
 bool c::db_t::withdraw_(const hash_t& k, const cash_t& amount) { //caller has to get the lock
 	return accounts->withdraw(k,amount);
 }
@@ -269,34 +264,27 @@ cash_t c::db_t::get_newcash() { //db lock must be acquired
 }
 
 void c::import(const blockchain::app::delta& gg, const blockchain::pow_t& w) {
-//cout << "cash: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
 	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(mx_policies);
 	for (int i=0; i<policies_traits::num_params; ++i) policies[i]=g[i];
 	}
 
-//patch db.
 	{
 	const c::local_delta::accounts_t& a=g.g.accounts;
 	lock_guard<mutex> lock(db.mx);
 	for (auto& i:a) {
-//cout << "AAAAAAAAAAAAAAAAA- " << i.first << endl;
-
 		auto d=db.accounts->find(i.first);
 		if (d==db.accounts->end()) {
 			if (likely(i.second.balance!=0)) {
-//cout << "AAAAAAAAAAAAAAAAAA " << i.second.locking_program << endl;
 				db.accounts->emplace(i.first,account_t(i.second.locking_program,i.second.balance));
 			}
 		}
 		else {
 			if (i.second.balance==0) {
-//cout << "AAAAAAAAAAAAAAAAA3" << endl;
 				db.accounts->erase(d);
 			}
 			else {
-//cout << "AAAAAAAAAAAAAAAAA2 " << i.second.locking_program << endl;
 				d->second.locking_program=i.second.locking_program;
 				d->second.balance=i.second.balance;
 			}
@@ -421,10 +409,11 @@ bool c::account_state(const local_delta::batch_t& batch, const hash_t& address, 
 }
 
 bool c::process(const tx& t) {
-//	cout << "cash: Processing transaction " << endl;
+	cout << "cash: Processing transaction " << endl;
 
 	if (t.parent_block!=last_block_imported) {
 		cout << "tx.rejected - base mismatch - " << t.parent_block << " != base:" << last_block_imported << endl; 
+                cerr << "TX REJECTED 1" << endl;
 		return false;
 	}
 
@@ -434,11 +423,17 @@ bool c::process(const tx& t) {
 	min_fee=policies[policies_traits::minimum_fee];
 	}
 
-	if (min_fee<0) return false;
+	if (min_fee<0) {
+                cerr << "TX REJECTED 2" << endl;
+        return false;
+    }
 //cout << "SGT-02-tx.check (I>O,fees) " << endl; 
 
 	auto fee=t.check();
-	if (fee<min_fee) return false;
+	if (fee<min_fee) {
+                cerr << "TX REJECTED 3" << endl;
+        return false;
+    }
 
 	//tx verification
 
@@ -446,17 +441,19 @@ bool c::process(const tx& t) {
 
 	account_t state; 
 
-cout << "SGT-02-tx.I size " << t.inputs.size() << endl; 
+//cout << "SGT-02-tx.I size " << t.inputs.size() << endl; 
 	for (size_t j=0; j<t.inputs.size(); ++j) {
 		auto& i=t.inputs[j];
 		if (!account_state(batch,i.address,state)) {
 //cout << "SGT-02-tx.Input #" << j << " account_state returned false.DENIED " << endl; 
+                cerr << "TX REJECTED " << endl;
 			return false;
 		}
 
 //cout << "SGT-02-tx.Input #" << j << " UNLOCK.." << endl; 
 		if (!unlock(i.address, j,state.locking_program, i.locking_program_input, t)) {
 //cout << "SGT-02-tx.Input #" << j << " UNABLE TO UNLOCK. denied." << endl; 
+                cerr << "TX REJECTED 4" << endl;
 			return false;
 		}
 
@@ -473,6 +470,7 @@ cout << "SGT-02-tx.I size " << t.inputs.size() << endl;
 		if (account_state(batch,i.address,state)) { 
 			if (unlikely(state.balance!=0 && state.locking_program!=i.locking_program)) { //locking program can only be replaced when balance is 0
 //cout << "SGT-02-tx.Output #" << j << " locking program can only be replaced when balance is 0. DENIED." << endl; 
+                cerr << "TX REJECTED 5" << endl;
 				return false;
 			}
 			state.balance+=i.amount;
@@ -492,6 +490,14 @@ cout << "SGT-02-tx.I size " << t.inputs.size() << endl;
 //cout << "SGT-02-tx ADD BATCH TO POOL; pool->fees=" << pool->fees << " fee=" << fee << endl;
 	pool->accounts.add(batch);
 //cout << "SGT-02-tx OK" << endl; 
+
+cerr << "TX added to mempool" << endl;
+{
+    	lock_guard<mutex> lock(mx_pool);
+        pool->accounts.dump(cout);
+        cout << "fees: " << pool->fees << endl;
+}
+
 	return true;
 }
 
