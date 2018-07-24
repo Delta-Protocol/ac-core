@@ -27,12 +27,13 @@ public class SymmetricEncryptionTests{
             b = ec.generateKeyPair();
             c = ec.generateKeyPair();
 
-            PrivateKey priv_a = ec.privateKeyFromKeyPair(a);
-            PublicKey pub_a = ec.publicKeyFromKeyPair(a);
-            PrivateKey priv_b = ec.privateKeyFromKeyPair(b);
-            PublicKey pub_b = ec.publicKeyFromKeyPair(b);
-            PrivateKey priv_c = ec.privateKeyFromKeyPair(c);
-            PublicKey pub_c = ec.publicKeyFromKeyPair(c);
+            PrivateKey priv_a = a.getPrivate();
+            PublicKey pub_a = a.getPublic();
+            PrivateKey priv_b = b.getPrivate();
+            PublicKey pub_b = b.getPublic();
+
+            PrivateKey priv_c = c.getPrivate();
+            PublicKey pub_c = c.getPublic();
 
             //test that encryption then decryption will retrieve original plaintext.
             assert(test_encrypt_decrypt("encrypt this"																														));
@@ -69,11 +70,10 @@ public class SymmetricEncryptionTests{
         KeyPair a = ec.generateKeyPair();
         KeyPair b = ec.generateKeyPair();
 
-        PrivateKey priv_a = ec.privateKeyFromKeyPair(a);
-        PublicKey pub_a = ec.publicKeyFromKeyPair(a);
-        PrivateKey priv_b = ec.privateKeyFromKeyPair(b);
-        PublicKey pub_b = ec.publicKeyFromKeyPair(b);
-
+        PrivateKey priv_a = a.getPrivate();
+        PublicKey pub_a = a.getPublic();
+        PrivateKey priv_b = b.getPrivate();
+        PublicKey pub_b = b.getPublic();
         return test_encrypt_decrypt_keys(plaintext_string, priv_a, pub_b, priv_b, pub_a);
     }
 
@@ -95,9 +95,11 @@ public class SymmetricEncryptionTests{
         KeyPair a = ec.generateKeyPair();
         KeyPair b = ec.generateKeyPair();
 
-        PrivateKey priv_a = ec.privateKeyFromKeyPair(a);
-        PublicKey pub_b = ec.publicKeyFromKeyPair(b);
-
+        PrivateKey priv_a = a.getPrivate();
+        PublicKey pub_a = a.getPublic();
+        PrivateKey priv_b = b.getPrivate();
+        PublicKey pub_b = b.getPublic();
+        
         byte[] plaintext = plaintext_string.getBytes();
         
         SymmetricEncryption se_a = new SymmetricEncryption(priv_a,pub_b);
@@ -112,8 +114,10 @@ public class SymmetricEncryptionTests{
         KeyPair a = ec.generateKeyPair();
         KeyPair b = ec.generateKeyPair();
 
-        PrivateKey priv_a = ec.privateKeyFromKeyPair(a);
-        PublicKey pub_b = ec.publicKeyFromKeyPair(b);
+        PrivateKey priv_a = a.getPrivate();
+        PublicKey pub_a = a.getPublic();
+        PrivateKey priv_b = b.getPrivate();
+        PublicKey pub_b = b.getPublic();
 
         byte[] ciphertext = ciphertext_string.getBytes();
         SymmetricEncryption se = new SymmetricEncryption(priv_a,pub_b);
@@ -126,10 +130,10 @@ public class SymmetricEncryptionTests{
         KeyPair a = ec.generateKeyPair();
         KeyPair b = ec.generateKeyPair();
 
-        PrivateKey priv_a = ec.privateKeyFromKeyPair(a);
-        PublicKey pub_a = ec.publicKeyFromKeyPair(a);
-        PrivateKey priv_b = ec.privateKeyFromKeyPair(b);
-        PublicKey pub_b = ec.publicKeyFromKeyPair(b);
+        PrivateKey priv_a = a.getPrivate();
+        PublicKey pub_a = a.getPublic();
+        PrivateKey priv_b = b.getPrivate();
+        PublicKey pub_b = b.getPublic();
 
         byte[] plaintext = plaintext_string.getBytes();
         

@@ -33,7 +33,7 @@ public class SymmetricEncryption {
 
     public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
         
-        this(EllipticCryptography.getInstance().generateSharedKey(priv_a,pub_b));
+        this(EllipticCryptography.getInstance().generateSharedKey(priv_a,pub_b,16));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {

@@ -2,10 +2,15 @@ package us.test;
 
 import us.wallet.*;
 import java.security.PrivateKey;
+import org.spongycastle.jce.spec.ECPrivateKeySpec;
+import org.spongycastle.jce.spec.ECPublicKeySpec;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.crypto.params.ECPrivateKeyParameters;
 import java.security.PublicKey;
 import java.security.KeyPair;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import javax.xml.bind.DatatypeConverter;
 
 public class EllipticCryptographyTests{
 
@@ -21,6 +26,7 @@ public class EllipticCryptographyTests{
             ec = EllipticCryptography.getInstance();
             assert(testKeyPairGeneration());
             assert(testSharedSecret());
+            testKeyConversion();
         }
         catch(GeneralSecurityException e){
             throw new GeneralSecurityException("elliptic cryptography test failed on: " + e);
@@ -38,17 +44,36 @@ public class EllipticCryptographyTests{
         return true;
     }
 
+    private void testKeyConversion() throws GeneralSecurityException{
+        KeyPair a = ec.generateKeyPair();
+
+        PrivateKey priv_a = a.getPrivate();
+        PublicKey pub_a = a.getPublic();
+        PrivateKey priv_b = b.getPrivate();
+        PublicKey pub_b = b.getPublic();
+
+
+        byte[] key1 = ec.generateSharedKey(priv_a, pub_b,16);
+
+        //PublicKey pub_b2 = ec.publicKeyAndBackAgain(pub_a);
+        
+        //ECPrivateKeyParameters privParams_b = (ECPrivateKeyParameters) priv_b.getPrivate();
+        
+       // throw new GeneralSecurityException("privs encoded: " + priv_a.getEncoded() + " " + priv_b.getEncoded() + "\n" + privParams_a.getD() + " " + privParams_a.getD());
+       
+    }
+
     private boolean testSharedSecret() throws GeneralSecurityException {
         KeyPair a = ec.generateKeyPair();
         KeyPair b = ec.generateKeyPair();
 
-        PrivateKey priv_a = ec.privateKeyFromKeyPair(a);
-        PublicKey pub_a = ec.publicKeyFromKeyPair(a);
-        PrivateKey priv_b = ec.privateKeyFromKeyPair(b);
-        PublicKey pub_b = ec.publicKeyFromKeyPair(b);
+        PrivateKey priv_a = a.getPrivate();
+        PublicKey pub_a = a.getPublic();
+        PrivateKey priv_b = b.getPrivate();
+        PublicKey pub_b = b.getPublic();
 
-        byte[] key1 = ec.generateSharedKey(priv_a, pub_b);
-        byte[] key2 = ec.generateSharedKey(priv_b, pub_a);
+        byte[] key1 = ec.generateSharedKey(priv_a, pub_b,16);
+        byte[] key2 = ec.generateSharedKey(priv_b, pub_a,16);
         
         return Arrays.equals(key1,key2);
 

@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <cassert>
 #include "base58.h"
+#include <secp256k1_ecdh.h>
+
 
 using namespace us::gov::crypto;
 using namespace std;
@@ -281,6 +283,17 @@ vector<unsigned char> c::sign(const keys::priv_t& pk, const sigmsg_hasher_t::val
 	}
 	signature.resize(nSigLen);
 	return move(signature);
+}
+bool c::generate_shared_key(unsigned char* shared_key, size_t size, const keys::priv_t& priv, const keys::pub_t& pub){
+	unsigned char temp_key[32];
+	if(!secp256k1_ecdh(ctx, temp_key, &pub, &priv[0])) { //LE
+        cerr << "Could not create shared secret";
+	return false;
+    }
+	for(size_t i=0; i<size; i++){
+		shared_key[i]=temp_key[i];
+	}
+    return true;
 }
 
 #include <iomanip>

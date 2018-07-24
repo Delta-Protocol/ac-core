@@ -34,7 +34,7 @@ using namespace us::gov::crypto;
 typedef us::gov::crypto::symmetric_encryption c;
 
 c::symmetric_encryption(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b) {
-    if (!set_agreed_key_value(priv_key_a,pub_key_b)) {
+    if (!ec::instance.generate_shared_key(key_, sizeof(key_), priv_key_a, pub_key_b)) {
 		throw "Could not initialize encryption";
     }
 }

@@ -6,8 +6,8 @@
 #include <stdio.h>
 
 using namespace std;
-
-    typedef us::gov::crypto::ec::keys keys;
+typedef us::gov::crypto::ec::keys keys;
+    
     bool test_symmetric_encryption();
     bool test_encrypt_decrypt_keys(string, const keys::priv_t&, const keys::pub_t&, const keys::priv_t&, const keys::pub_t&);
     bool test_encrypt_decrypt(string);

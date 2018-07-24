@@ -1,4 +1,4 @@
-#include "crypto_test.h"
+#include "symmetric_encryption_test.h"
 #include <iostream>
 #include <cassert>
 #include <vector>

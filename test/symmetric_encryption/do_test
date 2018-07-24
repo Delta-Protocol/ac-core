@@ -7,6 +7,7 @@ MESSAGE='blah blah'
 encrypted="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a $public_b encrypt "$MESSAGE")"
 echo $encrypted
 
+java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_a $public_b decrypt $encrypted
 #call java to decrypt
 #check
 
