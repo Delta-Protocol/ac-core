@@ -232,37 +232,41 @@ diff::hash_t c::get_last_block_imported() const {
 
 
 void c::stage1(cycle_t& data) {
-//cout << "stage1 NB1 " << data.new_block << endl;
-	if (!data.new_block) return;
+//cout << "stage1 NB1 " << data.new_diff << endl;
+	if (!data.new_diff) return;
 	if (auth_app->my_stage()!=peer_t::node) return;
 //cout << "stage1 VOTETIP " << endl;
-	vote_tip(*data.new_block);
-//cout << "NB1 " << data.new_block << endl;
+	vote_tip(*data.new_diff);
+//cout << "NB1 " << data.new_diff << endl;
 //cout << "/stage1" << endl;
 }
 
-bool c::stage2(cycle_t& cycle) {
-	diff::hash_t hash=votes.select();
-cout << "Voting process result: diff " << hash << endl;
-	if (likely(!hash.is_zero())) {
-		if (likely(cycle.new_block!=0)) {
-			if (likely(hash==cycle.new_block->hash())) {
-				save(*cycle.new_block);
-				if (!import(*cycle.new_block)) {
-			                clear();
+void c::eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle) {
+		if (likely(cycle.new_diff!=0)) {
+			if (likely(voted_tip==cycle.new_diff->hash())) {
+				save(*cycle.new_diff);
+				if (!import(*cycle.new_diff)) {
+			        clear();
 					cerr << "DB CLEARED" << endl;
 				}
 			}
-			delete cycle.new_block;
-			cycle.new_block=0;
+			delete cycle.new_diff;
+			cycle.new_diff=0;
 		}
-		syncdemon.update(hash,get_last_block_imported()); //head,tail
+		syncdemon.update(voted_tip,get_last_block_imported()); //head,tail
 		while (!syncdemon.in_sync() && !program::_this.terminated) {
 			cout << "syncing" << endl;
 			thread_::_this.sleep_for(chrono::seconds(1));
 			if (cycle.get_stage()!=cycle_t::local_deltas_io) break;
 		}
-		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false;
+}
+
+bool c::stage2(cycle_t& cycle) {
+	diff::hash_t hash=votes.select(); //decide tip
+cout << "Voting process result: diff " << hash << endl;
+	if (likely(!hash.is_zero())) {
+        eat_diff(hash,cycle);
+		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false; //TODO review
 	}
 
 	if (unlikely(!auth_app->is_node())) return false;
@@ -272,22 +276,21 @@ cout << "Voting process result: diff " << hash << endl;
 		send(*mg);
 		{
 		lock_guard<mutex> lock(mx_pool);
-		pool->allow(*mg);
-		pool->add(mg);
+		if (pool->allow(*mg)) pool->add(mg);
 		}
 	}
 	return true;
 }
 
 void c::stage3(cycle_t& cycle) {
-	assert(cycle.new_block==0);
+	assert(cycle.new_diff==0);
 	{
 	lock_guard<mutex> lock(mx_pool);
 	pool->end_adding();
-	cycle.new_block=pool;
+	cycle.new_diff=pool;
 	pool=new diff();
 	}
-	cycle.new_block->prev=get_last_block_imported();
+	cycle.new_diff->prev=get_last_block_imported();
 }
 
 void c::load_head() {
@@ -300,7 +303,6 @@ void c::load_head() {
 
 void c::run() {
 	//if (miners_size()>1000) peerd.set_ip4(); else peerd.set_tor();
-
 	thread peers(&networking::run,&peerd);
 
 	vector<thread> apps_threads;
@@ -503,9 +505,10 @@ void c::send(const local_deltas& g, peer_t* exclude) {
 	ostringstream os;
 	g.to_stream(os);
 	string msg=os.str();
+    datagram d(protocol::local_deltas,msg); //TODO optimize, write directly in the datagram
 	for (auto& i:peerd.get_nodes()) {
 		if (i==exclude) continue; //dont relay to the original sender
-		i->send(new datagram(protocol::local_deltas,msg));
+		i->send(d);
 	}
 }
 
@@ -514,14 +517,15 @@ local_deltas* c::create_local_deltas() {
 	auto* mg=new local_deltas();
 
 	{
-    lock_guard<mutex> lock(peerd.mx_evidences); //pause reception of evidences while changing app pools
+    lock_guard<mutex> lock(peerd.mx_evidences);
 	for (auto&i:apps_) {
 		auto* amg=i.second->create_local_delta(); //
 		if (amg!=0) {
 			mg->emplace(i.first,amg);
 		}
 	}
-	peerd.clear_evidences(); //evidences are recorded to decide if relay them or not, it is emptied on each cycle, it is safe to forget about them as they are tied to a parent block, for so they cannot be succesfully executed after the blockain grows 1 block
+	auto e=peerd.retrieve_evidences(); //evidences are recorded to decide if I should relay them or not, it is emptied on each cycle, it is safe to forget about them (replay attack) as they are tied to a specific db hash. They cannot be succesfully executed after the blockain grows 1 block
+    delete e; //evidences are recorded to decide if I should relay them or not, it is emptied on each cycle, it is safe to forget about them (replay attack) as they are tied to a specific db hash. They cannot be succesfully executed after the blockain grows 1 block
 	}
 
 	if (mg->empty()) {

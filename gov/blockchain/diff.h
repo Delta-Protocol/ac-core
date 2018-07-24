@@ -56,6 +56,7 @@ namespace blockchain {
 			for (auto& i:*this) delete i.second;
 		}
 
+		bool allow(const local_deltas&); // only one local_deltas per pubkey is allowed to be added
 		uint64_t add(int appid, app::local_delta* g);
 		void add(local_deltas*); //returns false when local_deltas exists for this pubk
 		void end_adding();
@@ -66,7 +67,6 @@ namespace blockchain {
 		void to_stream(ostream&) const;
 		static diff* from_stream(istream&);
 
-		bool allow(const local_deltas& g);
 
 		mutable hash_t hash_cached;
 		mutable bool h{false};

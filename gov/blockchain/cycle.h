@@ -24,10 +24,10 @@ using namespace std;
 			num_stages
 		};
 		
-		cycle_t():new_block(0) {
+		cycle_t():new_diff(0) {
         }
 		~cycle_t() {
-			delete new_block;
+			delete new_diff;
         }
 		void wait_for_stage(stage ts);
 		string str(stage s) const;
@@ -35,7 +35,7 @@ using namespace std;
 
 		time_point cur_sync;
 		duration period{60s};
-		diff* new_block;
+		diff* new_diff;
 	};
 
 

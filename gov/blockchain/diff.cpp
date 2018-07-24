@@ -117,6 +117,7 @@ bool c::allow(const local_deltas& g) {
 		return false;
 	}
 	proof_of_work.emplace(pubkeyh,0);
+    return true;
 }
 
 uint64_t c::add(int appid, app::local_delta* g) { //private, not protected by mutex, see add fn below

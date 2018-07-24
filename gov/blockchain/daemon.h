@@ -46,6 +46,8 @@ namespace blockchain {
 
         string blocksdir() const;
 
+        void eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle);
+
 		struct networking:dfs::daemon {
 			typedef dfs::daemon b;
 			using b::keys;
@@ -55,7 +57,6 @@ namespace blockchain {
 			virtual bool process_evidence(datagram*d) override;
 			bool process_work_sysop(peer::peer_t *c, datagram*d);
 			virtual string get_random_peer(const unordered_set<string>& exclude) const override; //returns ipaddress //there exist a possibility of returning "" even though there were eligible items available
-
 
             virtual const keys& get_keys() const override {
                 return parent->id;

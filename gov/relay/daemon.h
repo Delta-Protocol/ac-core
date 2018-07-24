@@ -29,7 +29,9 @@ using namespace std;
 		virtual bool process_evidence(datagram*)=0;
 
 		typedef unordered_set<datagram::hash_t> evidences_t;
-		evidences_t evidences;
+        evidences_t* retrieve_evidences(); //caller must take the lock
+
+		evidences_t* evidences;
 		mutable mutex mx_evidences;
 
 	};
