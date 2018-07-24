@@ -54,15 +54,13 @@ void c::process_work(peer_t *c) {
 	if (unlikely(!r.first.empty())) {
 		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		assert(!r.second);
-		//clients.remove(c); 
-        c->disconnect();
+	        c->disconnect();
 		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		return; //processed work
 	}
     assert(r.second!=0);
-	if (unlikely(!r.second->completed())) { 
-		//cout << "socket: daemon: recv partial datagram. returning to listening pool" << endl;
-        delete r.second;
+	if (unlikely(!r.second->completed())) {
+        	delete r.second;
 		return;
 	}
 	bool processed=process_work(c,r.second);

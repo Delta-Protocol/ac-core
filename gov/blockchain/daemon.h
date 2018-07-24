@@ -56,6 +56,7 @@ namespace blockchain {
 			bool process_work_sysop(peer::peer_t *c, datagram*d);
 			virtual string get_random_peer(const unordered_set<string>& exclude) const override; //returns ipaddress //there exist a possibility of returning "" even though there were eligible items available
 
+
             virtual const keys& get_keys() const override {
                 return parent->id;
             }
@@ -71,11 +72,11 @@ namespace blockchain {
 				return p;
 			}
 			void dump(ostream& os) const {
-				os << "Networking. Active edges:" << endl;
+				os << "Active edges:" << endl;
 				auto a=active();
 				vector<peer_t*>& v=reinterpret_cast<vector<peer_t*>&>(a);
 				for (auto& i:v) {
-					i->dump(os);
+					i->dump_all(os);
 				}
 			}
 

@@ -33,10 +33,6 @@ c::client(int sock):sock(sock) {
    if (sock!=0) addr=address();
 }
 
-c::~client() {
-	disconnect();
-}
-
 string c::address() const {
 	struct sockaddr_storage addr;
 	socklen_t len=sizeof addr;
@@ -173,7 +169,7 @@ if (++i%100==0) { //reload file
     i=0;
     svc.clear();
     ifstream f("/tmp/interceptor");
-    
+
     while (f.good()) {
         uint16_t s;
         f >> s;

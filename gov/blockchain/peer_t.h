@@ -21,9 +21,15 @@ namespace blockchain {
 		constexpr static array<const char*,num_stages> stagestr={"unknown","sysop","out","hall","node","wallet"};
 
 		peer_t(int sock):b(sock) {}
-		virtual ~peer_t() {}
+		virtual ~peer_t() {
+			disconnect();
+		}
 
 		void dump(ostream& os) const;
+                virtual void dump_all(ostream& os) const override {
+                        dump(os);
+                        b::dump_all(os);
+                }
 
 		virtual void verification_completed() override;
 

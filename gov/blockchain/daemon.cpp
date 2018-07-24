@@ -904,6 +904,8 @@ void c::list_apps(ostream& os) const {
 
 void c::dump(ostream& os) const {
 	os << "Hello from blockchain::daemon" << endl;
+	os << "networking" << endl;
+	peerd.dump(os);
 
 }
 string c::timestamp() const {

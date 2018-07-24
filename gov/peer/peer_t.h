@@ -51,7 +51,10 @@ namespace peer {
 		virtual void disconnect() override;
 
 		void dump(ostream& os) const;
-		
+                virtual void dump_all(ostream& os) const override {
+                        dump(os);
+                        b::dump_all(os);
+                }
 		chrono::steady_clock::time_point sent_ping;
 		chrono::steady_clock::time_point since;
 		int mode; //0 tor; 1 ip4

@@ -124,6 +124,8 @@ void c::clients_t::hold(client* c) {
 	assert(i!=end());
 	erase(i);
 	}
+cout << "XXXXXXXXXXX add hold " << endl;
+ 	c->dump_all(cout);
 	holds.add(c);
 }
 
@@ -299,15 +301,17 @@ bool c::clients_t::rmlist::find(int fd) const {
 }
 
 void c::clients_t::rmlist::dump(ostream& os) const {
-	lock_guard<mutex> lock(mx);	
+	lock_guard<mutex> lock(mx);
 	os << "Size: " << size() << endl;
-	for (auto i:*this)
-		{ i.second->dump(os); }
+	for (auto i:*this) {
+		i.second->dump_all(os);
+		os << endl;
+	}
 }
 
 
 c::clients_t::wait::~wait() {
-    for (auto i:*this) delete i; 
+    for (auto i:*this) delete i;
 }
 
 void c::clients_t::wait::add(client* c) {
@@ -329,10 +333,12 @@ bool c::clients_t::wait::find(client* c) const {
 }
 
 void c::clients_t::wait::dump(ostream& os) const {
-	lock_guard<mutex> lock(mx);	
+	lock_guard<mutex> lock(mx);
 	os << "Size: " << size() << endl;
-	for (auto i:*this)
-		{ i->dump(os); }
+	for (auto i:*this) {
+		i->dump_all(os);
+		os << endl;
+	}
 }
 
 client* c::create_client(int sock) {
