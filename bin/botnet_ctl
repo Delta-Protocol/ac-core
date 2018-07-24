@@ -1,10 +1,6 @@
 #!/bin/bash
 
-cmd=$1
 
-help() {
-echo 
-}
 
 function checkout() {
 IP=$1
@@ -65,90 +61,98 @@ echo "restarting gov $IP"
 ssh $IP "cd us; /etc/init.d/us-wallet restart"
 }
 
-nodes="10.84.172.66 10.84.172.55 10.84.172.54 10.84.172.52 10.84.172.50"
+if [ "_$1" == "_--only" ]; then
+    shift
+    nodes=("$1")
+    shift
+else
+    nodes=("10.84.172.66" "10.84.172.55" "10.84.172.54" "10.84.172.52" "10.84.172.50")
+fi
+cmd=$1
+
 
 if [ "_$cmd" == "_bots" ]; then  # Print the IP addresses og the bots
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
     done
 fi
 
 if [ "_$cmd" == "_pull" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         ssh $n "cd us; git pull"
     done
 fi
 if [ "_$cmd" == "_ps" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo "$n:"
         ssh $n "cd us; ps ax | grep us-wallet; ps ax | grep us-gov"
     done
 fi
 if [ "_$cmd" == "_install" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         install $n
     done
 fi
 if [ "_$cmd" == "_rebuild" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         rebuild $n
     done
 fi
 if [ "_$cmd" == "_stopw" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         stopw $n
     done
 fi
 if [ "_$cmd" == "_startw" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         startw $n
     done
 fi
 if [ "_$cmd" == "_stopg" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         stopg $n
     done
 fi
 if [ "_$cmd" == "_startg" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         startg $n
     done
 fi
 if [ "_$cmd" == "_start" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         echo $n
         startg $n
         startw $n
     done
 fi
 if [ "_$cmd" == "_stop" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo $n
         stopg $n
         stopw $n
     done
 fi
 if [ "_$cmd" == "_restartw" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo $n
         restartw $n
     done
 fi
 if [ "_$cmd" == "_restartg" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo $n
         restartg $n
     done
 fi
 if [ "_$cmd" == "_restart" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo $n
         restartg $n
         restartw $n
@@ -156,14 +160,14 @@ echo $n
 fi
 
 if [ "_$cmd" == "_service" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo $n
         service $n
     done
 fi
 
 if [ "_$cmd" == "_putkey" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo $n
         scp ~/.ssh/id_rsa.pub $n:/tmp
         (ssh $n "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
@@ -171,66 +175,75 @@ echo $n
 fi
 
 if [ "_$cmd" == "_balance" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         us-wallet -whost $n balance
     done
 fi
 if [ "_$cmd" == "_head" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "cat ~/.us/gov/blocks/head"
     done
 fi
 if [ "_$cmd" == "_ping" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
         us-wallet -whost $n ping
     done
 fi
 if [ "_$cmd" == "_rm_auth_devices" ]; then  #deletes device file wallet/d . require wallet daemon restart
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "rm ~/.us/wallet/d"
     done
 fi
 if [ "_$cmd" == "_cat_auth_devices" ]; then  #shows auth device ids
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "cat ~/.us/wallet/d"
     done
 fi
 if [ "_$cmd" == "_bin" ]; then
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "md5sum /usr/local/lib/libusgov.so; "
     done
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "md5sum /usr/local/lib/libuswallet.so; "
     done
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "md5sum /usr/local/bin/us-gov; "
     done
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "md5sum /usr/local/bin/us-wallet; "
     done
 fi
 if [ "_$cmd" == "_cmd" ]; then
     shift
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         ssh $n "$@"
     done
 fi
 if [ "_$cmd" == "_checkout" ]; then
     shift
-    for n in $nodes; do
+    for n in "${nodes[@]}"; do
 echo -n "$n - "
         checkout $n
     done
 fi
+if [ "_$cmd" == "_random_node" ]; then   #prints IP of a random node
+    num=`echo $nodes | wc -w`
+    RANDOM=`date +%s%N`
+#    echo $(($RANDOM % $num))
+#    echo ${nodes[$RANDOM % $num]}
+    s=${nodes[$RANDOM % ${#nodes[@]}]}
+    echo $s
+fi
+
 if [ "_$cmd" == "_" ]; then
 MY_PATH=`dirname "$0"`
 MY_PATH=`( cd "$MY_PATH" && pwd )`

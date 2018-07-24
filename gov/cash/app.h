@@ -149,7 +149,7 @@ namespace cash {
 
 		virtual bool process_query(peer_t *, datagram*) override;
 
-		virtual bool process_evidence(peer_t *, datagram*) override;
+		virtual bool process_evidence(datagram*) override;
 		bool process_tx(peer_t *, datagram*);
 		void cash_query(peer_t *, datagram*);
 
