@@ -45,38 +45,43 @@ os << "Obtain a copy of the licence here: https://www.gnu.org/licenses/agpl.txt"
 	os << "us.gov ; Introspective Shell. Node id " << d.id.pub << endl;
 	os << "h              Shows this help." << endl;
 	os << "l, level [int]    Change level. Current level is " << level << endl;
-	os << "      " << (level==0?'>':' ') << "level 0 - socket" << endl;
-	os << "      " << (level==1?'>':' ') << "level 1 - id" << endl;
-	os << "      " << (level==2?'>':' ') << "level 2 - auth" << endl;
-	os << "      " << (level==3?'>':' ') << "level 3 - peer" << endl;
-	os << "      " << (level==4?'>':' ') << "level 4 - relay" << endl;
-	os << "      " << (level==5?'>':' ') << "level 5 - dfs" << endl;
-	os << "      " << (level==6?'>':' ') << "level 6 - blockchain" << endl;
+	os << "      " << (level==0?'>':' ') << "level 0 - socket server" << endl;
+	os << "      " << (level==1?'>':' ') << "level 1 - socket daemon" << endl;
+	os << "      " << (level==2?'>':' ') << "level 2 - id" << endl;
+	os << "      " << (level==3?'>':' ') << "level 3 - auth" << endl;
+	os << "      " << (level==4?'>':' ') << "level 4 - peer" << endl;
+	os << "      " << (level==5?'>':' ') << "level 5 - relay" << endl;
+	os << "      " << (level==6?'>':' ') << "level 6 - dfs" << endl;
+	os << "      " << (level==7?'>':' ') << "level 7 - blockchain" << endl;
 	if (level==0) {
-		os << "Level " << level << " (socket) help:" << endl;
-		os << "s|server    Dumps daemon info." << endl;
+		os << "Level " << level << " (socket server) help:" << endl;
+		os << "s|server    Dumps server info." << endl;
 	}
 	else if (level==1) {
-		os << "Level " << level << " (id) help:" << endl;
+		os << "Level " << level << " (socket daemon) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	else if (level==2) {
-		os << "Level " << level << " (auth) help:" << endl;
+		os << "Level " << level << " (id) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	else if (level==3) {
-		os << "Level " << level << " (peer) help:" << endl;
+		os << "Level " << level << " (auth) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	else if (level==4) {
-		os << "Level " << level << " (relay) help:" << endl;
+		os << "Level " << level << " (peer) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
 	else if (level==5) {
+		os << "Level " << level << " (relay) help:" << endl;
+		os << "s|server    Dumps daemon info." << endl;
+	}
+	else if (level==6) {
 		os << "Level " << level << " (dfs) help:" << endl;
 		os << "s|server    Dumps daemon info." << endl;
 	}
-	else if (level==6) { //change init level to this in shell.h
+	else if (level==7) { //change init level to this in shell.h
 		os << "Level " << level << " (blockchain) help:" << endl;
 		os << "s|server    Dumps networking info." << endl;
 		os << "y|syncd     Dumps data sync info." << endl;
@@ -128,16 +133,18 @@ string c::command(const string& cmdline) {
 		case 0:
 			dynamic_cast<const us::gov::socket::server&>(d.peerd).dump(os); break;
 		case 1:
-			dynamic_cast<const us::gov::id::daemon&>(d.peerd).dump(os); break;
+			dynamic_cast<const us::gov::socket::daemon&>(d.peerd).dump(os); break;
 		case 2:
-			dynamic_cast<const us::gov::auth::daemon&>(d.peerd).dump(os); break;
+			dynamic_cast<const us::gov::id::daemon&>(d.peerd).dump(os); break;
 		case 3:
-			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os); break;
+			dynamic_cast<const us::gov::auth::daemon&>(d.peerd).dump(os); break;
 		case 4:
-			dynamic_cast<const us::gov::relay::daemon&>(d.peerd).dump(os); break;
+			dynamic_cast<const us::gov::peer::daemon&>(d.peerd).dump(os); break;
 		case 5:
-			dynamic_cast<const us::gov::dfs::daemon&>(d.peerd).dump(os); break;
+			dynamic_cast<const us::gov::relay::daemon&>(d.peerd).dump(os); break;
 		case 6:
+			dynamic_cast<const us::gov::dfs::daemon&>(d.peerd).dump(os); break;
+		case 7:
 			d.peerd.dump(os); break;
 		default:
 			os << "No daemon at level " << level << endl;
