@@ -259,7 +259,6 @@ void c::stage2(cycle_t& cycle) {
 	diff::hash_t tip=votes.select(); //decide tip
 cout << "Voting process result: diff " << tip << endl;
 	if (likely(!tip.is_zero())) {
-        app::chaininfo.set_tip(tip); //tx validation, now they have to refer to this new tip
         eat_diff(tip,cycle);
 //		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false; //TODO review
 	}
@@ -690,7 +689,9 @@ void c::flush_evidences_on_hold() {
 }
 
 void c::on_sync() { //while syncing evidences are queued in a separate containew evidences_on_hold
+    app::chaininfo.set_tip(tip); //tx validation, now they have to refer to this new tip
     flush_evidences_on_hold();
+
 //    cycle.in_sync=true;
 }
 

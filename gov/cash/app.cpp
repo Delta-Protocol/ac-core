@@ -142,7 +142,7 @@ c::query_accounts_t c::query_accounts_t::from_string(const string&s) {
 
 c::query_accounts_t c::query_accounts_t::from_datagram(datagram*d) {
 	string query=d->parse_string();
-cout << "query: " << endl;
+//cout << "query: " << endl;
 	delete d;
 	return from_string(query);
 }
