@@ -155,8 +155,8 @@ namespace blockchain {
 			v1+=v2;
 		}
 		void end_merge(D& v, const unsigned long& multiplicity) const {
-cout << "avg merger input:" << v << " multiplicity:" << m << " ret: ";
 			double m=multiplicity;
+cout << "avg merger input:" << v << " multiplicity:" << m << " ret: ";
 			v/=m;
 cout << v << endl;
 		}
