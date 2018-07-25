@@ -170,7 +170,7 @@ void c::cash_query(peer_t *c, datagram*d) {
 	}
 	}
     
-	os << ' ' << parent->syncdemon.tip(); //last db version
+	os << ' ' << chaininfo.get_tip(); //last db version
 //cout << "CASH_RESPONSE " << os.str() << endl;
 	c->send(new datagram(protocol::cash_response,os.str()));
 }
@@ -265,6 +265,7 @@ cash_t c::db_t::get_newcash() { //db lock must be acquired
 }
 
 void c::import(const blockchain::app::delta& gg, const blockchain::pow_t& w) {
+
 	const delta& g=static_cast<const delta&>(gg);
 	{
 	lock_guard<mutex> lock(mx_policies);
@@ -413,11 +414,10 @@ bool c::process(const tx& t) {
 	cout << "cash: Processing transaction " << endl;
 
     {
-    unique_lock<mutex> lock(mx_last_block_imported);
+    //unique_lock<mutex> lock(mx_last_block_imported);
 //	if (t.parent_block!=last_block_imported) {
-	if (t.parent_block!=tip) { //from sync daemon
-		cout << "tx.rejected - base mismatch - " << t.parent_block << " != base:" << tip/* last_block_imported*/ << endl; 
-                cerr << "TX REJECTED 1" << endl;
+	if (unlikely(chaininfo.not_equals_tip(t.parent_block))) { //from sync daemon
+		cout << "tx.rejected - base mismatch - " << t.parent_block << " != base:" << chaininfo.get_tip() << endl; 
 		return false;
 	}
     }

@@ -7,18 +7,18 @@
 using namespace us::gov::blockchain;
 typedef us::gov::blockchain::app c;
 
-diff::hash_t c::last_block_imported{0};
-mutex c::mx_last_block_imported;
+c::chaininfo_t c::chaininfo;
+//mutex c::mx_last_block_imported;
 
 unsigned int c::get_seed() {
-	if (last_block_imported.empty()) return 0;
-	return *reinterpret_cast<const unsigned int*>(&last_block_imported);
+	if (chaininfo.last_block_imported.empty()) return 0;
+//    assert(chaininfo.tip == chaininfo.last_block_imported);
+	return *reinterpret_cast<const unsigned int*>(&chaininfo.last_block_imported);  //LE
 }
 
 #include "auth_app.h"
 #include "policies.h"
 #include <us/gov/cash/app.h>
-
 
 uint64_t c::delta::merge(local_delta* other) {
 	++multiplicity;
@@ -29,14 +29,14 @@ uint64_t c::delta::merge(local_delta* other) {
 c::local_delta* c::local_delta::create(int id) {
 	if (id==auth::app::id()) return new auth::app::local_delta();
 	if (id==cash::app::id()) return new cash::app::local_delta();
-        assert(false);
+    assert(false);
 	return 0;
 }
 
 c::delta* c::delta::create(int id) {
 	if (id==auth::app::id()) return new auth::app::delta();
 	if (id==cash::app::id()) return new cash::app::delta();
-        assert(false);
+    assert(false);
 	return 0;
 }
 

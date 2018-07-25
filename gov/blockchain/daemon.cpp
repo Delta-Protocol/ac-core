@@ -31,7 +31,7 @@ void c::add(app*app) {
 		exit(1);
 	}
 	apps_.emplace(app->get_id(),app);
-    app->parent=this;
+//    app->parent=this;
 }
 
 c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
@@ -230,17 +230,6 @@ diff::hash_t c::get_last_block_imported() const {
 	return last_block_imported;
 }
 
-
-void c::stage1(cycle_t& data) {
-//cout << "stage1 NB1 " << data.new_diff << endl;
-	if (!data.new_diff) return;
-	if (auth_app->my_stage()!=peer_t::node) return;
-//cout << "stage1 VOTETIP " << endl;
-	vote_tip(*data.new_diff);
-//cout << "NB1 " << data.new_diff << endl;
-//cout << "/stage1" << endl;
-}
-
 void c::eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle) {
 		if (likely(cycle.new_diff!=0)) {
 			if (likely(voted_tip==cycle.new_diff->hash())) {
@@ -254,22 +243,31 @@ void c::eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle) {
 			cycle.new_diff=0;
 		}
 		syncdemon.update(voted_tip,get_last_block_imported()); //head,tail
-		while (!syncdemon.in_sync() && !program::_this.terminated) {
-			cout << "syncing" << endl;
-			thread_::_this.sleep_for(chrono::seconds(1));
-			if (cycle.get_stage()!=cycle_t::local_deltas_io) break;
-		}
 }
 
-bool c::stage2(cycle_t& cycle) {
-	diff::hash_t hash=votes.select(); //decide tip
-cout << "Voting process result: diff " << hash << endl;
-	if (likely(!hash.is_zero())) {
-        eat_diff(hash,cycle);
-		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false; //TODO review
-	}
+void c::stage1(cycle_t& data) {
+//cout << "stage1 NB1 " << data.new_diff << endl;
+	if (!data.new_diff) return;
+	if (auth_app->my_stage()!=peer_t::node) return;
+//cout << "stage1 VOTETIP " << endl;
+	vote_tip(*data.new_diff);
+//cout << "NB1 " << data.new_diff << endl;
+//cout << "/stage1" << endl;
+}
 
+void c::stage2(cycle_t& cycle) {
+	diff::hash_t tip=votes.select(); //decide tip
+cout << "Voting process result: diff " << tip << endl;
+	if (likely(!tip.is_zero())) {
+        app::chaininfo.set_tip(tip); //tx validation, now they have to refer to this new tip
+        eat_diff(tip,cycle);
+//		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false; //TODO review
+	}
+}
+
+bool c::stage3(cycle_t& cycle) {
 	if (unlikely(!auth_app->is_node())) return false;
+	if (unlikely(!syncdemon.in_sync())) return false;
 
 	auto* mg=create_local_deltas();
 	if (mg!=0) {
@@ -282,7 +280,8 @@ cout << "Voting process result: diff " << hash << endl;
 	return true;
 }
 
-void c::stage3(cycle_t& cycle) {
+void c::stage4(cycle_t& cycle) {
+
 	assert(cycle.new_diff==0);
 	{
 	lock_guard<mutex> lock(mx_pool);
@@ -316,7 +315,7 @@ void c::run() {
 
 	thread synct(&syncd::run,&syncdemon);
 
-	cycle_t cycle;
+cout << "it looks stupid I am waiting for 5 secs now" << endl;
 	thread_::_this.sleep_for(chrono::seconds(5));
 
 	assert(pool==0);
@@ -327,10 +326,15 @@ void c::run() {
 	while(!program::_this.terminated) { // main loop
 		cycle.wait_for_stage(cycle_t::new_cycle);
 		stage1(cycle);
+
 		cycle.wait_for_stage(cycle_t::local_deltas_io);
-		if (!stage2(cycle)) continue;
+		stage2(cycle);
+
+		cycle.wait_for_stage(cycle_t::sync_db);
+		if (!stage3(cycle)) continue;
+
 		cycle.wait_for_stage(cycle_t::consensus_vote_tip_io);
-		stage3(cycle);
+		stage4(cycle);
 	}
 
 	synct.join();
@@ -687,6 +691,7 @@ void c::flush_evidences_on_hold() {
 
 void c::on_sync() { //while syncing evidences are queued in a separate containew evidences_on_hold
     flush_evidences_on_hold();
+//    cycle.in_sync=true;
 }
 
 bool c::process_evidence(datagram*d) {
@@ -816,18 +821,15 @@ void c::set_last_block_imported(const diff::hash_t& h) {
 }
 
 bool c::import(const diff& b) {
-        lock_guard<mutex> lock(mx_import); 
+    lock_guard<mutex> lock(mx_import); 
 //	cout << "blockchain: importing diff " << b.hash() << endl;
-        if (b.prev!=last_block_imported) {
-                cout << "block not in sequence." << b.prev << " " << last_block_imported << endl;
-                return false;
-        }
-    
-    
-    {
-    unique_lock<mutex> lock(app::mx_last_block_imported);
-	app::last_block_imported=last_block_imported;
+    if (b.prev!=last_block_imported) {
+       cout << "block not in sequence." << b.prev << " " << last_block_imported << endl;
+       return false;
     }
+    
+//    unique_lock<mutex> lock(app::mx_last_block_imported);
+	app::chaininfo.last_block_imported=last_block_imported;
 
 	for (auto&i:b) {
 		auto a=apps_.find(i.first);

@@ -163,9 +163,12 @@ namespace blockchain {
 
 		void send(const local_deltas& g, peer_t* exclude=0);
 
+        cycle_t cycle;
+
 		void stage1(cycle_t&);
-		bool stage2(cycle_t&);
-		void stage3(cycle_t&);
+		void stage2(cycle_t&);
+		bool stage3(cycle_t&);
+		void stage4(cycle_t&);
 		void run();
 
 		void load_head();

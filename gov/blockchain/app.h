@@ -78,10 +78,29 @@ namespace blockchain {
 
 		static unsigned int get_seed();
 
-		static hash_t last_block_imported;
-        static mutex mx_last_block_imported;
 
-        blockchain::daemon* parent;
+        struct chaininfo_t {
+            chaininfo_t():last_block_imported(0), tip(0) {
+            }
+            bool not_equals_tip(const hash_t& h) const {
+                unique_lock<mutex> lock(mx_tip);
+                return tip!=h;
+            }
+            const hash_t& get_tip() const {
+                unique_lock<mutex> lock(mx_tip);
+                return tip;
+            }
+            void set_tip(const hash_t& t) {
+                unique_lock<mutex> lock(mx_tip);
+                tip=t;
+            }
+    		hash_t last_block_imported; //no need to lock, write occurs during import and apps never read it during this time.
+	    	hash_t tip; //need the lock, writes occur on voting result, reads occur every time on tx validation
+            mutable mutex mx_tip;
+        };
+
+        static chaininfo_t chaininfo;
+//        blockchain::daemon* parent;
 	};
 
 	struct runnable_app: app {
