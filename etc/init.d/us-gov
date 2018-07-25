@@ -24,7 +24,7 @@ start() {
       echo -n "Starting us-gov: "
 # 	  echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env $PROG"
 
-      /sbin/start-stop-daemon --start  --background -o -q  --pidfile $PIDFILE --make-pidfile  --chuid $USER  --startas /usr/bin/pipexec -- -k  -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:1>L:0}' '{D:2>D:1}'
+      /sbin/start-stop-daemon --start  --background -o -q  --pidfile $PIDFILE --make-pidfile  --chuid $USER  --startas /usr/bin/pipexec -- -k  -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:1>L:0}' '{D:2>L:0}'
 
 
       RETVAL=$?
