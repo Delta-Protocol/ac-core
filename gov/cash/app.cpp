@@ -411,7 +411,8 @@ bool c::account_state(const local_delta::batch_t& batch, const hash_t& address, 
 }
 
 bool c::process(const tx& t) {
-	cout << ">tx< "; cout.flush();
+	cout << ">tx";
+	cerr << "< ";
 
     {
     //unique_lock<mutex> lock(mx_last_block_imported);
@@ -494,7 +495,7 @@ bool c::process(const tx& t) {
 	pool->accounts.add(batch);
 //cout << "SGT-02-tx OK" << endl; 
 //#ifdef DEBUG
-cout << "TX added to mempool" << endl;
+cout << "TX added to mempool:" << endl;
 {
     	lock_guard<mutex> lock(mx_pool);
         pool->accounts.dump(cout);
