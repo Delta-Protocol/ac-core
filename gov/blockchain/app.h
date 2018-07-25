@@ -55,7 +55,7 @@ namespace blockchain {
 			virtual void end_merge()=0;
 			virtual void to_stream(ostream&) const=0;
 
-			unsigned long multiplicity{1}; //updated by merge
+			unsigned long multiplicity{0}; //updated by merge
 
 		};
 
