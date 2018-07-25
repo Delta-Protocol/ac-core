@@ -33,7 +33,7 @@ start() {
   --pidfile $PIDFILE --make-pidfile \
   --chuid $USER \
   --startas /usr/bin/pipexec -- -k \
-  -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:2>D:1}' '{D:1>L:1}'
+  -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:2>L:0}' '{D:1>L:0}'
 
 
       RETVAL=$?
