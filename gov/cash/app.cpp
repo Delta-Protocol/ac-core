@@ -24,7 +24,7 @@ namespace std {
 }
 
 size_t std::hash<us::gov::cash::app::local_delta>::operator() (const us::gov::cash::app::local_delta&g) const {
-	return *reinterpret_cast<const size_t*>(&g.get_hash()[0]);
+	return *reinterpret_cast<const size_t*>(&g.get_hash()[0]); //LE
 }
 
 bool c::local_delta::accounts_t::add_input(tx& t, const hash_t& addr, const cash_t& amount) {
@@ -435,10 +435,13 @@ bool c::process(const tx& t) {
     }
 
 	auto fee=t.check();
+cout << "RBF removed min fee check" << endl;
+/*
 	if (fee<min_fee) {
         cerr << "TX REJECTED 3 " << fee << " " << min_fee << endl;
         return false;
     }
+*/
 
 	//tx verification
 	local_delta::batch_t batch;
