@@ -10,7 +10,6 @@ import java.security.PublicKey;
 import java.security.KeyPair;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import javax.xml.bind.DatatypeConverter;
 
 public class EllipticCryptographyTests{
 

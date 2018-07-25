@@ -33,46 +33,48 @@ int main ( int argc, char *argv[] )
         std::string argv1(argv[1]);
         k.priv=ec::keys::priv_t::from_b58(argv1);
         k.pub=ec::keys::pub_t::from_b58(argv[2]);
-        cout<<"c++ private key: " << k.priv << endl;
-        cout<<"c++ recieved public key: " << k.pub << endl;
-        cout<<"private key hex:" << k.to_hex(k.priv)<< endl;
-        cout << "pub key hex:" << k.pub.to_hex() << endl;
-        vector<unsigned char> priv_decoded;
-        b58::decode(argv1, priv_decoded);
-        for (int i = 0; i < priv_decoded.size(); i++) {
-            cout <<int(priv_decoded[i]) << "/";
-            }
-        unsigned char key_[AES::DEFAULT_KEYLENGTH]; //and this
+        //cout<<"c++ private key: " << k.priv << endl;
+        //cout<<"c++ recieved public key: " << k.pub << endl;
         
+        //vector<unsigned char> priv_decoded;
+        //b58::decode(argv1, priv_decoded);
+        //for (int i = 0; i < priv_decoded.size(); i++) {
+            //cout <<int(priv_decoded[i]) << "/";
+            //}
+        unsigned char key_[AES::DEFAULT_KEYLENGTH]; //and this
+        size_t keysize = sizeof(key_);
         string command(argv[3]);
 
         string message_string(argv[4]);
 
-        //vector<unsigned char> message(message_string.begin(),message_string.end());
-       
-        if(!ec::instance.generate_shared_key(key_, sizeof(key_), k.priv, k.pub)){
+        vector<unsigned char> message(message_string.begin(),message_string.end());
+        
+        if(!ec::instance.generate_shared_key(key_, keysize, k.priv, k.pub)){
             cout << "couldn't make shared key" << endl;
         }
         else{
-            //string shared_key = b58::encode(key_);
-            //cout <<"shared key: " << endl;
-            //for (int i = 0; i < AES::DEFAULT_KEYLENGTH; i++) {
-            //cout << key_[i];
+           // string shared_key = b58::encode(key_);
+            //cout <<"c++ shared key: " << endl;
+            //for (int i = 0; i < keysize; i++) {
+                //cout << int(key_[i]) << "/";
             //}
             //cout << endl;
 
-            //cout << "shared key b58: " << b58::encode(key_, key_ + sizeof(key_) - 1);
-            //cout << endl;
            
             //cout << hex << key_ << endl;
+            string fake_shared_key = "fakekey123456789";
+            vector<unsigned char> fakekey(fake_shared_key.begin(),fake_shared_key.end());
 
             //symmetric_encryption s_e(k.priv,k.pub);
-           // if(command=="encrypt"){
+            symmetric_encryption s_e(fakekey);
+            if(command=="encrypt"){
             
-                //vector<unsigned char> encrypted = s_e.encrypt(message);
+                vector<unsigned char> encrypted = s_e.encrypt(message);
+                cout << b58::encode(encrypted) << endl;
+                //count << hex << encrypted << endl;
                 //string encrypted_string(encrypted.begin(), encrypted.end());
-               // cout << "encrypted string : " << encrypted_string << endl;
-           // }
+                //cout << encrypted_string << endl;
+            }
         }
     }
 }

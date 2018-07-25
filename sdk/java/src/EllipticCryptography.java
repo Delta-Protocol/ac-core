@@ -10,6 +10,8 @@ import org.spongycastle.jce.ECPointUtil;
 import java.security.MessageDigest;
 import org.spongycastle.math.ec.ECCurve;
 import java.util.Arrays;
+import org.spongycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.jce.interfaces.ECPrivateKey;
 
 
 import javax.crypto.KeyAgreement;
@@ -163,17 +165,24 @@ public class EllipticCryptography {
         
     }
 
-    public static byte[] newGenerateSharedKey(PrivateKey privKeyA, PublicKey pubKeyB, int length) throws NoSuchProviderException, InvalidKeyException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public byte[] newGenerateSharedKey(PrivateKey privKeyA, PublicKey pubKeyB, int length) throws NoSuchProviderException, InvalidKeyException, InvalidKeySpecException, NoSuchAlgorithmException {
+        ECPrivateKey ecPrivateKey = (ECPrivateKey) privKeyA;
+        ECPublicKey ecPublicKey = (ECPublicKey) pubKeyB;
         
-        byte[] secret = aKA.generateSecret();
-
+        ECPoint newPoint = ecMultiply(ecPublicKey.getQ(), ecPrivateKey.getD());
+        System.out.println("d is: " + ecPrivateKey.getD());
+        System.out.println("ecpoint x from newPoint: " + newPoint.getX().toString());
+        byte[] encodedPoint = newPoint.getEncoded(true);
+        System.out.println("java shared key encodedPoint: " + toHexString(encodedPoint));
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] hashed = messageDigest.digest(secret);
+        byte[] hashed = messageDigest.digest(encodedPoint);
+        System.out.println("java shared key hashed: " + toHexString(hashed));
+        System.out.println("java shared key hashed: " + Arrays.toString(hashed));
         return Arrays.copyOf(hashed, 16);
         
     }
-
-    //new
+   
+    
     public PrivateKey newGetPrivateKey(byte[] privateKey) throws InvalidKeySpecException{
     
         ECPrivateKeySpec privKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(privateKey),ecSpec);
@@ -183,6 +192,8 @@ public class EllipticCryptography {
         ECCurve curve = ecSpec.getCurve();
         return curve.decodePoint(publicKey);
     }
+
+
 
     public PublicKey newGetPublicKey(byte[] publicKey) throws InvalidKeySpecException{
         ECPoint ecPoint = newGetECPoint(publicKey);

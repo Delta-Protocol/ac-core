@@ -13,6 +13,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 
+
 import java.nio.charset.StandardCharsets;
 
 public class SymmetricEncryption {
@@ -45,18 +46,21 @@ public class SymmetricEncryption {
 
     //Decrypt returns an empty byte array if the ciphertext is invalid. Invalid ciphertext would 
     //otherwise cause an exception as the algorithm tries to authenticate the ciphertext.
-    public byte[] decrypt(byte[] encrypted) {    
+    public byte[] decrypt(byte[] encrypted) throws GeneralSecurityException{    
         
         byte[] emptyArray = new byte[0];
         try{
             int messageLength = encrypted.length - iv_size;
             if(messageLength<=0){return emptyArray;}
             iv = Arrays.copyOfRange(encrypted, messageLength , encrypted.length);
+            System.out.println("decrypted iv: " + EllipticCryptography.getInstance().toHexString(iv));
+            System.out.println("ENCRYPTED: " + EllipticCryptography.getInstance().toHexString(encrypted));
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
             return cipher.doFinal(Arrays.copyOfRange(encrypted, 0, messageLength));
         }
-        catch(Exception e){
-            return emptyArray;
+        catch(GeneralSecurityException e){
+            //return emptyArray;
+            throw e;
         }      
     }
 

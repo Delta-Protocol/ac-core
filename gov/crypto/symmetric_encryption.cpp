@@ -39,6 +39,13 @@ c::symmetric_encryption(const keys::priv_t& priv_key_a, const keys::pub_t& pub_k
     }
 }
 
+c::symmetric_encryption(const vector<unsigned char>& shared_key) {
+    //if(shared_key.size()==16){}
+    for(size_t i = 0; i < shared_key.size(); i++){
+        key_[i] = shared_key[i];
+    }
+}
+
 bool c::set_agreed_key_value(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b) {
     if(!secp256k1_ecdh(ec::instance.ctx,key_,&pub_key_b,&priv_key_a[0])) { //LE
         cerr << "Could not create shared secret";
@@ -52,7 +59,8 @@ const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext) {
     vector<unsigned char> ciphertext(size_iv + plaintext.size() + AES::BLOCKSIZE);
 
     //we need a new iv for each message that is encrypted with the same key.
-    prng_.GenerateBlock(c::iv_, size_iv);
+    //prng_.GenerateBlock(iv_, size_iv);
+    std::fill_n(iv_, 16, 1);
 
     GCM<AES>::Encryption enc;
     enc.SetKeyWithIV(key_, sizeof(key_), iv_, size_iv);
