@@ -328,7 +328,7 @@ void c::import(const blockchain::app::delta& gg, const blockchain::pow_t& w) {
 			uniform_int_distribution<size_t> distribution(0,w.size()-1);
 			auto i=w.begin();
 			advance(i,distribution(generator));
-			cout << "lucky guy " << i->first << " got remainder " << remainder << endl;
+//			cout << "lucky guy " << i->first << " got remainder " << remainder << endl;
 			db.add_(i->first,remainder);
 		}
 	}
@@ -411,7 +411,7 @@ bool c::account_state(const local_delta::batch_t& batch, const hash_t& address, 
 }
 
 bool c::process(const tx& t) {
-//	cout << "cash: Processing transaction " << endl;
+	cout << ">tx< "; cout.flush();
 
     {
     //unique_lock<mutex> lock(mx_last_block_imported);
@@ -494,7 +494,7 @@ bool c::process(const tx& t) {
 	pool->accounts.add(batch);
 //cout << "SGT-02-tx OK" << endl; 
 //#ifdef DEBUG
-cerr << "TX added to mempool" << endl;
+cout << "TX added to mempool" << endl;
 {
     	lock_guard<mutex> lock(mx_pool);
         pool->accounts.dump(cout);
