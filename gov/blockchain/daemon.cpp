@@ -257,6 +257,8 @@ void c::stage1(cycle_t& data) {
 
 void c::stage2(cycle_t& cycle) {
 	diff::hash_t tip=votes.select(); //decide tip
+    app::chaininfo.set_tip(tip); //tx validation, now they have to refer to this new tip
+
 cout << "Voting process result: diff " << tip << endl;
 	if (likely(!tip.is_zero())) {
         eat_diff(tip,cycle);
@@ -297,6 +299,7 @@ void c::load_head() {
         diff::hash_t head(0);
         if (is.good()) is >> head;
         syncdemon.update(head,get_last_block_imported());
+        app::chaininfo.set_tip(head);
 }
 
 void c::run() {
@@ -689,7 +692,6 @@ void c::flush_evidences_on_hold() {
 }
 
 void c::on_sync() { //while syncing evidences are queued in a separate containew evidences_on_hold
-    app::chaininfo.set_tip(tip); //tx validation, now they have to refer to this new tip
     flush_evidences_on_hold();
 
 //    cycle.in_sync=true;
