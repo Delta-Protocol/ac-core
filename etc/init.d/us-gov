@@ -34,7 +34,7 @@ start() {
 
 stop() {
       echo -n "Stopping us-gov: "
-      /sbin/start-stop-daemon -q -o --stop --pidfile $PIDFILE 2>1 >/usr/bin/logger --tag $NAME
+      /sbin/start-stop-daemon -q -o --stop --pidfile $PIDFILE
 
       RETVAL=$?
       echoret $RETVAL
