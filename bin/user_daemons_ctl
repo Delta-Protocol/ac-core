@@ -9,7 +9,8 @@ start() {
 
 	#---govd---
 	LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -genesis 127.0.0.1
-       
+	#LD_LIBRARY_PATH=gov:/usr/lib govx/us-gov $@ 
+
       if [ $? -eq 0 ]; then
     	echo "govd-> PASS"
 	else
