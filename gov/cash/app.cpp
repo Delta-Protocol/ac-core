@@ -436,7 +436,7 @@ bool c::process(const tx& t) {
 
 	auto fee=t.check();
 	if (fee<min_fee) {
-        cerr << "TX REJECTED 3" << endl;
+        cerr << "TX REJECTED 3 " << fee << " " << min_fee << endl;
         return false;
     }
 
