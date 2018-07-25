@@ -207,6 +207,8 @@ namespace blockchain {
 			return 0;
 		}
 		virtual void end_merge() override {
+cerr << "policies delta: end merge with multiplicity=" << b::multiplicity << endl;
+
 			double m=b::multiplicity;
 			for (int i=0; i<T::num_params; ++i) merger.end_merge((*this)[i],m); //(*this)[i]/=m;
 		}
