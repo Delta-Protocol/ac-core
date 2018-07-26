@@ -3,7 +3,6 @@ PREFIX:=/usr/local
 DEBUGFLAGS:=-g -O0 ${STDFLAGS} -DDEBUG
 RELEASEFLAGS:=-O3 ${STDFLAGS}
 
-
 #dev
 CXXFLAGS:=-g -O0 -DDEBUG ${STDFLAGS}
 #distr
@@ -41,11 +40,11 @@ install: release
 	systemctl daemon-reload
 
 install-cryptos: cryptos
-        install gov/libusgov.so ${PREFIX}/lib
-        install wallet/libuswallet.so ${PREFIX}/lib
-        install govx/us-gov ${PREFIX}/bin
-        install cryptos/etc/init.d/us-wallet /etc/init.d/
-        install cryptos/etc/cryptos/init.d/us-gov /etc/init.d/
+	install gov/libusgov.so ${PREFIX}/lib
+	install wallet/libuswallet.so ${PREFIX}/lib
+	install govx/us-gov ${PREFIX}/bin
+	install cryptos/etc/init.d/us-wallet /etc/init.d/
+	cryptos/etc/cryptos/init.d/us-gov /etc/init.d/
 	ldconfig
 
 install-nginx:
