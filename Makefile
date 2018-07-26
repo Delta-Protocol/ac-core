@@ -45,7 +45,7 @@ cryptos-install: cryptos
 	install govx/us-gov ${PREFIX}/bin
 	install cryptos/etc/init.d/us-wallet /etc/init.d/
 	cryptos/etc/cryptos/init.d/us-gov /etc/init.d/
-	ldconfig
+	ldconfig /usr/local/lib
 
 install-nginx:
 	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
