@@ -15,7 +15,7 @@ debug: all
 release: export CXXFLAGS:=${RELEASEFLAGS}
 release: all
 
-pi: export CXXFLAGS:=${RELEASEFLAGS}
+cryptos: export CXXFLAGS:=${RELEASEFLAGS}
 cryptos: gov/libusgov.so wallet/libuswallet.so govx/us-gov
 
 all: gov/libusgov.so wallet/libuswallet.so govx/us-gov wallet/us-wallet
