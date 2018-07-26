@@ -63,14 +63,18 @@ int main ( int argc, char *argv[] )
            
             //cout << hex << key_ << endl;
             string fake_shared_key = "fakekey123456789";
-            vector<unsigned char> fakekey(fake_shared_key.begin(),fake_shared_key.end());
+            vector<unsigned char> fakekey(key_,key_+16);
 
             //symmetric_encryption s_e(k.priv,k.pub);
-            symmetric_encryption s_e(fakekey);
+            symmetric_encryption s_e(k.priv, k.pub);
+            //symmetric_encryption s_e1(fakekey);
             if(command=="encrypt"){
             
                 vector<unsigned char> encrypted = s_e.encrypt(message);
-                cout << b58::encode(encrypted) << endl;
+                //for (int i = 0; i < encrypted.size(); i++) {
+                   // cout << int(encrypted[i]) << "/";
+                //}
+                cout << encrypted << endl;
                 //count << hex << encrypted << endl;
                 //string encrypted_string(encrypted.begin(), encrypted.end());
                 //cout << encrypted_string << endl;

@@ -30,17 +30,20 @@ public class SymmetricEncryption {
         cipher = Cipher.getInstance("AES/GCM/NoPadding");
         iv = new byte[iv_size];
         key = sharedKey;
+        //System.out.printl("key from keys" + _key.toString());
     }
 
     public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
         
-        this(EllipticCryptography.getInstance().generateSharedKey(priv_a,pub_b,16));
+        this(EllipticCryptography.getInstance().newGenerateSharedKey(priv_a,pub_b,16));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
         
         random.nextBytes(iv);
+        //Arrays.fill(iv,(byte)1);
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
+        //return cipher.doFinal(plaintext);
         return Arrays.concatenate(cipher.doFinal(plaintext), iv);
     }
 

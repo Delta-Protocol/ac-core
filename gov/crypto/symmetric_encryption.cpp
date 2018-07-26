@@ -37,6 +37,11 @@ c::symmetric_encryption(const keys::priv_t& priv_key_a, const keys::pub_t& pub_k
     if (!ec::instance.generate_shared_key(key_, sizeof(key_), priv_key_a, pub_key_b)) {
 		throw "Could not initialize encryption";
     }
+    //cout << "key by eckeys:" << endl;
+    //for (int i = 0; i < sizeof(key_); i++) {
+                    //cout << int(key_[i]) << "/";
+               // }
+   //cout << "*" << endl;
 }
 
 c::symmetric_encryption(const vector<unsigned char>& shared_key) {
@@ -44,6 +49,11 @@ c::symmetric_encryption(const vector<unsigned char>& shared_key) {
     for(size_t i = 0; i < shared_key.size(); i++){
         key_[i] = shared_key[i];
     }
+    //cout << "key by direct key:" << endl;
+    //for (int i = 0; i < sizeof(key_); i++) {
+                    //cout << int(key_[i]) << "/";
+               // }
+   //cout << "*" << endl;
 }
 
 bool c::set_agreed_key_value(const keys::priv_t& priv_key_a, const keys::pub_t& pub_key_b) {
@@ -55,12 +65,16 @@ bool c::set_agreed_key_value(const keys::priv_t& priv_key_a, const keys::pub_t& 
 }
 
 const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext) {
-
+    
     vector<unsigned char> ciphertext(size_iv + plaintext.size() + AES::BLOCKSIZE);
-
+    //cout << "plaintext" << endl;
+    //for (int i = 0; i < plaintext.size(); i++) {
+                    //cout << int(plaintext[i]) << "/";
+                //}
+   // cout << "*" << endl;
     //we need a new iv for each message that is encrypted with the same key.
-    //prng_.GenerateBlock(iv_, size_iv);
-    std::fill_n(iv_, 16, 1);
+    prng_.GenerateBlock(iv_, size_iv);
+    //std::fill_n(iv_, 16, 1);
 
     GCM<AES>::Encryption enc;
     enc.SetKeyWithIV(key_, sizeof(key_), iv_, size_iv);
@@ -72,6 +86,11 @@ const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext) {
     // Set cipher text length now that its known, and append the iv
     ciphertext.resize(cs.TotalPutLength());
     ciphertext.insert(ciphertext.end(), begin(iv_), end(iv_));
+    //cout << "ciphertext" << endl;
+    //for (int i = 0; i < ciphertext.size(); i++) {
+                    //cout << int(ciphertext[i]) << "/";
+                //}
+    //cout << "*" << endl;
     return move(ciphertext);
 
 }

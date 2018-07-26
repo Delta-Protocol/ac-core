@@ -170,14 +170,14 @@ public class EllipticCryptography {
         ECPublicKey ecPublicKey = (ECPublicKey) pubKeyB;
         
         ECPoint newPoint = ecMultiply(ecPublicKey.getQ(), ecPrivateKey.getD());
-        System.out.println("d is: " + ecPrivateKey.getD());
-        System.out.println("ecpoint x from newPoint: " + newPoint.getX().toString());
+       // System.out.println("d is: " + ecPrivateKey.getD());
+       // System.out.println("ecpoint x from newPoint: " + newPoint.getX().toString());
         byte[] encodedPoint = newPoint.getEncoded(true);
-        System.out.println("java shared key encodedPoint: " + toHexString(encodedPoint));
+       // System.out.println("java shared key encodedPoint: " + toHexString(encodedPoint));
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         byte[] hashed = messageDigest.digest(encodedPoint);
-        System.out.println("java shared key hashed: " + toHexString(hashed));
-        System.out.println("java shared key hashed: " + Arrays.toString(hashed));
+       // System.out.println("java shared key hashed: " + toHexString(hashed));
+       // System.out.println("java shared key hashed: " + Arrays.toString(hashed));
         return Arrays.copyOf(hashed, 16);
         
     }
@@ -197,7 +197,7 @@ public class EllipticCryptography {
 
     public PublicKey newGetPublicKey(byte[] publicKey) throws InvalidKeySpecException{
         ECPoint ecPoint = newGetECPoint(publicKey);
-        System.out.println("ecpoint x from pub key bytes: " + ecPoint.getX().toString());
+        //System.out.println("ecpoint x from pub key bytes: " + ecPoint.getX().toString());
         return newGetPublicKey(ecPoint);
         
     }
