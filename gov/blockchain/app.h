@@ -31,8 +31,8 @@ namespace blockchain {
 		typedef crypto::ripemd160 hasher_t;
 		typedef hasher_t::value_type hash_t;
 
-		struct local_delta {
-			virtual ~local_delta() { }
+		struct local_delta { //an instance of local_delta serves as storage for processed transactions (mempool) in pre-consensus. It represents our vote on the right mempool
+			virtual ~local_delta() {}
 
 			static local_delta* create(int id);
 			static local_delta* create(istream&);
@@ -43,7 +43,7 @@ namespace blockchain {
 			virtual int app_id() const=0;
 		};
 
-		struct delta {
+		struct delta { //an instance of delta merges local_deltas as they arrive (consensus). It represents the agreed change to the ledger
 			delta() {}
 			virtual ~delta() {}
 
@@ -55,8 +55,7 @@ namespace blockchain {
 			virtual void end_merge()=0;
 			virtual void to_stream(ostream&) const=0;
 
-			unsigned long multiplicity{0}; //updated by merge
-
+			unsigned long multiplicity{0}; //counter for the number of local_deltas merged so far. This variable is updated by merge().
 		};
 
 		app() {}
@@ -189,17 +188,12 @@ cout << v << endl;
 		unordered_map<D,unsigned long> m;
 	};
 
-
-
-
 	template<typename D, typename T, typename M>
 	struct policies_delta: policies_base<D,T>, app::delta {
 		typedef policies_base<D,T> b1;
 		typedef delta b;
 		policies_delta() {}
-		policies_delta(const policies_local_delta<D,T>& g): b1(g) {
-
-		}
+		policies_delta(const policies_local_delta<D,T>& g): b1(g) {}
 		virtual ~policies_delta() {}
 
 		virtual uint64_t merge(app::local_delta* other0) override {
@@ -230,28 +224,27 @@ cerr << "policies delta: end merge with multiplicity=" << b::multiplicity << end
         void clear() {
 			for (auto& i:*this) i=0;
         }
-		
+
 		policies_t& operator =(const policies_t& other) {
 			for (int i=0; i<T::num_params; ++i) {
 				(*this)[i]=other[i];
 			}
 			return *this;
 		}
-		b operator - (const policies_t& other) const {
+
+		b operator -(const policies_t& other) const {
 			b ans;
 			for (int i=0; i<T::num_params; ++i) {
 				ans[i]=(*this)[i]-other[i];
 			}
 			return move(ans);
 		}
+
 		void hash(hasher_t& h) const {
-			for (auto& i:*this) {
-				h << i;
-			}
+			for (auto& i:*this) h << i;
 		}
-
 	};
-
+/*
 	struct miner_work_value:unordered_map<int, int64_t> {
 		int64_t value() const {
 			int64_t v=0;
@@ -261,6 +254,7 @@ cerr << "policies delta: end merge with multiplicity=" << b::multiplicity << end
 			return v;
 		}		
 	};
+*/
 }}
 }
 #endif

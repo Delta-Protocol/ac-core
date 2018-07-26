@@ -24,7 +24,8 @@ start() {
       echo -n "Starting us-gov: "
 # 	  echo "/sbin/start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env $PROG"
 
-      /sbin/start-stop-daemon --start  --background -o -q  --pidfile $PIDFILE --make-pidfile  --chuid $USER  --startas /usr/bin/pipexec -- -k -l 2 -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] "{D:2>D:1}" "{D:1>L:0}"
+#      /sbin/start-stop-daemon --start  --background -o -q  --no-close  --pidfile $PIDFILE --make-pidfile  --chuid $USER  --startas /usr/bin/pipexec -- -k -l 2 -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] "{D:2>D:1}" "{D:1>L:0}"
+      /sbin/start-stop-daemon --start  --background -o -q  --no-close  --pidfile $PIDFILE --make-pidfile  --chuid $USER  --startas /usr/bin/pipexec -- -k -l 2 -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] "{D:2>D:1}" "{D:1>L:0}"
 
 
       RETVAL=$?
@@ -33,7 +34,7 @@ start() {
 
 stop() {
       echo -n "Stopping us-gov: "
-      /sbin/start-stop-daemon -q -o --stop --pidfile $PIDFILE
+      /sbin/start-stop-daemon -q -o --stop --retry 2 --pidfile $PIDFILE
 
       RETVAL=$?
       echoret $RETVAL

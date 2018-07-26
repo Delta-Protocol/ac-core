@@ -43,7 +43,7 @@ start() {
 
 stop() {
       echo -n "Stopping us-wallet: "
-      /sbin/start-stop-daemon -q -o --stop --pidfile $PIDFILE 2>/dev/null
+      /sbin/start-stop-daemon -q -o --oknodo --stop --retry --pidfile $PIDFILE 2>/dev/null
       RETVAL=$?
       echoret $RETVAL
 }
