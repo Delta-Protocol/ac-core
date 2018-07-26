@@ -25,7 +25,7 @@ void c::finish() {
 	if (terminated) return;
 	cout << "starting ordered exit" << endl;
 	terminated=true;
-	for (auto&i:callbacks) i->on_finish();
-	cv.notify_all();
+	cv.notify_all(); //wakeup speeping threads
+	for (auto&i:callbacks) i->on_finish(); //wake up socket listener
 }
 

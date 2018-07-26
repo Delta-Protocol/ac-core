@@ -388,7 +388,6 @@ void c::run() {
 	signal_handler::_this.add(this);
 	char discard[4]; //loopback recv buffer, up to 30 wake up signals
 	while (true) {
-		if (unlikely(thread_::_this.terminated)) break;
 		FD_ZERO(&read_fd_set);
 		FD_SET(sock,&read_fd_set);
 		FD_SET(loopback,&read_fd_set);
@@ -398,6 +397,7 @@ void c::run() {
 			cerr << "error in select" << endl;
 			continue;
 		}
+		if (unlikely(thread_::_this.terminated)) break;
 		if (unlikely(FD_ISSET(loopback, &read_fd_set))) {
             ::recv(loopback,&discard,4,0);
 		}
