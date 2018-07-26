@@ -96,7 +96,7 @@ using us::gov::blockchain::diff;
 
 struct genesis_daemon: blockchain::daemon {
 
-    genesis_daemon(auto a, auto b):blockchain::daemon(a,b,0,0,vector<string>()) {
+    genesis_daemon(const us::gov::crypto::ec::keys& a, const string& b):blockchain::daemon(a,b,0,0,vector<string>()) {
 	    add(new cash::app());
     }
 

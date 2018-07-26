@@ -36,12 +36,12 @@
 
 #------------run-test-------------|
 
-cd
-cd us/test/wallet
+#cd
+#cd us/test/wallet
 
-g++ -std=c++17 -I../../.. -L../../gov -L../../wallet -lusgov -luswallet main.cpp api.cpp
+#g++ -std=c++17 -I../../.. -L../../gov -L../../wallet -lusgov -luswallet main.cpp api.cpp
 
-LD_LIBRARY_PATH=../../gov:../../wallet ./a.out
+#LD_LIBRARY_PATH=../../gov:../../wallet ./a.out
 
 
 

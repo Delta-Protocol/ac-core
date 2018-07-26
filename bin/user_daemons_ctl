@@ -8,16 +8,22 @@ start() {
 	echo "home dir is $home"
 
 	#---govd---
-	LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -genesis 127.0.0.1
-	#LD_LIBRARY_PATH=gov:/usr/lib govx/us-gov $@ 
+	#LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -genesis 127.0.0.1
+	
+	#LD_LIBRARY_PATH= ./us-genesis -home /tmp/xxx 1.1.1.8
 
-      if [ $? -eq 0 ]; then
-    	echo "govd-> PASS"
+
+		LD_LIBRARY_PATH=genesis genesis/us-genesis -home /tmp/xxx 127.0.0.1
+
+
+
+      if [ $? -eq 0 ]; then   # $? https://stackoverflow.com/questions/7248031/meaning-of-in-shell-scripts
+    	echo "govx-> PASS"
 	else
-    	echo "govd-> FAIL"
+    	echo "govx-> FAIL"
 	exit 1;
      fi
-
+ 
  ls $home
 
 #-------
