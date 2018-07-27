@@ -17,7 +17,6 @@ import java.security.GeneralSecurityException;
 public class Wallet {
 
     private BigInteger priv;
-    private ECPoint pub;
     public String my_address;
 
     public class tx_make_p2pkh_input {
@@ -114,7 +113,6 @@ public class Wallet {
             throw new IOException("priv key is null");
             //Log.d("Wallet", "Private key was not successfully retrieved");
         }
-        pub = EllipticCryptography.getInstance().publicPointFromPrivate(priv);
     }
 
     //must be in sync with the c++ master file wallet/protocol.h

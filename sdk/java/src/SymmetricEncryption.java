@@ -19,51 +19,60 @@ import java.nio.charset.StandardCharsets;
 public class SymmetricEncryption {
 
     private static final SecureRandom random = new SecureRandom();
-    private static final int iv_size = 16;
+    private static final int ivSize = 12;
+    private static final int keySize = 16;
+
     private Cipher cipher;
     private byte[] key;
     private byte[] iv;
 
     public SymmetricEncryption(byte[] sharedKey) throws GeneralSecurityException {
         
+        iv = new byte[ivSize];
         Security.addProvider(new BouncyCastleProvider());
         cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        iv = new byte[iv_size];
-        key = sharedKey;
-        //System.out.printl("key from keys" + _key.toString());
+        if(sharedKey.length == keySize){
+           key = sharedKey;
+        } 
+        else{
+            throw new GeneralSecurityException("The key provided should be " + keySize + " bytes.");
+        }
+    }
+
+    public int getKeySize(){
+        return keySize;
     }
 
     public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
         
-        this(EllipticCryptography.getInstance().newGenerateSharedKey(priv_a,pub_b,16));
+        this(EllipticCryptography.getInstance().generateSharedKey(priv_a,pub_b, keySize));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
         
         random.nextBytes(iv);
-        //Arrays.fill(iv,(byte)1);
+        
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
-        //return cipher.doFinal(plaintext);
         return Arrays.concatenate(cipher.doFinal(plaintext), iv);
     }
 
     //Decrypt returns an empty byte array if the ciphertext is invalid. Invalid ciphertext would 
-    //otherwise cause an exception as the algorithm tries to authenticate the ciphertext.
-    public byte[] decrypt(byte[] encrypted) throws GeneralSecurityException{    
+    //otherwise cause an exception as the algorithm is unable to authenticate the ciphertext.
+    public byte[] decrypt(byte[] encrypted) {    
         
         byte[] emptyArray = new byte[0];
         try{
-            int messageLength = encrypted.length - iv_size;
-            if(messageLength<=0){return emptyArray;}
+            int messageLength = encrypted.length - ivSize;
+            if(messageLength<0){
+                System.out.println("The ciphertext does not have sufficient length to contain the iv (initialisation vector) which should have been appended.");
+                return emptyArray;
+            }
             iv = Arrays.copyOfRange(encrypted, messageLength , encrypted.length);
-            System.out.println("decrypted iv: " + EllipticCryptography.getInstance().toHexString(iv));
-            System.out.println("ENCRYPTED: " + EllipticCryptography.getInstance().toHexString(encrypted));
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
             return cipher.doFinal(Arrays.copyOfRange(encrypted, 0, messageLength));
         }
         catch(GeneralSecurityException e){
-            //return emptyArray;
-            throw e;
+            return emptyArray;
         }      
     }
 

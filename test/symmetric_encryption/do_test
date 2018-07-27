@@ -5,16 +5,32 @@ read -r priv_b public_b <<< $(LD_LIBRARY_PATH=../../gov:/usr/lib ./generate_keys
 MESSAGE='trees and bees'
 MESSAGE2='lets do a longer one'
 
+echo "Message is: "
+echo $MESSAGE
 encrypted="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a $public_b encrypt "$MESSAGE")"
+echo "encrypted by c++ as: "
 echo $encrypted
 
-java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_a $public_b "decrypt" $encrypted
+decrypted="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_b $public_a "decrypt" $encrypted)"
+echo "decrypted by java to: "
+echo $decrypted
 
-encrypted2="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_a $public_b "encrypt" "$MESSAGE")"
+decrypted2="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a $public_b decrypt $encrypted)"
+echo "decrypted by c++ to: "
+echo $decrypted2
+
+echo "Message is: "
+echo $MESSAGE2
+encrypted2="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_b $public_a "encrypt" "$MESSAGE2")"
+echo "encrypted by java as: "
 echo $encrypted2
 
-decrypted2="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a $public_b decrypt "$encrypted2")"
-#call java to decrypt
-#check
+decrypted3="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a $public_b decrypt $encrypted2)"
+echo "decrypted by c++ to: "
+echo $decrypted3
 
-#and other way around
+decrypted4="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_b $public_a "decrypt" $encrypted2)"
+echo "decrypted by java to: "
+echo $decrypted4
+
+

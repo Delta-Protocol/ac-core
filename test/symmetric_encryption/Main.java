@@ -14,34 +14,26 @@ public class Main{
     public static void main(String [ ] args) throws GeneralSecurityException{
         if (args.length > 3){
             try{
-            
        
-                String command = args[2];
-                byte[] message = Base58.decode(args[3]);
-
-                byte[] pub=Base58.decode(args[1]);
                 byte[] priv=Base58.decode(args[0]);
-
-                
-                //System.out.println("message " + Arrays.toString(message));
+                byte[] pub=Base58.decode(args[1]);
+                String command = args[2];
                
-
-                PrivateKey privateKey = EllipticCryptography.getInstance().newGetPrivateKey(priv);
-                PublicKey publicKey = EllipticCryptography.getInstance().newGetPublicKey(pub);
+                PrivateKey privateKey = EllipticCryptography.getInstance().getPrivateKey(priv);
+                PublicKey publicKey = EllipticCryptography.getInstance().getPublicKey(pub);
    
-                byte[] sharedKey = EllipticCryptography.getInstance().newGenerateSharedKey(privateKey,publicKey, 16);
-                
-                SymmetricEncryption se = new SymmetricEncryption(privateKey,publicKey);
+                SymmetricEncryption se = new SymmetricEncryption(privateKey, publicKey);
         
                 if(command.equals("decrypt")){
                     
-                    
+                    byte[] message = Base58.decode(args[3]);
                     byte[] decrypted = se.decrypt(message);
-                    String decrypted_string = Arrays.toString(decrypted);
-                    System.out.println("decrypted as: " + decrypted_string);
+                    String decrypted_string = new String(decrypted);
+                    System.out.println(decrypted_string);
                 }
                 if(command.equals("encrypt")){
                     
+                    byte[] message = args[3].getBytes();
                     byte[] encrypted = se.encrypt(message);
                     String encrypted_string = Arrays.toString(encrypted);
                    
@@ -57,8 +49,6 @@ public class Main{
 
     }
 
-    private static void printHex(byte[] byteArray){
-        System.out.println(EllipticCryptography.toHexString(byteArray));
-    }
+   
 
 }

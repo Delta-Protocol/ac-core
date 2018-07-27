@@ -18,7 +18,7 @@ public class SymmetricEncryptionTests{
         KeyPair b;
         KeyPair c;
 
-    public boolean testSymmetricEncryption()throws GeneralSecurityException{
+    public boolean testSymmetricEncryption() throws Exception{
     
         try{
             
@@ -58,9 +58,10 @@ public class SymmetricEncryptionTests{
             //decrypting invalid ciphertext should return an empty vector. 
             assert(test_decrypt_nulls(""));
             assert(test_decrypt_nulls("this string hasn't been encrypted so decryption will fail"));
+            
         }
-        catch(GeneralSecurityException e){
-            throw new GeneralSecurityException("encryption test failed on: " + e);
+        catch(Exception e){
+            throw new Exception("encryption test failed on: " + e);
         }
         return true;
     }
@@ -78,16 +79,16 @@ public class SymmetricEncryptionTests{
     }
 
     public boolean test_encrypt_decrypt_keys(String plaintext_string, PrivateKey priv_a, PublicKey pub_b, PrivateKey priv_b, PublicKey pub_a) throws GeneralSecurityException{
-       
+        
         byte[] plaintext = plaintext_string.getBytes();
         
         SymmetricEncryption se_a= new SymmetricEncryption(priv_a,pub_b);
         byte[] ciphertext = se_a.encrypt(plaintext);
        
         SymmetricEncryption se_b= new SymmetricEncryption(priv_b,pub_a);
-        byte[] decodedtext = se_b.decrypt(ciphertext);
-       
-        return Arrays.equals(plaintext,decodedtext);
+        byte[] decryptedtext = se_b.decrypt(ciphertext);
+      
+        return Arrays.equals(plaintext,decryptedtext);
     }
 
     public boolean test_encrypt_multiple(String plaintext_string)throws GeneralSecurityException{
