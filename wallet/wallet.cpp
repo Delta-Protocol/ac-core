@@ -117,13 +117,13 @@ void c::dump_balances(ostream& os) const {
 }
 
 void c::extended_balance(ostream& os) const {
-	cash::cash_t b=0;
-	os << "[address] [locking_program] [balance]" << endl;
+//	cash::cash_t b=0;
+//	os << "[address] [locking_program] [balance]" << endl;
 	for (auto& i:data) {
-		b+=i.second.balance;
+//		b+=i.second.balance;
 		os << i.first << ' ' << i.second.locking_program << ' ' << i.second.balance << endl;
 	}
-	os << "total balance: " << b;
+//	os << "total balance: " << b;
 }
 
 using socket::datagram;

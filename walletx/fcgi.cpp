@@ -1,5 +1,6 @@
 #ifdef FCGI
 #include "fcgi.h"
+#include "json_api.h"
 
 using namespace us::wallet::w3api;
 typedef us::wallet::w3api::fcgi_t c;
@@ -65,21 +66,23 @@ void c::help(ostream& os) const {
 
 #include "json.h"
 
-Json::Value to_json(const string& r,const string& cmd) {
+/*
+Json::Value c::to_json(const string& r,const string& cmd) {
 
     if (cmd=="balance") return json::convert_response_balance(r);
-/*
+    if (cmd=="balance_detailed") return json::convert_response_balance_detailed(r);
+/ *
     if (cmd=="new_compartiment") return json::convert_response_new_compartiment(r);
     if (cmd=="move") return json::convert_response_move(r);
     if (cmd=="track") return json::convert_response_track(r);
     if (cmd=="query") return json::convert_response_query(r);
     if (cmd=="mempool") return json::convert_response_mempool(r);
-*/
+* /
     Json::Value err;
     err["error"]="unknown command";
     return err;
 }
-
+*/
 pair<string,string> split(const string& s, char c) {
 	for (int i=0; i<s.size(); ++i) {
 		if (s[i]==c) {
@@ -157,7 +160,9 @@ out << uri << endl;
 //    istringstream is("");
     string cmd=n->second;
   	if (cmd=="balance") {
-   	    api->balance(false,os);
+       ++n;if (n==m.end()) {help(out); return true;}
+       bool detailed=n->second=="1";
+  	   api->balance(detailed,os);
     }
 /*
 	if (app=="nova") {
@@ -227,16 +232,15 @@ out << uri << endl;
     }
 */
     string r=os.str();
-    bool json=true;
+//    bool json=true;
 	if (!r.empty()) {
-        if (json) {
+        if (dynamic_cast<json_api*>(api)!=0) {
 		    out << "Content-Type: application/json; charset=utf-8" << endl << endl;
-            out << to_json(r,cmd) << endl;
         }
         else {
 		    out << "Content-Type: text/plain; charset=utf-8" << endl << endl;
-            out << r << endl;
         }
+        out << r << endl;
 	}
     else {
         help(out);

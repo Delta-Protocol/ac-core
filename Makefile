@@ -39,7 +39,7 @@ install: release
 	install walletx/us-wallet ${PREFIX}/bin
 
 ifeq ($(FCGI),1)
-	cat etc/init.d/us-wallet | sed "s/\(^DAEMON_ARGS=\".*\)\" *#A; INSTALLER.*/\1 -fcgi\"/" >/tmp/usgif
+	cat etc/init.d/us-wallet | sed "s/\(^DAEMON_ARGS=\".*\)\" *#A; INSTALLER.*/\1 -fcgi -json \"/" >/tmp/usgif
 	cat /tmp/usgif | sed "s@^\(DAEMON=\"\).*\" *#D; INSTALLER.*@\1/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-wallet -- \"@" >/tmp/us-wallet
 	install /tmp/us-wallet /etc/init.d/
 	rm /tmp/usgif

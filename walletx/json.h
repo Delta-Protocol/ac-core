@@ -11,6 +11,7 @@ using namespace std;
 struct json {
 
     static Json::Value convert_response_balance(const string&);
+    static Json::Value convert_response_balance_detailed(const string&);
 /*
     static Json::Value convert_response_new_compartiment(const string& s);
     static Json::Value convert_response_move(const string& s);

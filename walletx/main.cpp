@@ -11,6 +11,7 @@
 #include <us/wallet/daemon.h>
 #include <us/gov/input.h>
 #include "fcgi.h"
+#include "json_api.h"
 
 using namespace us::wallet;
 
@@ -251,7 +252,7 @@ void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 
 #include <us/wallet/rpc_api.h>
 #include <us/wallet/local_api.h>
-
+/*
 #ifdef FCGI
 #include <jsoncpp/json/json.h> 
 Json::Value to_json(const string& s) {
@@ -266,7 +267,7 @@ Json::Value to_json(const string& s) {
     return val;
 }
 #endif
-
+*/
 
 using us::gov::input::cfg;
 using us::gov::input::cfg0;
@@ -280,31 +281,36 @@ void run_daemon(const params& p) {
 //	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
     string homedir=p.homedir+"/wallet";
 
-	wallet_daemon d(cfg1::load(homedir).keys, p.listening_port, homedir, p.backend_host, p.backend_port);
+	wallet_daemon* d=new wallet_daemon(cfg1::load(homedir).keys, p.listening_port, homedir, p.backend_host, p.backend_port);
 
     auto k=cfg1::load_priv_key(p.homedir+"/gov");
-    if (k.first) d.add_address(k.second);
+    if (k.first) d->add_address(k.second);
 
 #ifdef FCGI
     if (p.fcgi) {
+        api* a=d;
+        if (p.json) {
+            a=new json_api(a);
+        }
         thread* wt=0;
-        w3api::fcgi_t::api=&d;
+        w3api::fcgi_t::api=a;
 
-        wt=new thread([&](){d.run(); if (fcgi) fcgi->terminate(); });
+        wt=new thread([&](){d->run(); if (fcgi) fcgi->terminate(); });
         run_fcgi(p);
         wt->join();
         delete wt;
+        w3api::fcgi_t::api=0;
     }
     else {
-        d.run();
+        d->run();
     }
 #else
-    d.run();
+    d->run();
 #endif
+    delete d;
 }
 
-
-	using us::gov::input::cfg_id;
+using us::gov::input::cfg_id;
 
 //if a gov daemon is running in the same homedir
 //import gov priv key into the wallet
@@ -339,6 +345,11 @@ void run_local(string command, args_t& args, const params& p) {
 		auto f=cfg_id::load(homedir+"/rpc_client");
 		papi=new rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
 	}
+
+#ifdef FCGI
+    if (p.json) papi=new json_api(papi);
+#endif
+
 	api& wapi=*papi;
 
     ostringstream os;
@@ -393,7 +404,6 @@ void run_local(string command, args_t& args, const params& p) {
         }
         else {
     	    auto name=args.next<string>();
-//cout << "-- " << name << endl;
 	    	wapi.pair(pub,name,os);
         }
 	}
@@ -412,15 +422,16 @@ void run_local(string command, args_t& args, const params& p) {
 		help(p);
 	}
 	delete papi;
-
+/*
 #ifdef FCGI
     if (p.json)
     cout << to_json(os.str()) << endl;
     else
     cout << os.str() << endl;
 #else
+*/
     cout << os.str() << endl;
-#endif
+//#endif
 }
 
 

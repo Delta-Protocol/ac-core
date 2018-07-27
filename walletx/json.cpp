@@ -14,6 +14,14 @@ Json::Value c::convert_response_balance(const string& s) {
     val["balance"]=p;
     return val;
 }
+Json::Value c::convert_response_balance_detailed(const string& s) {
+    istringstream is(s);
+    string p;
+    is >> p;
+    Json::Value val;
+    val["dbalance"]=p;
+    return val;
+}
 
 /* 
 Json::Value c::convert_response_new_compartiment(const string& s) {
