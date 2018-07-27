@@ -16,7 +16,7 @@ release: export CXXFLAGS:=${RELEASEFLAGS}
 release: all
 
 cryptos-debug: export CXXFLAGS:=${DEBUGFLAGS} -DCRYPTOS
-cryptos-debug: all
+ cryptos-debug: all
 
 cryptos-release: export CXXFLAGS:=${RELEASEFLAGS} -DCRYPTOS
 cryptos-release: all
@@ -37,7 +37,17 @@ install: release
 	install wallet/libuswallet.so ${PREFIX}/lib
 	install govx/us-gov ${PREFIX}/bin
 	install walletx/us-wallet ${PREFIX}/bin
+
+ifeq ($(FCGI),1)
+	cat etc/init.d/us-wallet | sed "s/\(^DAEMON_ARGS=\".*\)\" *#A; INSTALLER.*/\1 -fcgi\"/" >/tmp/usgif
+	cat /tmp/usgif | sed "s@^\(DAEMON=\"\).*\" *#D; INSTALLER.*@\1/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-wallet -- \"@" >/tmp/us-wallet
+	install /tmp/us-wallet /etc/init.d/
+	rm /tmp/usgif
+	rm /tmp/us-wallet
+else
 	install etc/init.d/us-wallet /etc/init.d/
+endif
+
 	install etc/init.d/us-gov /etc/init.d/
 	ldconfig
 	systemctl daemon-reload
@@ -69,7 +79,13 @@ wallet/libuswallet.so: gov/libusgov.so
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C wallet;
 
 walletx/us-wallet: wallet/libuswallet.so
+ifeq ($(FCGI),1)
+	echo "HOLA"
+	$(MAKE) CXXFLAGS="${CXXFLAGS}" FCGI=1 -C walletx ;
+else
+	echo "ADIOS"
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C walletx ;
+endif
 
 .PHONY: all
 .PHONY: wallet

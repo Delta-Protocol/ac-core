@@ -2,16 +2,10 @@
 #copy this file into /etc/init.d/
 #update-rc.d curex-fcgi defaults
 
-
-
 USER=root
-#if not FCGI
-DAEMON="/usr/local/bin/us-wallet"
-DAEMON_ARGS="-d"
-#else
-#DAEMON="/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-wallet -- "
-#DAEMON_ARGS="-d -fcgi"
-#endif
+DAEMON="/usr/local/bin/us-wallet"  #D; INSTALLER will tweak this line
+DAEMON_ARGS="-d"                   #A; INSTALLER will tweak this line
+
 PIDFILE="/var/run/us-wallet.pid"
 NAME="us-wallet"
 

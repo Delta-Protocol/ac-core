@@ -47,8 +47,10 @@ void c::help(ostream& os) const {
     	static const string url="https://127.0.0.1/api";
 		os << "Content-Type: text/html; charset=utf-8" << endl << endl;
 		os << "<pre>" << endl;
-		os << "US-Wallet functions" << endl;
+		os << "us-wallet functions" << endl;
 		os << endl;
+
+		os << url << "/?<b>cmd=balance&detailed=&lt;1|0&gt;</b>" << endl;
 /*
 		os << url << "/?<b>app=nova&cmd=new_compartiment</b>" << endl;
 		os << url << "/?<b>app=nova&cmd=move&compartiment=&lt;compartiment&gt;&item=&lt;item&gt;&action=&lt;load/unload&gt;&send=&lt;1|0&gt; </b>" << endl;
@@ -64,6 +66,8 @@ void c::help(ostream& os) const {
 #include "json.h"
 
 Json::Value to_json(const string& r,const string& cmd) {
+
+    if (cmd=="balance") return json::convert_response_balance(r);
 /*
     if (cmd=="new_compartiment") return json::convert_response_new_compartiment(r);
     if (cmd=="move") return json::convert_response_move(r);
@@ -75,8 +79,6 @@ Json::Value to_json(const string& r,const string& cmd) {
     err["error"]="unknown command";
     return err;
 }
-
-
 
 pair<string,string> split(const string& s, char c) {
 	for (int i=0; i<s.size(); ++i) {
@@ -147,13 +149,16 @@ out << uri << endl;
 	auto m=parse_uri(uri);
 	auto n=m.begin();
 	if (n==m.end()) {help(out); return true;}
-	string app=n->second;
+	//string app=n->second;
 
 //	istringstream is(uri);
 //	string command;
 //	is >> command;
-    istringstream is("");
-    string cmd;
+//    istringstream is("");
+    string cmd=n->second;
+  	if (cmd=="balance") {
+   	    api->balance(false,os);
+    }
 /*
 	if (app=="nova") {
 	++n;
