@@ -309,32 +309,27 @@ cout << "writting file apitool_generated_pairing.h" << endl;
     os << "#endif" << endl;
 }
 
-int main(int argc, char**argv) {
-    
+void gen_functions_cpp_override() {
+    {
+    cout << "writting file apitool_generated_wallet_functions_cpp_override" << endl;
+    ofstream os("apitool_generated_wallet_functions_cpp_override");
+    print_wallet_override_api(os);
+    }
+    {
+    cout << "writting file apitool_generated_pairing_functions_cpp_override" << endl;
+    ofstream os("apitool_generated_pairing_functions_cpp_override");
+    print_pairing_override_api(os);
+    }
+}
+
+void gen_purevir_hdrs() {
     gen_wallet_header();    
     gen_pairing_header();    
+}
 
-{
-cout << "writting file apitool_generated_wallet_functions_cpp_override" << endl;
-ofstream os("apitool_generated_wallet_functions_cpp_override");
-print_wallet_override_api(os);
-}
-{
-cout << "writting file apitool_generated_pairing_functions_cpp_override" << endl;
-ofstream os("apitool_generated_pairing_functions_cpp_override");
-print_pairing_override_api(os);
-}
+int main(int argc, char**argv) {
+    gen_purevir_hdrs();
+    gen_functions_cpp_override
 
 
 }
-
-/*
-
-
-
-
-        void gen_keys(ostream&os);
-        static void priv_key(const priv_t& privkey, ostream&);
-    };
-
-*/
