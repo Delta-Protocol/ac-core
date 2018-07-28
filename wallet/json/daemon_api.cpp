@@ -1,13 +1,13 @@
-#include "wallet_api.h"
+#include "daemon_api.h"
 
-typedef us::wallet::json::wallet_api c;
+typedef us::wallet::json::daemon_api c;
 using namespace us::wallet;
 using namespace std;
 
-c::wallet_api(us::api::wallet* underlying_api): underlying_api(underlying_api) {
+c::daemon_api(us::api::wallet_daemon* underlying_api): underlying_api(underlying_api) {
 }
 
-c::~wallet_api() {
+c::~daemon_api() {
     delete underlying_api;
 }
 
@@ -78,7 +78,11 @@ void c::tx_decode(const string&txb58, ostream&os) {
 void c::tx_check(const string&txb58, ostream&os) {
     os << "Not implemented" << endl;
 }
-/*
+
+void c::ping(ostream&os) {
+    os << "Not implemented" << endl;
+}
+
 void c::pair(const pub_t& pk, const string& name, ostream&os) {
 	ostringstream si;
 	si << pk << ' ' << name;
@@ -94,10 +98,7 @@ void c::unpair(const pub_t& pk, ostream&os) {
 void c::list_devices(ostream&os) {
     os << "Not implemented" << endl;
 }
-*/
-void c::ping(ostream&os) {
-    os << "Not implemented" << endl;
-}
+
 /*
 #ifdef FCGI
 #include "json.h"

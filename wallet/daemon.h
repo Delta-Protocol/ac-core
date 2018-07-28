@@ -31,8 +31,6 @@ struct wallet_daemon: auth::daemon, wallet_local_api, pairing_local_api {
    virtual socket::client* create_client(int sock) override;
 
 	const keys& id;
-  //  string backend_host;
-  //  uint16_t backend_port;
 
 	bool send_response(socket::peer_t *c, datagram*d, const string& payload);
 	bool send_error_response(socket::peer_t *c, datagram*d, const string& error);

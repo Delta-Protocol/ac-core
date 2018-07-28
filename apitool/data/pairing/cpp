@@ -1,6 +1,6 @@
 pair 2
 const pub_t&
-const string& name
+const string&
 
 unpair 1
 const pub_t&

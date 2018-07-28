@@ -86,7 +86,6 @@ else
 endif
 
 api/apitool_generated_*: apitool/apitool
-	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C api ;
 
 apitool/apitool:
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C apitool ;

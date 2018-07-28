@@ -10,10 +10,9 @@
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
 #include <us/gov/input.h>
-#include <us/api/apitool_generated_wallet.h>
-#include <us/api/apitool_generated_pairing.h>
+#include <us/api/apitool_generated_wallet_daemon.h>
 #include "fcgi.h"
-#include "json/wallet_api.h"
+#include <us/wallet/json/daemon_api.h>
 
 using namespace us::wallet;
 
@@ -316,40 +315,29 @@ void import_gov_k(us::api::wallet& x, const params& p) {
     }
 }
 
-
-//wallet_local_api
-
-struct local_api: wallet_local_api, pairing_local_api {
-    typedef wallet_local_api b;
-    typedef pairing_local_api p;
-    local_api(const string& homedir, const string& backend_host, uint16_t backend_port): w(homedir, backend_host, backend_port), p(homedir) {}
-
-
-};
-
+#include <us/wallet/daemon_local_api.h>
+#include <us/wallet/daemon_rpc_api.h>
 
 void run_local(string command, shell_args& args, const params& p) {
 	auto homedir=p.homedir+"/wallet";
 	auto gov_homedir=p.homedir+"/wallet";
 
-	api::wallet* papiw;
-	api::pairing* papip;
+	us::api::wallet_daemon* papi;
 	if (p.offline) {
 		cfg0::load(homedir);
-		papiw=new wallet_local_api(homedir,p.backend_host,p.backend_port); //rpc to node
-		papip=new pairing_local_api(homedir);
-        import_gov_k(*papiw,p);
+		papi=new us::wallet::daemon_local_api(homedir,p.backend_host,p.backend_port); //rpc to node
+        import_gov_k(*papi,p);
 	}
 	else {
 		using us::gov::input::cfg_id;
 		auto f=cfg_id::load(homedir+"/rpc_client");
-		papiw=new wallet_rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
-		papip=new pairing_rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
+		papi=new us::wallet::daemon_rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
 	}
 
-    if (p.json) papi=new json_api(papi);
+    if (p.json) papi=new us::wallet::json::daemon_api(papi);
 
-	api& wapi=*papi;
+	us::api::wallet_daemon& wapi=*papi;
+    typedef us::api::wallet_daemon::pub_t pub_t;
 
     ostringstream os;
 
@@ -397,7 +385,7 @@ void run_local(string command, shell_args& args, const params& p) {
         }
     }
 	else if (command=="pair") {
-		api::pub_t pub=args.next<api::pub_t>();
+		pub_t pub=args.next<pub_t>();
         if (!pub.valid) {
             os << "Error: Invalid public key";
         }
@@ -407,7 +395,7 @@ void run_local(string command, shell_args& args, const params& p) {
         }
 	}
 	else if (command=="unpair") {
-		api::pub_t pub=args.next<api::pub_t>();
+		pub_t pub=args.next<pub_t>();
 		wapi.unpair(pub,os);
 	}
 	else if (command=="list_devices") {

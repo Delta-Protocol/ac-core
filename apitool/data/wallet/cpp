@@ -1,8 +1,8 @@
 balance 1
-bool detailed
+bool
 
 list 1
-bool showpriv
+bool
 
 new_address 0
 
@@ -13,17 +13,17 @@ tx_make_p2pkh 1
 const us::api::wallet::tx_make_p2pkh_input&
 
 tx_sign 3
-const string&txb58
-sigcode_t inputs
-sigcode_t outputs
+const string&
+sigcode_t
+sigcode_t
 
 tx_send 1
-const string&txb58
+const string&
 
 tx_decode 1
-const string&txb58
+const string&
 
 tx_check 1
-const string&txb58
+const string&
 
 ping 0
