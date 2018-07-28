@@ -1,4 +1,3 @@
-#ifdef FCGI
 #include "json_api.h"
 
 typedef us::wallet::json_api c;
@@ -119,4 +118,3 @@ Json::Value c::convert_response_balance_detailed(const string& s) {
     return val;
 }
 */
-#endif

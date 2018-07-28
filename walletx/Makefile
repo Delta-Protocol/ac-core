@@ -1,7 +1,7 @@
 CPPS:=$(wildcard *.cpp)
 HS:=$(wildcard *.h)
-LIBS:=-lusgov -luswallet
-FCGILIBS:=-lfastcgipp -ljsoncpp
+LIBS:=-lusgov -luswallet -ljsoncpp
+FCGILIBS:=-lfastcgipp 
 CXXFLAGS = -g -O0 -std=c++17 -DDEBUG
 
 .PHONY: all

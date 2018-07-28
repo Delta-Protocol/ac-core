@@ -1,13 +1,13 @@
 #ifdef FCGI
 #include "fcgi.h"
 #include "json_api.h"
+#include <unordered_map>
 
 using namespace us::wallet::w3api;
 typedef us::wallet::w3api::fcgi_t c;
 
 int c::count_reqs{0};
 us::wallet::api* c::api{0};
-
 
 template<typename T>
 std::basic_string<T> uri_decode(const std::basic_string<T>& in) {
@@ -105,16 +105,35 @@ vector<string> split2(const string& s, char c) {
 }
 
 
-vector<pair<string,string>> parse_uri(const string& uri) {
-	vector<pair<string,string>> m;
-//m.push_back(make_pair("app","nova"));
-//return m;
+struct args_t:unordered_map<string,string> {
+    const string& get(const string& param) const {
+    }
+    template<typename T>
+    T get(const string& param) {
+        auto i=find(param);
+        if (i==end()) {
+            return T();
+        }
+        return convert<T>(i->second);
+    }
+    template<typename T>
+    T get(const T& default_value) {
+        auto i=find(param);
+        if (i==end()) {
+            return default_value;
+        }
+        return convert<T>(i->second);
+    }
+};
+
+args parse_uri(const string& uri) {
+	args m;
 	auto i=uri.find('?');
 	if (i==string::npos) return m;
 	auto p=split2(&uri[i+1],'&'); //vector<str> "para=value"
 	for (auto&i:p) {
 		auto v=split(i,'='); //pair<str,str>
-		m.push_back(v);
+		m.emplace(v);
 	}
 	return m;
 }
@@ -149,16 +168,15 @@ out << uri << endl;
 */
         ostringstream os;
 
-	auto m=parse_uri(uri);
-	auto n=m.begin();
-	if (n==m.end()) {help(out); return true;}
+	auto args=parse_uri(uri);
+//	if (==m.end()) {help(out); return true;}
 	//string app=n->second;
 
 //	istringstream is(uri);
 //	string command;
 //	is >> command;
 //    istringstream is("");
-    string cmd=n->second;
+    string cmd=args.get<string>("cmd");
   	if (cmd=="balance") {
        ++n;if (n==m.end()) {help(out); return true;}
        bool detailed=n->second=="1";

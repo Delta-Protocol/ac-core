@@ -1,6 +1,5 @@
 #ifndef USGOV_f195771f72f8dc2390e21a5c2a022838551620e7e997e90438f201a2aa3aa216
 #define USGOV_f195771f72f8dc2390e21a5c2a022838551620e7e997e90438f201a2aa3aa216
-#ifdef FCGI
 
 #include <us/wallet/api.h>
 #include <string>
@@ -33,7 +32,6 @@ struct json_api:api {
 
 }}
 
-#endif
 #endif
 
 

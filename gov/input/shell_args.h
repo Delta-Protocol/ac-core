@@ -3,25 +3,15 @@
 
 #include <string>
 #include <sstream>
+#include "convert.h"
 
 namespace us { namespace gov {
 namespace input {
 
 using namespace std;
 
-template<typename T>
-T convert(const string& s) {
-	T v;
-	istringstream is(s);
-	is >> v;
-	return move(v);
-}
-
-template<> string convert(const string& s);
-
-
-struct args_t {	
-	args_t(int argc, char** argv):argc(argc), argv(argv) {
+struct shell_args {	
+	shell_args(int argc, char** argv):argc(argc), argv(argv) {
 	}
 	template<typename T>
 	T next() {
