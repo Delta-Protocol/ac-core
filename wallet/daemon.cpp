@@ -7,7 +7,7 @@ using namespace us::wallet;
 using namespace std;
 typedef us::wallet::wallet_daemon c;
 
-c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), local_api(home,backend_host,backend_port), id(k) {
+c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), wallet_local_api(home,backend_host,backend_port), pairing_local_api(home), id(k) {
     assert(!home.empty());
 }
 
@@ -31,7 +31,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 	case us::wallet::protocol::ping: {
 //cout << "PING" << endl;
 		ostringstream ans;
-		local_api::ping(ans);
+		wallet_local_api::ping(ans);
 //cout << ans.str() << endl;
 		return send_response(c,d,ans.str());
     }
@@ -56,7 +56,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
             }
 
 			ostringstream ans;
-			local_api::tx_make_p2pkh(i,ans);
+			wallet_local_api::tx_make_p2pkh(i,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
@@ -65,27 +65,27 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 			istringstream is(d->parse_string());
 			is >> privkey;
 			ostringstream ans;
-			local_api::add_address(privkey,ans);
+			wallet_local_api::add_address(privkey,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
 		case us::wallet::protocol::new_address_query: {
 			ostringstream ans;
-			local_api::new_address(ans);
+			wallet_local_api::new_address(ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
 		case us::wallet::protocol::list_query: {
 			bool showpriv=d->parse_string()=="1";
 			ostringstream ans;
-			local_api::list(showpriv,ans);
+			wallet_local_api::list(showpriv,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
 		case us::wallet::protocol::balance_query: {
 			bool detailed=d->parse_string()=="1";
 			ostringstream ans;
-   			local_api::balance(detailed,ans);
+   			wallet_local_api::balance(detailed,ans);
 //cout << "ANSWERING : " << ans.str() << endl;
 //cout << "In 5 seconds" << endl;
 //this_thread::sleep_for(5s);
@@ -102,7 +102,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
             is >> sci;
             is >> sco;
 			ostringstream ans;
-			local_api::tx_sign(txb58,sci,sco,ans);
+			wallet_local_api::tx_sign(txb58,sci,sco,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
@@ -111,7 +111,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 			istringstream is(d->parse_string());
             is >> txb58;
 			ostringstream ans;
-			local_api::tx_send(txb58,ans);
+			wallet_local_api::tx_send(txb58,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
@@ -120,7 +120,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 			istringstream is(d->parse_string());
             is >> txb58;
 			ostringstream ans;
-			local_api::tx_decode(txb58,ans);
+			wallet_local_api::tx_decode(txb58,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
@@ -129,7 +129,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 			istringstream is(d->parse_string());
             is >> txb58;
 			ostringstream ans;
-			local_api::tx_check(txb58,ans);
+			wallet_local_api::tx_check(txb58,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
@@ -140,7 +140,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
             string name;
             is >> name;
 			ostringstream ans;
-			local_api::pair(pk,name,ans);
+			pairing_local_api::pair(pk,name,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
@@ -149,13 +149,13 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 			istringstream is(d->parse_string());
             is >> pk;
 			ostringstream ans;
-			local_api::unpair(pk,ans);
+			pairing_local_api::unpair(pk,ans);
 			return send_response(c,d,ans.str());
 		}
 		break;
 		case us::wallet::protocol::list_devices_query: {
 			ostringstream ans;
-			local_api::list_devices(ans);
+			pairing_local_api::list_devices(ans);
 
 			return send_response(c,d,ans.str());
 		}

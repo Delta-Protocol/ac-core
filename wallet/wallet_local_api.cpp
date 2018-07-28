@@ -58,7 +58,7 @@ void c::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	os << wallet::add_address(privkey);
 }
 
-void c::tx_make_p2pkh(const wallet::api::tx_make_p2pkh_input&i, ostream& os) {
+void c::tx_make_p2pkh(const us::api::wallet::tx_make_p2pkh_input&i, ostream& os) {
     if (!connect_backend(os)) return;
 
     auto tx=wallet::tx_make_p2pkh(endpoint,i);

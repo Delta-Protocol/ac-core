@@ -1,0 +1,29 @@
+balance 1
+bool detailed
+
+list 1
+bool showpriv
+
+new_address 0
+
+add_address 1
+const priv_t&
+
+tx_make_p2pkh 1
+const us::api::wallet::tx_make_p2pkh_input&
+
+tx_sign 3
+const string&txb58
+sigcode_t inputs
+sigcode_t outputs
+
+tx_send 1
+const string&txb58
+
+tx_decode 1
+const string&txb58
+
+tx_check 1
+const string&txb58
+
+ping 0

@@ -5,7 +5,8 @@
 #include <us/gov/crypto/ec.h>
 #include "wallet.h"
 #include <unordered_map>
-#include "local_api.h"
+#include "wallet_local_api.h"
+#include "pairing_local_api.h"
 
 namespace us { namespace wallet {
 
@@ -15,7 +16,7 @@ using socket::datagram;
 
 struct peer_t;
 
-struct wallet_daemon: auth::daemon, local_api {
+struct wallet_daemon: auth::daemon, wallet_local_api, pairing_local_api {
 	typedef auth::daemon b;
 	typedef b::keys keys;
 	typedef keys::pub_t pub_t;

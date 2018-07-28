@@ -10,8 +10,10 @@
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
 #include <us/gov/input.h>
+#include <us/api/wallet.h>
+#include <us/api/pairing.h>
 #include "fcgi.h"
-#include "json_api.h"
+#include "json/wallet_api.h"
 
 using namespace us::wallet;
 
@@ -205,10 +207,10 @@ string parse_options(shell_args& args, params& p) {
     return cmd;
 }
 
-void tx(api& wapi, shell_args& args, const params& p, ostream& os) {
+void tx(us::api::wallet& wapi, shell_args& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="transfer") {
-        wallet::tx_make_p2pkh_input i;
+        us::api::wallet::tx_make_p2pkh_input i;
         i.rcpt_addr=args.next<cash::hash_t>();
         i.amount=args.next<cash::cash_t>();
         i.fee=1;
@@ -251,7 +253,8 @@ void tx(api& wapi, shell_args& args, const params& p, ostream& os) {
 }
 
 #include <us/wallet/rpc_api.h>
-#include <us/wallet/local_api.h>
+#include <us/wallet/wallet_local_api.h>
+#include <us/wallet/pairing_local_api.h>
 
 using us::gov::input::cfg;
 using us::gov::input::cfg0;
@@ -297,7 +300,7 @@ using us::gov::input::cfg_id;
 
 //if a gov daemon is running in the same homedir
 //import gov priv key into the wallet
-void import_gov_k(api& x, const params& p) {
+void import_gov_k(us::api::wallet& x, const params& p) {
     string govhomedir=p.homedir+"/gov";
     if (!cfg_id::file_exists(cfg_id::k_file(govhomedir))) {
         return;
@@ -313,20 +316,34 @@ void import_gov_k(api& x, const params& p) {
     }
 }
 
+
+//wallet_local_api
+struct local_api: wallet_local_api, pairing_local_api {
+    typedef wallet_local_api b;
+    typedef pairing_local_api p;
+    local_api(const string& homedir, const string& backend_host, uint16_t backend_port): w(homedir, backend_host, backend_port), p(homedir) {}
+
+
+};
+
+
 void run_local(string command, shell_args& args, const params& p) {
 	auto homedir=p.homedir+"/wallet";
 	auto gov_homedir=p.homedir+"/wallet";
 
-	api* papi;
+	api::wallet* papiw;
+	api::pairing* papip;
 	if (p.offline) {
 		cfg0::load(homedir);
-		papi=new local_api(homedir,p.backend_host,p.backend_port); //rpc to node
-        import_gov_k(*papi,p);
+		papiw=new wallet_local_api(homedir,p.backend_host,p.backend_port); //rpc to node
+		papip=new pairing_local_api(homedir);
+        import_gov_k(*papiw,p);
 	}
 	else {
 		using us::gov::input::cfg_id;
 		auto f=cfg_id::load(homedir+"/rpc_client");
-		papi=new rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
+		papiw=new wallet_rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
+		papip=new pairing_rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
 	}
 
     if (p.json) papi=new json_api(papi);
@@ -405,8 +422,6 @@ void run_local(string command, shell_args& args, const params& p) {
 	delete papi;
     cout << os.str() << endl;
 }
-
-
 
 /// \brief  Main function
 /// \param  argc An integer argument count of the command line arguments

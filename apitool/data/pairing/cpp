@@ -1,0 +1,8 @@
+pair 2
+const pub_t&
+const string& name
+
+unpair 1
+const pub_t&
+
+list_devices 0
