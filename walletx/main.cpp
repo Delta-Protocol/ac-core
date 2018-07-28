@@ -10,7 +10,7 @@
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
 #include <us/gov/input.h>
-#include <us/api/apitool_generated_wallet_daemon.h>
+#include <us/wallet/daemon_api.h>
 #include "fcgi.h"
 #include <us/wallet/json/daemon_api.h>
 
@@ -206,10 +206,10 @@ string parse_options(shell_args& args, params& p) {
     return cmd;
 }
 
-void tx(us::api::wallet& wapi, shell_args& args, const params& p, ostream& os) {
+void tx(us::wallet::wallet_api& wapi, shell_args& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="transfer") {
-        us::api::wallet::tx_make_p2pkh_input i;
+        us::wallet::wallet_api::tx_make_p2pkh_input i;
         i.rcpt_addr=args.next<cash::hash_t>();
         i.amount=args.next<cash::cash_t>();
         i.fee=1;
@@ -299,7 +299,7 @@ using us::gov::input::cfg_id;
 
 //if a gov daemon is running in the same homedir
 //import gov priv key into the wallet
-void import_gov_k(us::api::wallet& x, const params& p) {
+void import_gov_k(us::wallet::wallet_api& x, const params& p) {
     string govhomedir=p.homedir+"/gov";
     if (!cfg_id::file_exists(cfg_id::k_file(govhomedir))) {
         return;
@@ -322,7 +322,7 @@ void run_local(string command, shell_args& args, const params& p) {
 	auto homedir=p.homedir+"/wallet";
 	auto gov_homedir=p.homedir+"/wallet";
 
-	us::api::wallet_daemon* papi;
+	us::wallet::daemon_api* papi;
 	if (p.offline) {
 		cfg0::load(homedir);
 		papi=new us::wallet::daemon_local_api(homedir,p.backend_host,p.backend_port); //rpc to node
@@ -336,8 +336,8 @@ void run_local(string command, shell_args& args, const params& p) {
 
     if (p.json) papi=new us::wallet::json::daemon_api(papi);
 
-	us::api::wallet_daemon& wapi=*papi;
-    typedef us::api::wallet_daemon::pub_t pub_t;
+	us::wallet::daemon_api& wapi=*papi;
+    typedef us::wallet::daemon_api::pub_t pub_t;
 
     ostringstream os;
 

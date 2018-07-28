@@ -4,7 +4,7 @@ typedef us::wallet::json::daemon_api c;
 using namespace us::wallet;
 using namespace std;
 
-c::daemon_api(us::api::wallet_daemon* underlying_api): underlying_api(underlying_api) {
+c::daemon_api(us::wallet::daemon_api* underlying_api): underlying_api(underlying_api) {
 }
 
 c::~daemon_api() {

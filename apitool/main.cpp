@@ -126,6 +126,7 @@ vector<string> gov_id{
     struct f: vector<string>  {
         typedef vector<string> args;
         string name;
+        string fcgi;
         static f from_stream(istream& is) {
             f r;        
             int n;
@@ -144,6 +145,7 @@ vector<string> gov_id{
                     r.push_back(line);
                 }
             }
+            getline(is,r.fcgi);
             r.push_back("ostream&");
             return r;
         }
@@ -227,6 +229,11 @@ struct api_t: vector<f> {
                 i.gen_cpp_override(os);
             }
     }
+    void gen_cpp_purevir(ostream&os) const {
+            for (auto&i:*this) {
+                i.gen_cpp_purevir(os);
+            }
+    }
     void gen_cpp_wallet_daemon_delegate(const string& t, ostream&os) const {
             for (auto&i:*this) {
                 i.gen_cpp_delegate(t,os);
@@ -255,6 +262,14 @@ void print_cpp_override_api(const string&file, ostream& os) {
     //fa(os);
 }
 
+void print_cpp_purevir_api(const string&file, ostream& os) {
+    ifstream is(file);
+    api_t api=api_t::from_stream(is);
+    api.gen_cpp_purevir(os);
+    //os << "files affected:" << endl;
+    //fa(os);
+}
+
 void print_cpp_wallet_daemon_delegate_api(const string&file, const string& t, ostream& os) {
     ifstream is(file);
     api_t api=api_t::from_stream(is);
@@ -270,6 +285,7 @@ void include_snippet(const string& file,ostream&os) {
     }
 }
 
+/*
 void print_pairing_purevir_api(ostream&os) {
     print_cpp_purevir_api("data/pairing/cpp",[](ostream& os) {
             os << "struct pairing {" << endl;
@@ -315,20 +331,28 @@ void print_wallet_daemon_purevir_api(ostream&os) {
         }, [](ostream& os) {
         }, os);
 }
-
+*/
 void print_pairing_override_api(ostream&os) {
     print_cpp_override_api("data/pairing/cpp", os);
+}
+
+void print_pairing_purevir_api(ostream&os) {
+    print_cpp_purevir_api("data/pairing/cpp", os);
 }
 
 void print_wallet_override_api(ostream&os) {
     print_cpp_override_api("data/wallet/cpp", os);
 }
 
+void print_wallet_purevir_api(ostream&os) {
+    print_cpp_purevir_api("data/wallet/cpp", os);
+}
+
 void print_wallet_daemon_delegate_api(ostream&os) {
     print_cpp_wallet_daemon_delegate_api("data/wallet/cpp", "w", os);
     print_cpp_wallet_daemon_delegate_api("data/pairing/cpp","p", os);
 }
-
+/*
 void gen_wallet_header() {
 cout << "writting file apitool_generated_wallet.h" << endl;
     ofstream os("apitool_generated_wallet.h");
@@ -388,7 +412,7 @@ cout << "writting file apitool_generated_wallet_daemon.h" << endl;
     os << "}}" << endl;
     os << "#endif" << endl;
 }
-
+*/
 void gen_functions_cpp_override() {
     {
     cout << "writting file apitool_generated_wallet_functions_cpp_override" << endl;
@@ -402,10 +426,21 @@ void gen_functions_cpp_override() {
     }
 }
 
-void gen_purevir_hdrs() {
-    gen_wallet_header();    
-    gen_pairing_header();    
-    gen_wallet_daemon_header();    
+void gen_functions_cpp_purevir() {
+//    gen_wallet_header();    
+//    gen_pairing_header();    
+//    gen_wallet_daemon_header();    
+    {
+    cout << "writting file apitool_generated_wallet_functions_cpp_purevir" << endl;
+    ofstream os("apitool_generated_wallet_functions_cpp_purevir");
+    print_wallet_purevir_api(os);
+    }
+    {
+    cout << "writting file apitool_generated_pairing_functions_cpp_purevir" << endl;
+    ofstream os("apitool_generated_pairing_functions_cpp_purevir");
+    print_pairing_purevir_api(os);
+    }
+
 }
 
 void gen_functions_wallet_daemon_cpp_impl() {
@@ -417,7 +452,7 @@ void gen_functions_wallet_daemon_cpp_impl() {
 }
 
 int main(int argc, char**argv) {
-    gen_purevir_hdrs();
+    gen_functions_cpp_purevir();
     gen_functions_cpp_override();
     gen_functions_wallet_daemon_cpp_impl();
 

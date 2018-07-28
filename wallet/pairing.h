@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <us/gov/crypto.h>
-#include <us/api/apitool_generated_pairing.h>
+//#include "pairing_api.h"
 #include <mutex>
 
 namespace us { namespace wallet {
@@ -17,7 +17,7 @@ struct pairing {
     pairing(const string& homedir);
     virtual ~pairing();
 
-    typedef us::api::pairing api;
+//    typedef us::api::pairing api;
 
     struct device {
         device() {

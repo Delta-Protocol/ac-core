@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/crypto.h>
-#include <us/api/apitool_generated_wallet.h>
+#include "wallet_api.h"
 
 namespace us { namespace wallet {
 using namespace std;
@@ -21,6 +21,8 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 	string backend_host;
 	uint16_t backend_port;
 
+    typedef cash::hash_t addr_t;
+    typedef cash::cash_t cash_t;
 	typedef cash::app::account_t account_t;
 
 	struct accounts_query_t:cash::app::accounts_t {
@@ -45,7 +47,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 		void dump(ostream& os) const;
 	};
 
-    typedef us::api::wallet::tx_make_p2pkh_input tx_make_p2pkh_input;
+    typedef wallet_api::tx_make_p2pkh_input tx_make_p2pkh_input;
 
     string filename() const;
 	bool file_exists() const;

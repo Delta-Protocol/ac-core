@@ -1,8 +1,11 @@
 pair 2
 const pub_t&
 const string&
+cmd=pair&device=pubkeyB58&name=
 
 unpair 1
 const pub_t&
+cmd=unpair&device=pubkeyB58&name=
 
 list_devices 0
+cmd=list_devices
