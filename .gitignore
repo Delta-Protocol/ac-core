@@ -16,4 +16,5 @@ secp256k1
 fastcgi++
 build
 apitool/apitool
+apitool_generated*
 

@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <us/gov/crypto.h>
-#include <us/api/pairing.h>
+#include <us/api/apitool_generated_pairing.h>
 #include <mutex>
 
 namespace us { namespace wallet {

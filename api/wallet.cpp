@@ -1,4 +1,4 @@
-#include "wallet.h"
+#include "apitool_generated_wallet.h"
 #include <sstream>
 #include <us/gov/crypto.h>
 

@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/crypto.h>
-#include <us/api/wallet.h>
+#include <us/api/apitool_generated_wallet.h>
 
 namespace us { namespace wallet {
 using namespace std;

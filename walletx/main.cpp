@@ -10,8 +10,8 @@
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
 #include <us/gov/input.h>
-#include <us/api/wallet.h>
-#include <us/api/pairing.h>
+#include <us/api/apitool_generated_wallet.h>
+#include <us/api/apitool_generated_pairing.h>
 #include "fcgi.h"
 #include "json/wallet_api.h"
 
@@ -318,6 +318,7 @@ void import_gov_k(us::api::wallet& x, const params& p) {
 
 
 //wallet_local_api
+
 struct local_api: wallet_local_api, pairing_local_api {
     typedef wallet_local_api b;
     typedef pairing_local_api p;

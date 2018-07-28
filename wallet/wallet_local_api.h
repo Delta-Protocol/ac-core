@@ -1,7 +1,7 @@
 #ifndef USGOV_b05bd77af998c823ed16a99e5cd5a0faa0ef03d000b57ee63148072bf9a65c79
 #define USGOV_b05bd77af998c823ed16a99e5cd5a0faa0ef03d000b57ee63148072bf9a65c79
 
-#include <us/api/wallet.h>
+#include <us/api/apitool_generated_wallet.h>
 #include "wallet.h"
 
 namespace us{ namespace wallet {
@@ -13,7 +13,7 @@ using namespace std;
         virtual ~wallet_local_api();
         using wallet::add_address;
 
-#include <us/api/wallet_functions_cpp_override>
+#include <us/api/apitool_generated_wallet_functions_cpp_override>
 
     bool connect_backend(ostream&os);
     chrono::steady_clock::time_point connected_since;

@@ -2,7 +2,7 @@
 #ifndef USGOV_be7dc84108784c4af35dada40b3f9b325e2d9f0782781c75529a2c286e0cfa5c
 #define USGOV_be7dc84108784c4af35dada40b3f9b325e2d9f0782781c75529a2c286e0cfa5c
 
-#include <us/api/wallet.h>
+//#include <us/api/wallet.h>
 #include <us/gov/auth/peer_t.h>
 #include <chrono>
 
