@@ -7,6 +7,9 @@
 #include <us/gov/auth.h>
 #include <fstream>
 #include <unordered_map>
+#include <us/gov/socket/datagram.h>
+#include <us/gov/crypto.h>
+//#include <us/gov/auth.h>
 
 namespace us { namespace wallet {
 using namespace std;
@@ -42,6 +45,41 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 		void dump(ostream& os) const;
 	};
 
+    struct tx_make_p2pkh_input {
+        cash::hash_t rcpt_addr;
+        cash::cash_t amount;
+        cash::cash_t fee;
+        cash::tx::sigcode_t sigcode_inputs;
+        cash::tx::sigcode_t sigcode_outputs;
+        bool sendover;
+
+    	void to_stream(ostream&) const;
+	    static tx_make_p2pkh_input from_stream(istream&);
+    };
+
+    struct api {
+        typedef gov::crypto::ec::keys::priv_t priv_t;
+        typedef gov::crypto::ec::keys::pub_t pub_t;
+        typedef cash::tx::sigcode_t sigcode_t;
+        virtual ~api() {}
+        virtual void balance(bool detailed, ostream&)=0;
+        virtual void list(bool showpriv, ostream&)=0;
+        virtual void new_address(ostream&)=0;
+        virtual void add_address(const priv_t&, ostream&)=0;
+        typedef wallet::tx_make_p2pkh_input tx_make_p2pkh_input;
+        virtual void tx_make_p2pkh(const tx_make_p2pkh_input&, ostream&)=0;
+        virtual void tx_sign(const string&txb58, sigcode_t inputs, sigcode_t outputs, ostream&os)=0;
+        virtual void tx_send(const string&txb58, ostream&os)=0;
+        virtual void tx_decode(const string&txb58, ostream&os)=0;
+        virtual void tx_check(const string&txb58, ostream&os)=0;
+
+        virtual void ping(ostream&os)=0;
+
+        void gen_keys(ostream&os);
+        static void priv_key(const priv_t& privkey, ostream&);
+    };
+
+
 
     string filename() const;
 	bool file_exists() const;
@@ -63,18 +101,6 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
     string generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
     string generate_locking_program_input(const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
 
-    struct tx_make_p2pkh_input {
-        cash::hash_t rcpt_addr;
-        cash::cash_t amount;
-        cash::cash_t fee;
-        cash::tx::sigcode_t sigcode_inputs;
-        cash::tx::sigcode_t sigcode_outputs;
-        bool sendover;
-
-	void to_stream(ostream&) const;
-	static tx_make_p2pkh_input from_stream(istream&);
-
-    };
     string send(socket::peer_t&, const cash::tx&) const;
 
     pair<string,cash::tx> tx_make_p2pkh(socket::peer_t&, const tx_make_p2pkh_input& i);

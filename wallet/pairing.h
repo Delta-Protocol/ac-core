@@ -16,6 +16,13 @@ struct pairing {
     pairing(const string& homedir);
     virtual ~pairing();
 
+    struct api {
+        virtual ~api() { }
+        virtual void pair(const pub_t&, const string& name, ostream&os)=0;
+        virtual void unpair(const pub_t&, ostream&os)=0;
+        virtual void list_devices(ostream&os)=0;
+    };
+
     struct device {
         device() {
         }

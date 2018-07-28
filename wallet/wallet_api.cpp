@@ -1,16 +1,13 @@
-#include "api.h"
+#include "wallet.h"
 #include "protocol.h"
 #include <sstream>
-#include <us/gov/socket/datagram.h>
 #include <us/gov/cash.h>
 
-typedef us::wallet::api c;
+typedef us::wallet::wallet::api c;
 using namespace us::wallet;
 using namespace std;
 
-using datagram=socket::datagram;
-
-void api::priv_key(const crypto::ec::keys::priv_t& privkey, ostream&os) {
+void c::priv_key(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	if (!crypto::ec::keys::verify(privkey)) {
 		os << "The private key is incorrect.";
         return;
@@ -20,7 +17,7 @@ void api::priv_key(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	os << "Address: " << pub.compute_hash();
 }
 
-void api::gen_keys(ostream&os) {
+void c::gen_keys(ostream&os) {
 	crypto::ec::keys k=crypto::ec::keys::generate();
 	os << "Private key: " << k.priv.to_b58() << endl;
 	os << "Public key: " << k.pub.to_b58() << endl;
