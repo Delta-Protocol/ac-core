@@ -382,51 +382,26 @@ vector<string> f{ "wallet_base","balance_query","list_query",
 
 
 
-void gen_functions_cpp_override(const api_t&w, const api_t&p) {
-    {
+void gen_functions_cpp_override(const api_t&a) {
     ostringstream fn;
-    fn << file_prefix << "functions_" << w.name << "_cpp_override";
+    fn << file_prefix << "functions_" << a.name << "_cpp_override";
     string file=fn.str();
     cout << "writting file " << file  << endl;
     ofstream os(file);
-    w.warn_h(os);
-    w.gen_cpp_override(os);
-    w.warn_f(os);
-    }
-    {
-    ostringstream fn;
-    fn << file_prefix << "functions_" << p.name << "_cpp_override";
-    string file=fn.str();
-    cout << "writting file " << file  << endl;
-    ofstream os(file);
-    p.warn_h(os);
-    p.gen_cpp_override(os);
-    p.warn_f(os);
-    }
+    a.warn_h(os);
+    a.gen_cpp_override(os);
+    a.warn_f(os);
 }
 
-void gen_functions_cpp_purevir(const api_t&w, const api_t&p) {
-    {
+void gen_functions_cpp_purevir(const api_t&a) {
     ostringstream fn;
-    fn << file_prefix << "functions_" << w.name << "_cpp_purevir";
+    fn << file_prefix << "functions_" << a.name << "_cpp_purevir";
     string file=fn.str();
     cout << "writting file " << file  << endl;
     ofstream os(file);
-    w.warn_h(os);
-    w.gen_cpp_purevir(os);
-    w.warn_f(os);
-    }
-    {
-    ostringstream fn;
-    fn << file_prefix << "functions_" << p.name << "_cpp_purevir";
-    string file=fn.str();
-    cout << "writting file " << file  << endl;
-    ofstream os(file);
-    p.warn_h(os);
-    p.gen_cpp_purevir(os);
-    p.warn_f(os);
-    }
-
+    a.warn_h(os);
+    a.gen_cpp_purevir(os);
+    a.warn_f(os);
 }
 
 void gen_functions_wallet_daemon_impl(const api_t&w, const api_t&p) {
@@ -517,21 +492,21 @@ void gen_gov_protocol(const api_t& a, const vector<string>& v, int base) {
     }
 }
 
-void gen_wallet_daemon_protocol(const api_t& w, const api_t& p) {
-    auto vw=w.get_protocol_vector();
-    int wbase=0;
-    gen_protocol(w,vw,wbase);
 
-    auto vp=p.get_protocol_vector();
-    int pbase=100;
-    gen_protocol(p,vp,pbase);
-
+void do_wallet_daemon(const api_t& w,const vector<string>& vw,int wbase,const api_t& p, const vector<string>& vp,int pbase) {
+    gen_functions_wallet_daemon_impl(w,p);
     gen_wallet_daemon_protocol(w,vw,wbase,p,vp,pbase);
 }
 
-void gen_gov_id_protocol(const api_t& a) {
-    auto v=a.get_protocol_vector();
-    int base=200;
+void do_api(const api_t& a, const vector<string>& v, int base) {
+    gen_functions_cpp_purevir(a);
+    gen_functions_cpp_override(a);
+    gen_protocol(a,v,base);
+
+}
+void do_gov_api(const api_t& a,const vector<string>& v,int base) {
+    gen_functions_cpp_purevir(a);
+    gen_functions_cpp_override(a);
     gen_gov_protocol(a,v,base);
 }
 
@@ -540,11 +515,17 @@ int main(int argc, char**argv) {
     auto p=api_t::load("pairing");
     auto gid=api_t::load("gov_id");
 
-    gen_functions_cpp_purevir(w,p);
-    gen_functions_cpp_override(w,p);
-    gen_functions_wallet_daemon_impl(w,p);
+    int wbase=0;
+    int pbase=100;
+    int gidbase=200;
 
-    gen_wallet_daemon_protocol(w,p);
+    auto vw=w.get_protocol_vector();
+    auto vp=p.get_protocol_vector();
+    auto vgid=gid.get_protocol_vector();
 
-    gen_gov_id_protocol(gid);
+    do_api(w,vw,wbase);
+    do_api(p,vp,pbase);
+    do_wallet_daemon(w,vw,wbase,p,vp,pbase);
+
+    do_gov_api(gid,vgid,gidbase);
 }
