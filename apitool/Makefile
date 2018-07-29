@@ -1,6 +1,6 @@
-all: apitool_generated_pairing_*
+all: apitool_generated__*
 
-apitool_generated_pairing_*: apitool data/pairing data/wallet
+apitool_generated__*: apitool data/pairing data/wallet
 	./apitool
 
 apitool: main.cpp
@@ -8,5 +8,5 @@ apitool: main.cpp
 
 clean:
 	rm -f apitool
-	rm apitool_generated_*
+	rm apitool_generated__*
 
