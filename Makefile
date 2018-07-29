@@ -62,7 +62,7 @@ cryptos-install: cryptos-release
 	ldconfig /usr/local/lib
 
 install-nginx:
-	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites_available
+	install etc/nginx/sites_available/us-wallet-api.conf /etc/nginx/sites-available
 	install etc/nginx/snippets/snakeoil.conf /etc/nginx/snippets/
 	install etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/
 	install etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/

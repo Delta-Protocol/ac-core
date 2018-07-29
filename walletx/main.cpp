@@ -140,9 +140,12 @@ void run_fcgi(const params& p) {
    try {
       fcgi=new Fastcgipp::Manager<w3api::fcgi_t>();
       //fcgi.setupSignals();
-      fcgi->listen();
+      if (!fcgi->listen()) {
+        cerr << "Cannot listen on FCGI port" << endl;
+        exit (1);
+      }
       fcgi->start();
-      cout << "us-wallet fast-cgi initiated normally" << endl;
+      //cout << "us-wallet fast-cgi initiated normally" << endl;
       fcgi->join();
       delete fcgi;
       fcgi=0;
