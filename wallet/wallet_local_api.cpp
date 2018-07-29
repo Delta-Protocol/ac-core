@@ -58,6 +58,17 @@ void c::add_address(const crypto::ec::keys::priv_t& privkey, ostream&os) {
 	os << wallet::add_address(privkey);
 }
 
+void c::transfer(const hash_t&addr, const cash_t&amount, ostream& os) {
+        tx_make_p2pkh_input i;
+        i.rcpt_addr=addr;
+        i.amount=amount;
+        i.fee=1;
+        i.sigcode_inputs=cash::tx::sigcode_all;
+        i.sigcode_outputs=cash::tx::sigcode_all;
+        i.sendover=true;
+        tx_make_p2pkh(i,os);
+}
+
 void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream& os) {
     if (!connect_backend(os)) return;
 

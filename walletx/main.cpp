@@ -209,14 +209,7 @@ string parse_options(shell_args& args, params& p) {
 void tx(us::wallet::wallet_api& wapi, shell_args& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="transfer") {
-        us::wallet::wallet_api::tx_make_p2pkh_input i;
-        i.rcpt_addr=args.next<cash::hash_t>();
-        i.amount=args.next<cash::cash_t>();
-        i.fee=1;
-        i.sigcode_inputs=cash::tx::sigcode_all;
-        i.sigcode_outputs=cash::tx::sigcode_all;
-        i.sendover=true;
-        wapi.tx_make_p2pkh(i,os);
+        wapi.transfer(args.next<cash::hash_t>(),args.next<cash::cash_t>(),os);
 	}
 	else if (command=="make_p2pkh") {
         wallet::tx_make_p2pkh_input i;

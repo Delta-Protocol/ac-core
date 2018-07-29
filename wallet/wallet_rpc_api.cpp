@@ -36,6 +36,12 @@ void c::add_address(const us::gov::crypto::ec::keys::priv_t& privkey, ostream&os
 	ask(us::wallet::protocol::add_address_query,k.str(),os);
 }
 
+void c::transfer(const hash_t&addr, const cash_t&amount, ostream& os) {
+	ostringstream si;
+	si << addr << ' ' << amount;
+	ask(us::wallet::protocol::w_transfer,si.str(),os);
+}
+
 void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {
 	ostringstream si;
 	i.to_stream(si);
