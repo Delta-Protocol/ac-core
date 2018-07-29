@@ -101,3 +101,4 @@ clean:
 	$(MAKE) clean -C govx; \
 	$(MAKE) clean -C wallet; \
 	$(MAKE) clean -C walletx;
+	$(MAKE) clean -C api;

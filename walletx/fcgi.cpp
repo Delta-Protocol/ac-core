@@ -52,7 +52,12 @@ void c::help(ostream& os) const {
 		os << "us-wallet functions" << endl;
 		os << endl;
 
+    os << "Wallet" << endl;
 #include <us/api/apitool_generated__links_wallet_fcgi_query_strings>
+    os << endl;
+    os << "Pairing" << endl;
+#include <us/api/apitool_generated__links_pairing_fcgi_query_strings>
+    os << endl;
 
 //		os << url << "/?<b>cmd=balance&detailed=&lt;1|0&gt;</b>" << endl;
 /*
