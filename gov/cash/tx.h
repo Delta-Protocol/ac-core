@@ -118,7 +118,7 @@ namespace cash {
 		blockchain::diff::hash_t parent_block;
         uint32_t nonce;
 	};
-}
+
 
 static ostream& operator << (ostream&os, const cash::tx& t) {
 	os << t.to_b58();
@@ -149,6 +149,7 @@ static istream& operator >> (istream&is, cash::tx::sigcode_t& t) {
 	return is;
 }
 
+}
 }}
 
 #endif

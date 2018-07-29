@@ -93,3 +93,7 @@ BUILD & INSTALL ANDROID US-CASH APP
     http://<NODE_IP>/us.cash-v1-release.apk
 
     
+CHECK ALL HEADER-GUARDS ARE UNIQUE
+    compare the outcomes the these two mommands, if the numbers match they are unique
+    ack "#define USGOV" | grep define | grep -v newclass | wc -l
+    ack "#define USGOV" | grep define | grep -v newclass | sort | uniq | wc -l

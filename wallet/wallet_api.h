@@ -39,5 +39,13 @@ struct wallet_api {
   static void priv_key(const priv_t& privkey, ostream&);
 };
 
+
+    static ostream& operator << (ostream& os, const wallet_api::tx_make_p2pkh_input& o) {
+        o.to_stream(os);
+        return os;
+    }
+
 }}
+
+
 #endif

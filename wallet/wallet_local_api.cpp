@@ -3,6 +3,7 @@
 #include <sstream>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/cash.h>
+#include <us/gov/cash/tx.h>
 
 typedef us::wallet::wallet_local_api c;
 using namespace us::wallet;
@@ -68,6 +69,9 @@ void c::transfer(const hash_t&addr, const cash_t&amount, ostream& os) {
         i.sendover=true;
         tx_make_p2pkh(i,os);
 }
+
+//using namespace us::gov::cash;
+//us::gov::cash::tx xd;
 
 void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream& os) {
     if (!connect_backend(os)) return;

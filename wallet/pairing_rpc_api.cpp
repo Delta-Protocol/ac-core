@@ -14,6 +14,10 @@ c::pairing_rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd
 c::~pairing_rpc_api() {
 }
 
+using namespace protocol;
+#include <us/api/apitool_generated__functions_pairing_cpp_rpc-impl>
+
+/*
 void c::pair(const pub_t& pk, const string& name, ostream&os) {
 	ostringstream si;
 	si << pk << ' ' << name;
@@ -29,4 +33,4 @@ void c::unpair(const pub_t& pk, ostream&os) {
 void c::list_devices(ostream&os) {
 	ask(us::wallet::protocol::list_devices_query,os);
 }
-
+*/

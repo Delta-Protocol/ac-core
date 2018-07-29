@@ -222,18 +222,25 @@ vector<string> gov_id{
                os << *rbegin() << " a" << j;
             }
            os << ") {" << endl;
-            os << "    ostringstream o; o << ";
             j=0;
-            if (!empty()) {
-                auto e=end();
-                --e;
-                for (auto i=cbegin(); i!=e; ++i) {
-                    os << "a" << j++ << " << ' ' << ";
-                }
-                os << "a" << j;
+            assert(!empty());
+            if (size()==1) {
+                os << "    ask(" << service << ", a0);" << endl;
             }
-            os << ";" << endl;
-            os << "    ask(" << service << ", o.str(), a" << j << ");" << endl;
+            else if (size()==2 && (*this)[0]=="const string&") {
+                os << "    ask(" << service << ", a0, a1);" << endl;
+            }
+            else {
+                   os << "    ostringstream o; o << ";
+                   auto e=end();
+                   --e; --e;
+                   for (auto i=cbegin(); i!=e; ++i) {
+                       os << "a" << j++ << " << ' ' << ";
+                   }
+                   os << "a" << j++;
+                   os << ";" << endl;
+                   os << "    ask(" << service << ", o.str(), a" << j << ");" << endl;
+            }
             os << "}" << endl;
         }
 
@@ -260,7 +267,22 @@ vector<string> gov_id{
             }
             os << "); }" << endl;
         }
+
+        void gen_cpp_service_router(ostream&os) const {
+            os << "    case " << service << ": { return send_response__" << service << "(c,d); }" << endl;
+        }
+        void gen_cpp_service_handlers(ostream&os) const {
+            os << "bool c::send_response__" << service << "(socket::peer_t* c, socket::datagram* d) {" << endl;
+            os << "   abort();" << endl;
+            os << "}" << endl;
+        }
+        void gen_cpp_service_handler_headers(ostream&os) const {
+            os << "bool send_response__" << service << "(socket::peer_t*, socket::datagram*);" << endl;
+        }
     };
+
+
+
 
 
 struct api_t: vector<f> {
@@ -360,6 +382,27 @@ vector<string> f{ "wallet_base","balance_query","list_query",
 
         }
 
+        void gen_cpp_service_router(ostream&os) const {
+            info(os);
+            for (auto&i:*this) {
+                i.gen_cpp_service_router(os);
+            }
+        }
+        void gen_cpp_service_handlers(ostream&os) const {
+            info(os);
+            for (auto&i:*this) {
+                i.gen_cpp_service_handlers(os);
+                os << endl;
+            }
+        }
+        void gen_cpp_service_handler_headers(ostream&os) const {
+            info(os);
+            for (auto&i:*this) {
+                i.gen_cpp_service_handler_headers(os);
+            }
+        }
+
+
         void gen_protocol_cpp_body(int nbase, ostream& os) const {
             info(os);
             assert(!v.empty());
@@ -431,6 +474,37 @@ vector<string> f{ "wallet_base","balance_query","list_query",
 string api_t::protocol_prefix_cpp{""};
 string api_t::protocol_prefix_java{"protocol_"};
 
+
+void gen_cpp_service_router(const api_t&a) {
+    ostringstream fn;
+    fn << file_prefix << "protocol_" << a.name << "_cpp_service_router";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    a.warn_h(os);
+    a.gen_cpp_service_router(os);
+    a.warn_f(os);
+}
+void gen_cpp_service_handlers(const api_t&a) {
+    ostringstream fn;
+    fn << file_prefix << "protocol_" << a.name << "_cpp_service_handlers";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    a.warn_h(os);
+    a.gen_cpp_service_handlers(os);
+    a.warn_f(os);
+}
+void gen_cpp_service_handler_headers(const api_t&a) {
+    ostringstream fn;
+    fn << file_prefix << "protocol_" << a.name << "_cpp_service_handler_headers";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    a.warn_h(os);
+    a.gen_cpp_service_handler_headers(os);
+    a.warn_f(os);
+}
 void gen_functions_cpp_rpc_impl(const api_t&a) {
     ostringstream fn;
     fn << file_prefix << "functions_" << a.name << "_cpp_rpc-impl";
@@ -494,6 +568,42 @@ void gen_protocol(const api_t& a, int base) {
     }
 
 }
+void gen_cpp_wallet_daemon_service_router(const api_t& w, const api_t& p) {
+    ostringstream fn;
+    fn << file_prefix << "protocol_" << "wallet-daemon" << "_cpp_service_router";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    api_t::warn_h(os);
+    w.gen_cpp_service_router(os);
+    p.gen_cpp_service_router(os);
+    api_t::warn_f(os);
+}
+
+void gen_cpp_wallet_daemon_service_handlers(const api_t& w, const api_t& p) {
+    ostringstream fn;
+    fn << file_prefix << "protocol_" << "wallet-daemon" << "_cpp_service_handlers";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    api_t::warn_h(os);
+    w.gen_cpp_service_handlers(os);
+    p.gen_cpp_service_handlers(os);
+    api_t::warn_f(os);
+}
+
+void gen_cpp_wallet_daemon_service_handler_headers(const api_t& w, const api_t& p) {
+    ostringstream fn;
+    fn << file_prefix << "protocol_" << "wallet-daemon" << "_cpp_service_handler_headers";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    api_t::warn_h(os);
+    w.gen_cpp_service_handler_headers(os);
+    p.gen_cpp_service_handler_headers(os);
+    api_t::warn_f(os);
+}
+
 
 void gen_wallet_daemon_protocol(const api_t& w, int wbase, const api_t& p, int pbase) {
     {
@@ -554,16 +664,24 @@ void gen_gov_protocol(const api_t& a, int base) {
 void do_wallet_daemon(const api_t& w, int wbase, const api_t& p, int pbase) {
     gen_functions_wallet_daemon_impl(w,p);
     gen_wallet_daemon_protocol(w,wbase,p,pbase);
+    gen_cpp_wallet_daemon_service_router(w,p);
+    gen_cpp_wallet_daemon_service_handlers(w,p);
+    gen_cpp_wallet_daemon_service_handler_headers(w,p);
+
 }
 
 void do_api(const api_t& a, int base) {
     gen_functions_cpp_purevir(a);
     gen_functions_cpp_override(a);
     gen_functions_cpp_rpc_impl(a);
+    gen_cpp_service_router(a);
+    gen_cpp_service_handlers(a);
+    gen_cpp_service_handler_headers(a);
 
     gen_protocol(a,base);
 
 }
+
 void do_gov_api(const api_t& a,int base) {
     gen_functions_cpp_purevir(a);
     gen_functions_cpp_override(a);

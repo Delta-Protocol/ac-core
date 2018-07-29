@@ -26,6 +26,8 @@ struct wallet_daemon: auth::daemon, wallet_local_api, pairing_local_api {
 	virtual ~wallet_daemon();
 	virtual bool process_work(socket::peer_t*, datagram*) override;
 
+#include <us/api/apitool_generated__protocol_wallet-daemon_cpp_service_handler_headers>
+
    inline virtual const keys& get_keys() const override { return id; }
 
    virtual socket::client* create_client(int sock) override;

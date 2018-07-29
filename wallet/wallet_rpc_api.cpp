@@ -15,6 +15,10 @@ c::wallet_rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_
 c::~wallet_rpc_api() {
 }
 
+using namespace protocol;
+#include <us/api/apitool_generated__functions_wallet_cpp_rpc-impl>
+
+/*
 void c::balance(bool detailed, ostream&os) {
 //for (int i=0; i<100; ++i) {
 	ask(us::wallet::protocol::balance_query,detailed?"1":"0",os);
@@ -22,9 +26,7 @@ void c::balance(bool detailed, ostream&os) {
 //}
 }
 
-void c::list(bool showpriv, ostream& os) {
-	ask(us::wallet::protocol::list_query,showpriv?"1":"0",os);
-}
+
 
 void c::new_address(ostream&os) {
 	ask(us::wallet::protocol::new_address_query,os);
@@ -36,11 +38,6 @@ void c::add_address(const us::gov::crypto::ec::keys::priv_t& privkey, ostream&os
 	ask(us::wallet::protocol::add_address_query,k.str(),os);
 }
 
-void c::transfer(const hash_t&addr, const cash_t&amount, ostream& os) {
-	ostringstream si;
-	si << addr << ' ' << amount;
-	ask(us::wallet::protocol::w_transfer,si.str(),os);
-}
 
 void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {
 	ostringstream si;
@@ -69,3 +66,4 @@ void c::tx_check(const string&txb58, ostream&os) {
 void c::ping(ostream&os) {
 	ask_ping(os);
 }
+*/

@@ -15,6 +15,6 @@ cash/android/android_sdk/
 secp256k1
 fastcgi++
 build
-apitool/apitool
-apitool_generated*
+api/apitool
+api/apitool_generated__*
 
