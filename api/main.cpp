@@ -664,27 +664,30 @@ void gen_gov_protocol(const api_t& a, int base) {
 void do_wallet_daemon(const api_t& w, int wbase, const api_t& p, int pbase) {
     gen_functions_wallet_daemon_impl(w,p);
     gen_wallet_daemon_protocol(w,wbase,p,pbase);
+//    gen_functions_cpp_rpc_impl(w,p);
     gen_cpp_wallet_daemon_service_router(w,p);
     gen_cpp_wallet_daemon_service_handlers(w,p);
     gen_cpp_wallet_daemon_service_handler_headers(w,p);
 
 }
 
-void do_api(const api_t& a, int base) {
+void do_common_api(const api_t& a, int base) {
     gen_functions_cpp_purevir(a);
     gen_functions_cpp_override(a);
     gen_functions_cpp_rpc_impl(a);
     gen_cpp_service_router(a);
     gen_cpp_service_handlers(a);
     gen_cpp_service_handler_headers(a);
+}
 
+void do_api(const api_t& a, int base) {
+    do_common_api(a,base);
     gen_protocol(a,base);
 
 }
 
 void do_gov_api(const api_t& a,int base) {
-    gen_functions_cpp_purevir(a);
-    gen_functions_cpp_override(a);
+    do_common_api(a,base);
     gen_gov_protocol(a,base);
 }
 

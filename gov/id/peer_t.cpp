@@ -37,7 +37,7 @@ void c::process_request(datagram* d, const keys& mykeys) {
     assert(mykeys.pub.valid);
 	os << mykeys.pub << ' ' << signature << ' ' << msg;
 //cout << "ID: process_request. sending id_peer_challenge: " << os.str() << endl;
-	send(new datagram(protocol::id_peer_challenge,os.str()));
+	send(new datagram(protocol::gov_id_peer_challenge,os.str()));
 }
 
 void c::process_peer_challenge(datagram* d, const keys& mykeys) {
@@ -83,7 +83,7 @@ void c::process_peer_challenge(datagram* d, const keys& mykeys) {
 	ostringstream os;
 	os << mykeys.pub << ' ' << signature_der_b58 << ' ' << stage_peer;
 //cout << "ID sending id_challenge_response " << os.str() << endl;
-	send(new datagram(protocol::id_challenge_response,os.str()));
+	send(new datagram(protocol::gov_id_challenge_response,os.str()));
 
 }
 
@@ -122,7 +122,7 @@ void c::process_challenge_response(datagram* d) {
 		stage_peer=peer_t::verified_fail;
 	}
 	msg.clear();
-	send(new datagram(protocol::id_peer_status,(uint16_t) stage_peer));
+	send(new datagram(protocol::gov_id_peer_status,(uint16_t) stage_peer));
 
 //cout << "ID: process_challenge_response  " << pubkey << endl;
 //cout << "ID: process_challenge_response calling verification_completed" << endl;
@@ -143,7 +143,7 @@ void c::initiate_dialogue() {
 	if (stage_me==anonymous && msg.empty()) {  //if msg not empty we are carrying on the wauth process already
 		msg=get_random_message();		
 //cout << "ID: sending id_request" << endl;
-		send(new datagram(protocol::id_request,msg));
+		send(new datagram(protocol::gov_id_request,msg));
 	}
 }
 
@@ -170,14 +170,13 @@ const c::keys& c::get_keys() const {
     return static_cast<const daemon*>(parent)->get_keys();
 }
 
-bool c::process_work(datagram*d) {
-    //if (b::process_work(d)) return true;
 
+bool c::process_work(datagram*d) {
     switch(d->service) {
-        case protocol::id_request: process_request(d,get_keys()); break;
-        case protocol::id_peer_challenge: process_peer_challenge(d,get_keys()); break;
-        case protocol::id_challenge_response: process_challenge_response(d); break;
-        case protocol::id_peer_status: process_peer_status(d); break;
+        case protocol::gov_id_request: process_request(d,get_keys()); break;
+        case protocol::gov_id_peer_challenge: process_peer_challenge(d,get_keys()); break;
+        case protocol::gov_id_challenge_response: process_challenge_response(d); break;
+        case protocol::gov_id_peer_status: process_peer_status(d); break;
     default: return false;
     }
     return true;

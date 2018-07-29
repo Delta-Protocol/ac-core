@@ -55,6 +55,10 @@ void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {
     os << "Not implemented" << endl;
 }
 
+void c::transfer(const gov::crypto::ripemd160::value_type&, const cash_t&, ostream&os) {
+    os << "Not implemented" << endl;
+}
+
 void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {
 	ostringstream si;
 	i.to_stream(si);
