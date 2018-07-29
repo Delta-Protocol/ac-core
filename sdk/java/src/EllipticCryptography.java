@@ -12,12 +12,9 @@ import org.spongycastle.math.ec.ECCurve;
 import java.util.Arrays;
 import org.spongycastle.jce.interfaces.ECPublicKey;
 import org.spongycastle.jce.interfaces.ECPrivateKey;
-
-
-import javax.crypto.KeyAgreement;
-import java.security.spec.ECGenParameterSpec;
+import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.jce.ECNamedCurveTable;
-import org.spongycastle.math.ec.FixedPointCombMultiplier;
+import java.security.Signature;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -25,21 +22,14 @@ import java.security.SecureRandom;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.spec.X509EncodedKeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
-import org.spongycastle.crypto.params.ECKeyGenerationParameters;
-import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.util.test.FixedSecureRandom;
-import org.spongycastle.asn1.x9.X9ECParameters;
 import java.security.Security;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
-import java.util.Base64;
-import javax.xml.bind.DatatypeConverter;
 import org.spongycastle.util.BigIntegers;
 
 public class EllipticCryptography {
@@ -74,34 +64,23 @@ public class EllipticCryptography {
         return instance;
     }
 
-    public static BigInteger generatePrivateKey() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
+    public static BigInteger generatePrivateInt() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
         KeyPair keyPair = generateKeyPair();
-        return getBigIntegerPrivateKey(keyPair);  
+        return getPrivateInt(keyPair);  
     }
 
-    private static BigInteger getBigIntegerPrivateKey(KeyPair keypair){
-        return getBigIntegerPrivateKey(keypair.getPrivate().getEncoded());
+    private static BigInteger getPrivateInt(KeyPair keypair){
+        return getPrivateInt(keypair.getPrivate());
     }
 
-    private static BigInteger getBigIntegerPrivateKey(PrivateKey privateKey){
-        return getBigIntegerPrivateKey(privateKey.getEncoded());
-    }
-
-    private static BigInteger getBigIntegerPrivateKey(byte[] privateKey){
-        return new BigInteger(privateKey);
+    public static BigInteger getPrivateInt(PrivateKey privateKey){
+        ECPrivateKey ecPrivateKey = (ECPrivateKey) privateKey;
+        return ecPrivateKey.getD();
     }
  
     public static PrivateKey getPrivateKey(BigInteger privateKey) throws InvalidKeySpecException{
         ECPrivateKeySpec priKeySpec = new ECPrivateKeySpec(privateKey, ecSpec);
         return factory.generatePrivate(priKeySpec);
-    }
-
-    public static PrivateKey privateKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException {
-        return factory.generatePrivate(new PKCS8EncodedKeySpec(keypair.getPrivate().getEncoded()));
-    }
-
-    public static PublicKey publicKeyFromKeyPair(KeyPair keypair) throws InvalidKeySpecException {
-        return factory.generatePublic(new X509EncodedKeySpec(keypair.getPublic().getEncoded()));
     }
 
     public static KeyPair generateKeyPair() throws NoSuchAlgorithmException,InvalidAlgorithmParameterException, NoSuchProviderException {
@@ -121,8 +100,7 @@ public class EllipticCryptography {
     
     public static PrivateKey getPrivateKey(byte[] privateKey) throws InvalidKeySpecException{
     
-        ECPrivateKeySpec privKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(privateKey),ecSpec);
-        return factory.generatePrivate(privKeySpec);
+        return getPrivateKey(BigIntegers.fromUnsignedByteArray(privateKey));
     }
 
     private static ECPoint getECPoint(byte[] publicKey){
@@ -148,22 +126,38 @@ public class EllipticCryptography {
         return ecPoint.multiply(d);
     }
  
-    public static BigInteger getPrivateInt(PrivateKey privateKey){
-        ECPrivateKey ecPrivateKey = (ECPrivateKey) privateKey;
-        return ecPrivateKey.getD();
-    }
-    public static PublicKey getPublicKeyFromPrivate(PrivateKey privateKey) throws InvalidKeySpecException{
+    public static PublicKey getPublicKeyFromPrivate(PrivateKey priv) throws InvalidKeySpecException{
         
-        BigInteger privateInt = getPrivateInt(privateKey);
+        BigInteger privateInt = getPrivateInt(priv);
         return getPublicKeyFromPrivate(privateInt);
 
     }
 
-    public static PublicKey getPublicKeyFromPrivate(BigInteger privateKey) throws InvalidKeySpecException{
+    public static PublicKey getPublicKeyFromPrivate(BigInteger priv) throws InvalidKeySpecException{
         
-        ECPoint ecPoint = ecMultiply(ecSpec.getG(), privateKey);
+        ECPoint ecPoint = ecMultiply(ecSpec.getG(), priv);
         return getPublicKey(ecPoint);
+    }
 
+    public static boolean verify(PublicKey pub, byte[] message, byte[] hash ) throws GeneralSecurityException{
+        
+        Signature dsa = Signature.getInstance("SHA1withECDSA");
+
+        dsa.initVerify(pub);
+
+        dsa.update(message);
+
+        return dsa.verify(hash);
+    }
+
+    public static byte[] sign(PrivateKey priv, byte[] message) throws GeneralSecurityException{
+        
+        Signature dsa = Signature.getInstance("SHA1withECDSA");
+
+        dsa.initSign(priv);
+        dsa.update(message);
+
+        return dsa.sign();
     }
 
 }

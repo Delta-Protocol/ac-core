@@ -64,7 +64,7 @@ public class SymmetricEncryption {
         try{
             int messageLength = encrypted.length - ivSize;
             if(messageLength<0){
-                System.out.println("The ciphertext does not have sufficient length to contain the iv (initialisation vector) which should have been appended.");
+                //System.out.println("The ciphertext does not have sufficient length to contain the iv (initialisation vector) which should have been appended.");
                 return emptyArray;
             }
             iv = Arrays.copyOfRange(encrypted, messageLength , encrypted.length);

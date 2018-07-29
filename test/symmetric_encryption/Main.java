@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.math.BigInteger;
 import org.spongycastle.math.ec.ECPoint;
 import javax.xml.bind.DatatypeConverter;
-import org.spongycastle.util.BigIntegers;
 
 
 public class Main{
