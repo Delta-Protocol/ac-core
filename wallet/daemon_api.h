@@ -13,8 +13,10 @@ struct daemon_api: wallet_api, pairing_api  {
   using wallet_api::priv_t;
   using wallet_api::pub_t;
 
-#include <us/api/apitool_generated_wallet_functions_cpp_purevir>
-#include <us/api/apitool_generated_pairing_functions_cpp_purevir>
+//#include <us/api/apitool_generated_wallet_functions_cpp_purevir>
+//#include <us/api/apitool_generated_pairing_functions_cpp_purevir>
+#include <us/api/apitool_generated__functions_wallet_cpp_purevir>
+#include <us/api/apitool_generated__functions_pairing_cpp_purevir>
 
 };
 }}

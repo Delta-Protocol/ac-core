@@ -14,7 +14,8 @@ using namespace std;
         pairing_rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port);
         virtual ~pairing_rpc_api();
 
-#include <us/api/apitool_generated_pairing_functions_cpp_override>
+//#include <us/api/apitool_generated_pairing_functions_cpp_override>
+#include <us/api/apitool_generated__functions_pairing_cpp_override>
 
     };
 

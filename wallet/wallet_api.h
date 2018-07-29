@@ -32,7 +32,8 @@ struct wallet_api {
 
   virtual ~wallet_api() {}
 
-#include <us/api/apitool_generated_wallet_functions_cpp_purevir>
+//#include <us/api/apitool_generated_wallet_functions_cpp_purevir>
+#include <us/api/apitool_generated__functions_wallet_cpp_purevir>
 
   void gen_keys(ostream&os);
   static void priv_key(const priv_t& privkey, ostream&);

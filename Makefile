@@ -68,14 +68,14 @@ install-nginx:
 	install etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/
 	install var/www/html/index.html /var/www/html/
 
-gov/libusgov.so: api/apitool_generated_*
+gov/libusgov.so: api/apitool_generated__*
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C gov;
 
 govx/us-gov: gov/libusgov.so
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C govx;
 
 
-wallet/libuswallet.so: gov/libusgov.so api/apitool_generated_*
+wallet/libuswallet.so: gov/libusgov.so api/apitool_generated__*
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C wallet;
 
 walletx/us-wallet: wallet/libuswallet.so
@@ -85,10 +85,10 @@ else
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C walletx ;
 endif
 
-api/apitool_generated_*: apitool/apitool
+api/apitool_generated__*: api/apitool
 
-apitool/apitool:
-	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C apitool ;
+api/apitool:
+	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C api ;
 
 .PHONY: all
 .PHONY: wallet

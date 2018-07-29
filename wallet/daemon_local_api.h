@@ -18,7 +18,8 @@ using namespace std;
         using w::cash_t;
         using w::tx_make_p2pkh_input;
 
-#include <us/api/apitool_generated_wallet_daemon_functions_cpp_impl>
+//#include <us/api/apitool_generated_wallet_daemon_functions_cpp_impl>
+#include <us/api/apitool_generated__functions_wallet-daemon_cpp_impl>
 
     };
 

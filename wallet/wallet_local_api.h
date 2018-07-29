@@ -16,7 +16,8 @@ using namespace std;
         using wallet_api::cash_t;
         using wallet_api::tx_make_p2pkh_input;
 
-#include <us/api/apitool_generated_wallet_functions_cpp_override>
+//#include <us/api/apitool_generated_wallet_functions_cpp_override>
+#include <us/api/apitool_generated__functions_wallet_cpp_override>
 
     bool connect_backend(ostream&os);
     chrono::steady_clock::time_point connected_since;

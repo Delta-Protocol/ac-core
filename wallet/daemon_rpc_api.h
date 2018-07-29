@@ -14,8 +14,8 @@ using namespace std;
         daemon_rpc_api(const w::keys&k, const string& whost, uint16_t wport): w(k, whost, wport), p(k, whost, wport), rpc_api(k, whost, wport) {}
         virtual ~daemon_rpc_api() {}
         using w::pub_t;
-
-#include <us/api/apitool_generated_wallet_daemon_functions_cpp_impl>
+//#include <us/api/apitool_generated_wallet_daemon_functions_cpp_impl>
+  #include <us/api/apitool_generated__functions_wallet-daemon_cpp_impl>
 
     };
 

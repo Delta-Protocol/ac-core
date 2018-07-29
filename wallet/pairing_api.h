@@ -11,7 +11,8 @@ struct pairing_api {
   typedef us::gov::crypto::ec::keys::pub_t pub_t;
   virtual ~pairing_api() {}
 
-#include <us/api/apitool_generated_pairing_functions_cpp_purevir>
+//#include <us/api/apitool_generated_pairing_functions_cpp_purevir>
+#include <us/api/apitool_generated__functions_pairing_cpp_purevir>
 
 };
 }}

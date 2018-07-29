@@ -15,7 +15,8 @@ using namespace std;
         pairing_local_api(const string& homedir);
         virtual ~pairing_local_api();
 
-#include <us/api/apitool_generated_pairing_functions_cpp_override>
+//#include <us/api/apitool_generated_pairing_functions_cpp_override>
+#include <us/api/apitool_generated__functions_pairing_cpp_override>
 
     };
 

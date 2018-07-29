@@ -14,7 +14,9 @@ using namespace std;
         wallet_rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port);
         virtual ~wallet_rpc_api();
 
-#include <us/api/apitool_generated_wallet_functions_cpp_override>
+//#include <us/api/apitool_generated_wallet_functions_cpp_override>
+#include <us/api/apitool_generated__functions_wallet_cpp_override>
+
 
     };
 

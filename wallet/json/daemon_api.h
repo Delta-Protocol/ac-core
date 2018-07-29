@@ -13,8 +13,10 @@ struct daemon_api: us::wallet::daemon_api {
 	daemon_api(us::wallet::daemon_api*);
 	virtual ~daemon_api();
 
-#include <us/api/apitool_generated_wallet_functions_cpp_override>
-#include <us/api/apitool_generated_pairing_functions_cpp_override>
+//#include <us/api/apitool_generated_wallet_functions_cpp_override>
+//#include <us/api/apitool_generated_pairing_functions_cpp_override>
+#include <us/api/apitool_generated__functions_wallet_cpp_override>
+#include <us/api/apitool_generated__functions_pairing_cpp_override>
 
     us::wallet::daemon_api* underlying_api;
 };
