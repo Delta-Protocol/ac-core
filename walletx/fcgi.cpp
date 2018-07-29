@@ -1,13 +1,14 @@
 #ifdef FCGI
 #include "fcgi.h"
-#include "json_api.h"
+#include <us/wallet/json/daemon_api.h>
 #include <unordered_map>
+#include <us/gov/input/convert.h>
 
 using namespace us::wallet::w3api;
 typedef us::wallet::w3api::fcgi_t c;
 
 int c::count_reqs{0};
-us::wallet::api* c::api{0};
+us::wallet::daemon_api* c::api{0};
 
 template<typename T>
 std::basic_string<T> uri_decode(const std::basic_string<T>& in) {
@@ -51,7 +52,9 @@ void c::help(ostream& os) const {
 		os << "us-wallet functions" << endl;
 		os << endl;
 
-		os << url << "/?<b>cmd=balance&detailed=&lt;1|0&gt;</b>" << endl;
+#include <us/api/apitool_generated__links_wallet_fcgi_query_strings>
+
+//		os << url << "/?<b>cmd=balance&detailed=&lt;1|0&gt;</b>" << endl;
 /*
 		os << url << "/?<b>app=nova&cmd=new_compartiment</b>" << endl;
 		os << url << "/?<b>app=nova&cmd=move&compartiment=&lt;compartiment&gt;&item=&lt;item&gt;&action=&lt;load/unload&gt;&send=&lt;1|0&gt; </b>" << endl;
@@ -104,6 +107,8 @@ vector<string> split2(const string& s, char c) {
 	return v;
 }
 
+using namespace us::gov::input;
+
 
 struct args_t:unordered_map<string,string> {
     const string& get(const string& param) const {
@@ -117,7 +122,7 @@ struct args_t:unordered_map<string,string> {
         return convert<T>(i->second);
     }
     template<typename T>
-    T get(const T& default_value) {
+    T get(const string& param, const T& default_value) {
         auto i=find(param);
         if (i==end()) {
             return default_value;
@@ -126,8 +131,8 @@ struct args_t:unordered_map<string,string> {
     }
 };
 
-args parse_uri(const string& uri) {
-	args m;
+args_t parse_uri(const string& uri) {
+	args_t m;
 	auto i=uri.find('?');
 	if (i==string::npos) return m;
 	auto p=split2(&uri[i+1],'&'); //vector<str> "para=value"
@@ -178,9 +183,9 @@ out << uri << endl;
 //    istringstream is("");
     string cmd=args.get<string>("cmd");
   	if (cmd=="balance") {
-       ++n;if (n==m.end()) {help(out); return true;}
-       bool detailed=n->second=="1";
-  	   api->balance(detailed,os);
+       string detailed=args.get<string>("detailed");
+        bool b=detailed=="1";
+  	   api->balance(b,os);
     }
 /*
 	if (app=="nova") {
@@ -252,7 +257,7 @@ out << uri << endl;
     string r=os.str();
 //    bool json=true;
 	if (!r.empty()) {
-        if (dynamic_cast<json_api*>(api)!=0) {
+        if (dynamic_cast<json::daemon_api*>(api)!=0) {
 		    out << "Content-Type: application/json; charset=utf-8" << endl << endl;
         }
         else {

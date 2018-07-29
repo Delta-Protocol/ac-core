@@ -7,7 +7,7 @@ using namespace us::wallet;
 using namespace std;
 typedef us::wallet::wallet_daemon c;
 
-c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), wallet_local_api(home,backend_host,backend_port), pairing_local_api(home), id(k) {
+c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), daemon_local_api(home,backend_host,backend_port), id(k) { //wallet_local_api(home,backend_host,backend_port), pairing_local_api(home), id(k) {
     assert(!home.empty());
 }
 

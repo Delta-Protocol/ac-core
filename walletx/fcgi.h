@@ -8,7 +8,7 @@
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>
 #include <us/wallet/wallet.h>
-#include <us/wallet/api.h>
+#include <us/wallet/daemon_api.h>
 
 namespace us { namespace wallet { namespace w3api {
 using namespace std;
@@ -36,7 +36,7 @@ struct fcgi_t: Fastcgipp::Request<char_type> {
     }
 
     static int count_reqs;
-    static us::wallet::api*	api;
+    static us::wallet::daemon_api* api;
 
     void help(ostream& os) const;
 //    Json::Value to_json(const string& s) const;

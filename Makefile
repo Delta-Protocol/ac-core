@@ -38,14 +38,14 @@ install: release
 	install govx/us-gov ${PREFIX}/bin
 	install walletx/us-wallet ${PREFIX}/bin
 
-ifeq ($(FCGI),1)
+ifeq ($(NOFCGI),1)
+	install etc/init.d/us-wallet /etc/init.d/
+else
 	cat etc/init.d/us-wallet | sed "s/\(^DAEMON_ARGS=\".*\)\" *#A; INSTALLER.*/\1 -fcgi -json \"/" >/tmp/usgif
 	cat /tmp/usgif | sed "s@^\(DAEMON=\"\).*\" *#D; INSTALLER.*@\1/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-wallet -- \"@" >/tmp/us-wallet
 	install /tmp/us-wallet /etc/init.d/
 	rm /tmp/usgif
 	rm /tmp/us-wallet
-else
-	install etc/init.d/us-wallet /etc/init.d/
 endif
 
 	install etc/init.d/us-gov /etc/init.d/
@@ -79,10 +79,10 @@ wallet/libuswallet.so: gov/libusgov.so api/apitool_generated__*
 	$(MAKE) CXXFLAGS="${CXXFLAGS} -fPIC" -C wallet;
 
 walletx/us-wallet: wallet/libuswallet.so
-ifeq ($(FCGI),1)
-	$(MAKE) CXXFLAGS="${CXXFLAGS}" FCGI=1 -C walletx ;
-else
+ifeq ($(NOFCGI),1)
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C walletx ;
+else
+	$(MAKE) CXXFLAGS="${CXXFLAGS}" FCGI=1 -C walletx ;
 endif
 
 api/apitool_generated__*: api/apitool

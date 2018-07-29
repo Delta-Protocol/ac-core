@@ -1,4 +1,4 @@
-Coding style 
+Coding style
 ============
 
 comments are minimal, documentation is elsewhere.
@@ -19,5 +19,9 @@ scope opening curly braces {
 
 Upper case are only used for MACROS, to yell, because macros don't respect c++ scope rules.
 Lower case is used elsewhere, identifiers, constants, etc.
+
+struct is preferred rather than class.
+
+protected and private sections are innofensive but are rather not written.
 
 

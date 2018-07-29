@@ -46,7 +46,7 @@ void c::list(bool showpriv, ostream& os) {
 }
 
 void c::new_address(ostream&os) {
-    os << "Not implemented" << endl;
+    os << "Not implemented. James be patient :)" << endl;
 }
 
 void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {

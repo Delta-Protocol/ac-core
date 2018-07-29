@@ -266,9 +266,9 @@ void run_daemon(const params& p) {
 
 #ifdef FCGI
     if (p.fcgi) {
-        api* a=d;
+        daemon_api* a=d;
         if (p.json) {
-            a=new json_api(a);
+            a=new json::daemon_api(a);
         }
         thread* wt=0;
         w3api::fcgi_t::api=a;

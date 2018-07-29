@@ -61,10 +61,10 @@ void c::receive_and_process(client* scl) {
 void c::process_work(peer_t *c) {
 	auto r=c->recv(); //complete_datagram();
 	if (unlikely(!r.first.empty())) {
-		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
+//		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		assert(!r.second);
-	        c->disconnect();
-		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
+        c->disconnect();
+//		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		return; //processed work
 	}
     assert(r.second!=0);
