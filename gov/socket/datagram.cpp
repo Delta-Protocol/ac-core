@@ -100,6 +100,32 @@ bool c::completed() const {
 	return dend==size() && !empty();
 }
 
+#ifdef SIM
+/*
+string c::sendto(int sock) const {
+}
+string c::recvfrom(int sock) {
+}
+*/
+#else
+string c::sendto(int sock) const {
+	if (unlikely(size()>=maxsize)) {
+            return "Error. Datagram is too big.";
+        }
+	if (unlikely(sock==0)) {
+            return "Error. Connection is closed.";
+        }
+	uint8_t sz[h];
+	auto n = ::write(sock, &(*this)[0], size());
+	if (unlikely(n<0)) {
+		return "Error. Failure writting to socket.";
+	}
+	if (unlikely(n!=size())) {
+		return "Error. Unexpected returning size while wrtting to socket";
+	}
+	return "";
+}
+
 string c::recvfrom(int sock) {
 	if (unlikely(sock==0)) {
             return "Error. Connection is closed.";
@@ -141,24 +167,7 @@ string c::recvfrom(int sock) {
 	dend+=nread;
 	return "";
 }
-
-string c::sendto(int sock) const {
-	if (unlikely(size()>=maxsize)) {
-            return "Error. Datagram is too big.";
-        }
-	if (unlikely(sock==0)) {
-            return "Error. Connection is closed.";
-        }
-	uint8_t sz[h];
-	auto n = ::write(sock, &(*this)[0], size());
-	if (unlikely(n<0)) {
-		return "Error. Failure writting to socket.";
-	}
-	if (unlikely(n!=size())) {
-		return "Error. Unexpected returning size while wrtting to socket";
-	}
-	return "";
-}
+#endif
 
 c::hash_t c::compute_hash() const {
 	hasher_t hasher;
