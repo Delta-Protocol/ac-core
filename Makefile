@@ -100,5 +100,7 @@ clean:
 	$(MAKE) clean -C gov; \
 	$(MAKE) clean -C govx; \
 	$(MAKE) clean -C wallet; \
-	$(MAKE) clean -C walletx;
+	$(MAKE) clean -C walletx; \
 	$(MAKE) clean -C api;
+	cd sdk/java; ./make clean; cd ../..
+

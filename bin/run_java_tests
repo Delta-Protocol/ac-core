@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd sdk/java
+java -ea -cp us-test-sdk.jar:libs/*:us-wallet-sdk.jar:. us.test.MainTest

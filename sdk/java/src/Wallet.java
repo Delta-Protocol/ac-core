@@ -12,11 +12,11 @@ import java.math.BigInteger;
 import java.net.Socket;
 import java.security.SecureRandom;
 import org.spongycastle.math.ec.ECPoint;
+import java.security.GeneralSecurityException;
 
 public class Wallet {
 
     private BigInteger priv;
-    private ECPoint pub;
     public String my_address;
 
     public class tx_make_p2pkh_input {
@@ -54,7 +54,7 @@ public class Wallet {
 
     private File homeDir;
 
-    public Wallet(File homedir) throws IOException {
+    public Wallet(File homedir) throws IOException, GeneralSecurityException {
 	homeDir=homedir;
         setup_keys();
         setup_addr();
@@ -69,7 +69,7 @@ public class Wallet {
 	return new FileOutputStream(filename);
     }
 
-    void setup_keys() throws IOException {
+    void setup_keys() throws IOException, GeneralSecurityException {
         String filename = "k";
         String fileContents;
         File file = new File(homeDir,filename);
@@ -86,7 +86,7 @@ public class Wallet {
             //            log+=";Directory not created";
             //      }
 
-            fileContents = EllipticCryptography.getInstance().generatePrivateKey().toString();
+            fileContents = EllipticCryptography.getInstance().generatePrivateInt().toString();
             //log+=";"+fileContents.length();
             FileOutputStream outputStream;
 //            outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
@@ -110,7 +110,6 @@ public class Wallet {
             throw new IOException("priv key is null");
             //Log.d("Wallet", "Private key was not successfully retrieved");
         }
-        pub = EllipticCryptography.getInstance().publicPointFromPrivate(priv);
     }
 
     public static final short protocol_suffix = 0;

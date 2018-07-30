@@ -102,7 +102,7 @@ struct ec {
 
 	/*vector<unsigned char> encrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& clear_text) const;
 	vector<unsigned char> decrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& cyphered_text) const;*/
-
+	bool generate_shared_key(unsigned char *, size_t, const keys::priv_t&, const keys::pub_t&);
 
 	static constexpr size_t bit_size() { return 256; }
 

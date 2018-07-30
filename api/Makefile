@@ -8,5 +8,5 @@ apitool: main.cpp
 
 clean:
 	rm -f apitool
-	rm apitool_generated__*
+	rm -f apitool_generated__*
 

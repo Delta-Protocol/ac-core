@@ -14,12 +14,14 @@
 pwd=`pwd`
 cd ../..
 cd sdk/java
+./make clean
 ./make all
 cd $pwd
 
 cd app/libs
-rm -f us-wallet-sdk.jar
-ln -s ../../../../sdk/java/us-wallet-sdk.jar .
+rm -f *.jar
+ln -s ../../../../sdk/java/*.jar .
+
 #cp ../../../../sdk/java/libs/* .
 cd ../..
 
