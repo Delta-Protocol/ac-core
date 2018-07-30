@@ -1,0 +1,49 @@
+#!/bin/sh
+
+htdocs=htdocs
+
+files="
+jquery.min.js
+tradebox.js
+front.js
+market.js
+markets.js
+popup_order.js
+order.js
+orders.js
+matched_trades.js
+tradeslip.js
+trading_window.js
+deposit_window.js
+register_window.js
+wallet.js
+wallets_window.js
+account_window.js
+cookies.js
+main.js"
+#for f in `find $htdocs -name "*.js"`; do
+#files="$files $f "
+#done
+
+out="www"
+mkdir -p $out
+
+cd $htdocs
+#closure-compiler --language_in ECMASCRIPT5 --compilation_level SIMPLE_OPTIMIZATIONS --js $files --js_output_file ../$out/bin.js
+#closure-compiler --language_in ECMASCRIPT5 --compilation_level WHITESPACE_ONLY --js $files --js_output_file ../$out/bin.js
+echo "" > ../$out/bin.js
+for f in $files; do
+	echo "" >> ../$out/bin.js
+	echo "//------------------$f" >> ../$out/bin.js
+        cat $f >> ../$out/bin.js
+done
+cd ..
+
+exit
+
+echo "" > $out/bin.js
+for f in $files; do
+echo $f
+cat $htdocs/$f >> $out/bin.js
+echo "" >> $out/bin.js
+done

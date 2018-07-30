@@ -1,0 +1,41 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+rm -rf frames
+
+imglist=""
+let i=0
+mkdir -p frames
+
+fxrange=`cat fxrange`
+cat $DIR/mkt_liq.gnuplot.template | sed "s#FXRANGE#$fxrange#g" > mkt_liq.gnuplot.0
+
+for d in `cat day | awk '{ print $2 }'`; do
+	echo "gen png $d"
+	line=`cat day | grep "$f "`
+	ask=`cat $d/fx | awk '{ print $1 }'`
+	bid=`cat $d/fx | awk '{ print $2 }'`
+	ticks=`cat $d/ticks`
+	cat mkt_liq.gnuplot.0 | sed "s:OFILE:frames/$i.png:" > mkt_liq.gnuplot.2
+	cat mkt_liq.gnuplot.2 | sed "s:IFILE:$d/market:" > mkt_liq.gnuplot.1
+	imglist="$imglist $i.png"
+	let i=$i+1
+	pfile=$d/day
+	head -n$i day > $pfile
+	cat mkt_liq.gnuplot.1 | sed "s/TICKS/$ticks/" > mkt_liq.gnuplot.2
+	cat mkt_liq.gnuplot.2 | sed "s/FXASK/$ask/g" > mkt_liq.gnuplot.1
+	cat mkt_liq.gnuplot.1 | sed "s/FXBID/$bid/g" > mkt_liq.gnuplot.2
+	cat mkt_liq.gnuplot.2 | sed "s:PFILE:$pfile:g" > mkt_liq.gnuplot
+	gnuplot mkt_liq.gnuplot
+done
+
+let i=$i-1
+for j in {1..20}; do
+	imglist="$imglist $i.png"
+done
+echo $imglist
+cd frames 
+convert -delay 50 $imglist -loop 0 market_animation.gif
+cd ..
+
