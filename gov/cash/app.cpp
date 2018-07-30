@@ -5,6 +5,7 @@
 #include <chrono>
 #include <us/gov/crypto/base58.h>
 #include <us/gov/likely.h>
+#include "tx.h"
 
 typedef us::gov::cash::app c;
 using namespace us::gov;

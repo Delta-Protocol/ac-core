@@ -17,10 +17,11 @@
 #include <cassert>
 #include <map>
 #include <atomic>
-#include "tx.h"
 
 namespace us { namespace gov {
 namespace cash {
+
+
 	using namespace std;
 	using socket::datagram;
 	using blockchain::local_deltas;
@@ -28,14 +29,17 @@ namespace cash {
 	using crypto::ec;
 	using blockchain::peer_t;
 
-	typedef int64_t cash_t;
 	typedef crypto::ec::keys keys;
 	typedef keys::pub_t pubkey_t;
 
 	typedef ripemd160 hasher_t;
 	typedef hasher_t::value_type hash_t;
 
+	typedef int64_t cash_t; //signed!
+
 	static const hash_t min_locking_program(10000);
+
+    struct tx;
 
 	struct app:blockchain::runnable_app {
 		app();
