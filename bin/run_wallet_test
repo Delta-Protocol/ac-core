@@ -8,44 +8,57 @@
 #------------start----------------|
 
 
-#LD_LIBRARY_PATH=gov govd/us-gov -d -home $home -p 46000 2>&1 >/dev/null &
-#sleep 1
-#pid=`ps ax | grep gov | grep -v grep | awk '{print $1}'`
-#echo "pid=$pid"
-
 
 ~/us/bin/user_daemons_ctl  start
 
 
 
+
+
+
+
+
+
+
+
+
+#LD_LIBRARY_PATH=gov govx/us-gov -d -home $home -p 46009 2>&1 >/dev/null &
+#sleep 1
+#pid=`ps ax | grep gov | grep -v grep | awk '{print $1}'`
+#echo "gov-pid = $pid"
+
+
 #---wallet---                                              wallet port  backend port
-#LD_LIBRARY_PATH=wallet:gov walletd/us-wallet -home $home -d -wp 46001 -bp 46000 2>&1 >/dev/null &
+#LD_LIBRARY_PATH=wallet:gov walletx/us-wallet -home $home -d -wp 16673 -bp 46001 2>&1 >/dev/null &
 #sleep 1
 #pid2=`ps ax | grep wallet | grep -v grep | awk '{print $1}'`
-#echo "pid2=$pid2"
+#echo "wallet-pid = $pid2"
 #exit 0
 
 
 #---Run-Test---
-#LD_LIBRARY_PATH=wallet:gov walletd/us-wallet -d -wp 46001 b
-#
+#LD_LIBRARY_PATH=wallet:gov walletx/us-wallet -d -wp 46001 b
 
 
 
 
 
-#------------run-test-------------|
+
+
+
+
+
+
+
+
+
+#------------run-test-------------| ** keep it **
 
 #cd
 #cd us/test/wallet
 
 #g++ -std=c++17 -I../../.. -L../../gov -L../../wallet -lusgov -luswallet main.cpp api.cpp
-
 #LD_LIBRARY_PATH=../../gov:../../wallet ./a.out
-
-
-
-
 
 
 
