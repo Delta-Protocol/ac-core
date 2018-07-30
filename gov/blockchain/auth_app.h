@@ -95,8 +95,8 @@ namespace auth { //blockchain network support, this service is free
 
 		virtual blockchain::app::local_delta* create_local_delta() override;
 
-		string get_ip4() const {
-		}
+//		string get_ip4() const {
+//		}
 
 		local_delta* pool{0};
 		mutex mx_pool;
