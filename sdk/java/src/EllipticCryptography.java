@@ -136,7 +136,7 @@ public class EllipticCryptography{
 
     public static boolean verify(PublicKey pub, byte[] message, byte[] hash ) throws GeneralSecurityException{
         
-        Signature dsa = Signature.getInstance("SHA1withECDSA");
+        Signature dsa = Signature.getInstance("SHA256withECDSA");
 
         dsa.initVerify(pub);
 
@@ -147,7 +147,7 @@ public class EllipticCryptography{
 
     public static byte[] sign(PrivateKey priv, byte[] message) throws GeneralSecurityException{
         
-        Signature dsa = Signature.getInstance("SHA1withECDSA");
+        Signature dsa = Signature.getInstance("SHA256withECDSA");
 
         dsa.initSign(priv);
         dsa.update(message);

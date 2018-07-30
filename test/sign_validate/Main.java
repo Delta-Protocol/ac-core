@@ -22,12 +22,13 @@ public class Main{
                     PrivateKey privateKey = EllipticCryptography.getPrivateKey(key);
                     
                     byte[] signed = EllipticCryptography.sign(privateKey,message);
-                    System.out.println(signed);
+                    String encoded = new String(Base58.encode(signed));
+                    System.out.println(encoded);
                 }
                 if(command.equals("verify")){
                
                     PublicKey publicKey = EllipticCryptography.getPublicKey(key);
-                    byte[] hash = Base58.decode(args[3]);
+                    byte[] hash =Base58.decode(args[3]);
                     boolean validated = EllipticCryptography.verify(publicKey, message, hash);
                     
                     System.out.println(validated);

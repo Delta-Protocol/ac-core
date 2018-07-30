@@ -2,3 +2,8 @@
 
 cd test/symmetric_encryption
 make run
+cd ../..
+
+cd test/sign_validate
+make run
+cd ../..

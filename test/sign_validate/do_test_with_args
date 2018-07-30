@@ -5,15 +5,20 @@ read -r priv_b public_b <<< $(LD_LIBRARY_PATH=../../gov:/usr/lib ../helpers/gene
 
 MESSAGE=$1
 
-signed="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a sign "$MESSAGE")"
+signed="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a "sign" "$MESSAGE")"
+echo "signed:"$signed
+verified="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $public_a "verify" "$MESSAGE" "$signed")"
+echo "verified:"$verified
+verified2="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $public_a "verify" "$MESSAGE" "$signed")"
+echo "verified2:"$verified2
 
-verified="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $public_a "verify" $MESSAGE $signed)"
-
-signed2="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_b "sign" "$MESSAGE")"
-
-verified2="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $public_b verify $signed2)"
-
-if [ "$verified" == "true" ] && [ "$verified2" == "true" ]
+signed2="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $priv_a "sign" "$MESSAGE")"
+echo $signed2
+verified3="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $public_a "verify" "$MESSAGE" "$signed2")"
+echo "verified3:"$verified3
+verified4="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main $public_a "verify" "$MESSAGE" "$signed2")"
+echo "verified4:"$verified4
+if [ "$verified" == "true" ] && [ "$verified3" == "1" ]
 then
     echo "PASSED"
 else 

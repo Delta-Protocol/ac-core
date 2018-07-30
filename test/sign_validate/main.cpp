@@ -15,7 +15,7 @@ using CryptoPP::AES;
 int main ( int argc, char *argv[] )
 {
     if ( argc < 4 ) {
-        cout<<"required arugments: <key> <[sign|verify]> <message> <hash (optional)>" << endl;
+        cout<<"arugments: <key> <[sign|verify]> <message> <hash (optional)>" << endl;
         if(argc == 2)
             cout<<"provided key: " << argv[1] << endl;
         if(argc == 3)
@@ -26,26 +26,25 @@ int main ( int argc, char *argv[] )
         ec::keys k;
         
         string command(argv[2]);
-
-        symmetric_encryption s_e(k.priv, k.pub);
+        string message(argv[3]);
           
             if(command=="sign"){
+                
                 k.priv=ec::keys::priv_t::from_b58(argv[1]);
-                string message_string(argv[4]);
-                vector<unsigned char> message(message_string.begin(),message_string.end());
-
-                vector<unsigned char> signed = ec.sign(message);
-                cout << b58::encode(encrypted) << endl;
+                
+                string signature = ec::instance.sign_encode(k.priv, message);
+                
+                cout << signature << endl;
+                
             }
             if(command=="verify"){
-                k.pub=ec::keys::pub_t::from_b58(argv[2]);
-                vector<unsigned char> message;
-                b58::decode(argv[4],message);
-                vector<unsigned char> decrypted = s_e.decrypt(message);
-                string decrypted_string(decrypted.begin(), decrypted.end());
-                cout << decrypted_string << endl;
+                k.pub=ec::keys::pub_t::from_b58(argv[1]);
+                string signature = argv[4];
+                bool verified = ec::instance.verify(k.pub, message, signature);
+                cout << verified << endl;
             }
         
     }
 }
+
 
