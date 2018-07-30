@@ -86,7 +86,7 @@ public class Wallet {
             //            log+=";Directory not created";
             //      }
 
-            fileContents = EllipticCryptography.getInstance().generatePrivateInt().toString();
+            fileContents = EllipticCryptography.generatePrivateInt().toString();
             //log+=";"+fileContents.length();
             FileOutputStream outputStream;
 //            outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);

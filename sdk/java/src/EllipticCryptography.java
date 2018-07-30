@@ -32,34 +32,30 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
 import org.spongycastle.util.BigIntegers;
 
-public class EllipticCryptography {
+public class EllipticCryptography{
 
-    private static EllipticCryptography instance;
-    private SecureRandom secureRandom;
+    private static SecureRandom secureRandom;
     private static KeyFactory factory;
     private static ECParameterSpec ecSpec;
-    private ECDomainParameters curve;
+    private static ECDomainParameters curve;
     private static KeyPairGenerator generator;
 
-    private EllipticCryptography() throws NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
-        Security.addProvider(new BouncyCastleProvider());
-
-        String curveName = "secp256k1";
-        String algorithmName = "ECDSA";
-        ecSpec = ECNamedCurveTable.getParameterSpec(curveName);
-        factory = KeyFactory.getInstance(algorithmName);
-        curve = new ECDomainParameters(ecSpec.getCurve(), ecSpec.getG(), ecSpec.getN(), ecSpec.getH());
-        secureRandom = new SecureRandom();
-        generator = KeyPairGenerator.getInstance(algorithmName);
-        generator.initialize(ecSpec);  
-
-    }
-
-    public static EllipticCryptography getInstance() throws NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException {
-        if(instance == null) {
-            instance = new EllipticCryptography();
+    static{
+        try{
+            Security.addProvider(new BouncyCastleProvider());
+            String curveName = "secp256k1";
+            String algorithmName = "ECDSA";
+            ecSpec = ECNamedCurveTable.getParameterSpec(curveName);
+            factory = KeyFactory.getInstance(algorithmName);
+            curve = new ECDomainParameters(ecSpec.getCurve(), ecSpec.getG(), ecSpec.getN(), ecSpec.getH());
+            secureRandom = new SecureRandom();
+            generator = KeyPairGenerator.getInstance(algorithmName);
+            generator.initialize(ecSpec);
         }
-        return instance;
+        catch(GeneralSecurityException e){
+            System.out.println("Elliptic Cryptography could not be initialised: " + e);
+        }
+
     }
 
     public static BigInteger generatePrivateInt() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
@@ -75,7 +71,7 @@ public class EllipticCryptography {
         ECPrivateKey ecPrivateKey = (ECPrivateKey) privateKey;
         return ecPrivateKey.getD();
     }
- 
+
     public static PrivateKey getPrivateKey(BigInteger privateKey) throws InvalidKeySpecException{
         ECPrivateKeySpec priKeySpec = new ECPrivateKeySpec(privateKey, ecSpec);
         return factory.generatePrivate(priKeySpec);
@@ -132,15 +128,15 @@ public class EllipticCryptography {
         return getPublicKey(ecPoint);
     }
 
-    public static boolean verify(PublicKey pub, byte[] message, byte[] hash ) throws GeneralSecurityException {
-        Signature dsa = Signature.getInstance("SHA1withECDSA");
+    public static boolean verify(PublicKey pub, byte[] message, byte[] hash ) throws GeneralSecurityException{
+        Signature dsa = Signature.getInstance("SHA256withECDSA");
         dsa.initVerify(pub);
         dsa.update(message);
         return dsa.verify(hash);
     }
 
     public static byte[] sign(PrivateKey priv, byte[] message) throws GeneralSecurityException{
-        Signature dsa = Signature.getInstance("SHA1withECDSA");
+        Signature dsa = Signature.getInstance("SHA256withECDSA");
         dsa.initSign(priv);
         dsa.update(message);
         return dsa.sign();
