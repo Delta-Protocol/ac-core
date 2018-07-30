@@ -32,17 +32,16 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
 import org.spongycastle.util.BigIntegers;
 
-public class EllipticCryptography {
+public class EllipticCryptography{
 
-    private static EllipticCryptography instance;
-    private SecureRandom secureRandom;
+    private static SecureRandom secureRandom;
     private static KeyFactory factory;
     private static ECParameterSpec ecSpec;
-    private ECDomainParameters curve;
+    private static ECDomainParameters curve;
     private static KeyPairGenerator generator;
 
-    private EllipticCryptography() throws NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{
-        
+    static{  
+        try{
         Security.addProvider(new BouncyCastleProvider());
 
         String curveName = "secp256k1";
@@ -53,15 +52,11 @@ public class EllipticCryptography {
         secureRandom = new SecureRandom();
         generator = KeyPairGenerator.getInstance(algorithmName);
         generator.initialize(ecSpec);  
-
-    }
-
-    public static EllipticCryptography getInstance() throws NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException {
-        
-        if(instance == null) {
-            instance = new EllipticCryptography();
         }
-        return instance;
+        catch(GeneralSecurityException e){
+            System.out.println("Elliptic Cryptography could not be initialised: " + e);
+        }
+
     }
 
     public static BigInteger generatePrivateInt() throws NoSuchProviderException, NoSuchAlgorithmException,InvalidAlgorithmParameterException, InvalidKeySpecException{

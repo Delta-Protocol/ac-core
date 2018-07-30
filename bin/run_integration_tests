@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd test/symmetric_encryption
+make run
