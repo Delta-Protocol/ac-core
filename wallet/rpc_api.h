@@ -22,8 +22,6 @@ struct rpc_api: gov::auth::peer_t {
 
     virtual bool authorize(const pubkey_t& p) const override { return true; }
 
-    void ask_ping(ostream&os);
-
 	void ask(int service, ostream&os);
 	void ask(int service, const string& args, ostream&os);
 

@@ -15,6 +15,28 @@ c::wallet_rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_
 c::~wallet_rpc_api() {
 }
 
+void c::ask_ping(ostream&os) {
+//cout << "asking " << service << " " << args << endl;
+    if (!connect_walletd(os)) return;
+
+    datagram* d=new datagram(us::wallet::protocol::wallet_ping,"");
+    auto r=send_recv(d);
+    if (unlikely(!r.first.empty())) {
+        os << "(Error) " << r.first;
+    }
+    else {
+        os << "Remote wallet says: " << r.second->parse_string();
+        delete r.second;
+    }
+}
+
+namespace {
+ostream& operator << (ostream&os, bool v) {
+    os << (v?1:0);
+    return os;
+}
+};
+
 using namespace protocol;
 #include <us/api/apitool_generated__functions_wallet_cpp_rpc-impl>
 
@@ -67,3 +89,4 @@ void c::ping(ostream&os) {
 	ask_ping(os);
 }
 */
+
