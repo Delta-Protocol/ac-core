@@ -39,6 +39,8 @@ namespace cash {
 
 	static const hash_t min_locking_program(10000);
 
+    typedef uint32_t token_t;
+
     struct tx;
 
 	struct app:blockchain::runnable_app {
@@ -55,6 +57,7 @@ namespace cash {
 			constexpr static array<const char*,num_params> paramstr={"minimum_fee"/*,"floating_point_pos"*/};
 		};
 
+
 		struct local_delta: blockchain::policies_local_delta<double, policies_traits> {
 			typedef blockchain::policies_local_delta<double, policies_traits> b;
 
@@ -66,12 +69,28 @@ namespace cash {
 			virtual void to_stream(ostream&) const override;
 			virtual void from_stream(istream&) override;
 
+            struct tokens_t:unordered_map<token_t,cash_t> {
+	    			void dump(ostream& os) const;
+		    		void to_stream(ostream& os) const;
+			    	static tokens_t from_stream(istream& is);
+            };
+
+            struct safe_deposit_box {  //safe deposit box
+                tokens_t balance;
+                //SC data goes here
+
+				void dump(ostream& os) const;
+				void to_stream(ostream& os) const;
+				static safe_deposit_box from_stream(istream& is);
+            };
+
 			struct account_t {
 				account_t();
 				account_t(const hash_t& locking_program, const cash_t& balance);
 
 				hash_t locking_program;
-				cash_t balance;
+				cash_t balance;  //deprecated, use sdb
+                safe_deposit_box box;
 
 				void dump(ostream& os) const;
 				void to_stream(ostream& os) const;

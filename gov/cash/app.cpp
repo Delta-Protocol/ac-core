@@ -196,6 +196,30 @@ void c::local_delta::accounts_t::dump(ostream& os) const {
 	}
 }
 
+//struct tokens_t:unordered_map<token_t,cash_t> {
+void c::local_delta::tokens_t::dump(ostream& os) const {
+}
+
+void c::local_delta::tokens_t::to_stream(ostream& os) const {
+}
+
+c::local_delta::tokens_t c::local_delta::tokens_t::from_stream(istream& is) {
+    return tokens_t();
+}
+
+void c::local_delta::safe_deposit_box::dump(ostream& os) const {
+}
+
+void c::local_delta::safe_deposit_box::to_stream(ostream& os) const {
+}
+
+c::local_delta::safe_deposit_box c::local_delta::safe_deposit_box::from_stream(istream& is) {
+    return safe_deposit_box();
+}
+
+
+
+
 void c::db_t::dump(ostream& os) const {
 	cout << "cash app db dump" << endl;
 	lock_guard<mutex> lock(mx);
