@@ -41,19 +41,95 @@ void c::balance(bool detailed, ostream&os) {
     os << val;
 }
 
-void c::list(bool showpriv, ostream& os) {
-    os << "Not implemented" << endl;
+
+
+void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it
+    ostringstream plain;
+    underlying_api->list(showpriv,plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    if (showpriv) {
+        int n=0;
+        Json::Value lists;
+        while(is.good()) {
+            Json::Value v;
+            string s;
+            is >> s;
+            v["private Key"]=s;
+            is >> s;
+            v["public key"]=s;
+            is >> s;
+            v["address"]=s;
+            lists[n++]=v;
+        }
+        val["lists"]=val;
+    }
+    else {
+        string p; 
+        is >> p;
+        val["address"]=p;
+    }
+    os << val;
 }
 
-void c::new_address(ostream&os) {
-    os << "Not implemented. James be patient :)" << endl;
+
+
+void c::new_address(ostream&os) {    // --compile-code-&-test-it
+
+ ostringstream plain;
+ underlying_api->new_address(plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["address"]=p;
+
+    os << val;
 }
 
-void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {
-	ostringstream k;
-	k << privkey;
-    os << "Not implemented" << endl;
+
+
+
+void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {   // --compile-code-&-test-it
+    //	ostringstream k;
+    //	k << privkey;
+    //	os << "Not implemented" << endl;
+
+
+ ostringstream plain;
+    underlying_api->add_address(privkey,plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+/*
+    if (privkey) {
+        int n=0;
+        Json::Value pkey;
+        while(is.good()) {
+            Json::Value v;
+            string s;
+            is >> s;
+            v["address"]=s;
+            pkey[n++]=v;
+        }
+        val["pkey"]=val;
+    }
+    else {
+        string p;
+        is >> p;
+        val["address"]=p;
+    }
+    os << val;
+*/
+
 }
+
+
+
 
 void c::transfer(const gov::crypto::ripemd160::value_type&, const cash_t&, ostream&os) {
     os << "Not implemented" << endl;
