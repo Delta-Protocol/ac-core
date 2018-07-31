@@ -1,4 +1,4 @@
-package us.wallet;
+package us.gov.crypto;
 
 import java.security.SecureRandom;
 import java.security.Security;
@@ -16,7 +16,7 @@ import java.security.GeneralSecurityException;
 
 import java.nio.charset.StandardCharsets;
 
-public class SymmetricEncryption {
+public class symmetric_encryption {
 
     private static final SecureRandom random = new SecureRandom();
     private static final int ivSize = 12;
@@ -26,14 +26,13 @@ public class SymmetricEncryption {
     private byte[] key;
     private byte[] iv;
 
-    public SymmetricEncryption(byte[] sharedKey) throws GeneralSecurityException {
-        
+    public symmetric_encryption(byte[] sharedKey) throws GeneralSecurityException {
         iv = new byte[ivSize];
         Security.addProvider(new BouncyCastleProvider());
         cipher = Cipher.getInstance("AES/GCM/NoPadding");
         if(sharedKey.length == keySize){
            key = sharedKey;
-        } 
+        }
         else{
             throw new GeneralSecurityException("The key provided should be " + keySize + " bytes.");
         }
@@ -43,8 +42,8 @@ public class SymmetricEncryption {
         return keySize;
     }
 
-    public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
-        this(EllipticCryptography.secp256k1.secp256k1.generateSharedKey(priv_a,pub_b, keySize));
+    public symmetric_encryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
+        this(ec.secp256k1.generateSharedKey(priv_a,pub_b, keySize));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {

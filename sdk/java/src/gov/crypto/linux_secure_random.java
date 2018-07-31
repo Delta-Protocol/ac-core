@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package us.wallet;
+package us.gov.crypto;
 
 //import org.slf4j.*;
 
@@ -27,13 +27,13 @@ import java.security.*;
  * other platforms. Attempts to manually set the seed are ignored. There is no difference between seed bytes and
  * non-seed bytes, they are all from the same source.
  */
-public class LinuxSecureRandom extends SecureRandomSpi {
+public class linux_secure_random extends SecureRandomSpi {
     private static final FileInputStream urandom;
 
     private static class LinuxSecureRandomProvider extends Provider {
         public LinuxSecureRandomProvider() {
-            super("LinuxSecureRandom", 1.0, "A Linux specific random number provider that uses /dev/urandom");
-            put("SecureRandom.LinuxSecureRandom", LinuxSecureRandom.class.getName());
+            super("linux_secure_random", 1.0, "A Linux specific random number provider that uses /dev/urandom");
+            put("SecureRandom.linux_secure_random", linux_secure_random.class.getName());
         }
     }
 
@@ -66,7 +66,7 @@ public class LinuxSecureRandom extends SecureRandomSpi {
 
     private final DataInputStream dis;
 
-    public LinuxSecureRandom() {
+    public linux_secure_random() {
         // DataInputStream is not thread safe, so each random object has its own.
         dis = new DataInputStream(urandom);
     }
