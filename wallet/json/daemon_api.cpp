@@ -11,7 +11,8 @@ c::~daemon_api() {
     delete underlying_api;
 }
 
-void c::balance(bool detailed, ostream&os) {
+void c::balance(bool detailed0, ostream&os) { // --compile-code-&-test-it      \/
+bool detailed=true;				//--
     ostringstream plain;
     underlying_api->balance(detailed,plain);
 
@@ -31,7 +32,8 @@ void c::balance(bool detailed, ostream&os) {
             v["balance"]=s;
             addresses[n++]=v;
         }
-        val["addresses"]=val;
+        //val["addresses"]=val; //always null
+	val["addresses"]=addresses;
     }
     else {
         string p;
@@ -43,7 +45,7 @@ void c::balance(bool detailed, ostream&os) {
 
 
 
-void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it
+void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it      \/
     ostringstream output;
     underlying_api->list(showpriv,output);
 
@@ -64,12 +66,12 @@ void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it
             v["address"]=s;
             lists[n++]=v;
         }
-        val["lists"]=val;
+	val["keys"]=lists;
     }
     else {
         string p; 
         is >> p;
-        val["address"]=p;
+        val["private Key"]=p;
     }
     os << val;
 }
@@ -93,53 +95,69 @@ void c::new_address(ostream&os) {    // --compile-code-&-test-it
 
 
 
-
+		
 void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {   // --compile-code-&-test-it
-    //	ostringstream k;
-    //	k << privkey;
-    //	os << "Not implemented" << endl;
-
-
+//    	ostringstream k;
+//    	k << privkey;
+//    os << "Not implemented" << endl;
+	
  ostringstream plain;
-    underlying_api->add_address(privkey,plain);
+ underlying_api->add_address(privkey,plain);
 
     Json::Value val;
     istringstream is(plain.str());
-/*
-    if (privkey) {
-        int n=0;
-        Json::Value pkey;
-        while(is.good()) {
-            Json::Value v;
-            string s;
-            is >> s;
-            v["address"]=s;
-            pkey[n++]=v;
-        }
-        val["pkey"]=val;
-    }
-    else {
-        string p;
-        is >> p;
-        val["address"]=p;
-    }
+
+    string p;
+    is >> p;
+    val["address"]=p;
+
     os << val;
-*/
+}
+
+
+
+//void c::transfer(const gov::crypto::ripemd160::value_type&, const cash_t&, ostream&os) { // to swsto
+void c::transfer(const gov::crypto::ripemd160::value_type&value_type, const cash_t& cash_t, ostream&os) { // --compile-code-&-test-it      \/
+//    os << "Not implemented" << endl;
+
+ ostringstream plain;
+ underlying_api->transfer(value_type, cash_t ,plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["transfer"]=p;
+
+    os << val;
 
 }
 
 
 
+void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {   // --compile-code-&-test-it
+//	ostringstream si;
+//	i.to_stream(si);
+//    os << "Not implemented" << endl;
 
-void c::transfer(const gov::crypto::ripemd160::value_type&, const cash_t&, ostream&os) {
-    os << "Not implemented" << endl;
+
+ ostringstream plain;
+ underlying_api->tx_make_p2pkh(i ,plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["tx_make_p2pkh"]=p;
+
+    os << val;
+
 }
 
-void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {
-	ostringstream si;
-	i.to_stream(si);
-    os << "Not implemented" << endl;
-}
+
+
 
 void c::tx_sign(const string&txb58, gov::cash::tx::sigcode_t sigcodei, gov::cash::tx::sigcode_t sigcodeo, ostream&os) {
 	ostringstream si;
