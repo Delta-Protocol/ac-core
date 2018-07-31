@@ -1,31 +1,107 @@
 package us.gov.socket;
 
+import java.net.Socket;
+
 	public class client {
         public client() {
-            sock=0;
+//            sock=0;
         }
 
 		client();
-		client(int sock);
+		client(Socket sock);
+/*
 		virtual ~client() {
 			disconnect();
 			  //you must override destructor call the virtual function disconnect on the most specialized class
 		}
-		virtual string connect(const string& host, uint16_t port, bool block=false);
-		virtual void disconnect();
+*/
+		virtual String connect(String host, int port, boolean block=false) {
+        	//lock_guard<mutex> lock(mx);
+        	String r=init_sock(host, port, block);
+        	if (r!=null) {
+                return r;
+            }
+        	addr=host;
+            on_connect();
+        	return null;
+        }
 
-	        inline bool connected() const { return sock!=0; }
+		virtual void disconnect() {
+        //	lock_guard<mutex> lock(mx);
+        	if (!connected()) return;
+        	sock.close();
+        }
 
-		string address() const;
-		virtual void ready() {}
+        inline boolean connected() const { return sock.isConnected(); }
 
-        pair<string,datagram*> recv(uint16_t expected_service);
-        pair<string,datagram*> send_recv(datagram* d,uint16_t expected_service);
+		String address() {
+            return sock.getHostAddress().getHostAddress();
+        }
 
-	        pair<string,datagram*> send_recv(datagram* d); 
+		void ready() {}
+
+public class pair<f,s>
+    public f first;
+    public s second;
+
+    public pair(f fst, s snd) {
+        this.first=fst;
+        this.second=snd;
+     }
+ }
+
+
+pair<String,datagram> recv(short expected_service) {
+    pair<String,datagram> r=recv();
+    if (r.first!=null) {
+        return r;
+    }
+    datagram d=r.second;
+    while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
+        if (d.service==us::gov::protocol::gov_socket_error) {
+            return move(r);
+        }
+        if (d->service==expected_service) {
+            break;
+        }
+        else {
+            delete d;
+        }
+        auto r=recv();
+        if (!r.first.empty()) {
+            return move(r);
+        }
+        d=r.second;
+    }
+    return make_pair("",d);
+}
+
+
+
+        pair<String,datagram> send_recv(datagram d,short expected_service);
+
+	    pair<string,datagram*> send_recv(datagram* d);
 		string send(datagram* d);
 		string send(const datagram& d);
-        	pair<string,datagram*> recv(); //caller owns the returning object
+
+
+pair<String,datagram> recv() { //caller owns the returning object
+    pair<String,datagram> r;
+    r.second=new datagram();
+    while(true) {
+        String ans=r.second.recvfrom(sock); //,socket::response_timeout_secs);
+        if (ans==null) {
+            r.first=ans;
+            r.second=null;
+            disconnect();
+            break;
+        }
+        if (r.second.completed()) {
+            break;
+        }
+    }
+    return move(r);
+}
 
 		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
 		string init_sock(const string& host, uint16_t port, bool block=false);
@@ -37,10 +113,10 @@ package us.gov.socket;
                         dump(os);
                 }
 
-		int sock;
-		mutable string msg;
-		string addr;
-		mutable mutex mx;
+        Socket sock;
+		String msg;
+		String addr;
+		//mutable mutex mx;
 	}
 
 
@@ -77,47 +153,12 @@ c::client(int sock):sock(sock) {
    if (sock!=0) addr=address();
 }
 
-#ifdef SIM
-
-#else
 string c::address() const {
-	struct sockaddr_storage addr;
-	socklen_t len=sizeof addr;
-	int a=getpeername(sock, (struct sockaddr*)&addr, &len);
-	if (a!=0) return "";
-	char ipstr[len]; // deal with both IPv4 and IPv6
-	if (addr.ss_family == AF_INET) {
-	    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-	    int port = ntohs(s->sin_port);
-	    inet_ntop(AF_INET, &s->sin_addr, ipstr, len); //sizeof ipstr);
-	} else { // AF_INET6
-	    struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
-	    int port = ntohs(s->sin6_port);
-	    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, len); //sizeof ipstr);
-	}
-	return ipstr;
 }
-#endif 
 
 string c::connect(const string& host, uint16_t port, bool block) {
-	assert(sock==0); //disconnect();
-	lock_guard<mutex> lock(mx);
-	string r=init_sock(host, port, block);
-	if (!r.empty()) {
-        return r;
-    }
-	addr=host;
-    on_connect();
-	return "";
 }
 #include <us/gov/stacktrace.h>
-void c::disconnect() {
-	lock_guard<mutex> lock(mx);
-	if (unlikely(sock==0)) return;
-	close(sock);
-	sock=0;
-    //print_stacktrace();
-}
 
 void c::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t port) {
 	struct hostent *hostinfo;
@@ -240,54 +281,8 @@ _log << "      : " << d.parse_string() << endl;
 
 #endif
 
-pair<string,datagram*> c::recv(uint16_t expected_service) { //caller owns the returning object
-    auto r=recv();
-    if (!r.first.empty()) {
-        return move(r);
-    }
-    datagram*d=r.second;
-    while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
-        if (d->service==us::gov::protocol::error) {
-            return move(r);
-        }
-        if (d->service==expected_service) {
-            break;
-        }
-        else {
-            delete d;
-        }
-        auto r=recv();
-        if (!r.first.empty()) {
-            return move(r);
-        }
-        d=r.second;
-    }
-    return make_pair("",d);
-}
 
 
-pair<string,datagram*> c::recv() { //caller owns the returning object
-    pair<string,datagram*> r;
-    r.second=new datagram();
-    while(!program::_this.terminated) {
-        string ans=r.second->recvfrom(sock); //,socket::response_timeout_secs);
-        if (unlikely(!ans.empty())) {
-            r.first=ans;
-	        delete r.second;
-            r.second=0;
-            disconnect();
-            break;
-        }
-        if (likely(r.second->completed())) {
-   #ifdef DEBUG
-   dump_d("recv", *r.second, addr); 
-//   interceptor(*r.second);
-   #endif
-            break;
-        }
-    }
-    return move(r);
-}
 
 string c::send(datagram* d) { //don't call send(&d) perf
 	if (unlikely(!sock)) {

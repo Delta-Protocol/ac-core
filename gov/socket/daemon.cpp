@@ -81,7 +81,7 @@ void c::process_work(peer_t *c) {
 }
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
-    bool ispong=d->service==protocol::pong;
+//    bool ispong=d->service==protocol::pong;
     if (c->process_work(d)) {
         return true;
     }
