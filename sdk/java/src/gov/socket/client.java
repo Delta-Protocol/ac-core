@@ -17,9 +17,17 @@ import java.net.Socket;
 */
 		virtual String connect(String host, int port, boolean block=false) {
         	//lock_guard<mutex> lock(mx);
-        	String r=init_sock(host, port, block);
-        	if (r!=null) {
-                return r;
+            try {
+                Socket s = new Socket(walletd_host(), walletd_port());
+    /*
+            	String r=init_sock(host, port, block);
+            	if (r!=null) {
+                    return r;
+                }
+*/
+            }
+            catch (IOException e) {
+                return "
             }
         	addr=host;
             on_connect();
@@ -40,7 +48,7 @@ import java.net.Socket;
 
 		void ready() {}
 
-public class pair<f,s>
+public class pair<f,s> {
     public f first;
     public s second;
 
@@ -58,32 +66,56 @@ pair<String,datagram> recv(short expected_service) {
     }
     datagram d=r.second;
     while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
-        if (d.service==us::gov::protocol::gov_socket_error) {
-            return move(r);
+        if (d.service==protocol_gov_socket_error) {
+            return r;
         }
-        if (d->service==expected_service) {
+        if (d.service==expected_service) {
             break;
         }
         else {
             delete d;
         }
-        auto r=recv();
-        if (!r.first.empty()) {
+        pair<String,datagram> r=recv();
+        if (r.first!=null) {
             return move(r);
         }
         d=r.second;
     }
-    return make_pair("",d);
+    return new pair<String,datagram>(null,d);
 }
 
 
 
-        pair<String,datagram> send_recv(datagram d,short expected_service);
+pair<String,datagram> send_recv(datagram d,short expected_service) {
+    pair<String,datagram> ans;
+    ans.first=send(d);
+    if (ans.first!=null) {
+        ans.second=null;
+        return ans;
+    }
+    return recv(expected_service);
+}
 
-	    pair<string,datagram*> send_recv(datagram* d);
-		string send(datagram* d);
-		string send(const datagram& d);
+pair<String,datagram> send_recv(datagram d) {
+    pair<String,datagram> ans;
+    ans.first=send(d);
+    if (ans.first!=null) {
+        ans.second=null;
+        return ans;
+    }
+    return recv();
+}
 
+String send(datagram d) {
+	if (!connected()) {
+		return new String("Error. Sending datagram before connecting.");
+	}
+	auto r=d.sendto(sock);
+    if (r!=null)) {
+        disconnect();
+    }
+	return r;
+}
 
 pair<String,datagram> recv() { //caller owns the returning object
     pair<String,datagram> r;
@@ -103,45 +135,21 @@ pair<String,datagram> recv() { //caller owns the returning object
     return move(r);
 }
 
-		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
-		string init_sock(const string& host, uint16_t port, bool block=false);
+//		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
+//		string init_sock(const string& host, uint16_t port, bool block=false);
 
-		virtual void on_connect() {}
-
+		void on_connect() {}
+/*
 		void dump(ostream& os) const;
                 virtual void dump_all(ostream& os) const {
                         dump(os);
                 }
-
+*/
         Socket sock;
 		String msg;
 		String addr;
 		//mutable mutex mx;
 	}
-
-
-#include "client.h"
-#include <string>
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <errno.h>
-#include <cassert>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <signal.h>
-#include <cstring>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <us/gov/signal_handler.h>
-#include <us/gov/likely.h>
-#include "protocol.h"
 
 
 typedef us::gov::socket::client c;
@@ -229,103 +237,10 @@ string c::init_sock(const string& host, uint16_t port, bool block) {
 #endif
 
 
-pair<string,datagram*> c::send_recv(datagram* d,uint16_t expected_service) {
-    pair<string,datagram*> ans;
-    ans.first=send(d);
-    if (unlikely(!ans.first.empty())) {
-        ans.second=0;
-        return move(ans);
-    }
-    return recv(expected_service);
+
+
 }
 
-pair<string,datagram*> c::send_recv(datagram* d) {
-    pair<string,datagram*> ans;
-    ans.first=send(d);
-    if (unlikely(!ans.first.empty())) {
-        ans.second=0;
-        return move(ans);
-    }
-    return recv();
-}
-
-#ifdef DEBUG
-#include <us/gov/stacktrace.h>
-#include <fstream>
-
-ofstream _log("/tmp/us_gov_socket_io_log");
-
-void interceptor(const datagram& d) {
-typedef unordered_set<uint16_t> dt;
-static dt svc;
-static int i=0;
-if (++i%100==0) { //reload file
-    i=0;
-    svc.clear();
-    ifstream f("/tmp/interceptor");
-
-    while (f.good()) {
-        uint16_t s;
-        f >> s;
-        svc.emplace(s);
-    }
-
-    if (svc.find(d.service)!=svc.end()) print_stacktrace(); 
-}
-}
-
-void dump_d(string prefix, const datagram& d, const string& addr) {
-_log << "SOCKET: " << prefix << " datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
-_log << "      : " << d.parse_string() << endl;
-}
-
-#endif
 
 
-
-
-string c::send(datagram* d) { //don't call send(&d) perf
-	if (unlikely(!sock)) {
-		return "Error. Sending datagram before connecting.";
-	}
-	assert(d);
-	auto r=d->sendto(sock);
-    if (unlikely(!r.empty())) {
-        disconnect();
-    }
-    else {
-
-   #ifdef DEBUG
-   dump_d("sent", *d, addr); 
-//   interceptor(*r.second);
-   #endif
-
-
-    }
-    delete d;
-    return r;
-}
-
-string c::send(const datagram& d) {
-	if (unlikely(!sock)) {
-		return "Error. Sending datagram before connecting.";
-	}
-	auto r=d.sendto(sock);
-    if (unlikely(!r.empty())) {
-        disconnect();
-    }
-	else {
-
-   #ifdef DEBUG
-   dump_d("sent", d, addr); 
-//   interceptor(*r.second);
-   #endif
-
-	}
-	return r;
-}
-
-void c::dump(ostream& os) const {
-	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
-}
 
