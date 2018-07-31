@@ -44,11 +44,11 @@ void c::balance(bool detailed, ostream&os) {
 
 
 void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it
-    ostringstream plain;
-    underlying_api->list(showpriv,plain);
+    ostringstream output;
+    underlying_api->list(showpriv,output);
 
     Json::Value val;
-    istringstream is(plain.str());
+    istringstream is(output.str());
 
     if (showpriv) {
         int n=0;
