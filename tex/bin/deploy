@@ -1,0 +1,20 @@
+#!/bin/sh
+
+./bin/compile_js
+./bin/compile_html
+
+mkdir src
+cd src
+ln -s .. curex
+cd ..
+mkdir release
+cd release
+mmmake curex
+make cexapi
+cd ..
+
+echo "next step is to kill /usr/local/bin/cexapi"
+dr=$(basename `pwd`)
+echo "cd ..; rm trocavaluta; ln -s $dr trocavaluta" 
+echo "/etc/init.d/curex-api start"
+

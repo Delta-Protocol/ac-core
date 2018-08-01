@@ -11,6 +11,7 @@
 #include <us/gov/signal_handler.h>
 #include <us/gov/crypto/crypto.h>
 #include "protocol.h"
+#include "app.h"
 #include <chrono>
 #include <cassert>
 #include <map>
@@ -24,7 +25,6 @@ namespace cash {
 	using crypto::ec;
 	using blockchain::peer_t;
 
-	typedef int64_t cash_t;
 	typedef crypto::ec::keys keys;
 	typedef keys::pub_t pubkey_t;
 

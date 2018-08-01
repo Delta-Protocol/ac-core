@@ -44,22 +44,18 @@ public class SymmetricEncryption {
     }
 
     public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
-        
-        this(EllipticCryptography.getInstance().generateSharedKey(priv_a,pub_b, keySize));
+        this(EllipticCryptography.secp256k1.secp256k1.generateSharedKey(priv_a,pub_b, keySize));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
-        
         random.nextBytes(iv);
-        
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
         return Arrays.concatenate(cipher.doFinal(plaintext), iv);
     }
 
-    //Decrypt returns an empty byte array if the ciphertext is invalid. Invalid ciphertext would 
+    //Decrypt returns an empty byte array if the ciphertext is invalid. Invalid ciphertext would
     //otherwise cause an exception as the algorithm is unable to authenticate the ciphertext.
-    public byte[] decrypt(byte[] encrypted) {    
-        
+    public byte[] decrypt(byte[] encrypted) {
         byte[] emptyArray = new byte[0];
         try{
             int messageLength = encrypted.length - ivSize;
@@ -73,7 +69,7 @@ public class SymmetricEncryption {
         }
         catch(GeneralSecurityException e){
             return emptyArray;
-        }      
+        }
     }
 
 }

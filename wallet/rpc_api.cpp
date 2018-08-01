@@ -63,18 +63,3 @@ void c::ask(int service, const string& args, ostream&os) {
     }
 }
 
-void c::ask_ping(ostream&os) {
-//cout << "asking " << service << " " << args << endl;
-	if (!connect_walletd(os)) return;
-
-	datagram* d=new datagram(us::wallet::protocol::wallet_ping,"");
-    auto r=send_recv(d);
-    if (unlikely(!r.first.empty())) {
-        os << "(Error) " << r.first;
-    }
-    else {
-    	os << "Remote wallet says: " << r.second->parse_string();
-	    delete r.second;
-    }
-}
-

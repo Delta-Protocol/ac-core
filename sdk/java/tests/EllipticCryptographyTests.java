@@ -19,16 +19,13 @@ import java.util.Arrays;
 
 public class EllipticCryptographyTests{
 
-    private static EllipticCryptography ec;
-        
-        KeyPair a;
+         KeyPair a;
         KeyPair b;
         KeyPair c;
 
     public boolean testEllipticCryptography() throws GeneralSecurityException {
         
         try{
-            ec = EllipticCryptography.getInstance();
            
             assert(testSharedSecret());
             assert(testSharedSecretRawKeys());
@@ -44,19 +41,19 @@ public class EllipticCryptographyTests{
     //tests that conversion between raw private key and java PrivateKey type is successful.
     private boolean testKeyConversion() throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         
-        BigInteger privInts = EllipticCryptography.generatePrivateInt();
-        PrivateKey priv = EllipticCryptography.getPrivateKey(privInts);
-        BigInteger privInts2 = EllipticCryptography.getPrivateInt(priv);
+        BigInteger privInts = EllipticCryptography.secp256k1.generatePrivateInt();
+        PrivateKey priv = EllipticCryptography.secp256k1.getPrivateKey(privInts);
+        BigInteger privInts2 = EllipticCryptography.secp256k1.getPrivateInt(priv);
         
         return privInts==privInts2;
     }
 
     //tests shared secret generation with real raw key values.
     private boolean testSharedSecretRawKeys() throws GeneralSecurityException{
-        PrivateKey privateKey = ec.getPrivateKey(Base58.decode("9pKQDhcZsi9V1qVhaDDnqV7HyiatxUEwTiLjqtqD7ZR6"));
-        PublicKey publicKey = ec.getPublicKey(Base58.decode("or69BumA7ZALzHNKjuxDLtHithXo3BfzJ2VYg73uNizk"));
+        PrivateKey privateKey = EllipticCryptography.secp256k1.getPrivateKey(Base58.decode("9pKQDhcZsi9V1qVhaDDnqV7HyiatxUEwTiLjqtqD7ZR6"));
+        PublicKey publicKey = EllipticCryptography.secp256k1.getPublicKey(Base58.decode("or69BumA7ZALzHNKjuxDLtHithXo3BfzJ2VYg73uNizk"));
  
-        byte[] key = ec.generateSharedKey(privateKey, publicKey, 16);
+        byte[] key = EllipticCryptography.secp256k1.generateSharedKey(privateKey, publicKey, 16);
         ;
         return Base58.encode(key).equals("C1w1ufPafGrkgPCZRFRT1x");
     }
@@ -64,28 +61,28 @@ public class EllipticCryptographyTests{
     //tests that two keypairs will generate the same shared secret using their own private key and the other's public key.
     private boolean testSharedSecret() throws GeneralSecurityException {
         
-        KeyPair a = ec.generateKeyPair();
-        KeyPair b = ec.generateKeyPair();
+        KeyPair a = EllipticCryptography.secp256k1.generateKeyPair();
+        KeyPair b = EllipticCryptography.secp256k1.generateKeyPair();
 
         PrivateKey priv_a = a.getPrivate();
         PublicKey pub_a = a.getPublic();
         PrivateKey priv_b = b.getPrivate();
         PublicKey pub_b = b.getPublic();
 
-        byte[] key1 = ec.generateSharedKey(priv_a, pub_b, 16);
-        byte[] key2 = ec.generateSharedKey(priv_b, pub_a, 16);
+        byte[] key1 = EllipticCryptography.secp256k1.generateSharedKey(priv_a, pub_b, 16);
+        byte[] key2 = EllipticCryptography.secp256k1.generateSharedKey(priv_b, pub_a, 16);
         
         return Arrays.equals(key1,key2);
     }
 
     private boolean testSignAndVerify() throws GeneralSecurityException {
         
-        KeyPair a = ec.generateKeyPair();
+        KeyPair a = EllipticCryptography.secp256k1.generateKeyPair();
         String message_string = "How do you know that this message is from who you think it is?";
         byte[] message = message_string.getBytes();
-        byte[] signature = ec.sign(a.getPrivate(), message);
+        byte[] signature = EllipticCryptography.secp256k1.sign(a.getPrivate(), message);
 
-        return ec.verify(a.getPublic(), message, signature);
+        return EllipticCryptography.secp256k1.verify(a.getPublic(), message, signature);
     }
 
     /*

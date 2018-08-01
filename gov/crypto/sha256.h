@@ -8,6 +8,7 @@
 #include <cstring>
 #include <array>
 #include <us/gov/likely.h>
+#include "ripemd160.h"
 
 namespace us { namespace gov {
 namespace crypto {
@@ -35,6 +36,7 @@ using namespace std;
 
 		void write(const unsigned char* data, size_t len);
 		void write(const string&data);
+		void write(const ripemd160::value_type& data);
 
 		void finalize(unsigned char hash[output_size]);
 		void finalize(value_type&);
