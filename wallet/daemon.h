@@ -6,10 +6,6 @@
 #include <us/gov/crypto/ec.h>
 #include "wallet.h"
 #include <unordered_map>
-
-#include "local_api.h" //---delete or not
-#include "api.h"       //---delete or not
-
 //#include "wallet_local_api.h"
 //#include "pairing_local_api.h"
 #include "daemon_local_api.h"
