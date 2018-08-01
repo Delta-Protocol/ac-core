@@ -135,6 +135,10 @@ void c::write(const unsigned char* data, size_t len) {
     }
 }
 
+void c::write(const ripemd160::value_type& data) {
+	write(&data[0],ripemd160::output_size);
+}
+
 void c::finalize(value_type& hash) {
     static const unsigned char pad[64] = {0x80};
     unsigned char sizedesc[8];

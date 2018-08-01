@@ -19,13 +19,19 @@ c::~app() {
 }
 
 us::gov::blockchain::peer_t::stage_t c::my_stage() const {
-	if (cache_my_stage!=peer_t::unknown) return cache_my_stage;
+//	if (cache_my_stage!=peer_t::unknown) return cache_my_stage;
 	auto k=node_pubkey.hash();
+cout << k << endl;
+cout << db.nodes.size() << endl;
+cout << endl;
+cout << db.hall.size() << endl;
 	if (db.nodes.find(k)!=db.nodes.end()) {
 		cache_my_stage=peer_t::node;
+cout << "SET node" << endl;
 	}
 	else if (db.hall.find(k)!=db.hall.end()) {
 		cache_my_stage=peer_t::hall;
+cout << "SET hall" << endl;
 	}
 	else {
 		cache_my_stage=peer_t::out;
@@ -103,7 +109,7 @@ void c::add_growth_transactions(unsigned int seed) {
 		if (s<min_growth) s=min_growth;
 		if (s>nh) s=nh;
 		maxr=nh-1;
-		//cout << "grow the network with " << s << " nodes." << endl;
+	cout << "grow the network with " << s << " nodes." << endl;
 	}
 	else {
 		size_t nn=db.nodes.size();
@@ -111,9 +117,10 @@ void c::add_growth_transactions(unsigned int seed) {
 		src=&db.nodes;
 		dst=&db.hall;
 		maxr=nn-1;
-		//cout << "shrink the network with " << s << " nodes." << endl;
+	cout << "shrink the network with " << s << " nodes." << endl;
 	}
 	uniform_int_distribution<size_t> distribution(0,maxr);
+cout << s << " " << maxr << endl;
 	for (size_t i=0; i<s; ++i) { ///move s from hall to nodes
 		auto p=src->begin();
 		size_t r;
@@ -126,6 +133,7 @@ void c::add_growth_transactions(unsigned int seed) {
 		advance(p,r);
 		dst->emplace(*p);
 		src->erase(p);
+cout << "dddooone" << endl;
 	}
 }
 

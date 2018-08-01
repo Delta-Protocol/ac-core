@@ -1,0 +1,27 @@
+Coding style
+============
+
+comments are minimal, documentation is elsewhere.
+
+Vertical space is optimized at the expense of horizontal space.
+Comments are 1 line using // appended at the end of the first line they apply to.
+
+Relevant types are stored in their own file. Their names match.
+
+in the scope of a cpp file the identifier c represents the type name
+in the scope of a type c, the subtype c::b represents the main base class
+
+function prototypes occupy only one line, regardless of its length.
+
+scope opening curly braces {
+<4 space indent>body
+} // closing
+
+Upper case are only used for MACROS, to yell, because macros don't respect c++ scope rules.
+Lower case is used elsewhere, identifiers, constants, etc.
+
+struct is preferred rather than class.
+
+protected and private sections are innofensive but are rather not written.
+
+

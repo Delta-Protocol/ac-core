@@ -11,6 +11,7 @@
 #include <us/gov/signal_handler.h>
 #include <us/gov/crypto/crypto.h>
 #include "protocol.h"
+#include "app.h"
 #include <chrono>
 #include <cassert>
 #include <map>
@@ -24,7 +25,6 @@ namespace cash {
 	using crypto::ec;
 	using blockchain::peer_t;
 
-	typedef int64_t cash_t;
 	typedef crypto::ec::keys keys;
 	typedef keys::pub_t pubkey_t;
 
@@ -98,6 +98,8 @@ namespace cash {
 		bool add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount, const string& locking_program_input);
 		bool add_output(const hash_t& addr, const cash_t& amount, const hash_t& locking_program);
 
+        tx();
+
 		cash_t check() const; //return fees
 
 		ec::sigmsg_hasher_t::value_type get_hash(const size_t& this_index, sigcodes_t) const;
@@ -114,8 +116,9 @@ namespace cash {
 		inputs_t inputs;
 		outputs_t outputs;
 		blockchain::diff::hash_t parent_block;
+        uint32_t nonce;
 	};
-}
+
 
 static ostream& operator << (ostream&os, const cash::tx& t) {
 	os << t.to_b58();
@@ -146,6 +149,7 @@ static istream& operator >> (istream&is, cash::tx::sigcode_t& t) {
 	return is;
 }
 
+}
 }}
 
 #endif

@@ -117,13 +117,13 @@ void c::dump_balances(ostream& os) const {
 }
 
 void c::extended_balance(ostream& os) const {
-	cash::cash_t b=0;
-	os << "[address] [locking_program] [balance]" << endl;
+//	cash::cash_t b=0;
+//	os << "[address] [locking_program] [balance]" << endl;
 	for (auto& i:data) {
-		b+=i.second.balance;
+//		b+=i.second.balance;
 		os << i.first << ' ' << i.second.locking_program << ' ' << i.second.balance << endl;
 	}
-	os << "total balance: " << b;
+//	os << "total balance: " << b;
 }
 
 using socket::datagram;
@@ -442,5 +442,25 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 }
 
 
+//---------impl of api functions that shall always be executed on the user pc and never query a remote server to do so
 
+#include <sstream>
+#include <us/gov/crypto.h>
+
+void wallet_api::priv_key(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {
+	if (!gov::crypto::ec::keys::verify(privkey)) {
+		os << "The private key is incorrect.";
+        return;
+	}
+	auto pub=gov::crypto::ec::keys::get_pubkey(privkey);
+	os << "Public key: " << pub << endl;
+	os << "Address: " << pub.compute_hash();
+}
+
+void wallet_api::gen_keys(ostream&os) {
+	gov::crypto::ec::keys k=gov::crypto::ec::keys::generate();
+	os << "Private key: " << k.priv.to_b58() << endl;
+	os << "Public key: " << k.pub.to_b58() << endl;
+	os << "Address: " << k.pub.compute_hash();
+}
 

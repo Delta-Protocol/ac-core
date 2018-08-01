@@ -51,6 +51,8 @@ using namespace std;
 	    void write(const string&);
 	    void write(const uint64_t&);
 	    void write(const int64_t&);
+	    void write(const uint32_t&);
+	    void write(const int32_t&);
 	    void write(bool);
 	    void write(const double&);
 

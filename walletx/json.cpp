@@ -1,3 +1,4 @@
+#if 0
 #ifdef FCGI
 #include "json.h"
 #include <sstream>
@@ -5,6 +6,24 @@
 using namespace std;
 using namespace us::wallet::w3api;
 typedef us::wallet::w3api::json c;
+
+Json::Value c::convert_response_balance(const string& s) {
+    istringstream is(s);
+    string p;
+    is >> p;
+    Json::Value val;
+    val["balance"]=p;
+    return val;
+}
+Json::Value c::convert_response_balance_detailed(const string& s) {
+    istringstream is(s);
+    string p;
+    is >> p;
+    Json::Value val;
+    val["dbalance"]=p;
+    return val;
+}
+
 /* 
 Json::Value c::convert_response_new_compartiment(const string& s) {
     istringstream is(s);
@@ -163,3 +182,4 @@ Json::Value c::convert_response_mempool(const string& s) {
 */
 #endif
 
+#endif

@@ -10,7 +10,9 @@
 #include <us/wallet/wallet.h>
 #include <us/wallet/daemon.h>
 #include <us/gov/input.h>
+#include <us/wallet/daemon_api.h>
 #include "fcgi.h"
+#include <us/wallet/json/daemon_api.h>
 
 using namespace us::wallet;
 
@@ -48,8 +50,8 @@ struct params {
 	bool daemon{false};
 #ifdef FCGI
     bool fcgi{false};
-    bool json{false};
 #endif
+    bool json{false};
     bool help{false};
     bool advanced{false};
     uint16_t listening_port{16673};
@@ -84,8 +86,8 @@ void help(const params& p, ostream& os=cout) {
 	  os << " -lp       Listening Port. Ignored with -local" << endl;
 #ifdef FCGI
 	  os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
-	  os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
 #endif
+	  os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
       os << " RPC to backend(us-gov) parameters:  Requires -local" << endl;
       os << "   -bhost <address>  us-gov IP address. [" << p.backend_host << "]" << endl;
       os << "   -bp <port>  TCP port. [" << p.backend_port << "]" << endl;
@@ -138,9 +140,12 @@ void run_fcgi(const params& p) {
    try {
       fcgi=new Fastcgipp::Manager<w3api::fcgi_t>();
       //fcgi.setupSignals();
-      fcgi->listen();
+      if (!fcgi->listen()) {
+        cerr << "Cannot listen on FCGI port" << endl;
+        exit (1);
+      }
       fcgi->start();
-      cout << "us-wallet fast-cgi initiated normally" << endl;
+      //cout << "us-wallet fast-cgi initiated normally" << endl;
       fcgi->join();
       delete fcgi;
       fcgi=0;
@@ -153,9 +158,9 @@ void run_fcgi(const params& p) {
 
 #include <us/wallet/protocol.h>
 
-using us::gov::input::args_t;
+using us::gov::input::shell_args;
 
-string parse_options(args_t& args, params& p) {
+string parse_options(shell_args& args, params& p) {
     string cmd;
     while(true) {
     	cmd=args.next<string>();
@@ -190,10 +195,10 @@ string parse_options(args_t& args, params& p) {
         else if (cmd=="-fcgi") {
         	p.fcgi=true;
         }
+#endif
         else if (cmd=="-json") {
         	p.json=true;
         }
-#endif
         else if (cmd=="-h") {
         	p.help=true;
         }
@@ -204,17 +209,10 @@ string parse_options(args_t& args, params& p) {
     return cmd;
 }
 
-void tx(api& wapi, args_t& args, const params& p, ostream& os) {
+void tx(us::wallet::wallet_api& wapi, shell_args& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="transfer") {
-        wallet::tx_make_p2pkh_input i;
-        i.rcpt_addr=args.next<cash::hash_t>();
-        i.amount=args.next<cash::cash_t>();
-        i.fee=1;
-        i.sigcode_inputs=cash::tx::sigcode_all;
-        i.sigcode_outputs=cash::tx::sigcode_all;
-        i.sendover=true;
-        wapi.tx_make_p2pkh(i,os);
+        wapi.transfer(args.next<cash::hash_t>(),args.next<cash::cash_t>(),os);
 	}
 	else if (command=="make_p2pkh") {
         wallet::tx_make_p2pkh_input i;
@@ -250,23 +248,8 @@ void tx(api& wapi, args_t& args, const params& p, ostream& os) {
 }
 
 #include <us/wallet/rpc_api.h>
-#include <us/wallet/local_api.h>
-
-#ifdef FCGI
-#include <jsoncpp/json/json.h> 
-Json::Value to_json(const string& s) {
-    istringstream is(s);
-    Json::Value val;
-    int i=0;
-    while(is.good()) {
-        string f;
-        is >> f;
-        if (!f.empty()) val[i++]=f;
-    }
-    return val;
-}
-#endif
-
+#include <us/wallet/wallet_local_api.h>
+#include <us/wallet/pairing_local_api.h>
 
 using us::gov::input::cfg;
 using us::gov::input::cfg0;
@@ -279,36 +262,40 @@ void run_daemon(const params& p) {
 
 //	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
     string homedir=p.homedir+"/wallet";
-
-	wallet_daemon d(cfg1::load(homedir).keys, p.listening_port, homedir, p.backend_host, p.backend_port);
+	wallet_daemon* d=new wallet_daemon(cfg1::load(homedir).keys, p.listening_port, homedir, p.backend_host, p.backend_port);
 
     auto k=cfg1::load_priv_key(p.homedir+"/gov");
-    if (k.first) d.add_address(k.second);
+    if (k.first) d->add_address(k.second);
 
 #ifdef FCGI
     if (p.fcgi) {
+        daemon_api* a=d;
+        if (p.json) {
+            a=new json::daemon_api(a);
+        }
         thread* wt=0;
-        w3api::fcgi_t::api=&d;
+        w3api::fcgi_t::api=a;
 
-        wt=new thread([&](){d.run(); if (fcgi) fcgi->terminate(); });
+        wt=new thread([&](){d->run(); if (fcgi) fcgi->terminate(); });
         run_fcgi(p);
         wt->join();
         delete wt;
+        w3api::fcgi_t::api=0;
     }
     else {
-        d.run();
+        d->run();
     }
 #else
-    d.run();
+    d->run();
 #endif
+    delete d;
 }
 
-
-	using us::gov::input::cfg_id;
+using us::gov::input::cfg_id;
 
 //if a gov daemon is running in the same homedir
 //import gov priv key into the wallet
-void import_gov_k(api& x, const params& p) {
+void import_gov_k(us::wallet::wallet_api& x, const params& p) {
     string govhomedir=p.homedir+"/gov";
     if (!cfg_id::file_exists(cfg_id::k_file(govhomedir))) {
         return;
@@ -324,22 +311,29 @@ void import_gov_k(api& x, const params& p) {
     }
 }
 
-void run_local(string command, args_t& args, const params& p) {
+#include <us/wallet/daemon_local_api.h>
+#include <us/wallet/daemon_rpc_api.h>
+
+void run_local(string command, shell_args& args, const params& p) {
 	auto homedir=p.homedir+"/wallet";
 	auto gov_homedir=p.homedir+"/wallet";
 
-	api* papi;
+	us::wallet::daemon_api* papi;
 	if (p.offline) {
 		cfg0::load(homedir);
-		papi=new local_api(homedir,p.backend_host,p.backend_port); //rpc to node
+		papi=new us::wallet::daemon_local_api(homedir,p.backend_host,p.backend_port); //rpc to node
         import_gov_k(*papi,p);
 	}
 	else {
 		using us::gov::input::cfg_id;
 		auto f=cfg_id::load(homedir+"/rpc_client");
-		papi=new rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
+		papi=new us::wallet::daemon_rpc_api(f.keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
 	}
-	api& wapi=*papi;
+
+    if (p.json) papi=new us::wallet::json::daemon_api(papi);
+
+	us::wallet::daemon_api& wapi=*papi;
+    typedef us::wallet::daemon_api::pub_t pub_t;
 
     ostringstream os;
 
@@ -387,18 +381,17 @@ void run_local(string command, args_t& args, const params& p) {
         }
     }
 	else if (command=="pair") {
-		api::pub_t pub=args.next<api::pub_t>();
+		pub_t pub=args.next<pub_t>();
         if (!pub.valid) {
             os << "Error: Invalid public key";
         }
         else {
     	    auto name=args.next<string>();
-//cout << "-- " << name << endl;
 	    	wapi.pair(pub,name,os);
         }
 	}
 	else if (command=="unpair") {
-		api::pub_t pub=args.next<api::pub_t>();
+		pub_t pub=args.next<pub_t>();
 		wapi.unpair(pub,os);
 	}
 	else if (command=="list_devices") {
@@ -412,25 +405,15 @@ void run_local(string command, args_t& args, const params& p) {
 		help(p);
 	}
 	delete papi;
-
-#ifdef FCGI
-    if (p.json)
-    cout << to_json(os.str()) << endl;
-    else
     cout << os.str() << endl;
-#else
-    cout << os.str() << endl;
-#endif
 }
-
-
 
 /// \brief  Main function
 /// \param  argc An integer argument count of the command line arguments
 /// \param  argv An argument vector of the command line arguments
 /// \return an integer 0 upon exit success
 int main(int argc, char** argv) {
-	args_t args(argc,argv);
+	shell_args args(argc,argv);
 	params p;
 	string command=parse_options(args,p);
 

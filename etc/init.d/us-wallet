@@ -2,16 +2,10 @@
 #copy this file into /etc/init.d/
 #update-rc.d curex-fcgi defaults
 
-
-
 USER=root
-#if not FCGI
-DAEMON="/usr/local/bin/us-wallet"
-DAEMON_ARGS="-d"
-#else
-#DAEMON="/usr/bin/spawn-fcgi -p 9000 -n /usr/local/bin/us-wallet -- "
-#DAEMON_ARGS="-d -fcgi"
-#endif
+DAEMON="/usr/local/bin/us-wallet"  #D; INSTALLER will tweak this line
+DAEMON_ARGS="-d"                   #A; INSTALLER will tweak this line
+
 PIDFILE="/var/run/us-wallet.pid"
 NAME="us-wallet"
 
@@ -25,7 +19,7 @@ start() {
   --pidfile $PIDFILE --make-pidfile \
   --chuid $USER \
   --startas /usr/bin/pipexec -- -k \
-   -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:2>D:1}' '{D:1>L:0}'
+  -- [ D $DAEMON $DAEMON_ARGS ] [ L /usr/bin/logger --tag $NAME ] '{D:2>L:0}' '{D:1>L:0}'
 
 
       RETVAL=$?
@@ -34,7 +28,9 @@ start() {
 
 
 stop() {
-      /sbin/start-stop-daemon --stop --pidfile $PIDFILE
+
+      echo -n "Stopping us-wallet: "
+      /sbin/start-stop-daemon -q -o --oknodo --stop --retry --pidfile $PIDFILE 2>/dev/null
       RETVAL=$?
 }
 

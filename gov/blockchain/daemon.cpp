@@ -31,9 +31,15 @@ void c::add(app*app) {
 		exit(1);
 	}
 	apps_.emplace(app->get_id(),app);
+//    app->parent=this;
 }
 
 c::syncd::syncd(daemon* d): d(d), head(0),cur(0),tail(0) {
+}
+
+const c::syncd::hash_t& c::syncd::tip() const {
+    lock_guard<mutex> lock(mx);
+    return head;
 }
 
 void c::syncd::run() {
@@ -84,18 +90,11 @@ void c::syncd::run() {
 			                        }
 			                    }
 					}
-{
-       unique_lock<mutex> lock(mx_wait4file);
-       if (!file_arrived) cv.wait_for(lock, 3s, [&]{ return file_arrived; });
-       file_arrived=false;
-}
-/*
-					else {
-//					cout << "SYNCD: going to sleep for 2 secs." << endl;
-						wait(chrono::seconds(2)); //TODO better
-					}
-//					cout << "SYNCD: waked up " << endl;
-*/
+                    {
+                       unique_lock<mutex> lock(mx_wait4file);
+                       if (!file_arrived) cv.wait_for(lock, 3s, [&]{ return file_arrived; });
+                       file_arrived=false;
+                    }
 				}
 				if (program::_this.terminated) return;
 			}
@@ -108,10 +107,9 @@ void c::syncd::run() {
                     d->clear();
                 }
 			}
+            d->on_sync();
 		}
-//		cout << "SYNCD: going to sleep indefinitely" << endl;
 		wait();
-//		cout << "SYNCD: waked up " << endl;
 	}
 }
 
@@ -232,64 +230,67 @@ diff::hash_t c::get_last_block_imported() const {
 	return last_block_imported;
 }
 
-
-void c::stage1(cycle_t& data) {
-//cout << "stage1 NB1 " << data.new_block << endl;
-	if (!data.new_block) return;
-	if (auth_app->my_stage()!=peer_t::node) return;
-//cout << "stage1 VOTETIP " << endl;
-	vote_tip(*data.new_block);
-//cout << "NB1 " << data.new_block << endl;
-//cout << "/stage1" << endl;
-}
-
-bool c::stage2(cycle_t& cycle) {
-	diff::hash_t hash=votes.select();
-cout << "Voting process result: diff " << hash << endl;
-	if (likely(!hash.is_zero())) {
-		if (likely(cycle.new_block!=0)) {
-			if (likely(hash==cycle.new_block->hash())) {
-				save(*cycle.new_block);
-				if (!import(*cycle.new_block)) {
-			                clear();
+void c::eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle) {
+		if (likely(cycle.new_diff!=0)) {
+			if (likely(voted_tip==cycle.new_diff->hash())) {
+				save(*cycle.new_diff);
+				if (!import(*cycle.new_diff)) {
+			        clear();
 					cerr << "DB CLEARED" << endl;
 				}
 			}
-			delete cycle.new_block;
-			cycle.new_block=0;
+			delete cycle.new_diff;
+			cycle.new_diff=0;
 		}
-		syncdemon.update(hash,get_last_block_imported()); //head,tail
-		while (!syncdemon.in_sync() && !program::_this.terminated) {
-			cout << "syncing" << endl;
-			thread_::_this.sleep_for(chrono::seconds(1));
-			if (cycle.get_stage()!=cycle_t::local_deltas_io) break;
-		}
-		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false;
-	}
+		syncdemon.update(voted_tip,get_last_block_imported()); //head,tail
+}
 
+void c::stage1(cycle_t& data) {
+//cout << "stage1 NB1 " << data.new_diff << endl;
+	if (!data.new_diff) return;
+	if (auth_app->my_stage()!=peer_t::node) return;
+//cout << "stage1 VOTETIP " << endl;
+	vote_tip(*data.new_diff);
+//cout << "NB1 " << data.new_diff << endl;
+//cout << "/stage1" << endl;
+}
+
+void c::stage2(cycle_t& cycle) {
+	diff::hash_t tip=votes.select(); //decide tip
+    app::chaininfo.set_tip(tip); //tx validation, now they have to refer to this new tip
+
+cout << "Voting process result: diff " << tip << endl;
+	if (likely(!tip.is_zero())) {
+        eat_diff(tip,cycle);
+//		if (cycle.get_stage()!=cycle_t::local_deltas_io) return false; //TODO review
+	}
+}
+
+bool c::stage3(cycle_t& cycle) {
 	if (unlikely(!auth_app->is_node())) return false;
+	if (unlikely(!syncdemon.in_sync())) return false;
 
 	auto* mg=create_local_deltas();
 	if (mg!=0) {
 		send(*mg);
 		{
 		lock_guard<mutex> lock(mx_pool);
-		pool->allow(*mg);
-		pool->add(mg);
+		if (pool->allow(*mg)) pool->add(mg);
 		}
 	}
 	return true;
 }
 
-void c::stage3(cycle_t& cycle) {
-	assert(cycle.new_block==0);
+void c::stage4(cycle_t& cycle) {
+
+	assert(cycle.new_diff==0);
 	{
 	lock_guard<mutex> lock(mx_pool);
 	pool->end_adding();
-	cycle.new_block=pool;
+	cycle.new_diff=pool;
 	pool=new diff();
 	}
-	cycle.new_block->prev=get_last_block_imported();
+	cycle.new_diff->prev=get_last_block_imported();
 }
 
 void c::load_head() {
@@ -298,11 +299,11 @@ void c::load_head() {
         diff::hash_t head(0);
         if (is.good()) is >> head;
         syncdemon.update(head,get_last_block_imported());
+        app::chaininfo.set_tip(head);
 }
 
 void c::run() {
 	//if (miners_size()>1000) peerd.set_ip4(); else peerd.set_tor();
-
 	thread peers(&networking::run,&peerd);
 
 	vector<thread> apps_threads;
@@ -316,7 +317,7 @@ void c::run() {
 
 	thread synct(&syncd::run,&syncdemon);
 
-	cycle_t cycle;
+cout << "it looks stupid I am waiting for 5 secs now" << endl;
 	thread_::_this.sleep_for(chrono::seconds(5));
 
 	assert(pool==0);
@@ -327,10 +328,15 @@ void c::run() {
 	while(!program::_this.terminated) { // main loop
 		cycle.wait_for_stage(cycle_t::new_cycle);
 		stage1(cycle);
+
 		cycle.wait_for_stage(cycle_t::local_deltas_io);
-		if (!stage2(cycle)) continue;
+		stage2(cycle);
+
+		cycle.wait_for_stage(cycle_t::sync_db);
+		if (!stage3(cycle)) continue;
+
 		cycle.wait_for_stage(cycle_t::consensus_vote_tip_io);
-		stage3(cycle);
+		stage4(cycle);
 	}
 
 	synct.join();
@@ -472,12 +478,12 @@ peer_t* c::get_random_edge() {
 }
 
 vector<peer_t*> c::get_nodes() {
-	vector<peer_t*> v;
-	for (auto& i:peerd.in_service()) {
-		auto p=reinterpret_cast<peer_t*>(i);
-		if (p->stage==peer_t::node) v.push_back(p);
-	}
-	return v;
+    vector<peer_t*> v;
+    for (auto& i:peerd.in_service()) {
+        auto p=static_cast<peer_t*>(i);
+        if (p->stage==peer_t::node) v.push_back(p);
+    }
+    return v;
 }
 
 vector<peer_t*> c::get_people() {
@@ -493,9 +499,9 @@ void c::update_peers_state() {
 	for (auto& i:peerd.in_service()) {
 		auto p=reinterpret_cast<peer_t*>(i);
 		if (p->stage!=peer_t::sysop) {
-			for (int i=0; i<sizeof(p->pubkey.data); ++i)
-				cout << p->pubkey.data[i]  << " ";
-			cout << endl;
+			//for (int i=0; i<sizeof(p->pubkey.data); ++i)
+			//	cout << p->pubkey.data[i]  << " ";
+			//cout << endl;
 			p->stage=auth_app->db.get_stage(p->pubkey.hash());
 		}
 	}
@@ -505,16 +511,10 @@ void c::send(const local_deltas& g, peer_t* exclude) {
 	ostringstream os;
 	g.to_stream(os);
 	string msg=os.str();
-	for (auto& i:get_nodes()) {
+    datagram d(protocol::local_deltas,msg); //TODO optimize, write directly in the datagram
+	for (auto& i:peerd.get_nodes()) {
 		if (i==exclude) continue; //dont relay to the original sender
-		i->send(new datagram(protocol::local_deltas,msg));
-	}
-}
-
-void c::send(const datagram& g, peer_t* exclude) {
-	for (auto& i:get_nodes()) {
-		if (i==exclude) continue; //dont relay to the original sender
-		i->send(g);
+		i->send(d);
 	}
 }
 
@@ -523,14 +523,15 @@ local_deltas* c::create_local_deltas() {
 	auto* mg=new local_deltas();
 
 	{
-    lock_guard<mutex> lock(peerd.mx_evidences); //pause reception of evidences while changing app pools
+    lock_guard<mutex> lock(peerd.mx_evidences);
 	for (auto&i:apps_) {
 		auto* amg=i.second->create_local_delta(); //
 		if (amg!=0) {
 			mg->emplace(i.first,amg);
 		}
 	}
-	peerd.clear_evidences(); //evidences are recorded to decide if relay them or not, it is emptied on each cycle, it is safe to forget about them as they are tied to a parent block, for so they cannot be succesfully executed after the blockain grows 1 block
+	auto e=peerd.retrieve_evidences(); //evidences are recorded to decide if I should relay them or not, it is emptied on each cycle, it is safe to forget about them (replay attack) as they are tied to a specific db hash. They cannot be succesfully executed after the blockain grows 1 block
+    delete e; //evidences are recorded to decide if I should relay them or not, it is emptied on each cycle, it is safe to forget about them (replay attack) as they are tied to a specific db hash. They cannot be succesfully executed after the blockain grows 1 block
 	}
 
 	if (mg->empty()) {
@@ -649,8 +650,8 @@ void c::process_block(peer_t *c, datagram*d) {
 	delete b;
 }
 
-bool c::networking::process_evidence(relay::peer_t *c, datagram*d) {
-	return parent->process_evidence(reinterpret_cast<peer_t*>(c),d);
+bool c::networking::process_evidence(datagram*d) {
+	return parent->process_evidence(d);
 }
 
 bool c::networking::process_work(socket::peer_t *c, datagram*d) {
@@ -677,17 +678,36 @@ bool c::networking::process_work_sysop(peer::peer_t *c, datagram*d) {
 	return false;
 }
 
-bool c::process_evidence(peer_t *c, datagram*d) {
-	send(*d, c); //relay TODO - check relay daemon
-        if (!syncdemon.in_sync()) {
-		cout << "ignoring evidence processing, I am syncing" << endl;
-		delete d;
-		return true;
+void c::flush_evidences_on_hold() {
+    unique_lock<mutex> lock(evidences_on_hold.mx);
+    for (auto& e:evidences_on_hold) {
+        if (!process_evidence(e)) {
+            cerr << "Nobody recognized this evidence" << endl;
+            e->dump(cout);
+            delete e;
+        }
+        e=0;
+    }
+    evidences_on_hold.clear();
+}
+
+void c::on_sync() { //while syncing evidences are queued in a separate containew evidences_on_hold
+    flush_evidences_on_hold();
+
+//    cycle.in_sync=true;
+}
+
+bool c::process_evidence(datagram*d) {
+//	send(*d, c); //relay TODO - check relay daemon
+    if (!syncdemon.in_sync()) {
+  		cout << "holding evidence until sync is completed" << endl;
+        evidences_on_hold.add(d);
+	    return true;
 	}
 
 	bool processed=false;
 	for (auto&i:apps_) {
-		if (i.second->process_evidence(c,d)) {
+		if (i.second->process_evidence(d)) {
 			processed=true;
 		}
 	}
@@ -696,12 +716,14 @@ bool c::process_evidence(peer_t *c, datagram*d) {
 
 bool c::process_app_query(peer_t *c, datagram*d) {
 //cout << "BLOCKCHAIN: process_query " << d->service << endl;
-        if (!syncdemon.in_sync()) {
+/*
+    if (!syncdemon.in_sync()) {
         c->send(new datagram(us::gov::protocol::error,"Service temporarily unavailable. Syncing."));
  //		cout << "ignoring query, I am syncing" << endl;
 		delete d;
 		return true;
 	}
+*/
 	bool processed=false;
 	for (auto&i:apps_) {
 		if (i.second->process_query(c,d)) {
@@ -761,6 +783,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return true;
 		}
 	}
+/*
 	if (!syncdemon.in_sync()) {
 		if (d->service>>2>=protocol::blockchain_base) {
 			cout << "dismissing command cause I am syncing" << endl;
@@ -771,6 +794,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 			return false; //route to auth, dfs, etc
 		}
 	}
+*/
 	switch(d->service) {
 		case protocol::local_deltas: {
 			process_incoming_local_deltas(c,d); 
@@ -800,13 +824,15 @@ void c::set_last_block_imported(const diff::hash_t& h) {
 }
 
 bool c::import(const diff& b) {
-        lock_guard<mutex> lock(mx_import); 
+    lock_guard<mutex> lock(mx_import); 
 //	cout << "blockchain: importing diff " << b.hash() << endl;
-        if (b.prev!=last_block_imported) {
-                cout << "block not in sequence." << b.prev << " " << last_block_imported << endl;
-                return false;
-        }
-	app::last_block_imported=last_block_imported;
+    if (b.prev!=last_block_imported) {
+       cout << "block not in sequence." << b.prev << " " << last_block_imported << endl;
+       return false;
+    }
+    
+//    unique_lock<mutex> lock(app::mx_last_block_imported);
+	app::chaininfo.last_block_imported=last_block_imported;
 
 	for (auto&i:b) {
 		auto a=apps_.find(i.first);
@@ -905,6 +931,8 @@ void c::list_apps(ostream& os) const {
 
 void c::dump(ostream& os) const {
 	os << "Hello from blockchain::daemon" << endl;
+	os << "networking" << endl;
+	peerd.dump(os);
 
 }
 string c::timestamp() const {

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- bmake project file --> 
+<project name="curex" version="1.0">
+	<title>currency exchange</title>	
+
+ 	<target name="cex" format="shared library" toolset="cmake"> <!--matching engine-->
+ 		<definitions>-std=c++14</definitions>
+		<dependencies>
+		<library name="boost"/>
+		</dependencies>
+	</target>
+ 	<target name="cexapi" format="executable" toolset="cmake"> <!-- api publisher - fastCGI -->
+ 		<definitions>-std=c++14</definitions>
+		<dependencies>
+	                <prj name="curex" target="cex"/>
+4			<library name="fastcgi++"/>
+		</dependencies>
+	</target>
+ 	<target name="cexr" format="shared library" toolset="cmake"> <!-- api remote access -->
+ 		<definitions>-std=c++14</definitions>
+		<dependencies>
+                        <library name="curlpp"/>
+		</dependencies>
+	</target>
+ 	<target name="cexbot" format="executable" toolset="cmake"> <!-- api remote access -->
+ 		<definitions>-std=c++14</definitions>
+		<dependencies>
+	                <prj name="curex" target="cexr"/>
+		</dependencies>
+	</target>
+
+        <target name="test" format="executable">
+                <version major="0" minor="1"/>
+ 		<definitions>-std=c++14</definitions>
+                <dependencies>
+                   <prj name="jail" target="jail"/>
+                   <prj name="curex" target="cex"/>
+                   <prj name="curex" target="cexr"/>
+                </dependencies>
+        </target>
+        <target name="fundsim" format="executable">
+                <version major="0" minor="1"/>
+ 		<definitions>-std=c++14</definitions>
+                <dependencies>
+                   <prj name="curex" target="cex"/>
+                </dependencies>
+        </target>
+</project>
+

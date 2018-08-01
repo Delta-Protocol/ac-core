@@ -1,0 +1,56 @@
+balance 1
+bool
+cmd=balance&detailed=&lt;1|0&gt;
+-
+
+list 1
+bool
+cmd=list&show_priv_keys=&lt;1|0&gt;
+-
+
+new_address 0
+cmd=new_address
+-
+
+add_address 1
+const priv_t&
+cmd=add_address&privkey=b58
+-
+
+transfer 2
+const hash_t&
+const cash_t&
+cmd=transfer&recipient=addressb58&amount=
+-
+
+tx_make_p2pkh 1
+const tx_make_p2pkh_input&
+-
+-
+
+tx_sign 3
+const string&
+sigcode_t
+sigcode_t
+-
+-
+
+tx_send 1
+const string&
+-
+-
+
+tx_decode 1
+const string&
+-
+-
+
+tx_check 1
+const string&
+-
+-
+
+ping 0
+cmd=ping
+    ask_ping(a0);
+

@@ -1,0 +1,50 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<style>
+#A{
+width:500px;
+heifht:100px;
+background-color:yellow;
+overflow-X: scroll;
+}
+
+#B{
+
+width:10000px;
+height:40px;
+background-color:red;
+}
+
+}
+</style>
+<script>
+
+function move() {
+//alert(document.getElementById("A").scrollLeft);
+//	document.getElementById("A").scrollLeft=100;
+//	$("#A").scrollLeft(1000);
+		$("#A").animate({
+				    scrollLeft: '+=1500'
+				}, 1000, function () { } );
+
+}
+
+</script>
+
+</head>
+<body>
+
+<div id="A">
+
+<div id="B">
+</div>
+
+</div>
+
+<button onclick="move();"><div>P</div></button>
+</body>
+
+</html>
+

@@ -56,7 +56,7 @@ int c::make_socket (uint16_t port) {
 }
 
 
-bool c::receive_and_process(client*c) {
+void c::receive_and_process(client*c) {
 	clients.resume(c);
 }
 
@@ -86,7 +86,6 @@ void c::incorporate(client*c) {
 	assert(c);
 	assert(c->sock!=0);
 	clients.add(c);
-
 }
 
 bool c::clients_t::is_here(client* c) const {
@@ -299,15 +298,17 @@ bool c::clients_t::rmlist::find(int fd) const {
 }
 
 void c::clients_t::rmlist::dump(ostream& os) const {
-	lock_guard<mutex> lock(mx);	
+	lock_guard<mutex> lock(mx);
 	os << "Size: " << size() << endl;
-	for (auto i:*this)
-		{ i.second->dump(os); }
+	for (auto i:*this) {
+		i.second->dump_all(os);
+		os << endl;
+	}
 }
 
 
 c::clients_t::wait::~wait() {
-    for (auto i:*this) delete i; 
+    for (auto i:*this) delete i;
 }
 
 void c::clients_t::wait::add(client* c) {
@@ -329,10 +330,12 @@ bool c::clients_t::wait::find(client* c) const {
 }
 
 void c::clients_t::wait::dump(ostream& os) const {
-	lock_guard<mutex> lock(mx);	
+	lock_guard<mutex> lock(mx);
 	os << "Size: " << size() << endl;
-	for (auto i:*this)
-		{ i->dump(os); }
+	for (auto i:*this) {
+		i->dump_all(os);
+		os << endl;
+	}
 }
 
 client* c::create_client(int sock) {
@@ -342,6 +345,8 @@ client* c::create_client(int sock) {
 
 #include <us/gov/likely.h>
 
+#ifdef SIM
+#else
 void c::run() {
 	fd_set read_fd_set;
 	int i;
@@ -384,7 +389,6 @@ void c::run() {
 	signal_handler::_this.add(this);
 	char discard[4]; //loopback recv buffer, up to 30 wake up signals
 	while (true) {
-		if (unlikely(thread_::_this.terminated)) break;
 		FD_ZERO(&read_fd_set);
 		FD_SET(sock,&read_fd_set);
 		FD_SET(loopback,&read_fd_set);
@@ -394,6 +398,7 @@ void c::run() {
 			cerr << "error in select" << endl;
 			continue;
 		}
+		if (unlikely(thread_::_this.terminated)) break;
 		if (unlikely(FD_ISSET(loopback, &read_fd_set))) {
             ::recv(loopback,&discard,4,0);
 		}
@@ -423,8 +428,9 @@ void c::run() {
 				cerr << "data arrived for an unknown fd " << i << endl;
 				continue;
 			}
-			clients.hold(c->second);
-			receive_and_process(c->second);
+			auto p=c->second;
+			clients.hold(p);
+			receive_and_process(p);
 		}
 	}
 	signal_handler::_this.remove(this);
@@ -434,5 +440,5 @@ void c::run() {
 	loopback=0;
 	clients.locli.disconnect();
 }
-
+#endif
 

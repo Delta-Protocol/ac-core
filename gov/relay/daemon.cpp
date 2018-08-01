@@ -8,25 +8,20 @@ using namespace us::gov::relay;
 using namespace std;
 
 c::daemon() {
+    evidences=new evidences_t();
 }
 c::daemon(uint16_t port, uint16_t edges): b(port,edges) {
+    evidences=new evidences_t();
 }
 
 c::~daemon() {
-}
-/*
-socket::client* c::create_client(int sock) {
-	auto p=new peer_t(sock);
-	p->parent=this;
-	return p;
-}
-*/
-bool c::process_evidence(peer_t *c, datagram*d) {
-	return false;
+    delete evidences;
 }
 
-void c::clear_evidences() {
-	evidences.clear();
+c::evidences_t* c::retrieve_evidences() { //caller must take the lock
+    auto e=evidences;
+    evidences=new evidences_t();
+    return e;
 }
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
@@ -34,26 +29,33 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 		datagram::hash_t h=d->compute_hash();
 		{
 		lock_guard<mutex> lock(mx_evidences);
-		if (evidences.find(h)!=evidences.end()) {
+		if (evidences->find(h)!=evidences->end()) {
 		delete d;
 		return true;
 		}
-		evidences.emplace(h);
+		evidences->emplace(h);
 		}
-		return process_evidence(static_cast<peer_t*>(c),d);
+        send(*d, c); //relay
+
+		return process_evidence(d);
 	}
 //cout << "relay_dmn:passing downstream" << endl;
 	return b::process_work(c,d);
 }
 
-
+void c::send(const datagram& g, socket::peer_t* exclude) {
+    for (auto& i:get_nodes()) {
+        if (i==exclude) continue; //dont relay to the original sender
+        i->send(g);
+    }
+}
 
 void c::dump(ostream& os) const {
 	os << "Hello from relay::daemon" << endl;
 	size_t z;
-        {
+    {
 	lock_guard<mutex> lock(mx_evidences);
-	z=evidences.size();
+	z=evidences->size();
 	}
 
 	os << "Unique evidences this cycle: " << z << endl;
