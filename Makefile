@@ -21,8 +21,8 @@ cryptos-debug: export CXXFLAGS:=${DEBUGFLAGS} -DCRYPTOS
 cryptos-release: export CXXFLAGS:=${RELEASEFLAGS} -DCRYPTOS
 cryptos-release: all
 
-all: gov/libusgov.so wallet/libuswallet.so govx/us-gov walletx/us-wallet
-	cd sdk/java; ./make; cd ../..
+all: gov/libusgov.so wallet/libuswallet.so govx/us-gov walletx/us-wallet sdk test
+	
 
 wallet-debug: export CXXFLAGS:=${DEBUGFLAGS}
 wallet-debug: wallet
@@ -91,17 +91,26 @@ api/apitool_generated__*: api/apitool
 api/apitool:
 	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C api ;
 
+sdk:
+	cd sdk/java; ./make; cd ../.. ;
+
+test: sdk
+	$(MAKE) CXXFLAGS="${CXXFLAGS}" -C test ;
+
 .PHONY: all
 .PHONY: wallet
 .PHONY: gov
 .PHONY: debug
 .PHONY: release
+.PHONY: sdk
+.PHONY: test
 
 clean:
 	$(MAKE) clean -C gov; \
 	$(MAKE) clean -C govx; \
 	$(MAKE) clean -C wallet; \
 	$(MAKE) clean -C walletx; \
-	$(MAKE) clean -C api;
+	$(MAKE) clean -C api; \
+	$(MAKE) clean -C test;
 	cd sdk/java; ./make clean; cd ../..
 

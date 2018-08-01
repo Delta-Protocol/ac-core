@@ -9,7 +9,6 @@
 
 using namespace std;
 using namespace us::gov::crypto;
-using CryptoPP::AES;
 
 int main ( int argc, char *argv[] )
 {

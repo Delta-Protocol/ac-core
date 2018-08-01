@@ -1,19 +1,19 @@
 package us.wallet;
 
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.jce.spec.ECParameterSpec;
 import org.spongycastle.jce.spec.ECPrivateKeySpec;
 import org.spongycastle.jce.spec.ECPublicKeySpec;
-import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.spongycastle.jce.spec.ECNamedCurveSpec;
+import org.spongycastle.jce.ECNamedCurveTable;
 import org.spongycastle.jce.ECPointUtil;
-import java.security.MessageDigest;
-import org.spongycastle.math.ec.ECCurve;
-import java.util.Arrays;
 import org.spongycastle.jce.interfaces.ECPublicKey;
 import org.spongycastle.jce.interfaces.ECPrivateKey;
 import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.jce.ECNamedCurveTable;
+import org.spongycastle.util.BigIntegers;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.math.ec.ECPoint;
 import java.security.Signature;
 import java.math.BigInteger;
 import java.security.PrivateKey;
@@ -22,15 +22,15 @@ import java.security.SecureRandom;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import org.spongycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.security.MessageDigest;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.NoSuchAlgorithmException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
-import org.spongycastle.util.BigIntegers;
+import java.util.Arrays;
 
 public class EllipticCryptography{
 

@@ -1,18 +1,16 @@
 package us.wallet;
 
-import java.security.SecureRandom;
-import java.security.Security;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.Arrays;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
-import org.spongycastle.util.Arrays;
-import org.spongycastle.jce.provider.BouncyCastleProvider;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
-
-
-import java.nio.charset.StandardCharsets;
 
 public class SymmetricEncryption {
 
@@ -23,7 +21,7 @@ public class SymmetricEncryption {
     private static final int tagSize = 16;
 
     private Cipher cipher;
-    private byte[] key;
+    private SecretKeySpec keySpec;
     private byte[] iv;
 
     public SymmetricEncryption(byte[] sharedKey) throws GeneralSecurityException {
@@ -32,28 +30,33 @@ public class SymmetricEncryption {
         Security.addProvider(new BouncyCastleProvider());
         cipher = Cipher.getInstance("AES/GCM/NoPadding");
         if(sharedKey.length == keySize){
-           key = sharedKey;
+            keySpec = new SecretKeySpec(sharedKey, "AES");
         } 
         else{
             throw new GeneralSecurityException("The key provided should be " + keySize + " bytes.");
         }
     }
 
-    public int getKeySize(){
-        return keySize;
-    }
-
-    public SymmetricEncryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
+    public SymmetricEncryption(PrivateKey priv, PublicKey pub) throws GeneralSecurityException {
         
-        this(EllipticCryptography.generateSharedKey(priv_a,pub_b, keySize));
+        this(EllipticCryptography.generateSharedKey(priv, pub, keySize));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
         
-        random.nextBytes(iv);
-        
-        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(tagSize * 8, iv), random);
-        return Arrays.concatenate(cipher.doFinal(plaintext), iv);
+        byte[] emptyArray = new byte[0];
+        try{
+            random.nextBytes(iv);
+            AlgorithmParameterSpec paramSpec = getAlgorithmParameterSpec();
+
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec , paramSpec, random);
+            
+            return Arrays.concatenate(cipher.doFinal(plaintext), iv);
+        }
+        catch(GeneralSecurityException e){
+            return emptyArray;
+        }  
+
     }
 
     //Decrypt returns an empty byte array if the ciphertext is invalid. Invalid ciphertext would 
@@ -68,12 +71,24 @@ public class SymmetricEncryption {
                 return emptyArray;
             }
             iv = Arrays.copyOfRange(encrypted, messageLength , encrypted.length);
-            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(tagSize * 8, iv), random);
+            AlgorithmParameterSpec paramSpec = getAlgorithmParameterSpec();
+            
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, paramSpec , random);
+            
             return cipher.doFinal(Arrays.copyOfRange(encrypted, 0, messageLength));
         }
         catch(GeneralSecurityException e){
             return emptyArray;
         }      
+    }
+
+    public int getKeySize(){
+        return keySize;
+    }
+
+    private AlgorithmParameterSpec getAlgorithmParameterSpec(){
+        
+        return new GCMParameterSpec(tagSize * 8, iv);
     }
 
 }

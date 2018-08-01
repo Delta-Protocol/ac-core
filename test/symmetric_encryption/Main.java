@@ -1,13 +1,7 @@
 import us.wallet.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.KeyPair;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.math.BigInteger;
-import org.spongycastle.math.ec.ECPoint;
-import javax.xml.bind.DatatypeConverter;
-
 
 public class Main{
     public static void main(String [ ] args) throws GeneralSecurityException{
