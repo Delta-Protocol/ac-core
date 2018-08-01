@@ -57,9 +57,9 @@ void c::list(bool showpriv, ostream& os){
             string s;
             is >> s;
 	if(!is.good()) break;
-            v["private Key"]=s;
+            v["private_Key"]=s;
             is >> s;
-            v["public key"]=s;
+            v["public_key"]=s;
             is >> s;
             v["address"]=s;
             lists[n++]=v;
@@ -69,7 +69,7 @@ void c::list(bool showpriv, ostream& os){
     else {
         string p; 
         is >> p;
-        val["private Key"]=p;
+        val["private_Key"]=p;
     }
     os << val;
 }
@@ -133,7 +133,7 @@ void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {
 
     string p;
     is >> p;
-    val["tx make p2pkh"]=p;
+    val["tx_make_p2pkh"]=p;
 
     os << val;
 
@@ -150,7 +150,7 @@ void c::tx_sign(const string&txb58, gov::cash::tx::sigcode_t sigcodei, gov::cash
 
     string p;
     is >> p;
-    val["tx sign"]=p;
+    val["tx_sign"]=p;
 
     os << val;
 
@@ -167,7 +167,7 @@ void c::tx_send(const string&txb58, ostream&os) {
 
     string p;
     is >> p;
-    val["tx send"]=p;
+    val["tx_send"]=p;
 
     os << val;
 
@@ -183,7 +183,7 @@ void c::tx_decode(const string&txb58, ostream&os) {
 
     string p;
     is >> p;
-    val["tx decode"]=p;
+    val["tx_decode"]=p;
 
     os << val;
 }
@@ -199,7 +199,7 @@ void c::tx_check(const string&txb58, ostream&os) {
 
     string p;
     is >> p;
-    val["tx check"]=p;
+    val["tx_check"]=p;
 
     os << val;
 }
@@ -215,7 +215,7 @@ void c::ping(ostream&os) {
 
     string p;
     is >> p;
-    val["ping response"]=p;
+    val["ping_response"]=p;
 
     os << val;
 }
@@ -263,7 +263,7 @@ void c::list_devices(ostream&os) {
 
     string p;
     is >> p;
-    val["list devices"]=p;
+    val["list_devices"]=p;
 
     os << val;
 }
