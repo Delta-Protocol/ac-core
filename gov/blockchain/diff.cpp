@@ -32,7 +32,11 @@ void local_deltas::to_stream(ostream& os) const {
 	os << pubkey << " " << signature << " " << message_to_sign() << " ";
 }
 
-local_deltas* local_deltas::from_stream(istream& is) {
+local_deltas* local_deltas::from_stream_prev(istream& is) {
+    return from_stream(is);
+}
+
+local_deltas* local_deltas::from_stream(istream& is) { //X
 	local_deltas* instance=new local_deltas();
 	is >> instance->pubkey;
 	is >> instance->signature;
@@ -72,7 +76,11 @@ void c::to_stream(ostream& os) const {
 	}
 }
 
-c* c::from_stream(istream& is) {
+c* c::from_stream_prev(istream& is) {
+    return from_stream(is);
+}
+
+c* c::from_stream(istream& is) { //X
 	c* bl=new c();
 	is >> bl->prev;
 //cout << "READING prev " << bl->prev << endl;

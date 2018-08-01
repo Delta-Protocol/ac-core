@@ -11,6 +11,7 @@ using namespace std;
         struct addr_t {
             virtual ~addr_t() {}
             virtual string to_stream(ostream& os) const=0;
+            static addr_t* from_stream_prev(istream& is);
             static addr_t* from_stream(istream& is);
         };
 

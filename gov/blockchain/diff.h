@@ -31,6 +31,7 @@ namespace blockchain {
 		virtual ~local_deltas() {}
 		string message_to_sign() const override;
 		void to_stream(ostream&) const;
+		static local_deltas* from_stream_prev(istream&);
 		static local_deltas* from_stream(istream&);
 	};
 
@@ -65,6 +66,7 @@ namespace blockchain {
 		const hash_t& hash() const;
 
 		void to_stream(ostream&) const;
+		static diff* from_stream_prev(istream&);
 		static diff* from_stream(istream&);
 
 

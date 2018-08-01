@@ -196,6 +196,9 @@ void c::local_delta::tokens_t::dump(ostream& os) const {
 void c::local_delta::tokens_t::to_stream(ostream& os) const {
 }
 
+c::local_delta::tokens_t c::local_delta::tokens_t::from_stream_prev(istream& is) {
+    return tokens_t();
+}
 c::local_delta::tokens_t c::local_delta::tokens_t::from_stream(istream& is) {
     return tokens_t();
 }
@@ -206,6 +209,9 @@ void c::local_delta::safe_deposit_box::dump(ostream& os) const {
 void c::local_delta::safe_deposit_box::to_stream(ostream& os) const {
 }
 
+c::local_delta::safe_deposit_box c::local_delta::safe_deposit_box::from_stream_prev(istream& is) {
+    return safe_deposit_box();
+}
 c::local_delta::safe_deposit_box c::local_delta::safe_deposit_box::from_stream(istream& is) {
     return safe_deposit_box();
 }
@@ -221,6 +227,14 @@ void c::db_t::to_stream(ostream&os) const {
 	accounts->to_stream(os);
 	os << ' ';
 	os << supply_left << ' ' << block_reward;
+}
+
+c::db_t c::db_t::from_stream_prev(istream& is) {
+	db_t db;
+	db.accounts=accounts_t::from_stream(is);
+	is >> db.supply_left;
+	is >> db.block_reward;
+	return move(db);
 }
 
 c::db_t c::db_t::from_stream(istream& is) {
@@ -502,6 +516,10 @@ void c::local_delta::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
+void c::local_delta::from_stream_prev(istream& is) {
+    return from_stream(is);
+}
+
 void c::local_delta::from_stream(istream& is) {
 	int n;
 	is >> n;
@@ -519,6 +537,10 @@ void c::local_delta::from_stream(istream& is) {
 void c::delta::to_stream(ostream& os) const {
 	g.to_stream(os);
 	b::b1::to_stream(os);
+}
+
+c::delta* c::delta::from_stream_prev(istream& is) {
+    return from_stream(is);
 }
 
 c::delta* c::delta::from_stream(istream& is) {

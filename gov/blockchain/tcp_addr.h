@@ -13,6 +13,7 @@ using namespace std;
             static constexpr char id{'A'};
             virtual string to_stream(ostream& os) const override;
             static addr_t* from_stream(istream& is);
+            static addr_t* from_stream_prev(istream& is);
 
             string address;
             uint16_t port;

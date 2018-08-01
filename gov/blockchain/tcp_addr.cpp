@@ -10,6 +10,10 @@ string c::to_stream(ostream& os) const {
    os << id << ' ' << address << ' ' << port;
 }
 
+c::b* c::from_stream_prev(istream& is) {
+    return from_stream(is);
+}
+
 c::b* c::from_stream(istream& is) {
     auto i=new c();
     is >> i->address;

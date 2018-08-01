@@ -50,6 +50,7 @@ namespace auth { //blockchain network support, this service is free
 			}
 			virtual int app_id() const override;
 			virtual void to_stream(ostream& os) const override;
+			virtual void from_stream_prev(istream& is) override;
 			virtual void from_stream(istream& is) override;
 			vector<pair<pubkeyh_t,address>> to_hall; //pubkey
 		};
@@ -66,6 +67,7 @@ namespace auth { //blockchain network support, this service is free
 				return 0;
 			}
 			virtual void to_stream(ostream& os) const override;
+			static delta* from_stream_prev(istream& is);
 			static delta* from_stream(istream& is);
 			map<pubkeyh_t,address> to_hall; //pubkey
 		};

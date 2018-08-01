@@ -149,7 +149,11 @@ void us::gov::blockchain::auth::app::local_delta::to_stream(ostream& os) const {
 	b::to_stream(os);
 }
 
-void us::gov::blockchain::auth::app::local_delta::from_stream(istream& is) {
+void us::gov::blockchain::auth::app::local_delta::from_stream_prev(istream& is) {
+    from_stream(is);
+}
+
+void us::gov::blockchain::auth::app::local_delta::from_stream(istream& is) { //X
 	int n;
 	is >> n;
 	to_hall.reserve(n);
@@ -171,7 +175,11 @@ void us::gov::blockchain::auth::app::delta::to_stream(ostream& os) const {
 	b::b1::to_stream(os);
 }
 
-app::delta* us::gov::blockchain::auth::app::delta::from_stream(istream& is) {
+app::delta* us::gov::blockchain::auth::app::delta::from_stream_prev(istream& is) {
+    return from_stream(is);
+}
+
+app::delta* us::gov::blockchain::auth::app::delta::from_stream(istream& is) { //X
 	delta* g=new delta();
 	{
 	int n;

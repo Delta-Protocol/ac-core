@@ -67,12 +67,14 @@ namespace cash {
 			virtual int app_id() const override;
 
 			virtual void to_stream(ostream&) const override;
+			virtual void from_stream_prev(istream&) override;
 			virtual void from_stream(istream&) override;
 
             struct tokens_t:unordered_map<token_t,cash_t> {
                     
 	    			void dump(ostream& os) const;
 		    		void to_stream(ostream& os) const;
+			    	static tokens_t from_stream_prev(istream& is);
 			    	static tokens_t from_stream(istream& is);
             };
 
@@ -82,6 +84,7 @@ namespace cash {
 
 				void dump(ostream& os) const;
 				void to_stream(ostream& os) const;
+				static safe_deposit_box from_stream_prev(istream& is);
 				static safe_deposit_box from_stream(istream& is);
 
 
@@ -102,6 +105,7 @@ namespace cash {
 
 				void dump(ostream& os) const;
 				void to_stream(ostream& os) const;
+				static account_t from_stream_prev(istream& is);
 				static account_t from_stream(istream& is);
 			};
 
@@ -114,6 +118,7 @@ namespace cash {
 				void add(const batch_t& batch);
 				box_t get_balance() const;
 				void to_stream(ostream& os) const;
+				static accounts_t* from_stream_prev(istream& is);
 				static accounts_t* from_stream(istream& is);
 
 				bool add_input(tx& t, const hash_t& addr, const cash_t& amount);
@@ -142,6 +147,7 @@ namespace cash {
 			virtual uint64_t merge(blockchain::app::local_delta* other0) override;
 			virtual void end_merge() override;
 			virtual void to_stream(ostream& os) const override;
+			static delta* from_stream_prev(istream& is);
 			static delta* from_stream(istream& is);
 			local_delta g;
 			blockchain::majority_merger<local_delta>* m;
@@ -213,6 +219,7 @@ namespace cash {
 			cash_t get_newcash();
 			void clear();
 			void to_stream(ostream&) const;
+			static db_t from_stream_prev(istream&);
 			static db_t from_stream(istream&);
 
 			mutable mutex mx;

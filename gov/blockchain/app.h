@@ -39,6 +39,7 @@ namespace blockchain {
 			static local_delta* create(int id, istream& is);
 
 			virtual void to_stream(ostream&) const=0;
+			virtual void from_stream_prev(istream&)=0;
 			virtual void from_stream(istream&)=0;
 			virtual int app_id() const=0;
 		};
