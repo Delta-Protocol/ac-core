@@ -1,5 +1,5 @@
 #https://gist.github.com/xuhdev/1873316
-OBJS :=  input/input.o crypto/crypto.o socket/socket.o peer/peer.o relay/relay.o dfs/dfs.o blockchain/blockchain.o id/id.o auth/auth.o cash/cash.o loan/loan.o
+OBJS :=  input/input.o crypto/crypto.o socket/socket.o peer/peer.o relay/relay.o dfs/dfs.o blockchain/blockchain.o id/id.o auth/auth.o cash/cash.o
 #CXXFLAGS := -g -O0 -DDEBUG
 CXXFLAGS = -fPIC -O0 -g -std=c++17 -DDEBUG
 
