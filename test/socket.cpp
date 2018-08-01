@@ -311,7 +311,10 @@ void testing_socket_datagram(){
 //------
 //------
 
-	bool showResults = false; //true == show testing results 
+	bool showResults = false; //	...::::TESTER::::....true == show testing results 
+	
+
+
 	if( showResults == true ) {
 	//......1...............//[serviceNumber]
 	test_1(0);  
@@ -341,7 +344,7 @@ void testing_socket_datagram(){
 	test_3( 111   , "a"   );
 	test_3( 65536 , "0"   );
 	test_3( 13564 , "123-)(*&^%$£!`~@'#?><"    );
-	test_3( 2147483648 , "123456\n78  _  _"	   ); //  overflow > 2147483648 | -2147483648
+	test_3( 2147483648 , "123456\n78  _  _"	   ); //  overflow > 2147483648 || -2147483648
 	test_3( -2147483648 , "0_+_)(*&0*(0^$%^^_0");  
 	test_3( -1      , "miden 0 miden"          );
 	test_3( -100   ,"0 0--%^*& (*&^6-0-75gj00 ");
@@ -383,9 +386,9 @@ struct test_server: server {
 	
 	~test_server() {} ;	
 		
-	bool receive_and_process(client*c) override {// us/gov/socket/daemon
-		//datagram* d = c-> complete_datagram();
-		/*if (!d || d->error!=0) {
+	/*bool receive_and_process(client*c) override {// us/gov/socket/daemon
+		datagram* d = c-> complete_datagram();
+		if (!d || d->error!=0) {
 			cout << "socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 			if (d) delete d;
 			server::receive_and_process(c);
@@ -396,7 +399,7 @@ struct test_server: server {
 			server::receive_and_process(c);
 			return true;
 			}
-*/
+
 		//---Completed datagram---
 			
 
@@ -404,17 +407,16 @@ struct test_server: server {
 
 		//check_received_datagram(*d);
 		//delete d;                                       
-		server::receive_and_process(c);
+		//server::receive_and_process(c);
 	}
-
+*/
 	//virtual void check_received_datagram(datagram* data)=0;
 	//virtual void check_received_datagram(datagram* data);  //--------------------------here--
 
 
 
-	client* create_client(int sock) override {
-		return new test_client(sock);
-		}
+	//client* create_client(int sock) override {
+	//	return new test_client(sock);	}
 };
 
 //--------------------------------------------------|
