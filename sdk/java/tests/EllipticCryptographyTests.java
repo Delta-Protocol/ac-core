@@ -85,23 +85,4 @@ public class EllipticCryptographyTests{
         return EllipticCryptography.verify(a.getPublic(), message, signature);
     }
 
-    /*
-    private boolean testKeyConversion2() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeySpecException{
-        
-        byte[] privateKeyBytes = Base58.decode("4ACKBcXXhtGb3NtZzSfwgSs3GqCgCBY65juF2UVSJQR2");
-        byte[] publicKeyBytes = Base58.decode("dPtUg631Hh7tL8t3wK6KHDwFfQzLmcHtkEAH5mSsANX3");
-
-        PrivateKey privateKey = ec.getPrivateKey(privateKeyBytes);
-        PublicKey publicKey = ec.getPublicKey(publicKeyBytes);
-
-        PublicKey publicKey2 = ec.getPublicKeyFromPrivate(privateKey);
-       
-        //byte[] publicKeyBytes2 = 
-        //System.out.println("pub2 bytes" + publicKeyBytes2);
-        System.out.println("pub bytes" + publicKeyBytes);
-        //return Arrays.equals(publicKeyBytes,publicKeyBytes2);
-        return true;
-
-    }
-*/
 }

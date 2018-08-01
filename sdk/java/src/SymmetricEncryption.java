@@ -3,10 +3,8 @@ package us.wallet;
 import java.security.SecureRandom;
 import java.security.Security;
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import org.spongycastle.util.Arrays;
-import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.PrivateKey;
@@ -19,8 +17,10 @@ import java.nio.charset.StandardCharsets;
 public class SymmetricEncryption {
 
     private static final SecureRandom random = new SecureRandom();
-    private static final int ivSize = 12;
+    
+    private static final int ivSize = 12;                   //all sizes in bytes
     private static final int keySize = 16;
+    private static final int tagSize = 16;
 
     private Cipher cipher;
     private byte[] key;
@@ -52,12 +52,12 @@ public class SymmetricEncryption {
         
         random.nextBytes(iv);
         
-        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
+        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(tagSize * 8, iv), random);
         return Arrays.concatenate(cipher.doFinal(plaintext), iv);
     }
 
     //Decrypt returns an empty byte array if the ciphertext is invalid. Invalid ciphertext would 
-    //otherwise cause an exception as the algorithm is unable to authenticate the ciphertext.
+    //otherwise cause an exception as the algorithm would be unable to authenticate the ciphertext.
     public byte[] decrypt(byte[] encrypted) {    
         
         byte[] emptyArray = new byte[0];
@@ -68,7 +68,7 @@ public class SymmetricEncryption {
                 return emptyArray;
             }
             iv = Arrays.copyOfRange(encrypted, messageLength , encrypted.length);
-            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv), random);
+            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(tagSize * 8, iv), random);
             return cipher.doFinal(Arrays.copyOfRange(encrypted, 0, messageLength));
         }
         catch(GeneralSecurityException e){

@@ -22,6 +22,7 @@ cryptos-release: export CXXFLAGS:=${RELEASEFLAGS} -DCRYPTOS
 cryptos-release: all
 
 all: gov/libusgov.so wallet/libuswallet.so govx/us-gov walletx/us-wallet
+	cd sdk/java; ./make; cd ../..
 
 wallet-debug: export CXXFLAGS:=${DEBUGFLAGS}
 wallet-debug: wallet

@@ -15,7 +15,7 @@ using namespace std;
 
 int main() {
 
-	testing_split_function(); //dfs
+	//testing_split_function(); //dfs
 	test_symmetric_encryption();
 	test_elliptic_cryptography();
 	
