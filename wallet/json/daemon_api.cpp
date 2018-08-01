@@ -11,8 +11,8 @@ c::~daemon_api() {
     delete underlying_api;
 }
 
-void c::balance(bool detailed0, ostream&os) { // --compile-code-&-test-it      \/
-bool detailed=true;				//--
+void c::balance(bool detailed0, ostream&os) {
+bool detailed=true;
     ostringstream plain;
     underlying_api->balance(detailed,plain);
 
@@ -32,7 +32,6 @@ bool detailed=true;				//--
             v["balance"]=s;
             addresses[n++]=v;
         }
-        //val["addresses"]=val; //always null
 	val["addresses"]=addresses;
     }
     else {
@@ -44,14 +43,12 @@ bool detailed=true;				//--
 }
 
 
-
-void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it      \/
+void c::list(bool showpriv, ostream& os){ 
     ostringstream output;
     underlying_api->list(showpriv,output);
 
     Json::Value val;
     istringstream is(output.str());
-
     if (showpriv) {
         int n=0;
         Json::Value lists;
@@ -59,6 +56,7 @@ void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it      \/
             Json::Value v;
             string s;
             is >> s;
+	if(!is.good()) break;
             v["private Key"]=s;
             is >> s;
             v["public key"]=s;
@@ -77,9 +75,7 @@ void c::list(bool showpriv, ostream& os){ // --compile-code-&-test-it      \/
 }
 
 
-
-void c::new_address(ostream&os) {    // --compile-code-&-test-it
-
+void c::new_address(ostream&os) {  
  ostringstream plain;
  underlying_api->new_address(plain);
 
@@ -93,14 +89,8 @@ void c::new_address(ostream&os) {    // --compile-code-&-test-it
     os << val;
 }
 
-
-
-		
-void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {   // --compile-code-&-test-it
-//    	ostringstream k;
-//    	k << privkey;
-//    os << "Not implemented" << endl;
 	
+void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {  
  ostringstream plain;
  underlying_api->add_address(privkey,plain);
 
@@ -115,10 +105,8 @@ void c::add_address(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) { 
 }
 
 
+void c::transfer(const gov::crypto::ripemd160::value_type&value_type, const cash_t& cash_t, ostream&os) { 
 
-//void c::transfer(const gov::crypto::ripemd160::value_type&, const cash_t&, ostream&os) { // to swsto
-void c::transfer(const gov::crypto::ripemd160::value_type&value_type, const cash_t& cash_t, ostream&os) { // --compile-code-&-test-it      \/
-//    os << "Not implemented" << endl;
 
  ostringstream plain;
  underlying_api->transfer(value_type, cash_t ,plain);
@@ -135,12 +123,7 @@ void c::transfer(const gov::crypto::ripemd160::value_type&value_type, const cash
 }
 
 
-
-void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {   // --compile-code-&-test-it
-//	ostringstream si;
-//	i.to_stream(si);
-//    os << "Not implemented" << endl;
-
+void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) { 
 
  ostringstream plain;
  underlying_api->tx_make_p2pkh(i ,plain);
@@ -150,52 +133,142 @@ void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream&os) {   // --compile-
 
     string p;
     is >> p;
-    val["tx_make_p2pkh"]=p;
+    val["tx make p2pkh"]=p;
 
     os << val;
 
 }
 
 
+void c::tx_sign(const string&txb58, gov::cash::tx::sigcode_t sigcodei, gov::cash::tx::sigcode_t sigcodeo, ostream&os) { 
 
+ ostringstream plain;
+ underlying_api->tx_sign(txb58, sigcodei, sigcodeo ,plain);
 
-void c::tx_sign(const string&txb58, gov::cash::tx::sigcode_t sigcodei, gov::cash::tx::sigcode_t sigcodeo, ostream&os) {
-	ostringstream si;
-	si << txb58 << ' ' << sigcodei << ' ' << sigcodeo;
-    os << "Not implemented" << endl;
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["tx sign"]=p;
+
+    os << val;
+
 }
 
-void c::tx_send(const string&txb58, ostream&os) {
-    os << "Not implemented" << endl;
+
+void c::tx_send(const string&txb58, ostream&os) { 
+
+ ostringstream plain;
+ underlying_api->tx_send(txb58 ,plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["tx send"]=p;
+
+    os << val;
+
 }
 
-void c::tx_decode(const string&txb58, ostream&os) {
-    os << "Not implemented" << endl;
+void c::tx_decode(const string&txb58, ostream&os) { 
+
+ ostringstream plain;
+ underlying_api->tx_decode(txb58 ,plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["tx decode"]=p;
+
+    os << val;
 }
 
-void c::tx_check(const string&txb58, ostream&os) {
-    os << "Not implemented" << endl;
+
+void c::tx_check(const string&txb58, ostream&os) { 
+
+ ostringstream plain;
+ underlying_api->tx_check(txb58 ,plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["tx check"]=p;
+
+    os << val;
 }
+
 
 void c::ping(ostream&os) {
-    os << "Not implemented" << endl;
+
+ ostringstream plain;
+ underlying_api->ping(plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["ping response"]=p;
+
+    os << val;
 }
 
-void c::pair(const pub_t& pk, const string& name, ostream&os) {
-	ostringstream si;
-	si << pk << ' ' << name;
-    os << "Not implemented" << endl;
+
+void c::pair(const pub_t& pk, const string& name, ostream&os) { 
+
+ ostringstream plain;
+ underlying_api->pair(pk, name , plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["pair"]=p;
+
+    os << val;
 }
 
-void c::unpair(const pub_t& pk, ostream&os) {
-	ostringstream si;
-	si << pk;
-    os << "Not implemented" << endl;
+
+void c::unpair(const pub_t& pk, ostream&os) { 
+
+ ostringstream plain;
+ underlying_api->unpair(pk , plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["unpair"]=p;
+
+    os << val;
 }
 
-void c::list_devices(ostream&os) {
-    os << "Not implemented" << endl;
+
+void c::list_devices(ostream&os) {	
+
+ ostringstream plain;
+ underlying_api->list_devices(plain);
+
+    Json::Value val;
+    istringstream is(plain.str());
+
+    string p;
+    is >> p;
+    val["list devices"]=p;
+
+    os << val;
 }
+
+
 
 /*
 #ifdef FCGI
