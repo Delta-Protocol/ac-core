@@ -100,6 +100,8 @@ struct ec {
 
 	bool verify(const keys::pub_t& pk, const string& text, const string& signature_der) const;
 	bool verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
+	bool verify_not_normalized(const keys::pub_t& pk, const string& text, const string& signature_der) const;
+	bool verify_not_normalized(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
 
 	bool generate_shared_key(unsigned char *, size_t, const keys::priv_t&, const keys::pub_t&);
 

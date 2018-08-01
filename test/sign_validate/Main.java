@@ -7,23 +7,23 @@ import java.util.Arrays;
 import java.math.BigInteger;
 import org.spongycastle.math.ec.ECPoint;
 import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 
 
 public class Main{
-    public static void main(String [ ] args) throws GeneralSecurityException{
-        if (args.length > 1){
+    public static void main(String [ ] args) throws GeneralSecurityException, UnsupportedEncodingException{
+       if (args.length > 2){
             try{
+                
                 byte[] key=Base58.decode(args[0]);
                 String command = args[1];
                 byte[] message = args[2].getBytes();
-
                 if(command.equals("sign")){
                     
                     PrivateKey privateKey = EllipticCryptography.getPrivateKey(key);
                     
                     byte[] signed = EllipticCryptography.sign(privateKey,message);
-                    String encoded = new String(Base58.encode(signed));
-                    System.out.println(encoded);
+                    System.out.println(Base58.encode(signed));
                 }
                 if(command.equals("verify")){
                

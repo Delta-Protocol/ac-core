@@ -13,5 +13,5 @@ test_java: Main.java
 	javac -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main.java
 
 run:
-	./do_symmetric_encryption_test
+	@./do_symmetric_encryption_test
 

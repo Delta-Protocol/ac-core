@@ -33,9 +33,7 @@ public class Main{
                 if(command.equals("encrypt")){
                     
                     byte[] message = args[3].getBytes();
-                    byte[] encrypted = se.encrypt(message);
-                    String encrypted_string = Arrays.toString(encrypted);
-                   
+                    byte[] encrypted = se.encrypt(message); 
                     System.out.println(Base58.encode(encrypted));
                 }
             }

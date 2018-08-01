@@ -334,7 +334,17 @@ string c::sign_encode(const keys::priv_t& pk, const sigmsg_hasher_t::value_type&
 	return to_b58(sign(pk, hash));
 }
 
+bool c::verify(const keys::pub_t& pk, const string& text, const string& signature_der_b58) const {
+	//cout << "Verify: " << pk << ' ' << text << ' '<< signature_der_b58 << endl;
+	sigmsg_hasher_t hasher;
+	hasher.write((const unsigned char*)text.c_str(),text.size());
+	sigmsg_hasher_t::value_type hash;
+	hasher.finalize(hash);
+	return verify(pk, hash, signature_der_b58);
+}
+
 bool c::verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const {
+
 	if (unlikely(signature_der_b58.empty())) return false;
 	/// Parse the signature
 	vector<unsigned char> sighex=c::from_b58(signature_der_b58);
@@ -344,19 +354,36 @@ bool c::verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, c
 	if (unlikely(!secp256k1_ecdsa_signature_parse_der(ctx,&sig,&sighex[0],sighex.size()))) {
 		cerr << "cannot parse signature '" << signature_der_b58 << "' " << sighex.size() << endl;
 		return false;
-//		exit(1);
 	}
-	/// EC Verify
+		/// EC Verify
 	return secp256k1_ecdsa_verify(ec::instance.ctx, &sig, &msgh[0], &pk)==1;
 }
 
-bool c::verify(const keys::pub_t& pk, const string& text, const string& signature_der_b58) const {
+bool c::verify_not_normalized(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const {
+	
+	if (unlikely(signature_der_b58.empty())) return false;
+	/// Parse the signature
+	vector<unsigned char> sighex=c::from_b58(signature_der_b58);
+	if (unlikely(sighex.empty())) return false;
+	//cout << "verifying hash '" << msgh << "' " << sighex.size() << " " << sighex[0] << " " << signature_der_b58 << " " << pk << endl;
+	signature sig;
+	if (unlikely(!secp256k1_ecdsa_signature_parse_der(ctx,&sig,&sighex[0],sighex.size()))) {
+		cerr << "cannot parse signature '" << signature_der_b58 << "' " << sighex.size() << endl;
+		return false;
+	}
+	signature nsig;
+	secp256k1_ecdsa_signature_normalize(ctx,&nsig,&sig);
+	
+	return secp256k1_ecdsa_verify(ec::instance.ctx, &nsig, &msgh[0], &pk)==1;
+}
+
+bool c::verify_not_normalized(const keys::pub_t& pk, const string& text, const string& signature_der_b58) const {
 	//cout << "Verify: " << pk << ' ' << text << ' '<< signature_der_b58 << endl;
 	sigmsg_hasher_t hasher;
 	hasher.write((const unsigned char*)text.c_str(),text.size());
 	sigmsg_hasher_t::value_type hash;
 	hasher.finalize(hash);
-	return verify(pk, hash, signature_der_b58);
+	return verify_not_normalized(pk, hash, signature_der_b58);
 }
 
 bool c::keys::verify(const keys::priv_t& k) {
