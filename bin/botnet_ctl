@@ -2,6 +2,7 @@
 
 
 
+
 function checkout() {
 IP=$1
 echo "checkout $IP"
@@ -27,22 +28,22 @@ echo "building sw node $IP"
 function stopg() {
 IP=$1
 echo "stopping gov $IP"
-(ssh $IP "cd us; /etc/init.d/us-gov stop") &
+ssh $IP "cd us; /etc/init.d/us-gov stop"
 }
 function stopw() {
 IP=$1
 echo "stopping wallet $IP"
-(ssh $IP "cd us; /etc/init.d/us-wallet stop") &
+ssh $IP "cd us; /etc/init.d/us-wallet stop"
 }
 function startg() {
 IP=$1
 echo "starting gov $IP"
-(ssh $IP "cd us; /etc/init.d/us-gov start") &
+ssh $IP "cd us; /etc/init.d/us-gov start"
 }
 function startw() {
 IP=$1
 echo "starting wallet $IP"
-(ssh $IP "cd us; /etc/init.d/us-wallet start") &
+ssh $IP "cd us; /etc/init.d/us-wallet start"
 }
 function restartg() {
 IP=$1
@@ -155,6 +156,7 @@ fi
 
 if [ "_$cmd" == "_service" ]; then
     for n in "${nodes[@]}"; do
+
 echo $n
         service $n
     done

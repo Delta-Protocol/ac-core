@@ -14,16 +14,16 @@ public class Main{
                 byte[] message = args[2].getBytes();
                 if(command.equals("sign")){
                     
-                    PrivateKey privateKey = EllipticCryptography.getPrivateKey(key);
-                    byte[] signed = EllipticCryptography.sign(privateKey,message);
+                    PrivateKey privateKey = EllipticCryptography.secp256k1.getPrivateKey(key);
+                    byte[] signed = EllipticCryptography.secp256k1.sign(privateKey,message);
                     
                     System.out.println(Base58.encode(signed));
                 }
                 if(command.equals("verify")){
                
-                    PublicKey publicKey = EllipticCryptography.getPublicKey(key);
+                    PublicKey publicKey = EllipticCryptography.secp256k1.getPublicKey(key);
                     byte[] hash =Base58.decode(args[3]);
-                    boolean validated = EllipticCryptography.verify(publicKey, message, hash);
+                    boolean validated = EllipticCryptography.secp256k1.verify(publicKey, message, hash);
                     
                     System.out.println(validated);
                 }

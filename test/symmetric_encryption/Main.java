@@ -12,8 +12,8 @@ public class Main{
                 byte[] pub=Base58.decode(args[1]);
                 String command = args[2];
                
-                PrivateKey privateKey = EllipticCryptography.getPrivateKey(priv);
-                PublicKey publicKey = EllipticCryptography.getPublicKey(pub);
+                PrivateKey privateKey = EllipticCryptography.secp256k1.getPrivateKey(priv);
+                PublicKey publicKey = EllipticCryptography.secp256k1.getPublicKey(pub);
    
                 SymmetricEncryption se = new SymmetricEncryption(privateKey, publicKey);
         

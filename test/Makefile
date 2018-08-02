@@ -5,7 +5,7 @@ CXXFLAGS = -O0 -g -std=c++17
 
 .PHONY: all
 
-all: #unit_tests
+all: unit_tests
 	cd symmetric_encryption; make; cd ..
 	cd sign_validate; make; cd ..
 

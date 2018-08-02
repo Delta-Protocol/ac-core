@@ -17,10 +17,11 @@
 #include <cassert>
 #include <map>
 #include <atomic>
-#include "tx.h"
 
 namespace us { namespace gov {
 namespace cash {
+
+
 	using namespace std;
 	using socket::datagram;
 	using blockchain::local_deltas;
@@ -28,14 +29,19 @@ namespace cash {
 	using crypto::ec;
 	using blockchain::peer_t;
 
-	typedef int64_t cash_t;
 	typedef crypto::ec::keys keys;
 	typedef keys::pub_t pubkey_t;
 
 	typedef ripemd160 hasher_t;
 	typedef hasher_t::value_type hash_t;
 
+	typedef int64_t cash_t; //signed!
+
 	static const hash_t min_locking_program(10000);
+
+    typedef uint32_t token_t;
+
+    struct tx;
 
 	struct app:blockchain::runnable_app {
 		app();
@@ -51,6 +57,7 @@ namespace cash {
 			constexpr static array<const char*,num_params> paramstr={"minimum_fee"/*,"floating_point_pos"*/};
 		};
 
+
 		struct local_delta: blockchain::policies_local_delta<double, policies_traits> {
 			typedef blockchain::policies_local_delta<double, policies_traits> b;
 
@@ -62,12 +69,36 @@ namespace cash {
 			virtual void to_stream(ostream&) const override;
 			virtual void from_stream(istream&) override;
 
+            struct tokens_t:unordered_map<token_t,cash_t> {
+                    
+	    			void dump(ostream& os) const;
+		    		void to_stream(ostream& os) const;
+			    	static tokens_t from_stream(istream& is);
+            };
+
+            struct safe_deposit_box {  //safe deposit box
+                tokens_t balance;
+                //SC data goes here
+
+				void dump(ostream& os) const;
+				void to_stream(ostream& os) const;
+				static safe_deposit_box from_stream(istream& is);
+
+
+                safe_deposit_box& operator =(const safe_deposit_box& other);
+                safe_deposit_box& operator +=(const safe_deposit_box& other);
+
+            };
+
+//            typedef safe_deposit_box box_t;
+            typedef cash_t box_t;
+
 			struct account_t {
 				account_t();
-				account_t(const hash_t& locking_program, const cash_t& balance);
+				account_t(const hash_t& locking_program, const box_t& balance);
 
 				hash_t locking_program;
-				cash_t balance;
+                box_t box;
 
 				void dump(ostream& os) const;
 				void to_stream(ostream& os) const;
@@ -81,7 +112,7 @@ namespace cash {
 
 			struct accounts_t: map<hash_t,account_t> {
 				void add(const batch_t& batch);
-				cash_t get_balance() const;
+				box_t get_balance() const;
 				void to_stream(ostream& os) const;
 				static accounts_t* from_stream(istream& is);
 
@@ -89,17 +120,19 @@ namespace cash {
 				bool add_output(tx& t, const hash_t& addr, const cash_t& amount, const hash_t& locking_program);
 				
 				void dump(ostream& os) const;
-				bool pay(const hash_t& k, const cash_t& amount);
-				bool withdraw(const hash_t& k, const cash_t& amount);
+				bool pay(const hash_t& k, const box_t& amount);
+				bool withdraw(const hash_t& k, const box_t& amount);
 			};
 
 			accounts_t accounts; 
-			cash_t fees{0};
+			box_t fees{0};
 
 			mutable hash_t hash{0};
 			const hash_t& get_hash() const;
 			hash_t compute_hash() const;
 		};
+
+        typedef local_delta::box_t box_t;
 
 		struct delta: blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> {
 			typedef blockchain::policies_delta<double, policies_traits, blockchain::average_merger<double>> b;
@@ -173,8 +206,8 @@ namespace cash {
 			db_t();
 			db_t(db_t&& other);
 			~db_t();
-			bool add_(const hash_t&, const cash_t& amount);
-			bool withdraw_(const hash_t& k, const cash_t& amount);
+			bool add_(const hash_t&, const box_t& amount);
+			bool withdraw_(const hash_t& k, const box_t& amount);
 
 			void dump(ostream& os) const;
 			cash_t get_newcash();
@@ -209,6 +242,10 @@ namespace cash {
 		policies_t policies_local;
 
 	};
+
+
+    ostream& operator << (ostream&os, const app::local_delta::safe_deposit_box& b);
+    istream& operator >> (istream&os, const app::local_delta::safe_deposit_box& b);
 
 }}
 }

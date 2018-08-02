@@ -86,7 +86,6 @@ void c::incorporate(client*c) {
 	assert(c);
 	assert(c->sock!=0);
 	clients.add(c);
-
 }
 
 bool c::clients_t::is_here(client* c) const {
@@ -346,6 +345,8 @@ client* c::create_client(int sock) {
 
 #include <us/gov/likely.h>
 
+#ifdef SIM
+#else
 void c::run() {
 	fd_set read_fd_set;
 	int i;
@@ -439,5 +440,5 @@ void c::run() {
 	loopback=0;
 	clients.locli.disconnect();
 }
-
+#endif
 

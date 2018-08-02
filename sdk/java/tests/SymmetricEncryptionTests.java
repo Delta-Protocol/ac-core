@@ -20,9 +20,9 @@ public class SymmetricEncryptionTests{
         try{
             
             
-            a = EllipticCryptography.generateKeyPair();
-            b = EllipticCryptography.generateKeyPair();
-            c = EllipticCryptography.generateKeyPair();
+            a = EllipticCryptography.secp256k1.generateKeyPair();
+            b = EllipticCryptography.secp256k1.generateKeyPair();
+            c = EllipticCryptography.secp256k1.generateKeyPair();
 
             PrivateKey priv_a = a.getPrivate();
             PublicKey pub_a = a.getPublic();
@@ -65,8 +65,8 @@ public class SymmetricEncryptionTests{
 
     public boolean test_encrypt_decrypt(String plaintext_string) throws GeneralSecurityException{
         
-        KeyPair a = EllipticCryptography.generateKeyPair();
-        KeyPair b = EllipticCryptography.generateKeyPair();
+        KeyPair a = EllipticCryptography.secp256k1.generateKeyPair();
+        KeyPair b = EllipticCryptography.secp256k1.generateKeyPair();
 
         PrivateKey priv_a = a.getPrivate();
         PublicKey pub_a = a.getPublic();
@@ -90,8 +90,8 @@ public class SymmetricEncryptionTests{
 
     public boolean test_encrypt_multiple(String plaintext_string)throws GeneralSecurityException{
         
-        KeyPair a = EllipticCryptography.generateKeyPair();
-        KeyPair b = EllipticCryptography.generateKeyPair();
+        KeyPair a = EllipticCryptography.secp256k1.generateKeyPair();
+        KeyPair b = EllipticCryptography.secp256k1.generateKeyPair();
 
         PrivateKey priv_a = a.getPrivate();
         PublicKey pub_a = a.getPublic();
@@ -109,8 +109,8 @@ public class SymmetricEncryptionTests{
 
     public boolean test_decrypt_nulls(String ciphertext_string) throws GeneralSecurityException{
         
-        KeyPair a = EllipticCryptography.generateKeyPair();
-        KeyPair b = EllipticCryptography.generateKeyPair();
+        KeyPair a = EllipticCryptography.secp256k1.generateKeyPair();
+        KeyPair b = EllipticCryptography.secp256k1.generateKeyPair();
 
         PrivateKey priv_a = a.getPrivate();
         PublicKey pub_a = a.getPublic();
@@ -125,8 +125,8 @@ public class SymmetricEncryptionTests{
 
     public boolean test_decrypt_multiple(String plaintext_string) throws GeneralSecurityException{
 
-        KeyPair a = EllipticCryptography.generateKeyPair();
-        KeyPair b = EllipticCryptography.generateKeyPair();
+        KeyPair a = EllipticCryptography.secp256k1.generateKeyPair();
+        KeyPair b = EllipticCryptography.secp256k1.generateKeyPair();
 
         PrivateKey priv_a = a.getPrivate();
         PublicKey pub_a = a.getPublic();

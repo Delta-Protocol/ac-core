@@ -39,7 +39,7 @@ public class SymmetricEncryption {
 
     public SymmetricEncryption(PrivateKey priv, PublicKey pub) throws GeneralSecurityException {
         
-        this(EllipticCryptography.generateSharedKey(priv, pub, keySize));
+        this(EllipticCryptography.secp256k1.generateSharedKey(priv, pub, keySize));
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
@@ -79,7 +79,7 @@ public class SymmetricEncryption {
         }
         catch(GeneralSecurityException e){
             return emptyArray;
-        }      
+        }
     }
 
     public int getKeySize(){
@@ -90,5 +90,7 @@ public class SymmetricEncryption {
         
         return new GCMParameterSpec(tagSize * 8, iv);
     }
+
+    
 
 }
