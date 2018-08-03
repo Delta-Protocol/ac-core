@@ -5,6 +5,9 @@
 #include <chrono>
 #include <us/gov/crypto/base58.h>
 #include <us/gov/likely.h>
+#include <chrono>
+#include <iostream>
+#include <sys/time.h>
 
 typedef us::gov::cash::tx c;
 using namespace us::gov;
@@ -13,12 +16,15 @@ using namespace std;
 
 constexpr array<const char*,c::num_sigcodes> c::sigcodestr;
 
-#include <sys/time.h>
+using namespace std::chrono;
 
-c::tx() {
-struct timeval tv;
-gettimeofday (&tv, NULL);
-memcpy(&nonce,&tv.tv_usec,sizeof(nonce));
+c::tx(): ts(duration_cast<nanoseconds>(chrono::steady_clock::now().time_since_epoch().count())) {
+    //struct timeval tv;
+    //gettimeofday (&tv, NULL);
+    //memcpy(&nonce,&tv.tv_usec,sizeof(nonce));
+}
+
+c::tx(int) {  //saves cpu
 }
 
 void c::dump_sigcodes(ostream&os) {
@@ -36,7 +42,7 @@ bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& 
 }
 
 pair<string,c> c::read(istream& is) {
-	pair<string,c> t;
+	pair<string,c> t(0);
     {
     auto r=t.second.inputs.read(is);
 	if (!r.empty()) {
@@ -49,15 +55,16 @@ pair<string,c> c::read(istream& is) {
         t.first=r;
         return move(t);       
     }
-
+/*
 	is >> t.second.parent_block;
     if (!is.good()) {
         t.first="Unreadable parent_block";
         return move(t);       
     }
-	is >> t.second.nonce;
+*/
+	is >> t.second.ts;
     if (!is.good()) {
-        t.first="Unreadable nonce";
+        t.first="Unreadable timestamp";
         return move(t);       
     }
 	return move(t);
@@ -66,14 +73,14 @@ pair<string,c> c::read(istream& is) {
 void c::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcodes_t scs) const {
 	inputs.write_sigmsg(h,this_index,sigcode_input(scs));
 	outputs.write_sigmsg(h,this_index,sigcode_output(scs));
-	h.write(parent_block);
-	h.write(nonce);
+//	h.write(parent_block);
+	h.write(ts);
 }
 
 void c::write_pretty(ostream& os) const {
 	os << "---transaction---------------" << endl;
-	os << "  nonce: " << nonce << endl;
-	os << "  parent_block: " << parent_block << endl;
+	os << "  timestamp: " << ts << endl;
+//	os << "  parent_block: " << parent_block << endl;
 	os << "  -----" << inputs.size() << " inputs-------" << endl;
 	inputs.write_pretty(os);
 	os << "  -----" << outputs.size() << " outputs-------" << endl;
@@ -81,10 +88,12 @@ void c::write_pretty(ostream& os) const {
 	os << "-/-transaction---------------" << endl;
 }
 
+
 void c::write(ostream& os) const {
 	inputs.write(os);
 	outputs.write(os);
-	os << parent_block << ' ' << nonce << ' ';
+//	os << parent_block << ' ' << nonce << ' ';
+	os << ts << ' ';
 }
 
 string c::to_b58() const {
@@ -132,7 +141,7 @@ void c::inputs_t::write(ostream& os) const {
 string c::inputs_t::read(istream& is) {
 	size_t sz;
 	is >> sz;
-    if (unlikely(sz>100)) { //max number of outputs
+    if (unlikely(sz>100)) { //max number of outputs TODO
         return "Error. There is a limit of 100 inputs.";
     }
 	reserve(sz);

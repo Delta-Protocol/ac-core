@@ -99,6 +99,7 @@ namespace cash {
 		bool add_output(const hash_t& addr, const cash_t& amount, const hash_t& locking_program);
 
         tx();
+        tx(int);
 
 		cash_t check() const; //return fees
 
@@ -115,8 +116,9 @@ namespace cash {
 
 		inputs_t inputs;
 		outputs_t outputs;
-		blockchain::diff::hash_t parent_block;
-        uint32_t nonce;
+//		blockchain::diff::hash_t parent_block;
+
+        uint64_t ts;
 	};
 
 

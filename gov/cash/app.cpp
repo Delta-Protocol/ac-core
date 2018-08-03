@@ -409,8 +409,8 @@ bool c::account_state(const local_delta::batch_t& batch, const hash_t& address, 
 }
 
 bool c::process(const tx& t) {
-	cout << ">tx";
-	cerr << "< ";
+//	cout << ">tx";
+//	cerr << "< ";
 
     {
 	if (unlikely(chaininfo.not_equals_tip(t.parent_block))) { //from sync daemon
@@ -431,13 +431,14 @@ bool c::process(const tx& t) {
     }
 
 	auto fee=t.check();
-cout << "RBF removed min fee check" << endl;
-/*
+
 	if (fee<min_fee) {
-        cerr << "TX REJECTED 3 " << fee << " " << min_fee << endl;
-        return false;
+        cerr << "TX 3 " << fee << " " << min_fee << endl;
+        cout << "RBF removed min fee check" << endl;
+        //-----------
+        //return false;  //uncomment TODO
+        //-----------
     }
-*/
 
 	//tx verification
 	local_delta::batch_t batch;
