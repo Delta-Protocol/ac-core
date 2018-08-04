@@ -4,6 +4,7 @@
 #include <cassert>
 #include <fstream>
 #include <functional>
+#include <unordered_map>
 using namespace std;
 
 string file_prefix="apitool_generated__";
