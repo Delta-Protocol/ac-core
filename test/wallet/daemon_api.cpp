@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 
-#include "-----"
+#include "daemon_api.h"
 
 
 #include <us/wallet/api.h>
@@ -12,7 +12,7 @@
 
 
 using namespace std;
-using namespace us::wallet::json;
+//using namespace us::wallet::json
 
 
 
