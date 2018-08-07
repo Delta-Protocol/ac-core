@@ -20,13 +20,20 @@ using namespace std;
 int main() {
 
 
+//----->>> na dimiourgisw fakelous analoga me to testing kai na valw mesa tis function!
+//--> dimiourgia olwn twn layers
+
+
+
+
+
 
 
 	//testing_split_function(); 		//dfs 	 --works!
 	
 
 	testing_socket_datagram(); 		//socket --works!
-	//testing_socket_communication(); 	//--errors--
+	testing_socket_communication(); 	//--errors--
 
 
 	//test_symmetric_encryption();
