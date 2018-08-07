@@ -6,9 +6,11 @@
 #include "api.h"
 
 #include <us/gov/socket/datagram.h>
-#include <us/wallet/api.h>
 
-//#include <us/wallet/wallet_local_api.h>
+//#include <us/wallet/api.h>
+//#include <us/wallet/wallet_local_api.h> //------here--
+#include <us/wallet/rpc_api.h> //---------------here--
+
 
 #include <us/wallet/wallet.h>
 
