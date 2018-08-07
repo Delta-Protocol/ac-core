@@ -231,7 +231,7 @@ void c::list(bool showpriv, ostream& os) const {
     	for (auto&i:*this)
 		os << i.second.priv <<' '<< i.second.pub <<' '<< i.first << endl;
 	    }
-   }
+   
    else {
     	for (auto&i:*this) {
 		os << i.second.pub <<' '<< i.first << endl;	    
