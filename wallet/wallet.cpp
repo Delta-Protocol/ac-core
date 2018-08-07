@@ -226,22 +226,17 @@ void c::dump(ostream& os) const {
 }
 
 void c::list(bool showpriv, ostream& os) const {
-    os << "#: ";
-    if (showpriv)
-    	os << "[private Key] ";
-    os << "[public key] [address]" << endl;
-	int n=0;
+
     if (showpriv) {
-    	for (auto&i:*this) {
-	    	os << '#' << n++ << ": " << i.second.priv << ' ' << i.second.pub << ' ' << i.first << endl;
+    	for (auto&i:*this)
+		os << i.second.priv <<' '<< i.second.pub <<' '<< i.first << endl;
 	    }
    }
    else {
     	for (auto&i:*this) {
-	    	os << '#' << n++ << ": " << i.second.pub << ' ' << i.first << endl;
-	    }
+		os << i.second.pub <<' '<< i.first << endl;	    
+	}
    }
-   os << size() << " keys";
 }
 
 void c::accounts_query_t::dump(ostream& os) const {
