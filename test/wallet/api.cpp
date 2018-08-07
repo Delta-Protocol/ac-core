@@ -7,6 +7,9 @@
 
 #include <us/gov/socket/datagram.h>
 #include <us/wallet/api.h>
+
+//#include <us/wallet/wallet_local_api.h>
+
 #include <us/wallet/wallet.h>
 
 #include <us/gov/socket/datagram.h>
