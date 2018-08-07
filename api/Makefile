@@ -4,7 +4,7 @@ apitool_generated__*: apitool data/pairing data/wallet
 	./apitool
 
 apitool: main.cpp
-	g++ main.cpp -o apitool
+	g++ -std=c++17 main.cpp -o apitool
 
 clean:
 	rm -f apitool
