@@ -203,7 +203,7 @@ pair<string,datagram*> c::recv(uint16_t expected_service) { //caller owns the re
     }
     datagram*d=r.second;
     while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
-        if (d->service==us::gov::protocol::error) {
+        if (d->service==us::gov::protocol::gov_socket_error) {
             return move(r);
         }
         if (d->service==expected_service) {

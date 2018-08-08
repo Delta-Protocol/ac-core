@@ -1,19 +1,19 @@
-package us.wallet;
+package us.gov.crypto;
 
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.jce.spec.ECParameterSpec;
 import org.spongycastle.jce.spec.ECPrivateKeySpec;
 import org.spongycastle.jce.spec.ECPublicKeySpec;
-import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.spongycastle.jce.spec.ECNamedCurveSpec;
+import org.spongycastle.jce.ECNamedCurveTable;
 import org.spongycastle.jce.ECPointUtil;
-import java.security.MessageDigest;
-import org.spongycastle.math.ec.ECCurve;
-import java.util.Arrays;
 import org.spongycastle.jce.interfaces.ECPublicKey;
 import org.spongycastle.jce.interfaces.ECPrivateKey;
 import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.jce.ECNamedCurveTable;
+import org.spongycastle.util.BigIntegers;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.math.ec.ECPoint;
 import java.security.Signature;
 import java.math.BigInteger;
 import java.security.PrivateKey;
@@ -22,17 +22,17 @@ import java.security.SecureRandom;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import org.spongycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.security.MessageDigest;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.NoSuchAlgorithmException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
-import org.spongycastle.util.BigIntegers;
+import java.util.Arrays;
 
-public class EllipticCryptography {
+public class ec {
     private SecureRandom secureRandom;
     private KeyFactory factory;
     private ECParameterSpec ecSpec;
@@ -40,10 +40,10 @@ public class EllipticCryptography {
     private KeyPairGenerator generator;
 
 
-    public static EllipticCryptography secp256k1;
+    public static ec secp256k1;
     static {
         try {
-        secp256k1=new EllipticCryptography("secp256k1", "ECDSA", "SHA256withECDSA");
+        secp256k1=new ec("secp256k1", "ECDSA", "SHA256withECDSA");
         }
         catch (GeneralSecurityException e) {
         }
@@ -51,7 +51,7 @@ public class EllipticCryptography {
 
     String signatureAlgorithm;
 
-    public EllipticCryptography(String curveName, String algorithmName, String signatureAlgo) throws GeneralSecurityException {
+    public ec(String curveName, String algorithmName, String signatureAlgo) throws GeneralSecurityException {
             signatureAlgorithm=signatureAlgo;
             Security.addProvider(new BouncyCastleProvider());
             ecSpec = ECNamedCurveTable.getParameterSpec(curveName);

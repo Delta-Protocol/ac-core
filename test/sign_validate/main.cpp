@@ -1,16 +1,15 @@
 
-#include "us/gov/crypto/symmetric_encryption.h"
+#include <us/gov/crypto/symmetric_encryption.h>
 
 #include <iostream>
 #include <string>
-#include "us/gov/crypto/ec.h"
-#include "us/gov/crypto/base58.h" 
+#include <us/gov/crypto/ec.h>
+#include <us/gov/crypto/base58.h>
 #include <vector>
 #include <array>
 
 using namespace std;
 using namespace us::gov::crypto;
-using CryptoPP::AES;
 
 int main ( int argc, char *argv[] )
 {
@@ -40,7 +39,7 @@ int main ( int argc, char *argv[] )
             if(command=="verify"){
                 k.pub=ec::keys::pub_t::from_b58(argv[1]);
                 string signature = argv[4];
-                bool verified = ec::instance.verify(k.pub, message, signature);
+                bool verified = ec::instance.verify_not_normalized(k.pub, message, signature);
                 cout << verified << endl;
             }
         

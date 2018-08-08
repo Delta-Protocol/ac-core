@@ -1,13 +1,7 @@
 import us.wallet.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.KeyPair;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.math.BigInteger;
-import org.spongycastle.math.ec.ECPoint;
-import javax.xml.bind.DatatypeConverter;
-
 
 public class Main{
     public static void main(String [ ] args) throws GeneralSecurityException{
@@ -18,8 +12,8 @@ public class Main{
                 byte[] pub=Base58.decode(args[1]);
                 String command = args[2];
                
-                PrivateKey privateKey = EllipticCryptography.getPrivateKey(priv);
-                PublicKey publicKey = EllipticCryptography.getPublicKey(pub);
+                PrivateKey privateKey = EllipticCryptography.secp256k1.getPrivateKey(priv);
+                PublicKey publicKey = EllipticCryptography.secp256k1.getPublicKey(pub);
    
                 SymmetricEncryption se = new SymmetricEncryption(privateKey, publicKey);
         
@@ -33,9 +27,7 @@ public class Main{
                 if(command.equals("encrypt")){
                     
                     byte[] message = args[3].getBytes();
-                    byte[] encrypted = se.encrypt(message);
-                    String encrypted_string = Arrays.toString(encrypted);
-                   
+                    byte[] encrypted = se.encrypt(message); 
                     System.out.println(Base58.encode(encrypted));
                 }
             }

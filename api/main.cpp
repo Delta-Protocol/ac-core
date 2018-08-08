@@ -584,13 +584,17 @@ int main(int argc, char**argv) {
     auto w=api_t::load("wallet");
     auto p=api_t::load("pairing");
     auto gid=api_t::load("gov_id");
+    auto gsocket=api_t::load("gov_socket");
 
     int wbase=0;
     int pbase=100;
+
+    int gsocketbase=100;
     int gidbase=200;
 
     do_api(w,wbase);
     do_api(p,pbase);
     do_wallet_daemon(w,wbase,p,pbase);
+    do_gov_api(gsocket,gsocketbase);
     do_gov_api(gid,gidbase);
 }

@@ -109,22 +109,6 @@ bool test_decrypt_multiple(string plaintext_string){
 	
 }
 
-bool test_expected_result(string ciphertext_string, const keys::priv_t& priv_b, const keys::pub_t& pub_a, string expected_result){
-	
-	vector<unsigned char> ciphertext(ciphertext_string.begin(),ciphertext_string.end());
-	
-	symmetric_encryption se_b(priv_b,pub_a);
-	const vector<unsigned char> decryptedtext = se_b.decrypt(ciphertext);
-	string decryptedtext_string(decryptedtext.begin(),decryptedtext.end());
-
-	return decryptedtext_string==expected_result;
-}
-
-
-//other useful tests??
-//-test ciphertest different to plaintext
-//-test decoded text different to ciphertext
-
 
 
 

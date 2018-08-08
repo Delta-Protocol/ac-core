@@ -1,5 +1,5 @@
-#ifndef USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
-#define USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
+#ifndef USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511781
+#define USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511781
 
 #include <secp256k1.h>
 #include <iostream>
@@ -100,6 +100,8 @@ struct ec {
 
 	bool verify(const keys::pub_t& pk, const string& text, const string& signature_der) const;
 	bool verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
+	bool verify_not_normalized(const keys::pub_t& pk, const string& text, const string& signature_der) const;
+	bool verify_not_normalized(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
 
 	bool generate_shared_key(unsigned char *, size_t, const keys::priv_t&, const keys::pub_t&);
 

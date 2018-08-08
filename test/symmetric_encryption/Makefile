@@ -1,17 +1,20 @@
-all: generate_keys_cpp test_cpp test_java
+CPPS := $(wildcard *.cpp)
+HS := $(wildcard *.h)
+INC := ../..
+CXXFLAGS = -O0 -g -std=c++17
 
-generate_keys_cpp: ../helpers/generate_keys.cpp
-	g++ ../helpers/generate_keys.cpp -I../../.. -L../../gov -lusgov -L/usr/lib -o ../helpers/generate_keys_cpp
+all: test_cpp test_java
 
-test_cpp: generate_keys_cpp main.cpp
-	g++ main.cpp -I../../.. -L../../gov -lcrypto++ -lsecp256k1 -L/usr/lib -lusgov -o test_cpp #removelibsecp
+test_cpp:
+	g++ ${CXXFLAGS} -I${INC} ${CPPS} -pthread -lcrypto++ -I../../.. -L../helpers/generate_keys_cpp.o -L../../gov -L/usr/lib -lusgov -o test_cpp.o
 
 clean:
 	find . -name "*.o" -delete
-	
+	find . -name "*.class" -delete
+
 test_java: Main.java
 	javac -cp ".:../../sdk/java/libs/*:../../sdk/java/us-wallet-sdk.jar" Main.java
 
 run:
-	./do_symmetric_encryption_test
+	@./do_symmetric_encryption_test.sh
 
