@@ -16,6 +16,6 @@ int main() {
 	testing_split_function();
 	testing_socket_datagram(); 		
 	testing_socket_communication();
-	
+
 	exit(0);
 }
