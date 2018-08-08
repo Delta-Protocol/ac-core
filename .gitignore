@@ -18,3 +18,4 @@ build
 api/apitool
 api/apitool_generated__*
 *.class
+*.swp
