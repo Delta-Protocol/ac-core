@@ -41,7 +41,7 @@ namespace socket {
 
         bool banned_throttle(const string& addr);
 
-		virtual bool receive_and_process(client*);
+		virtual void receive_and_process(client*);
 
 		struct clients_t: unordered_map<int,client*> {
 			typedef unordered_map<int,client*> b; ///<sock,client*>

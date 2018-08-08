@@ -1,0 +1,45 @@
+#!/bin/bash
+#copy this file into /etc/init.d/
+#update-rc.d curex-web defaults
+
+USER=www-data
+
+CUREXWEB=/usr/bin/spawn-fcgi
+CUREXWEB_NAME=`basename $CUREXWEB`
+CUREXWEB_ARGS="$CUREXWEB -p 9001 -n /usr/local/bin/cexgui"
+RETVAL=0
+
+start() {
+      echo -n "Starting curex-web on port 9001: "
+	mkdir -p /var/run/wt
+	chown www-data /var/run/wt
+      start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $CUREXWEB_ARGS
+      RETVAL=$?
+      echo "$CUREXWEB_NAME."
+}
+
+stop() {
+      echo -n "Stopping curex-web: "
+      killall -q -w -u $USER $CUREXWEB
+      RETVAL=$?
+      echo "$CUREXWEB_NAME."
+}
+
+case "$1" in
+    start)
+      start
+  ;;
+    stop)
+      stop
+  ;;
+    restart)
+      stop
+      start
+  ;;
+    *)
+      echo "Usage: curex-web {start|stop|restart}"
+      exit 1
+  ;;
+esac
+exit $RETVAL
+

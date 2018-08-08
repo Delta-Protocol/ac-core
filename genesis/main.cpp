@@ -9,8 +9,6 @@ using namespace us::gov;
 using namespace std;
 using socket::datagram;
 
-//using namespace std::chrono_literals;
-
 struct params {
 	params() {
         const char* env_p = std::getenv("HOME");
@@ -58,45 +56,18 @@ string parse_options(args_t& args, params& p) {
     return cmd;
 }
 
-/*
-bool parse_cmdline(int argc, char** argv, params& p) {
-	int i=1;
-	while (i<argc) {
-		string inp=argv[i++];
-		if (inp=="-home") {
-			if (i<argc) {
-				p.homedir=argv[i++];
-			}
-			else {
-				cerr << "I need a directory." << endl;
-				return false;
-			}
-			continue;
-		}
-		if (inp=="-h") {
-			help();
-			exit(0);
-		}
-		cerr << "Unrecognized option " << inp << ". invoke with -h for help." << endl;
-		return false;
-	}
-	return true;
-}
-*/
-
 #include <us/gov/crypto.h>
 #include <string.h>
 #include <iomanip>
 #include <fstream>
 #include <us/gov/input.h>
-
 #include <us/gov/blockchain/diff.h>
 
 using us::gov::blockchain::diff;
 
 struct genesis_daemon: blockchain::daemon {
 
-    genesis_daemon(auto a, auto b):blockchain::daemon(a,b,0,0,vector<string>()) {
+    genesis_daemon(const us::gov::crypto::ec::keys& a, const string& b):blockchain::daemon(a,b,0,0,vector<string>()) {
 	    add(new cash::app());
     }
 

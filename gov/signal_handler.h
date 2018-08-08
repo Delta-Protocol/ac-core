@@ -12,6 +12,7 @@ namespace us { namespace gov {
 using namespace std;
 
 struct signal_handler {
+
 	struct callback {
 		virtual void on_finish()=0;
 	};

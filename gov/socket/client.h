@@ -21,7 +21,10 @@ namespace socket {
 	struct client {
 		client();
 		client(int sock);
-		virtual ~client();
+		virtual ~client() {
+			disconnect();
+			  //you must override destructor call the virtual function disconnect on the most specialized class
+		}
 		virtual string connect(const string& host, uint16_t port, bool block=false);
 		virtual void disconnect();
 
@@ -44,6 +47,10 @@ namespace socket {
 		virtual void on_connect() {}
 
 		void dump(ostream& os) const;
+                virtual void dump_all(ostream& os) const {
+                        dump(os);
+                }
+
 
 public:
 		int sock;

@@ -23,11 +23,6 @@ void c::verification_completed() {
    	}
    	stage=authorized;
 }
-/*
-bool c::authorize(const pubkey_t& p) const {
-	return false;
-}
-*/
 void c::dump(ostream& os) const {
     os << this << ' ' << pubkey << "- " << stagestr[stage] << endl;
 }

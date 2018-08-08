@@ -1,0 +1,16 @@
+#!/bin/sh
+
+htdocs="htdocs"
+www="www"
+
+cp $htdocs/index.html $www/
+cp $htdocs/help.html $www/
+
+for img in `cat $htdocs/index.html | grep "<img src" | sed 's:.*<img src="\([^"]*\)"[ >].*:\1:'`; do
+  echo $img
+  cp $htdocs/$img $www/
+done
+
+cp $htdocs/default.css $www/
+cp $htdocs/sprite.png $www/
+

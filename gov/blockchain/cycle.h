@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <string>
+#include <atomic>
 #include "diff.h"
 
 namespace us{ namespace gov {
@@ -20,22 +21,26 @@ using namespace std;
 		enum stage {
 			new_cycle=0,
 			local_deltas_io=10,
+			sync_db=20,
 			consensus_vote_tip_io=40,
-			num_stages
+            num_stages=4
 		};
 		
-		cycle_t():new_block(0) {
+    	cycle_t():new_diff(0) {
         }
-		~cycle_t() {
-			delete new_block;
+    	~cycle_t() {
+            delete new_diff;
         }
+    
+        atomic<bool> in_sync;
+
 		void wait_for_stage(stage ts);
 		string str(stage s) const;
 		stage get_stage();
 
 		time_point cur_sync;
 		duration period{60s};
-		diff* new_block;
+		diff* new_diff;
 	};
 
 

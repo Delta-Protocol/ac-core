@@ -7,6 +7,9 @@
 #include <us/gov/auth.h>
 #include <fstream>
 #include <unordered_map>
+#include <us/gov/socket/datagram.h>
+#include <us/gov/crypto.h>
+#include "wallet_api.h"
 
 namespace us { namespace wallet {
 using namespace std;
@@ -18,6 +21,8 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 	string backend_host;
 	uint16_t backend_port;
 
+    typedef cash::hash_t addr_t;
+    typedef cash::cash_t cash_t;
 	typedef cash::app::account_t account_t;
 
 	struct accounts_query_t:cash::app::accounts_t {
@@ -42,6 +47,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 		void dump(ostream& os) const;
 	};
 
+    typedef wallet_api::tx_make_p2pkh_input tx_make_p2pkh_input;
 
     string filename() const;
 	bool file_exists() const;
@@ -63,18 +69,6 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
     string generate_locking_program_input(const crypto::ec::sigmsg_hasher_t::value_type& msg, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
     string generate_locking_program_input(const cash::tx& t, size_t this_index, const cash::tx::sigcodes_t& sigcodes, const cash::hash_t& address, const cash::hash_t& locking_program);
 
-    struct tx_make_p2pkh_input {
-        cash::hash_t rcpt_addr;
-        cash::cash_t amount;
-        cash::cash_t fee;
-        cash::tx::sigcode_t sigcode_inputs;
-        cash::tx::sigcode_t sigcode_outputs;
-        bool sendover;
-
-	void to_stream(ostream&) const;
-	static tx_make_p2pkh_input from_stream(istream&);
-
-    };
     string send(socket::peer_t&, const cash::tx&) const;
 
     pair<string,cash::tx> tx_make_p2pkh(socket::peer_t&, const tx_make_p2pkh_input& i);

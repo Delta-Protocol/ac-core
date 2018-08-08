@@ -7,7 +7,7 @@ using namespace us::wallet;
 using namespace std;
 typedef us::wallet::wallet_daemon c;
 
-c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), local_api(home,backend_host,backend_port), id(k) {
+c::wallet_daemon(const keys& k, uint16_t port, const string& home, const string&backend_host, uint16_t backend_port): b(port,2), daemon_local_api(home,backend_host,backend_port), id(k) { //wallet_local_api(home,backend_host,backend_port), pairing_local_api(home), id(k) {
     assert(!home.empty());
 }
 
@@ -15,27 +15,164 @@ c::~wallet_daemon() {
 }
 
 bool c::send_error_response(socket::peer_t *c, datagram*d, const string& error) {
+    auto s=d->service;
 	delete d;
-	c->send(new datagram(us::wallet::protocol::response,"E "+error));
+	c->send(new datagram(s+1,"E "+error)); //+1 means answer
 	return true;
 }
 
 bool c::send_response(socket::peer_t *c, datagram*d, const string& payload) {
+    auto s=d->service;
 	delete d;
-	c->send(new datagram(us::wallet::protocol::response,payload));
+	c->send(new datagram(s+1,payload));
 	return true;
 }
 
+
+
+
+// wallet - master file: us/apitool/data/wallet
+bool c::send_response__wallet_balance(socket::peer_t* c, socket::datagram* d) {
+            istringstream is(d->parse_string());
+            bool detailed; //=d->parse_string()=="1";
+            is >> detailed;
+            ostringstream ans;
+            wallet_local_api::balance(detailed,ans);
+            return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_list(socket::peer_t* c, socket::datagram* d) {
+            istringstream is(d->parse_string());
+            bool showpriv; //=d->parse_string()=="1";
+            is >> showpriv;
+//           bool showpriv=d->parse_string()=="1";
+            ostringstream ans;
+            wallet_local_api::list(showpriv,ans);
+            return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_new_address(socket::peer_t* c, socket::datagram* d) {
+           ostringstream ans;
+            wallet_local_api::new_address(ans);
+            return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_add_address(socket::peer_t* c, socket::datagram* d) {
+			crypto::ec::keys::priv_t privkey;
+			istringstream is(d->parse_string());
+			is >> privkey;
+			ostringstream ans;
+			wallet_local_api::add_address(privkey,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_transfer(socket::peer_t* c, socket::datagram* d) {
+			hash_t addr;
+			cash_t amount;
+			istringstream is(d->parse_string());
+			is >> addr;
+			is >> amount;
+			ostringstream ans;
+			wallet_local_api::transfer(addr,amount,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_tx_make_p2pkh(socket::peer_t* c, socket::datagram* d) {
+			istringstream is(d->parse_string());
+			wallet::tx_make_p2pkh_input i=wallet::tx_make_p2pkh_input::from_stream(is);
+            if (unlikely(is.fail())) {
+                return send_error_response(c,d,"Unacceptable input.");
+            }
+
+			ostringstream ans;
+			wallet_local_api::tx_make_p2pkh(i,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_tx_sign(socket::peer_t* c, socket::datagram* d) {
+	        string txb58;
+            cash::tx::sigcode_t sci;
+            cash::tx::sigcode_t sco;
+			istringstream is(d->parse_string());
+            is >> txb58;
+            is >> sci;
+            is >> sco;
+			ostringstream ans;
+			wallet_local_api::tx_sign(txb58,sci,sco,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_tx_send(socket::peer_t* c, socket::datagram* d) {
+	        string txb58;
+			istringstream is(d->parse_string());
+            is >> txb58;
+			ostringstream ans;
+			wallet_local_api::tx_send(txb58,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_tx_decode(socket::peer_t* c, socket::datagram* d) {
+	        string txb58;
+			istringstream is(d->parse_string());
+            is >> txb58;
+			ostringstream ans;
+			wallet_local_api::tx_decode(txb58,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_tx_check(socket::peer_t* c, socket::datagram* d) {
+	        string txb58;
+			istringstream is(d->parse_string());
+            is >> txb58;
+			ostringstream ans;
+			wallet_local_api::tx_check(txb58,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__wallet_ping(socket::peer_t* c, socket::datagram* d) {
+    //handled in process_work
+   abort();
+}
+
+// pairing - master file: us/apitool/data/pairing
+bool c::send_response__pairing_pair(socket::peer_t* c, socket::datagram* d) {
+			istringstream is(d->parse_string());
+	        pub_t pk;
+            is >> pk;
+            string name;
+            is >> name;
+			ostringstream ans;
+			pairing_local_api::pair(pk,name,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__pairing_unpair(socket::peer_t* c, socket::datagram* d) {
+	        pub_t pk;
+			istringstream is(d->parse_string());
+            is >> pk;
+			ostringstream ans;
+			pairing_local_api::unpair(pk,ans);
+			return send_response(c,d,ans.str());
+}
+
+bool c::send_response__pairing_list_devices(socket::peer_t* c, socket::datagram* d) {
+			ostringstream ans;
+			pairing_local_api::list_devices(ans);
+
+			return send_response(c,d,ans.str());
+}
+
+
+
+
+
+using namespace us::wallet::protocol;
+
 bool c::process_work(socket::peer_t *c, datagram*d) {
-    switch(d->service) {
-	case us::wallet::protocol::ping: {
-//cout << "PING" << endl;
+	if (unlikely(d->service==us::wallet::protocol::wallet_ping)) {
 		ostringstream ans;
-		local_api::ping(ans);
-//cout << ans.str() << endl;
+		wallet_local_api::ping(ans);
 		return send_response(c,d,ans.str());
-    }
-    break;
     }
 
     if (b::process_work(c,d)) return true;
@@ -48,117 +185,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
         return true;
     }
 	switch(d->service) {
-		case us::wallet::protocol::tx_make_p2pkh_query: {
-			istringstream is(d->parse_string());
-			wallet::tx_make_p2pkh_input i=wallet::tx_make_p2pkh_input::from_stream(is);
-            if (unlikely(is.fail())) {
-                return send_error_response(c,d,"Unacceptable input.");
-            }
-
-			ostringstream ans;
-			local_api::tx_make_p2pkh(i,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::add_address_query: {
-			crypto::ec::keys::priv_t privkey;
-			istringstream is(d->parse_string());
-			is >> privkey;
-			ostringstream ans;
-			local_api::add_address(privkey,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::new_address_query: {
-			ostringstream ans;
-			local_api::new_address(ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::list_query: {
-			bool showpriv=d->parse_string()=="1";
-			ostringstream ans;
-			local_api::list(showpriv,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::balance_query: {
-			bool detailed=d->parse_string()=="1";
-			ostringstream ans;
-   			local_api::balance(detailed,ans);
-//cout << "ANSWERING : " << ans.str() << endl;
-//cout << "In 5 seconds" << endl;
-//this_thread::sleep_for(5s);
-//cout << "now" << endl;
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::tx_sign_query: {
-	        string txb58;
-            cash::tx::sigcode_t sci;
-            cash::tx::sigcode_t sco;
-			istringstream is(d->parse_string());
-            is >> txb58;
-            is >> sci;
-            is >> sco;
-			ostringstream ans;
-			local_api::tx_sign(txb58,sci,sco,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::tx_send_query: {
-	        string txb58;
-			istringstream is(d->parse_string());
-            is >> txb58;
-			ostringstream ans;
-			local_api::tx_send(txb58,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::tx_decode_query: {
-	        string txb58;
-			istringstream is(d->parse_string());
-            is >> txb58;
-			ostringstream ans;
-			local_api::tx_decode(txb58,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::tx_check_query: {
-	        string txb58;
-			istringstream is(d->parse_string());
-            is >> txb58;
-			ostringstream ans;
-			local_api::tx_check(txb58,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::pair_query: {
-			istringstream is(d->parse_string());
-	        pub_t pk;
-            is >> pk;
-            string name;
-            is >> name;
-			ostringstream ans;
-			local_api::pair(pk,name,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::unpair_query: {
-	        pub_t pk;
-			istringstream is(d->parse_string());
-            is >> pk;
-			ostringstream ans;
-			local_api::unpair(pk,ans);
-			return send_response(c,d,ans.str());
-		}
-		break;
-		case us::wallet::protocol::list_devices_query: {
-			ostringstream ans;
-			local_api::list_devices(ans);
-
-			return send_response(c,d,ans.str());
-		}
+        #include <us/api/apitool_generated__protocol_wallet-daemon_cpp_service_router>
 		break;
 		default: break;
 	}

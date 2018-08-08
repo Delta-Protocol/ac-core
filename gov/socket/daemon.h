@@ -18,10 +18,6 @@ struct daemon: server {
 	virtual ~daemon();
 	virtual client* create_client(int sock) override;
 
-//	condition_variable cv;
-//	mutex mx;
-//	atomic<bool> _ready{false};
-
 	void run();
 	virtual void on_finish() override;
 
@@ -29,7 +25,7 @@ struct daemon: server {
 
 	void send(int num, peer_t* exclude, datagram* d);
 
-	virtual bool receive_and_process(client*) override;
+	virtual void receive_and_process(client*) override;
 	void process_work(peer_t *c);
 	virtual bool process_work(peer_t *c, datagram*d);
 

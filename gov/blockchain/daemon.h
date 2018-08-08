@@ -46,18 +46,25 @@ namespace blockchain {
 
         string blocksdir() const;
 
+        void eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle);
+
 		struct networking:dfs::daemon {
 			typedef dfs::daemon b;
 			using b::keys;
 			networking(blockchain::daemon* parent): parent(parent) {}
 			networking(uint16_t port, uint16_t edges, blockchain::daemon* parent, const vector<string>& seed_nodes): b(port, edges), parent(parent), seed_nodes(seed_nodes) {}
 			virtual bool process_work(socket::peer_t *c, datagram*d) override;
-			virtual bool process_evidence(relay::peer_t *c, datagram*d) override;
+			virtual bool process_evidence(datagram*d) override;
 			bool process_work_sysop(peer::peer_t *c, datagram*d);
 			virtual string get_random_peer(const unordered_set<string>& exclude) const override; //returns ipaddress //there exist a possibility of returning "" even though there were eligible items available
 
             virtual const keys& get_keys() const override {
                 return parent->id;
+            }
+
+            virtual vector<relay::peer_t*> get_nodes() override {
+                auto a=parent->get_nodes();
+                return *reinterpret_cast<vector<relay::peer_t*>*>(&a);
             }
 
 			virtual socket::client* create_client(int sock) override {
@@ -66,11 +73,11 @@ namespace blockchain {
 				return p;
 			}
 			void dump(ostream& os) const {
-				os << "Networking. Active edges:" << endl;
+				os << "Active edges:" << endl;
 				auto a=active();
 				vector<peer_t*>& v=reinterpret_cast<vector<peer_t*>&>(a);
 				for (auto& i:v) {
-					i->dump(os);
+					i->dump_all(os);
 				}
 			}
 
@@ -80,7 +87,7 @@ namespace blockchain {
 
 		bool process_work(peer_t *c, datagram*d);
 		bool process_app_query(peer_t *c, datagram*d);
-		bool process_evidence(peer_t *c, datagram*d);
+		bool process_evidence(datagram*d);
 		void process_query_block(peer_t *c, datagram*d);
 		void process_block(peer_t *c, datagram*d);
 		void process_vote_tip(peer_t *c, datagram*d);
@@ -88,11 +95,25 @@ namespace blockchain {
 		void relay(int num, peer_t* exclude, datagram* d) {
 			peerd.send(num,exclude,d);
 		}
-/*
-		int miners_size() const {
-			return 30; //TODO based on the number of local_deltass a block has
-		}
-*/
+
+        template<typename T>
+        struct mxvector: vector<T*> {
+            mxvector() {  
+            }
+            ~mxvector() {  
+                for (auto p:*this) delete p;
+            }
+            void add(T* d) {
+                unique_lock<mutex> lock(mx);
+                this->emplace_back(d);
+            }
+            mutex mx;
+        };
+        mxvector<datagram> evidences_on_hold;
+
+        void on_sync();
+        void flush_evidences_on_hold();
+
 		void vote_tip(const diff& b);
 		void dump(ostream& os) const;
 		void list_apps(ostream& os) const;
@@ -111,6 +132,8 @@ namespace blockchain {
 			void wait();
 			void wait(const chrono::steady_clock::duration& d);
 			virtual void on_finish();
+
+            const hash_t& tip() const;
 
 			daemon* d;
 			condition_variable cv;
@@ -139,11 +162,13 @@ namespace blockchain {
 		bool get_prev(const diff::hash_t& h, diff::hash_t& prev) const;
 
 		void send(const local_deltas& g, peer_t* exclude=0);
-		void send(const datagram& g, peer_t* exclude=0);
+
+        cycle_t cycle;
 
 		void stage1(cycle_t&);
-		bool stage2(cycle_t&);
-		void stage3(cycle_t&);
+		void stage2(cycle_t&);
+		bool stage3(cycle_t&);
+		void stage4(cycle_t&);
 		void run();
 
 		void load_head();

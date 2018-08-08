@@ -34,6 +34,10 @@ namespace id {
 		peer_t(int sock);
 		virtual ~peer_t();
 		void dump(ostream& os) const;
+                virtual void dump_all(ostream& os) const override {
+                        dump(os);
+                        b::dump_all(os);
+                }
 
 		virtual void on_connect() override; //backcalled only on the initiator.
 

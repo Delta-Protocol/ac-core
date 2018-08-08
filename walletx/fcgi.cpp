@@ -1,12 +1,14 @@
 #ifdef FCGI
 #include "fcgi.h"
+#include <us/wallet/json/daemon_api.h>
+#include <unordered_map>
+#include <us/gov/input/convert.h>
 
 using namespace us::wallet::w3api;
 typedef us::wallet::w3api::fcgi_t c;
 
 int c::count_reqs{0};
-us::wallet::api* c::api{0};
-
+us::wallet::daemon_api* c::api{0};
 
 template<typename T>
 std::basic_string<T> uri_decode(const std::basic_string<T>& in) {
@@ -47,8 +49,17 @@ void c::help(ostream& os) const {
     	static const string url="https://127.0.0.1/api";
 		os << "Content-Type: text/html; charset=utf-8" << endl << endl;
 		os << "<pre>" << endl;
-		os << "US-Wallet functions" << endl;
+		os << "us-wallet functions" << endl;
 		os << endl;
+
+    os << "Wallet" << endl;
+#include <us/api/apitool_generated__links_wallet_fcgi_query_strings>
+    os << endl;
+    os << "Pairing" << endl;
+#include <us/api/apitool_generated__links_pairing_fcgi_query_strings>
+    os << endl;
+
+//		os << url << "/?<b>cmd=balance&detailed=&lt;1|0&gt;</b>" << endl;
 /*
 		os << url << "/?<b>app=nova&cmd=new_compartiment</b>" << endl;
 		os << url << "/?<b>app=nova&cmd=move&compartiment=&lt;compartiment&gt;&item=&lt;item&gt;&action=&lt;load/unload&gt;&send=&lt;1|0&gt; </b>" << endl;
@@ -63,21 +74,23 @@ void c::help(ostream& os) const {
 
 #include "json.h"
 
-Json::Value to_json(const string& r,const string& cmd) {
 /*
+Json::Value c::to_json(const string& r,const string& cmd) {
+
+    if (cmd=="balance") return json::convert_response_balance(r);
+    if (cmd=="balance_detailed") return json::convert_response_balance_detailed(r);
+/ *
     if (cmd=="new_compartiment") return json::convert_response_new_compartiment(r);
     if (cmd=="move") return json::convert_response_move(r);
     if (cmd=="track") return json::convert_response_track(r);
     if (cmd=="query") return json::convert_response_query(r);
     if (cmd=="mempool") return json::convert_response_mempool(r);
-*/
+* /
     Json::Value err;
     err["error"]="unknown command";
     return err;
 }
-
-
-
+*/
 pair<string,string> split(const string& s, char c) {
 	for (int i=0; i<s.size(); ++i) {
 		if (s[i]==c) {
@@ -99,17 +112,38 @@ vector<string> split2(const string& s, char c) {
 	return v;
 }
 
+using namespace us::gov::input;
 
-vector<pair<string,string>> parse_uri(const string& uri) {
-	vector<pair<string,string>> m;
-//m.push_back(make_pair("app","nova"));
-//return m;
+
+struct args_t:unordered_map<string,string> {
+    const string& get(const string& param) const {
+    }
+    template<typename T>
+    T get(const string& param) {
+        auto i=find(param);
+        if (i==end()) {
+            return T();
+        }
+        return convert<T>(i->second);
+    }
+    template<typename T>
+    T get(const string& param, const T& default_value) {
+        auto i=find(param);
+        if (i==end()) {
+            return default_value;
+        }
+        return convert<T>(i->second);
+    }
+};
+
+args_t parse_uri(const string& uri) {
+	args_t m;
 	auto i=uri.find('?');
 	if (i==string::npos) return m;
 	auto p=split2(&uri[i+1],'&'); //vector<str> "para=value"
 	for (auto&i:p) {
 		auto v=split(i,'='); //pair<str,str>
-		m.push_back(v);
+		m.emplace(v);
 	}
 	return m;
 }
@@ -144,16 +178,20 @@ out << uri << endl;
 */
         ostringstream os;
 
-	auto m=parse_uri(uri);
-	auto n=m.begin();
-	if (n==m.end()) {help(out); return true;}
-	string app=n->second;
+	auto args=parse_uri(uri);
+//	if (==m.end()) {help(out); return true;}
+	//string app=n->second;
 
 //	istringstream is(uri);
 //	string command;
 //	is >> command;
-    istringstream is("");
-    string cmd;
+//    istringstream is("");
+    string cmd=args.get<string>("cmd");
+  	if (cmd=="balance") {
+       string detailed=args.get<string>("detailed");
+        bool b=detailed=="1";
+  	   api->balance(b,os);
+    }
 /*
 	if (app=="nova") {
 	++n;
@@ -222,16 +260,15 @@ out << uri << endl;
     }
 */
     string r=os.str();
-    bool json=true;
+//    bool json=true;
 	if (!r.empty()) {
-        if (json) {
+        if (dynamic_cast<json::daemon_api*>(api)!=0) {
 		    out << "Content-Type: application/json; charset=utf-8" << endl << endl;
-            out << to_json(r,cmd) << endl;
         }
         else {
 		    out << "Content-Type: text/plain; charset=utf-8" << endl << endl;
-            out << r << endl;
         }
+        out << r << endl;
 	}
     else {
         help(out);

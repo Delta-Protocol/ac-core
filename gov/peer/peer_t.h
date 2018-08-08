@@ -34,7 +34,7 @@ namespace peer {
 			num_stages
 		};
 		constexpr static array<const char*,num_stages> stagestr={"disconnected","connected","latency","service","disconnecting"};
-		constexpr static array<const char*,2> modestr={"tor","ip4"};
+//		constexpr static array<const char*,2> modestr={"tor","ip4"};
 		peer_t(int sock);
 		virtual ~peer_t();
 		//datagram* complete_datagram();
@@ -42,19 +42,22 @@ namespace peer {
 		virtual void on_connect() override;
 
 		//bool process_work(datagram* d);
-
+/*
 		void set_mode(int m) {
 			lock_guard<mutex> lock(mx);
 			mode=m;
 		}
-
+*/
 		virtual void disconnect() override;
 
 		void dump(ostream& os) const;
-		
+                virtual void dump_all(ostream& os) const override {
+                        dump(os);
+                        b::dump_all(os);
+                }
 		chrono::steady_clock::time_point sent_ping;
 		chrono::steady_clock::time_point since;
-		int mode; //0 tor; 1 ip4
+//		int mode; //0 tor; 1 ip4
 		stage_t stage;
 
 	};

@@ -23,12 +23,15 @@ struct peer_t: id::peer_t {
 
 	virtual bool authorize(const pubkey_t& p) const=0;
  void dump(ostream& os) const;
+                virtual void dump_all(ostream& os) const override {
+                        dump(os);
+                        b::dump_all(os);
+                }
 
         //virtual string run_auth() override;
 
         peer_t(int sock=0);
         virtual ~peer_t();
- 
         stage_t stage{denied};
 };
 

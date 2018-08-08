@@ -67,9 +67,9 @@ void help(const params& p, ostream& os) {
 }
 
 
-using us::gov::input::args_t;
+using us::gov::input::shell_args;
 
-string parse_options(args_t& args, params& p) {
+string parse_options(shell_args& args, params& p) {
     string cmd;
     while(true) {
         cmd=args.next<string>();
@@ -218,7 +218,7 @@ void sysop_localhost_allow(const params& p) {
 /// \param  argv An argument vector of the command line arguments
 /// \return an integer 0 upon exit success
 int main(int argc, char** argv) {
-    args_t args(argc,argv);
+    shell_args args(argc,argv);
     params p;
     string command=parse_options(args,p);
 

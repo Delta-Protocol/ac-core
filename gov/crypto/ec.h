@@ -1,5 +1,5 @@
-#ifndef USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
-#define USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
+#ifndef USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511781
+#define USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511781
 
 #include <secp256k1.h>
 #include <iostream>
@@ -7,6 +7,7 @@
 #include <array>
 #include "double_sha256.h"
 #include <us/gov/likely.h>
+#include "sha256.h"
 
 namespace us { namespace gov {
 namespace crypto {
@@ -14,7 +15,7 @@ using namespace std;
 
 struct ec {
 	typedef secp256k1_ecdsa_signature signature;
-	typedef double_sha256 sigmsg_hasher_t;
+	typedef sha256 sigmsg_hasher_t;
 
 	ec();
 	~ec();
@@ -99,10 +100,10 @@ struct ec {
 
 	bool verify(const keys::pub_t& pk, const string& text, const string& signature_der) const;
 	bool verify(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
+	bool verify_not_normalized(const keys::pub_t& pk, const string& text, const string& signature_der) const;
+	bool verify_not_normalized(const keys::pub_t& pk, const sigmsg_hasher_t::value_type& msgh, const string& signature_der_b58) const;
 
-	/*vector<unsigned char> encrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& clear_text) const;
-	vector<unsigned char> decrypt(const keys::priv_t& pk, const keys::pub_t& pk, const vector<unsigned char>& cyphered_text) const;*/
-
+	bool generate_shared_key(unsigned char *, size_t, const keys::priv_t&, const keys::pub_t&);
 
 	static constexpr size_t bit_size() { return 256; }
 

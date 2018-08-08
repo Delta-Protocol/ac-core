@@ -6,9 +6,9 @@
 #include <us/gov/crypto/ec.h>
 #include "wallet.h"
 #include <unordered_map>
-#include "local_api.h"
-#include "api.h"
-
+//#include "wallet_local_api.h"
+//#include "pairing_local_api.h"
+#include "daemon_local_api.h"
 
 namespace us { namespace wallet {
 
@@ -18,7 +18,7 @@ using socket::datagram;
 
 struct peer_t;
 
-struct wallet_daemon: auth::daemon, local_api {
+struct wallet_daemon: auth::daemon, daemon_local_api { //wallet_local_api, pairing_local_api {
 	typedef auth::daemon b;
 	typedef b::keys keys;
 	typedef keys::pub_t pub_t;
@@ -28,13 +28,14 @@ struct wallet_daemon: auth::daemon, local_api {
 	virtual ~wallet_daemon();
 	virtual bool process_work(socket::peer_t*, datagram*) override;
 
+using wallet::add_address;
+#include <us/api/apitool_generated__protocol_wallet-daemon_cpp_service_handler_headers>
+
    inline virtual const keys& get_keys() const override { return id; }
 
    virtual socket::client* create_client(int sock) override;
 
 	const keys& id;
-  //  string backend_host;
-  //  uint16_t backend_port;
 
 	bool send_response(socket::peer_t *c, datagram*d, const string& payload);
 	bool send_error_response(socket::peer_t *c, datagram*d, const string& error);

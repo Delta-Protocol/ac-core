@@ -100,6 +100,32 @@ bool c::completed() const {
 	return dend==size() && !empty();
 }
 
+#ifdef SIM
+/*
+string c::sendto(int sock) const {
+}
+string c::recvfrom(int sock) {
+}
+*/
+#else
+string c::sendto(int sock) const {
+	if (unlikely(size()>=maxsize)) {
+            return "Error. Datagram is too big.";
+        }
+	if (unlikely(sock==0)) {
+            return "Error. Connection is closed.";
+        }
+	uint8_t sz[h];
+	auto n = ::write(sock, &(*this)[0], size());
+	if (unlikely(n<0)) {
+		return "Error. Failure writting to socket.";
+	}
+	if (unlikely(n!=size())) {
+		return "Error. Unexpected returning size while wrtting to socket";
+	}
+	return "";
+}
+
 string c::recvfrom(int sock) {
 	if (unlikely(sock==0)) {
             return "Error. Connection is closed.";
@@ -141,24 +167,7 @@ string c::recvfrom(int sock) {
 	dend+=nread;
 	return "";
 }
-
-string c::sendto(int sock) const {
-	if (unlikely(size()>=maxsize)) {
-            return "Error. Datagram is too big.";
-        }
-	if (unlikely(sock==0)) {
-            return "Error. Connection is closed.";
-        }
-	uint8_t sz[h];
-	auto n = ::write(sock, &(*this)[0], size());
-	if (unlikely(n<0)) {
-		return "Error. Failure writting to socket.";
-	}
-	if (unlikely(n!=size())) {
-		return "Error. Unexpected returning size while wrtting to socket";
-	}
-	return "";
-}
+#endif
 
 c::hash_t c::compute_hash() const {
 	hasher_t hasher;
@@ -192,22 +201,28 @@ vector<string> c::parse_strings() const {
 #include <us/gov/dfs/protocol.h>
 #include <sstream>
 string c::parse_string() const {
-if (service==protocol::id_peer_status) {
+#ifdef DEBUG
+if (service==protocol::gov_id_peer_status) {
+assert(false);
     ostringstream os;
     os << "(uint16)" << parse_uint16();
     return os.str();
 }
 else if (service==protocol::file_response) {
+assert(false);
     return "[binary]";
 }
 else {
+#endif
     int sz=size()-h+1;
     if (unlikely(sz<2)) return ""; //minimum 2bytes for a non-empty c string
     char cstr[sz];
     memcpy(cstr,&*(cbegin()+h),sz-1);
     cstr[sz-1]='\0';
     return string(cstr);
+#ifdef DEBUG
 }
+#endif
 //	return string(reinterpret_cast<const char*>(&*(begin()+h)),size()-h);
 }
 

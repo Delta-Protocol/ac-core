@@ -13,6 +13,13 @@ using namespace std;
 
 constexpr array<const char*,c::num_sigcodes> c::sigcodestr;
 
+#include <sys/time.h>
+
+c::tx() {
+struct timeval tv;
+gettimeofday (&tv, NULL);
+memcpy(&nonce,&tv.tv_usec,sizeof(nonce));
+}
 
 void c::dump_sigcodes(ostream&os) {
 	os << sigcodestr[sigcode_all] << ' ' << sigcodestr[sigcode_none] << ' ' << sigcodestr[sigcode_this] << ' ';
@@ -22,7 +29,6 @@ bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& 
 	inputs.push_back(input_t(addr,prev_balance,amount));
 	return true;
 }
-
 
 bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount, const string& locking_program_input) {
 	inputs.push_back(input_t(addr,prev_balance,amount,locking_program_input));
@@ -49,6 +55,11 @@ pair<string,c> c::read(istream& is) {
         t.first="Unreadable parent_block";
         return move(t);       
     }
+	is >> t.second.nonce;
+    if (!is.good()) {
+        t.first="Unreadable nonce";
+        return move(t);       
+    }
 	return move(t);
 }
 
@@ -56,10 +67,12 @@ void c::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcodes_t scs) 
 	inputs.write_sigmsg(h,this_index,sigcode_input(scs));
 	outputs.write_sigmsg(h,this_index,sigcode_output(scs));
 	h.write(parent_block);
+	h.write(nonce);
 }
 
 void c::write_pretty(ostream& os) const {
 	os << "---transaction---------------" << endl;
+	os << "  nonce: " << nonce << endl;
 	os << "  parent_block: " << parent_block << endl;
 	os << "  -----" << inputs.size() << " inputs-------" << endl;
 	inputs.write_pretty(os);
@@ -71,7 +84,7 @@ void c::write_pretty(ostream& os) const {
 void c::write(ostream& os) const {
 	inputs.write(os);
 	outputs.write(os);
-	os << parent_block << ' ';
+	os << parent_block << ' ' << nonce << ' ';
 }
 
 string c::to_b58() const {

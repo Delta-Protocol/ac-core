@@ -33,10 +33,9 @@ c::client(int sock):sock(sock) {
    if (sock!=0) addr=address();
 }
 
-c::~client() {
-	disconnect();
-}
+#ifdef SIM
 
+#else
 string c::address() const {
 	struct sockaddr_storage addr;
 	socklen_t len=sizeof addr;
@@ -54,6 +53,7 @@ string c::address() const {
 	}
 	return ipstr;
 }
+#endif 
 
 string c::connect(const string& host, uint16_t port, bool block) {
 	assert(sock==0); //disconnect();
@@ -92,6 +92,8 @@ void c::init_sockaddr (struct sockaddr_in *name, const char *hostname,	uint16_t 
 #include <thread>
 #include <sstream>
 
+#ifdef SIM
+#else
 string c::init_sock(const string& host, uint16_t port, bool block) {
 	sockaddr_in servername;
 	if (unlikely(sock!=0)) {
@@ -139,6 +141,7 @@ string c::init_sock(const string& host, uint16_t port, bool block) {
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 	return "";
 }
+#endif
 
 
 pair<string,datagram*> c::send_recv(datagram* d,uint16_t expected_service) {
@@ -165,6 +168,8 @@ pair<string,datagram*> c::send_recv(datagram* d) {
 #include <us/gov/stacktrace.h>
 #include <fstream>
 
+ofstream _log("/tmp/us_gov_socket_io_log");
+
 void interceptor(const datagram& d) {
 typedef unordered_set<uint16_t> dt;
 static dt svc;
@@ -173,7 +178,7 @@ if (++i%100==0) { //reload file
     i=0;
     svc.clear();
     ifstream f("/tmp/interceptor");
-    
+
     while (f.good()) {
         uint16_t s;
         f >> s;
@@ -185,14 +190,11 @@ if (++i%100==0) { //reload file
 }
 
 void dump_d(string prefix, const datagram& d, const string& addr) {
-cout << "SOCKET: " << prefix << " datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
-cout << "      : " << d.parse_string() << endl;
+_log << "SOCKET: " << prefix << " datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
+_log << "      : " << d.parse_string() << endl;
 }
 
-
-
 #endif
-
 
 pair<string,datagram*> c::recv(uint16_t expected_service) { //caller owns the returning object
     auto r=recv();
@@ -201,7 +203,7 @@ pair<string,datagram*> c::recv(uint16_t expected_service) { //caller owns the re
     }
     datagram*d=r.second;
     while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
-        if (d->service==us::gov::protocol::error) {
+        if (d->service==us::gov::protocol::gov_socket_error) {
             return move(r);
         }
         if (d->service==expected_service) {

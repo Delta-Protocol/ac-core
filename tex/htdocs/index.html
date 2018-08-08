@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TROCAVALUTA - The Currency Exchange for all.</title>
+	<meta charset="UTF-8">
+	<link rel="icon" type="image/png" href="favicon.png" />
+<!--	<link rel="stylesheet" type="text/css" href="default.css"> -->
+<script>
+function cmn() {
+	var l = document.createElement('link'); l.rel = 'stylesheet';
+	l.href = 'default.css';
+	var h = document.getElementsByTagName('head')[0];
+	h.parentNode.insertBefore(l, h);
+}
+function setemail() {
+	cmn();
+	document.getElementById("email").innerHTML='<a href="mailto:info@trocavaluta.com">info@trocavaluta.com</a>';
+}
+
+function dljs() {
+	cmn();
+	var element = document.createElement("script");
+	element.src = "bin.js";
+	document.body.appendChild(element);
+}
+
+function add_loader(l) {
+	if (window.addEventListener)
+		window.addEventListener("load", l, false);
+	else if (window.attachEvent)
+		window.attachEvent("onload", l);
+	else window.onload = l;
+}
+
+if (window.location.href.indexOf("?demo")!=-1) {
+	add_loader(dljs);
+}
+else {
+	add_loader(setemail);
+}
+
+</script>
+</head>
+<body>
+<div id="all">
+	<div class="ts" id="ts"></div>
+	<div class="leftpane">
+		<div id="hdr">
+<!--
+			<button onclick="tw.ts.full_repaint($('#ts'))"><div>full_repaint('#ts')</div></button>
+			<button onclick="tw.ts.refresh()"><div>refresh ts</div></button>
+			<button onclick="tw.ms.update()"><div>refresh mkts</div></button>
+			<button onclick="puo.set()"><div>puo.set</div></button><br/>
+-->
+			<div id="logo">
+				<img src="trocavaluta-header.png" alt="TROCAVALUTA"><br/>
+			</div>
+			<div id="menu"><a href="https://trocavaluta.com/api" target="_blank">API...</a> <a href="help.html" target="_blank">help...</a> <a href="about.html" target="_blank">about us...</a></div>
+			<div id="ac"></div>
+			<div class="dw" id="rw"></div>
+			<div class="dw" id="dw"></div>
+			<div id="msgwindow" class="msgwindow" onclick="$('#msgwindow').css('display','none')"></div>
+		</div>
+		<div id="content"></div>
+		<div id="tpu" title="Click to hide." onclick="puo.hide();"></div>
+	</div>
+</div>
+<div id="dim">
+<br><br><br>
+	<div  style="color:black;font-size:17px; background-color:white;">
+	<br/>
+	<div><img src="trocavaluta-logo-300.png"></div>
+	<div id="email"></div>
+	<br/><br/>
+	</div>
+
+</div>
+</body>
+</html>
+

@@ -34,7 +34,7 @@ void c::run() {
 	thread_::_this.sleep_for(1s);
 	{
 	while(!thread_::_this.terminated) {
-		cout << "Triggered Timer (mutation) v=30 secs" << endl;
+		cout << "triggered timer (mutation) v=30 secs" << endl;
 		daemon_timer();
 		thread_::_this.sleep_for(chrono::seconds(30));  //TODO not every 30 secs but at some safe point in the cycle
 	}
@@ -42,27 +42,34 @@ void c::run() {
 	listen.join();
 }
 
-bool c::receive_and_process(client* scl) {
+void c::dump(ostream& os) const {
+    pool->dump(os);
+}
+
+void c::receive_and_process(client* scl) {
 	assert(pool!=0);
 	auto* cl=static_cast<peer_t*>(scl);
-	pool->push([&,cl](int id) { process_work(cl); });
-	return true;
+    if (pool->n_idle()>0) {
+    	pool->push([&,cl](int id) { process_work(cl); });
+    }
+    else { //drop the connection
+        clients.resume(scl);
+        scl->disconnect();
+    }
 }
 
 void c::process_work(peer_t *c) {
 	auto r=c->recv(); //complete_datagram();
 	if (unlikely(!r.first.empty())) {
-		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
+//		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		assert(!r.second);
-		//clients.remove(c); 
         c->disconnect();
-		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
+//		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		return; //processed work
 	}
     assert(r.second!=0);
-	if (unlikely(!r.second->completed())) { 
-		//cout << "socket: daemon: recv partial datagram. returning to listening pool" << endl;
-        delete r.second;
+	if (unlikely(!r.second->completed())) {
+        	delete r.second;
 		return;
 	}
 	bool processed=process_work(c,r.second);
@@ -74,7 +81,7 @@ void c::process_work(peer_t *c) {
 }
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
-    bool ispong=d->service==protocol::pong;
+//    bool ispong=d->service==protocol::pong;
     if (c->process_work(d)) {
         return true;
     }
