@@ -1,4 +1,4 @@
-package us.wallet;
+package us.gov.crypto;
 
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.jce.spec.ECParameterSpec;
@@ -32,7 +32,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
-public class EllipticCryptography {
+public class ec {
     private SecureRandom secureRandom;
     private KeyFactory factory;
     private ECParameterSpec ecSpec;
@@ -40,10 +40,10 @@ public class EllipticCryptography {
     private KeyPairGenerator generator;
 
 
-    public static EllipticCryptography secp256k1;
+    public static ec secp256k1;
     static {
         try {
-        secp256k1=new EllipticCryptography("secp256k1", "ECDSA", "SHA256withECDSA");
+        secp256k1=new ec("secp256k1", "ECDSA", "SHA256withECDSA");
         }
         catch (GeneralSecurityException e) {
         }
@@ -51,7 +51,7 @@ public class EllipticCryptography {
 
     String signatureAlgorithm;
 
-    public EllipticCryptography(String curveName, String algorithmName, String signatureAlgo) throws GeneralSecurityException {
+    public ec(String curveName, String algorithmName, String signatureAlgo) throws GeneralSecurityException {
             signatureAlgorithm=signatureAlgo;
             Security.addProvider(new BouncyCastleProvider());
             ecSpec = ECNamedCurveTable.getParameterSpec(curveName);

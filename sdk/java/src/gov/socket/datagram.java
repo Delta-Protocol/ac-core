@@ -1,4 +1,4 @@
-package us.wallet;
+package us.gov.socket;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-public class Datagram {
+public class datagram {
 
     static final int h=6;
     static final int maxsize=100000;
@@ -21,19 +21,19 @@ public class Datagram {
     int error;
     int service;
 
-    public Datagram() {
+    public datagram() {
         bytes=new byte[h];
         dend=0;
         error=0;
     }
-    public Datagram(short service) {
+    public datagram(short service) {
         int size=6;
         bytes= new byte[size];
         encode_size(size);
         encode_service(service);
         dend=bytes.length;
     }
-    public Datagram(short service, String msg) {
+    public datagram(short service, String msg) {
         int size=6+msg.length();
         bytes= new byte[size];
         encode_size(size);
@@ -140,14 +140,10 @@ public class Datagram {
     }
     }
 
-
-
     String parse_string() {
         byte[] b=new byte[dend-h];
         System.arraycopy(bytes, h, b, 0, dend-h);
 
         return new String(b);
     }
-
-
 };

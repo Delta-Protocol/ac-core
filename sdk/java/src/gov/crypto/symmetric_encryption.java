@@ -1,4 +1,4 @@
-package us.wallet;
+package us.gov.crypto;
 
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.util.Arrays;
@@ -12,7 +12,14 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 
+<<<<<<< HEAD:sdk/java/src/SymmetricEncryption.java
 public class SymmetricEncryption {
+=======
+
+import java.nio.charset.StandardCharsets;
+
+public class symmetric_encryption {
+>>>>>>> javasdk:sdk/java/src/gov/crypto/symmetric_encryption.java
 
     private static final SecureRandom random = new SecureRandom();
     
@@ -24,22 +31,35 @@ public class SymmetricEncryption {
     private SecretKeySpec keySpec;
     private byte[] iv;
 
-    public SymmetricEncryption(byte[] sharedKey) throws GeneralSecurityException {
-        
+    public symmetric_encryption(byte[] sharedKey) throws GeneralSecurityException {
         iv = new byte[ivSize];
         Security.addProvider(new BouncyCastleProvider());
         cipher = Cipher.getInstance("AES/GCM/NoPadding");
         if(sharedKey.length == keySize){
+<<<<<<< HEAD:sdk/java/src/SymmetricEncryption.java
             keySpec = new SecretKeySpec(sharedKey, "AES");
         } 
+=======
+           key = sharedKey;
+        }
+>>>>>>> javasdk:sdk/java/src/gov/crypto/symmetric_encryption.java
         else{
             throw new GeneralSecurityException("The key provided should be " + keySize + " bytes.");
         }
     }
 
+<<<<<<< HEAD:sdk/java/src/SymmetricEncryption.java
     public SymmetricEncryption(PrivateKey priv, PublicKey pub) throws GeneralSecurityException {
         
         this(EllipticCryptography.secp256k1.generateSharedKey(priv, pub, keySize));
+=======
+    public int getKeySize(){
+        return keySize;
+    }
+
+    public symmetric_encryption(PrivateKey priv_a, PublicKey pub_b) throws GeneralSecurityException {
+        this(ec.secp256k1.generateSharedKey(priv_a,pub_b, keySize));
+>>>>>>> javasdk:sdk/java/src/gov/crypto/symmetric_encryption.java
     }
 
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {

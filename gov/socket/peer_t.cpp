@@ -23,7 +23,6 @@ void c::ready() {
 //	parent->cv.notify_all();
 }
 
-
 void c::on_connect() {
 	if (parent) parent->incorporate(this);
 }
@@ -31,12 +30,12 @@ void c::on_connect() {
 bool c::process_work(datagram* d) { //executed by thread from pool 
      assert(d!=0);
      switch(d->service) {
-         case protocol::ping: {
+         case protocol::gov_socket_ping: {
             delete d;
-            send(new datagram(protocol::pong,"pong"));
+            send(new datagram(protocol::gov_socket_pong,"pong"));
             break;
          }
-         case protocol::pong: {
+         case protocol::gov_socket_pong: {
             delete d;
             process_pong();
             break;
@@ -68,7 +67,7 @@ bool c::ping() {
     sent_ping=chrono::steady_clock::now();
     }
 */
-    return send(new datagram(protocol::ping,"ping")).empty();
+    return send(new datagram(protocol::gov_socket_ping,"ping")).empty();
 }
 
 
