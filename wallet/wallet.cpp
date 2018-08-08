@@ -101,7 +101,7 @@ const crypto::ec::keys* c::get_keys(const cash::hash_t& address) const {
 cash::cash_t c::balance() const {
 	cash::cash_t b=0;
 	for (auto& i:data) {
-		b+=i.second.balance;
+		b+=i.second.box;
 	}
 	return b;
 }
@@ -110,8 +110,8 @@ void c::dump_balances(ostream& os) const {
 	cash::cash_t b=0;
 	os << "[address] [locking_program] [balance]" << endl;
 	for (auto& i:data) {
-		b+=i.second.balance;
-		os << i.first << ' ' << i.second.locking_program << ' ' << i.second.balance << endl;
+		b+=i.second.box;
+		os << i.first << ' ' << i.second.locking_program << ' ' << i.second.box << endl;
 	}
 	os << "total balance: " << b << endl;
 }
@@ -121,7 +121,7 @@ void c::extended_balance(ostream& os) const {
 //	os << "[address] [locking_program] [balance]" << endl;
 	for (auto& i:data) {
 //		b+=i.second.balance;
-		os << i.first << ' ' << i.second.locking_program << ' ' << i.second.balance << endl;
+		os << i.first << ' ' << i.second.locking_program << ' ' << i.second.box << endl;
 	}
 //	os << "total balance: " << b;
 }
@@ -164,7 +164,7 @@ pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const c
 	else {
 		for (auto&i:addresses) {
 			cash::app::account_t a=cash::app::account_t::from_stream(is);
-			if (a.balance>0) {
+			if (a.box>0) {
 				ret.second.emplace(i,move(a));
 			}
 		}
@@ -199,14 +199,14 @@ pair<string,c::input_accounts_t> c::select_sources(socket::peer_t& peer, const c
 	}
 
     //among all our balances we choose to consume those with lowest balance first (globally this algorithm will reduce the number of accounts with small amounts in the ledger)
-	sort(v.begin(),v.end(),[](const accounts_query_t::const_iterator&v1, const accounts_query_t::const_iterator&v2) { return v1->second.balance < v2->second.balance; });
+	sort(v.begin(),v.end(),[](const accounts_query_t::const_iterator&v1, const accounts_query_t::const_iterator&v2) { return v1->second.box < v2->second.box; });
 
 	ans.second.parent_block=data.parent_block;
 	cash::cash_t remaining=amount;
 	for (auto&i:v) {
-		if (i->second.balance<=remaining) {
-			ans.second.emplace_back(input_account_t(i->first,i->second,i->second.balance));
-			remaining-=i->second.balance;
+		if (i->second.box<=remaining) {
+			ans.second.emplace_back(input_account_t(i->first,i->second,i->second.box));
+			remaining-=i->second.box;
 		}
 		else {
 			ans.second.emplace_back(input_account_t(i->first,i->second,remaining));
@@ -226,22 +226,17 @@ void c::dump(ostream& os) const {
 }
 
 void c::list(bool showpriv, ostream& os) const {
-    os << "#: ";
-    if (showpriv)
-    	os << "[private Key] ";
-    os << "[public key] [address]" << endl;
-	int n=0;
+
     if (showpriv) {
-    	for (auto&i:*this) {
-	    	os << '#' << n++ << ": " << i.second.priv << ' ' << i.second.pub << ' ' << i.first << endl;
+    	for (auto&i:*this)
+		os << i.second.priv <<' '<< i.second.pub <<' '<< i.first << endl;
 	    }
-   }
+   
    else {
     	for (auto&i:*this) {
-	    	os << '#' << n++ << ": " << i.second.pub << ' ' << i.first << endl;
-	    }
+		os << i.second.pub <<' '<< i.first << endl;	    
+	}
    }
-   os << size() << " keys";
 }
 
 void c::accounts_query_t::dump(ostream& os) const {
@@ -389,7 +384,7 @@ pair<string,cash::tx> c::tx_make_p2pkh(socket::peer_t& peer, const tx_make_p2pkh
 		t.parent_block=input_accounts.parent_block;
 		t.inputs.reserve(input_accounts.size());
 		for (auto&i:input_accounts) {
-			t.add_input(i.address, i.balance, i.withdraw_amount);
+			t.add_input(i.address, i.box, i.withdraw_amount);
 		}
 		t.add_output(i.rcpt_addr, i.amount, cash::p2pkh::locking_program_hash);
         auto fee=t.check();

@@ -1,12 +1,14 @@
 #include <iostream>
 #include <string>
-#include "socket.h"//testing socket h
+#include "socket.h"
 #include <us/gov/socket/datagram.h>
 
-#include <us/gov/socket/server.h>//---
+#include <us/gov/socket/server.h>
 #include <us/gov/socket/client.h>//--
 #include <us/gov/blockchain/daemon.h>
+
 #include <thread>
+
 #include <vector>
 
 using namespace std;
@@ -311,7 +313,7 @@ void testing_socket_datagram(){
 //------
 //------
 
-	bool showResults = false; //	...::::TESTER::::....true == show testing results 
+	bool showResults = false; //	...:::HELLO::TESTER::::... ---> true == show testing results 
 	
 
 
@@ -344,7 +346,7 @@ void testing_socket_datagram(){
 	test_3( 111   , "a"   );
 	test_3( 65536 , "0"   );
 	test_3( 13564 , "123-)(*&^%$£!`~@'#?><"    );
-	test_3( 2147483648 , "123456\n78  _  _"	   ); //  overflow > 2147483648 || -2147483648
+	test_3( 2147483648 , "123456\n78  _  _"	   ); //  overflow:  > 2147483648 || -2147483648
 	test_3( -2147483648 , "0_+_)(*&0*(0^$%^^_0");  
 	test_3( -1      , "miden 0 miden"          );
 	test_3( -100   ,"0 0--%^*& (*&^6-0-75gj00 ");
@@ -362,19 +364,17 @@ void testing_socket_datagram(){
 
 
 
-
-//-----------------------------------test:-->---testing_socket_communication()---------------------------------------------------|
+//---------------------------------------------testing_socket_communication()---------------------------------------------------|
 
 using namespace us::gov::socket;
 
 
 struct test_client: client {
 	
-	test_client(int sock):client(sock) {
-   	}
+	test_client(int sock):client(sock) {}
 
 	virtual void on_connect() override {
-		cout << "connected" << endl;
+		//cout << "connected" << endl;
 	}
 };
 
@@ -382,11 +382,20 @@ struct test_client: client {
 
 struct test_server: server {
 
-	test_server(uint16_t port): server(port){} 
+	thread t;
 	
-	~test_server() {} ;	
-		
-	/*bool receive_and_process(client*c) override {// us/gov/socket/daemon
+	test_server(uint16_t port): server(port){ } 
+	
+	~test_server() { }
+
+
+//	void receive_and_process(client* scl) override{	}
+
+//	void process_work(peer_t *c) override{ }
+
+
+	
+/*	bool receive_and_process(client*c) override {		// us/gov/socket/daemon
 		datagram* d = c-> complete_datagram();
 		if (!d || d->error!=0) {
 			cout << "socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
@@ -400,136 +409,56 @@ struct test_server: server {
 			return true;
 			}
 
+		
 		//---Completed datagram---
 			
 
-
-
 		//check_received_datagram(*d);
 		//delete d;                                       
-		//server::receive_and_process(c);
-	}
-*/
-	//virtual void check_received_datagram(datagram* data)=0;
-	//virtual void check_received_datagram(datagram* data);  //--------------------------here--
+		//server::(c);
+	}*/
 
 
 
-	//client* create_client(int sock) override {
-	//	return new test_client(sock);	}
-};
-
-//--------------------------------------------------|
-
-//typedef us::gov::socket::server s;
-
-/*	
-struct tests:vector<pair<TestDatagram,datagram>>, test_server {
-	
-	typedef pair<TestDatagram,datagram> td;
-	thread t;
-	
-	
-	
-	//---run server thread---
-	tests():test_server(1060) { //1060
-
-	//	thread t(&server::run, &s); //----------------------> error
-			
-	
-	//	this_thread::sleep_for(100ms); //-------------------> error
-	}
-
-	~tests() {
-		t.join();
-	}
-
-
-	void test(td& d)
-	{
-		//---client connected with server---
-
-
-		test_client c( 0 );
-		c.connect( "localhost", 1060 , false ); //16672
-
-		//current = &d;      //---------------------------> error
-		//c.send(d.second);  //-------------------------->  error
-	}
-
-	
-	//td* current;
-
-	virtual void check_received_datagram(datagram* data) { //datagram& data) override {  //daemon.h
-		datagram* d = data;
-		//datagram* d = d-> complete_datagram();
+	 //virtual void check_received_datagram(datagram* data)=0;
+	 //virtual void check_received_datagram(datagram* data);  //--------------------------here--
 
 
 
-
-		//current->first.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());	
-	}
-
-
-	void run(){
-		for (auto&d:*this) {
-		test(d);
-		}
-	}
-};
-*/
-
-
-//-------------------New-Code--------------------------|
-
-struct testing: vector<datagram>, test_server {
-	
-	
-
-	//---run server thread---
-	testing():test_server(1060) { 
-		//---
-	}
-
-	~testing() {
-		//---
-	}
-
-
-	void test(datagram)
-	{
-		//---client connected with server---
-		test_client c( 0 );
-		c.connect( "localhost", 1060 , false );
-
-		//current = &d;      
-		//c.send(d.second);
-	}
-
-	
-
-	virtual void check_received_datagram(datagram* data) { //datagram& data) override { 
-		datagram* d = data;
-		//datagram* d = d-> complete_datagram();
-
-
-
-
-		//current->first.test_data(d->dend, d->size(), d->service, d->error, d->compute_hash().to_b58(), d->completed());	
-	}
-
-
-	void run(){
-		for (auto&d:*this) {
-		test(d);
-		}
-	}
+	client* create_client(int sock) override {
+		return new test_client(sock);	}
 };
 
 
 
 
 //--------------------------------------------------------------|
+
+	void run_server(int port) {	
+		test_server kk(port);
+		kk.make_socket(port);
+		kk.run();
+	}
+
+	void send_vectors(datagram d, int port)
+	{
+		test_client c( port );
+	 	c.init_sock("localhost", port , false );	
+		c.connect(  "localhost", port , false );
+
+		c.send(d);
+	}
+
+	void run(vector<datagram> k){
+		 for (int i = 0; i < k.size(); i++)
+      		{
+			send_vectors(k[i] , 1065);
+		}
+	}
+
+//--------------------------------------------------------------|
+
+
 
 
 #include<chrono>
@@ -538,42 +467,61 @@ using namespace std::chrono_literals;
 void testing_socket_communication(){
 
 
-	/*
+
+//	-1-  Put "noise" inside the vector of datagrams
+
 	vector<datagram> k;
-	k.push_back( us::gov::socket::datagram( 10 ,"yeah") );
-	k.push_back( us::gov::socket::datagram( 10 , 125   ) );
+	k.push_back( us::gov::socket::datagram( 0 ,"yeah") );
+	k.push_back( us::gov::socket::datagram( 1 , 125  ) );
 	k.push_back( us::gov::socket::datagram( 10 ,"some random string 0x60 yeah  ah") );
-	//https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html  ...:::ASCII:::...
 	k.push_back(48);
+	k.push_back(239);
 	k.push_back(32);
 	k.push_back(123);
+	k.push_back(0xF);
+	k.push_back(239);
+	k.push_back(32);
+	k.push_back(123);
+	k.push_back(0xF);
+	k.push_back(48);
+	k.push_back(0xF);
+	k.push_back(0xC);
 	k.push_back(48);
 	k.push_back(0xF);
 	k.push_back(0xC);
 	k.push_back(0xfd);
-	k.push_back( us::gov::socket::datagram( 10 ,"fluhs 0xF 0xF 0xF df 0xF fd") );
-	*/
+	k.push_back( us::gov::socket::datagram( 100 ," fluhs  0xF  0xF  0xF df  0xF  fd ") );
+	k.push_back( us::gov::socket::datagram( 1000 ,"yeah") );
+	k.push_back( us::gov::socket::datagram( 10000 , 125  ) );
+	k.push_back( us::gov::socket::datagram( 12356 ,"some random string 0x60 yeah  ah") );
+
+
+//	-2- run server thread
+
+	std::thread t(run_server, 1065);
+	this_thread::sleep_for(100ms);
+
+
+//	-3- send vector of datagrams
+
+	run(k);
+
+
+//	-4- server thread detach
+
+	t.detach();
 
 
 
-	//test_server kk(1060);
-	//	kk.run();
-
-	//us::gov::socket::daemon da(1060 , 1);
-	//	da.run();
-
-
-	///test_client c( 1060 );
-	//c.connect( "localhost", 1060 , false );
-	//c.send(10, "ooooooooge");
+	//			MUST DO - test_server
+	//************************************************************************ 
+	//	 1. catch completed datagram ----------------------------------> *  	--?????-- 		
+	//	 2. test the complete datagram --------------------------------> *  		--????--
+	//************************************************************************ 
 
 
 
 
-
-	//tests i();
-	//i.push_back( pair<TestDatagram ,datagram > (  TestDatagram(100,12) , us::gov::socket::datagram (100,12) ) );
-	//i.run();
 }
 
 

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#---------
+
+
+cd
+cd us/wallet
+rm libuswallet.so
+
+cd ..
+
+sudo make install
+
+cd wallet/json

@@ -10,9 +10,6 @@ using namespace us::gov::crypto;
 int main ()
 {
     ec::keys k = ec::keys::generate();
-    //std::cout << k.priv << " " << k.pub << endl;
-    //std::cout << "4ACKBcXXhtGb3NtZzSfwgSs3GqCgCBY65juF2UVSJQR2 dPtUg631Hh7tL8t3wK6KHDwFfQzLmcHtkEAH5mSsANX3" << endl;
-    //std::cout << "7RZ9FmWLCdfGZCzThU7DZKf2q8hyxtAzCXfjXEGVU8E1 R9s12KNiCKJG1ax5hYGoSHgLSMX3trHY26jmwbhUQFRQCgwR2gRtrAnJTR8NwmFkD4YMtHtXhe57KAd6nSjrYtMV" << endl;
-    //std::cout << "9pKQDhcZsi9V1qVhaDDnqV7HyiatxUEwTiLjqtqD7ZR6 R9s12KNiCKJG1ax5hYGoSHgLSMX3trHY26jmwbhUQFRQCgwR2gRtrAnJTR8NwmFkD4YMtHtXhe57KAd6nSjrYtMV" << endl;
-    std::cout << "8L7rYfQYDx39du8JzcaNzZGZFfEPc46JdgE17kt65KbF 21bAuDz5A48N1qXDDvzvnT3BBrxfaa6uErMyByJ75gy4B" <<endl;
+    std::cout << k.priv << " " << k.pub << endl;
+    //std::cout << "8L7rYfQYDx39du8JzcaNzZGZFfEPc46JdgE17kt65KbF 21bAuDz5A48N1qXDDvzvnT3BBrxfaa6uErMyByJ75gy4B" <<endl;
 }

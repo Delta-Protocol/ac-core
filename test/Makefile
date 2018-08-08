@@ -10,7 +10,7 @@ all: unit_tests
 	cd sign_validate; make; cd ..
 
 unit_tests: ${HS} ${CPPS}
-	g++ ${CXXFLAGS} -I${INC} ${CPPS} -lsecp256k1 -lcrypto++ -lusgov -L/usr/lib -L../gov -o unit_tests
+	g++ ${CXXFLAGS} -I${INC} ${CPPS} -pthread -lsecp256k1 -lcrypto++ -lusgov -L/usr/lib -L../gov -o unit_tests.o
 
 clean:
 	rm -f unit_tests
