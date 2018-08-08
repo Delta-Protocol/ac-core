@@ -21,12 +21,12 @@ void test_1(int serviceNumber){
 	cout << "|--------------------------Test-1----------------------------| "	<< endl;
 	cout << "|------------------------------------------------------------| \n"	<< endl;
 
-	//constructors results
+	//constructors results---------------------------
 	cout << "resize(h) ---d.h----->  " << d.h << endl;
 	cout << "d.dend = d.size()---->  " << d.dend << " - " << d.size() << endl;
 	cout << "d.size--------------->  " << d.size() << endl;
 
-	//rest of the code--------------------------------------
+	//rest of the code-----------------------------------------------
 	if (d.size() == d.h) {cout << "d.size() == datagram::h" << endl;}
 	cout << "maxsize---------> " << d.maxsize << endl;
 	cout << "service---------> " << d.service << endl;
@@ -43,11 +43,11 @@ void test_2(int serviceNumber, int payloadNumber){
 	cout << "|--------------------------Test-2----------------------------| "	<< endl;
 	cout << "|------------------------------------------------------------| \n"	<< endl;
 
-	//constructors results
+	//constructors results--------------------------------------
 	cout << "resize(h+2) ----------------->  " << d.h+2  << endl;
 	cout << "dend=size() ----------------->  " << d.dend << " - " << d.size() << endl;
 
-	//rest of the code--------------------------------------
+	//rest of the code--------------------------------
 	cout << "maxsize---------> " << d.maxsize << endl;
 	cout << "service---------> " << d.service << endl;
 	//cout << "error-----------> " << d.error << endl;
@@ -63,7 +63,7 @@ void test_3(int serviceNumber , string payloadString){
 	cout << "|--------------------------Test-3----------------------------| "	<< endl;
 	cout << "|------------------------------------------------------------| \n"	<< endl;
 
-	//constructors results--------------------------------
+	//constructors results------------------------------------------------------------------------------------------------
 	cout << "h + payload.size()---------------> " << d.h + payloadString.size() << "   < maxsize: " << d.maxsize  << endl; 
 	cout << "resize(h+payload.size())---------> " << d.h + payloadString.size() << endl;
 	cout << "h--------------------------------> " << d.h 			    << endl;
@@ -71,7 +71,7 @@ void test_3(int serviceNumber , string payloadString){
 	cout << "d.size()-------------------------> " << d.size()                   << endl;
 	cout << "dend=size()----------------------> " << d.dend << " - "<< d.size() << endl;
 
-	//rest of the code-------------------------------------
+	//rest of the code-------------------------------------------------------------------
 	cout << "parse_string()--> " << "\""             << d.parse_string() << "\"" << endl;
 	cout << "maxsize---------> " << d.maxsize 	 << endl;
 	cout << "service---------> " << d.service 	 << endl;
@@ -154,12 +154,12 @@ void testing_socket_datagram(){
 
 //---1--------------------------------------------------------------------------------------------|
 //       [serviceNumber]
-//	 	          |dend |size | service | error |  hash  |  complete
+//	 	          [ dend ],[ size ],[ service ],[ error ],[ hash ],[ complete ]
 	TestDatagram a(0);
 	a.test_data( 6  ,  6   ,   0    , "2FMmfVcFZfWMEwbuQsdtu5cSZXWN"  ,  1);
 	
 	TestDatagram b(1);
-	b.test_data( 6  ,  6   ,   1   ,    "3Z28rsteneYa98hvxR2ReLxP9jW"  ,   1);		
+	b.test_data( 6  ,  6   ,   1   ,    "3Z28rsteneYa98hvxR2ReLxP9jW"  ,  1);		
 
 	TestDatagram c(10);
 	c.test_data( 6  ,  6   ,   10  ,   "N5V1hPddzeWtKbTHECoPEYBijn6"  ,   1);
@@ -168,7 +168,7 @@ void testing_socket_datagram(){
 	d.test_data( 6  ,  6   ,   100 ,   "2fJEMgiNAhGwa6SPD8MK3wyhDCn8"  ,  1);
 
 	TestDatagram e(1000);
-	e.test_data( 6  ,  6   ,   1000,  "3eHUfaBJoEDae8oSvHwemt2vraMB"  ,  1);
+	e.test_data( 6  ,  6   ,   1000,  "3eHUfaBJoEDae8oSvHwemt2vraMB"  ,   1);
 
 	TestDatagram f(65535);
 	f.test_data( 6  ,  6   ,  65535,   "3xperfdBSJ6cthKMQLN5Mwa2jdJ5"  ,  1);
@@ -180,10 +180,10 @@ void testing_socket_datagram(){
 
 //---2---------------------------------------------------------------------------------------------|
 //       [serviceNumber][ payloadNumber ]
-//	 	          |dend |size | service | error |  hash  |  complete
+//	 	          [ dend ],[ size ],[ service ],[ error ],[ hash ],[ complete ]
 
 	TestDatagram a2(0,0);
-	a2.test_data(8  ,   8   ,  0    ,    "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,   1 );
+	a2.test_data(8  ,   8   ,  0    ,    "32idzgT8tKQT5yxjiGiGyufpSqXB"  ,  1 );
         Uint16 a2b(0,0);
         a2b.test_uint16(0);
 	
@@ -203,7 +203,7 @@ void testing_socket_datagram(){
 	d2b.test_uint16(1000);
 	
 	TestDatagram e2(65536,65535);
-	e2.test_data(8  ,   8   ,  0    ,  "1BrDi8KcT7ocoCx4rJhYEXRmGFX"  ,   1 );
+	e2.test_data(8  ,   8   ,  0    ,  "1BrDi8KcT7ocoCx4rJhYEXRmGFX"  ,    1 );
 	Uint16 e2b(65536,65535);
         e2b.test_uint16(65535);
 	
@@ -221,7 +221,7 @@ void testing_socket_datagram(){
 
 //---3--------------------------------------------------------------------------------------------|
 //       [serviceNumber][ payloadString ] 
-//	 	          |dend |size | service | error |  hash  |  complete
+//	 	          [ dend ],[ size ],[ service ],[ error ],[ hash ],[ complete ]
 
 	TestDatagram a3(0, "zz");
 	a3.test_data( 8 , 8    , 0     , "7cU4a99HHJWAD5grBsjYAVsXqJW",1);
@@ -290,30 +290,31 @@ void testing_socket_datagram(){
 	TestPayloadString m3b(2147483647,  " 0 " );         
 	m3b.test_payloadString( 3 , " 0 ");
 
-//------
-//------
+
 	TestDatagram n3(-2147483647, "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 ");
 	n3.test_data( 170 , 170    , 1     , "4UNpGamqVspG9ztPHwK9JC4dt2YV",1);
 	TestPayloadString n3b(-2147483647,  "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 " );         
 	n3b.test_payloadString( 164 , "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 ");
 
-//------
-//------
+//---
+
 	TestDatagram o3(-23647 , "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 ");
 	o3.test_data( 1063 , 1063    , 41889     , "2dWbqRnHzVtQe9jeatuk6Pf9D2Ee",1);
 	TestPayloadString o3b(-23647,  "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 " );         
 	o3b.test_payloadString( 1057 , "0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 000000 0000000 00000 0 0000 00 000000 000000 000000 0000000 00000000 0000000 000 000 000 0 0 0 000  000 00000 000000  0000 00000 000000 00000 00000 0000000 0000000 ");
 
 //------
-//------
+
 	TestDatagram p3(-123456789, "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0");
 	p3.test_data( 1792 , 1792    , 13035     , "iomD1gz3ZS6kdi7QdrEAmDQiFyp",1);
 	TestPayloadString p3b(-123456789,  "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0" );         
 	p3b.test_payloadString( 1786 , "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0");
-//------
+
 //------
 
-	bool showResults = false; //	...:::HELLO::TESTER::::... ---> true == show testing results 
+
+//	...:::HELLO::TESTER::::... ---> true == show testing results
+	bool showResults = false; 
 	
 
 
@@ -356,7 +357,7 @@ void testing_socket_datagram(){
 
 	test_3( -123456789   ,  "0 0 0 gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO  gkjfhdglkjfdhgariudhfdkjhgfdkjhy76^&%*^&$%FGVHKJGFV  r769trewrteorf2102401685710retg0r5460t9876fdjhgGFGJFR TO 0 0 0" );
 
-}// end-if
+}
 
 
 }
@@ -421,7 +422,7 @@ struct test_server: server {
 
 
 	 //virtual void check_received_datagram(datagram* data)=0;
-	 //virtual void check_received_datagram(datagram* data);  //--------------------------here--
+	 //virtual void check_received_datagram(datagram* data); 
 
 
 
