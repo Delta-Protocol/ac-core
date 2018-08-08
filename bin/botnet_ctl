@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
-
-
 function checkout() {
 IP=$1
 echo "checkout $IP"
@@ -64,7 +61,6 @@ else
     nodes=("10.84.172.66" "10.84.172.55" "10.84.172.54" "10.84.172.52" "10.84.172.50")
 fi
 cmd=$1
-
 
 if [ "_$cmd" == "_bots" ]; then  # Print the IP addresses og the bots
     for n in "${nodes[@]}"; do
