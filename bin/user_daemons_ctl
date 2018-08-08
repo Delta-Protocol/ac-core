@@ -1,23 +1,59 @@
 #!/bin/bash
 
 
+
+
+
+
 #-------------------------start()-----------------------|
 start() {
 
 	home=`mktemp -d`
+	echo '------------------'	
 	echo "home dir is $home"
+	echo '------------------'
 
-	#---govd---
-	LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -genesis 127.0.0.1
-       
-      if [ $? -eq 0 ]; then
-    	echo "govd-> PASS"
+
+	cd
+	cd us/genesis
+	./us-genesis -home $home 127.0.0.1
+	
+
+
+      if [ $? -eq 0 ]; then 
+	echo '--------------'
+    	echo "govx-> PASS"
 	else
-    	echo "govd-> FAIL"
+	echo '--------------'
+    	echo "govx-> FAIL"
 	exit 1;
      fi
+ 
+ls $home
 
- ls $home
+
+pid_g=`ps ax | grep govx | grep -v grep | awk '{print $1}' | sort | tail -n1`
+
+echo $pid_g
+
+echo '--------------'
+echo ' '
+
+
+
+#--1-- create nodes
+
+#--2-- create wallets
+
+
+
+
+
+
+
+#---govd---
+#LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -genesis 127.0.0.1
+
 
 #-------
 
@@ -25,18 +61,18 @@ start() {
  w_port=16673
 
  for value in {1..3}
- do                                                                 #
-   LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -p $g_port 2>&1 >/dev/null &
+ do                                                        #
+   LD_LIBRARY_PATH="gov govx/us-gov -d -home $home -p $g_port 2>&1 >/dev/null &"
    sleep 1
-   pid_g=`ps ax | grep govd | grep -v grep | awk '{print $1}' | sort | tail -n1`
+   pid_g=`ps ax | grep govx | grep -v grep | awk '{print $1}' | sort | tail -n1`
    echo "--------------------------------------------------"
    echo "gov pid= $pid_g    |   node port = $g_port "
    echo "--------------------------------------------------"
 	for value in {1..3}
-	do                                                                          #         #
-		LD_LIBRARY_PATH=wallet:gov walletd/us-walletd -home $home -d -wp $w_port -bp $g_port 2>&1 >/dev/null &
-		sleep 1
-		pid_w=`ps ax | grep walletd | grep -v grep | awk '{print $1}' | sort | tail -n1`
+	do                                                                        
+		LD_LIBRARY_PATH="wallet:gov walletx/us-wallet -home $home -d -wp $w_port -bp $g_port 2>&1 >/dev/null &"		
+		sleep 3
+		pid_w=`ps ax | grep wallet | grep -v grep | awk '{print $1}' | sort | tail -n1`
 		echo "wallet pid= $pid_w | ..:::wallet port--> $w_port :::.."
 		let w_port++ 
 	done
@@ -46,13 +82,16 @@ start() {
 
 }
 
+#	LD_LIBRARY_PATH=gov govd/us-govd -d -home $home -p $g_port 2>&1 >/dev/null &
+#	LD_LIBRARY_PATH=wallet:gov walletd/us-walletd -home $home -d -wp $w_port -bp $g_port 2>&1 >/dev/null &
 
 
 
 
 #-----------------------stop()-----------------------|
 stop() {
-	killall us-walletd us-govd
+	#killall us_genesis
+	echo "--"
 }
 
 

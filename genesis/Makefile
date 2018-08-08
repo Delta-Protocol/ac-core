@@ -1,5 +1,5 @@
 #https://gist.github.com/xuhdev/1873316
-CXXFLAGS:=-O3
+CXXFLAGS:=-O3 -std=c++17
 
 .PHONY: all
 all: genesis
