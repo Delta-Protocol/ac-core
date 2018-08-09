@@ -10,7 +10,6 @@ signal_handler.o: signal_handler.cpp signal_handler.h
 	g++ ${CXXFLAGS} -I../.. -c signal_handler.cpp
 
 libusgov.so: deps signal_handler.o
-#	g++ -shared -fPIC ${CXXFLAGS} -pthread ${OBJS} signal_handler.o cfg.o -lcrypto++ -lsecp256k1 -L/usr/lib -I../.. -o libusgov.so
 	g++ -shared ${CXXFLAGS} -pthread ${OBJS} signal_handler.o -lcryptopp -lsecp256k1 -L/usr/lib -I../.. -o libusgov.so
 
 deps:

@@ -6,7 +6,6 @@ rm -rf secp256k1
 
 git clone https://github.com/bitcoin-core/secp256k1
 cd secp256k1
-<<<<<<< HEAD
 ./autogen.sh && (exit 1)
 ./configure --enable-experimental --enable-module-ecdh --disable-dependency-tracking --enable-benchmark=no  --enable-coverage=no --enable-tests=no --enable-openssl-tests=no --enable-exhaustive-tests=no
 

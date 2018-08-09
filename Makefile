@@ -16,13 +16,12 @@ release: export CXXFLAGS:=${RELEASEFLAGS}
 release: all
 
 cryptos-debug: export CXXFLAGS:=${DEBUGFLAGS} -DCRYPTOS
- cryptos-debug: all
+cryptos-debug: all
 
 cryptos-release: export CXXFLAGS:=${RELEASEFLAGS} -DCRYPTOS
 cryptos-release: all
 
 all: gov/libusgov.so wallet/libuswallet.so govx/us-gov walletx/us-wallet sdk test
-	
 
 wallet-debug: export CXXFLAGS:=${DEBUGFLAGS}
 wallet-debug: wallet
@@ -113,4 +112,3 @@ clean:
 	$(MAKE) clean -C api; \
 	$(MAKE) clean -C test;
 	cd sdk/java; ./make clean; cd ../..
-
