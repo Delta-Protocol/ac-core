@@ -9,8 +9,7 @@
 
 
 
-~/us/bin/user_daemons_ctl  start
-
+#~/us/bin/user_daemons_ctl  start
 
 
 
@@ -64,7 +63,7 @@
 
 #--------stop---killall-pid------|
 
-~/us/bin/user_daemons_ctl  stop
+#~/us/bin/user_daemons_ctl  stop
 
 
 

@@ -97,18 +97,18 @@ stop() {
 
 
 
-
-
-
 #----------------------case------------------------------------------|
 case "$1" in   
 	start)   start ;;  
 	stop)    stop ;;
 	restart) stop; start ;;
-    	*) echo "usage: $0 start|stop|restart" >&2
-       exit 1
+   	*) echo "usage: $0 start|stop|restart" >&2
+      exit 1
        ;;
 esac
+
+
+
 
 
 

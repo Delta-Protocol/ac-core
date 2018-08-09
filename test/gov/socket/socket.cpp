@@ -148,7 +148,7 @@ class TestPayloadString {
 
 
 
- 
+
 void testing_socket_datagram(){
 
 
@@ -313,7 +313,7 @@ void testing_socket_datagram(){
 //------
 
 
-//	...:::HELLO::TESTER::::... ---> true == show testing results
+//	...:::HELLO::TESTER::::... ---> change to "true" if you want to see test_1 , test_2  , test_3 --> output 
 	bool showResults = false; 
 	
 
@@ -514,10 +514,10 @@ void testing_socket_communication(){
 
 
 
-	//			MUST DO - test_server
+	//			MUST DO - check -> struct test_server{ }
 	//************************************************************************ 
-	//	 1. catch completed datagram ----------------------------------> *  	--?????-- 		
-	//	 2. test the complete datagram --------------------------------> *  		--????--
+	//	 1. catch completed datagram ----------------------------------> *  --?????-- 		
+	//	 2. test the complete datagram --------------------------------> *  	--????--
 	//************************************************************************ 
 
 

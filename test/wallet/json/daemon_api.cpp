@@ -7,8 +7,8 @@
 
 
 //#include <us/wallet/api.h>
-#include <us/wallet/wallet.h>
-
+//#include <us/wallet/wallet.h>
+#include <us/wallet/json/daemon_api.h>
 
 
 using namespace std;
