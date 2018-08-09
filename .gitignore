@@ -1,4 +1,4 @@
-*.o
+*/**/*.o
 .vscode/
 gov/libusgov.so
 govx/us-gov
