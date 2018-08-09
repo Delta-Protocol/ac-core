@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">us-cash</string>
-    <string name="action_settings">Settings</string>
-    <string name="servicedesc">apdu service</string>
-    <string name="aiddescription">aid description</string>
-    <string name="accept_payments_new_addr">Generate new address</string>
-    <string name="title_activity_node_pairing">node_pairing</string>
-</resources>
