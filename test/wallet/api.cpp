@@ -61,25 +61,9 @@ struct test_api : rpc_api {
 
 
 
+
+
 using namespace us::gov::socket;
-
-
-struct test_client: client {
-	
-	test_client(int sock):client(sock) {
-   	}
-
-	virtual void on_connect() override {
-		//cout << "connected" << endl;
-	}
-};
-
-
-
-//------------------------------------/--------------------------------------------|
-
-
-
 
 
 void test(string ip_w_host , int wallet_p , int gov_p, string address ,int amoundSend, int fees , string privKey , bool timer ,int sec,  bool addToWallet){
@@ -116,9 +100,9 @@ try{
 	
 	ostringstream osTX;
 
-	i.rcpt_addr = address; 	//--address
-	i.amount = amoundSend; 	//--amoundSend
-	i.fee = fees;          	//--fees
+	i.rcpt_addr = address; 	
+	i.amount = amoundSend; 	
+	i.fee = fees;          	
 //	i.sigcode_inputs  = 1;
 //	i.sigcode_outputs = 1;
 //	i.sendover = 1;	
@@ -138,8 +122,6 @@ if (timer != false ){
 
 //--------------------check--addr--balance-----------------|
 try{
-	//test_client c( 0 );
-	//c.connect( "localhost", 16672 , false );	//---------------------------------------------------------------???----
 	
 	string howManyAddr = "1 ";
 	string askBalanceAddr = howManyAddr + address;	
@@ -221,7 +203,7 @@ void testing_wallet_api()
       {
 	cout << " |-------* " << +i <<" *-------------->> Test <<-----------------|  \n" << endl;
 	
-//   [ip-wallet_Host] [Wallet_port] [g_port]      [address]                 [amoundSend]  [fees] 	          [privKey] 			  [timer]   [sec] [addToWallet]
+//   	[ip-wallet_Host] [Wallet_port] [g_port]      [address]                 [amoundSend]  [fees] 	          [privKey] 			  [timer]   [sec] [addToWallet]
 
 	test("127.0.0.1" , 16673 , 16671 , "9koUJsXUmpJwWb5uzUm3VNwPz6c"  ,  1000000   ,   1000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );
 	test("127.0.0.1" , 16674 , 16670 , "3nuMp9bm19CGag9a5SvJ3A2n8jTi" ,  2000000   ,   2000  , "DUC111C2yiNZiKs9KPTWSTphjMNGHdPN7PeH8j8hvm1m"  , true   , 3 , false );

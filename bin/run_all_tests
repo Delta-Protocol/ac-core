@@ -1,12 +1,6 @@
 #!/bin/bash
 
 
-# Na ta valw se mia domi ola ta testing( sto folder pou anikei to ka8e test analoga me to structure tou project
-# na prosarmosw olo ton ektelesimo kwdika
-#na dimiourgisw ena use case opou 8a mporw na dialeksw pia test na treksoun
-#na create ena help menu gia to testing -> px run_all_test help
-
-
 
 #----------------------------
 
@@ -14,18 +8,205 @@
 
 # testing_socket_datagram
 
-# wallet api testing --> genesis
+# wallet api testing --> need genesis
 
 # json daemon api
 
 # testing_socket_communication   --not working yet :) 
 
 
------
 
-# c#
-# SDK
 
-----
 
-# cryptography
+
+main_menu() {
+ 	echo " "
+	echo "~~~~~~~~~~~~~~~~~~~~~"	
+	echo " M A I N - M E N U"
+	echo "~~~~~~~~~~~~~~~~~~~~~"
+	echo "1. show tests"
+	echo "2. "
+	echo "2. "
+	echo "3. exit"
+	echo " "
+	read -p "Choose from menu : " ans
+	echo " "
+
+
+
+case "$ans" in   
+	    1)  show_tests;;  	
+  	    *)  echo "---"; #help; choose
+      exit 1
+       ;;
+esac
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+show_tests() {
+echo ""
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     		AVAILABLE TESTES      		      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|   test/gov/					      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     1    |     dfs/  split_function.cpp		      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     2    |  socket/  socket.cpp		      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     3    |               		      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     4    |     				      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     5    |     				      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     6    |     				      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|  test/wallet/ 		     			      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     7    |   api.cpp  				      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     8    |     				      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     9    |     				      |"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "|     10   |     				      |"
+echo "--------------------------------------------------------"
+echo "| ***choose 0 -> go back to main menu		      |"
+echo "--------------------------------------------------------"
+
+choose
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+test1() {
+cd
+cd us/test/gov/dfs
+g++ -std=c++17  -I../../../.. -L../../../gov -lusgov main.cpp split_function.cpp
+LD_LIBRARY_PATH=../gov ./a.out
+echo "split_function -> succesful"
+}
+
+test2() {
+cd
+cd us/test/gov/socket
+g++ -std=c++17 -lpthread -I../../../.. -L../../../gov -lusgov main.cpp socket.cpp
+LD_LIBRARY_PATH=../gov ./a.out
+echo "socket.cpp -> succesful"
+}
+
+test3() {
+echo "test3"
+}
+
+test4() {
+echo "test4"
+echo "test4"
+echo "test4"
+echo "test4"
+}
+
+test7(){
+cd
+cd us/test/wallet
+
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+choose() {
+
+read -p "Choose tests separated by 'space' : " input
+echo " "
+
+for i in ${input[@]}
+do
+
+
+if [ $i -eq 0 ] 	
+then
+main_menu
+
+elif [ $i -eq 1 ] 	
+then
+ test1
+
+elif [ $i -eq 2 ] 	
+then
+ test2
+
+elif [ $i -eq 3 ] 	
+then
+ test3
+
+elif [ $i -eq 4 ] 	
+then
+ test4
+
+elif [ $i -eq 5 ] 	
+then
+ test4
+
+elif [ $i -eq 6 ] 	
+then
+ test4
+
+elif [ $i -eq 7 ] 	
+then
+ test7
+
+elif [ $i -eq 8 ] 	
+then
+ test4
+
+elif [ $i -eq 9 ] 	
+then
+ test4
+
+elif [ $i -eq 10 ] 	
+then
+ test4
+
+else 			
+echo "wrong numbers"
+choose
+fi
+
+
+done
+
+}
+
+
+
+#----------------------Starting-Point-----------------------------------------|
+
+
+ 	echo " "
+	echo "~~~~~~~~~~~~~~~~~~~~~"	
+	echo "| M A I N - M E N U  |"
+	echo "~~~~~~~~~~~~~~~~~~~~~"
+	echo "1. Show Tests"
+	echo "2. "
+	echo "2. "
+	echo "3. exit"
+	echo " "
+	read -p "Choose from menu : " ans
+	echo " "
+
+
+
+case "$ans" in   
+	    1)  show_tests;;
+	    2)  echo "----2-----";;  
+	    3)  echo "----3-----";;
+  	    *)  main_menu; #help; choose
+      exit 1
+       ;;
+esac
+
+
+
+

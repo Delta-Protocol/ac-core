@@ -1,4 +1,4 @@
-#include "json.h"
+#include "daemon_api.h"
 
 #include <iostream>
 #include <ostream>
@@ -14,7 +14,7 @@ using namespace std;
 int main() {
 
  
-	testing_json();	
+	testing_json_daemon_api();	
 
 
 exit(0);
