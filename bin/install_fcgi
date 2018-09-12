@@ -6,10 +6,16 @@ cd $dir
 git clone https://github.com/eddic/fastcgipp.git fastcgi++
 mkdir build
 cd build
-apt install cmake
+
 cmake -DCMAKE_BUILD_TYPE=RELEASE ../fastcgi++
-make
-make install
+
+cd ../
+find -name  "*" -exec sed -i "s/\-Werror//g" {} \;
+find -name  "*" -exec sed -i "s/\-Wno\-error//g" {} \;
+cd build/
+
+make && make install
+
 echo $dir
 exit
 rm $dir -r

@@ -1,6 +1,6 @@
 #Required packages for building binaries
 Debian: apt install libc-dev make g++ spawn-fcgi nginx libcrypto++-dev automake libtool psmisc pipexec libjsoncpp-dev libunwind-dev libtool automake bc coreutils unzip
-Alpine: apk add autoconf automake libtool crypto++-dev
+Alpine: apk add autoconf automake libtool crypto++-dev cmake
 
 openjdk-11-jdk-headless
 
@@ -41,3 +41,6 @@ openjdk-11-jdk-headless
 
 #unzip
 #   cash/android/make
+
+cmake 
+    bin/install_jsoncpp

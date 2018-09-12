@@ -19,6 +19,15 @@ c::~daemon() {
 	delete pool;
 }
 
+void c::attach(client*c, bool wakeupselect) {
+    assert(c!=0);
+    assert(static_cast<peer_t*>(c)->parent==0);
+    static_cast<peer_t*>(c)->parent=this;
+//cout << "attach " << c << " " << static_cast<peer_t*>(c)->parent << endl;
+    b::attach(c, wakeupselect);
+}
+
+
 void c::on_finish() {
 	b::on_finish();
 }
@@ -36,6 +45,7 @@ void c::run() {
 	while(!thread_::_this.terminated) {
 		cout << "triggered timer (mutation) v=30 secs" << endl;
 		daemon_timer();
+		pool->dump(cout);
 		thread_::_this.sleep_for(chrono::seconds(30));  //TODO not every 30 secs but at some safe point in the cycle
 	}
 	}
@@ -46,38 +56,67 @@ void c::dump(ostream& os) const {
     pool->dump(os);
 }
 
-void c::receive_and_process(client* scl) {
+void c::receive_and_process(client* c) {
 	assert(pool!=0);
-	auto* cl=static_cast<peer_t*>(scl);
-    if (pool->n_idle()>0) {
+	auto* cl=static_cast<peer_t*>(c);
+
+//    process_work(cl);
+
+    if (likely(pool->n_idle()>0)) {
     	pool->push([&,cl](int id) { process_work(cl); });
     }
     else { //drop the connection
-        clients.resume(scl);
-        scl->disconnect();
+//        clients.resume(*scl);
+        c->disconnect();
+        ++perf.disconnections.thread_pool.full;
     }
 }
 
+
 void c::process_work(peer_t *c) {
+//cout << this_thread::get_id() << ": worker takes lock" << endl;
+    while(true) {
+//        if(unlikely(c->parent==0)) {
+//cout << this_thread::get_id() << ": worker releases lock (parent=0)" << endl;
+//            return; //client has been detached
+//        }
+
+
+//cout << this_thread::get_id() << ": recv" << endl;
 	auto r=c->recv(); //complete_datagram();
+//cout << this_thread::get_id() << ": /recv" << endl;
 	if (unlikely(!r.first.empty())) {
 //		cerr << r.first << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
 		assert(!r.second);
-        c->disconnect();
+        //assert(c->parent!=0);
+        //c->disconnect();
 //		cerr << "peer killed" << endl; //"socket: daemon: error recv datagram. clients.remove(fd " << c->sock << ") " << endl;
-		return; //processed work
+		break; //processed work
 	}
     assert(r.second!=0);
 	if (unlikely(!r.second->completed())) {
-        	delete r.second;
-		return;
+        delete r.second;
+//cout << this_thread::get_id() << ": not completed" << endl;
+		break;
 	}
+//cout << this_thread::get_id() << ": process work" << endl;
 	bool processed=process_work(c,r.second);
     if (!processed) {
+//cout << this_thread::get_id() << ": not processed" << endl;
         delete r.second;
         c->disconnect();
+        ++perf.disconnections.datagram.unknown_service;
     }
-	clients.resume(c);
+
+    break;
+    }
+
+//cout << this_thread::get_id() << ": worker releases lock" << endl;
+    c->busy.store(false);
+    clients.read_sockets();//c might have more datagrams to process
+
+//    c->idle=true;
+//	clients.resume(c);
 }
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
@@ -89,8 +128,7 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 }
 
 client* c::create_client(int sock) {
-	auto p=new peer_t(sock);
-	p->parent=this;
-	return p;
+	return new peer_t(sock);
+//	p->parent=this;
+//	return p;
 }
-

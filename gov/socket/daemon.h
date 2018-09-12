@@ -21,6 +21,10 @@ struct daemon: server {
 	void run();
 	virtual void on_finish() override;
 
+        virtual void attach(client*,bool wakeupselect=true) override;
+        //virtual void detach(client*) override;
+
+
 	void dump(ostream& os) const;
 
 	void send(int num, peer_t* exclude, datagram* d);
@@ -32,6 +36,24 @@ struct daemon: server {
 	virtual void daemon_timer() {}
 
 	ctpl::thread_pool* pool{0};
+
+
+    struct perf_t {
+        struct disconnections_t {
+            struct datagram_t {
+                uint64_t normal{0};
+                uint8_t unknown_service{0};
+            };
+            struct thread_pool_t {
+                uint64_t full{0};
+            };
+            datagram_t datagram;
+            thread_pool_t thread_pool;
+        };
+        disconnections_t disconnections;
+    };
+
+    perf_t perf;
 
 };
 

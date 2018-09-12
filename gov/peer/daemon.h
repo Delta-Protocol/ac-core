@@ -32,7 +32,7 @@ namespace peer {
 		virtual void daemon_timer() override;
 
 
-		struct pub_t:vector<peer_t*> {
+		struct peers_t:vector<peer_t*> {
 			size_t asize() const {
 					size_t n=0;
 					for (auto i:*this) if (i!=0) ++n;
@@ -46,30 +46,31 @@ namespace peer {
 			}
 		};
 
-		pub_t connected_peers() const;
+		peers_t connected_peers() const;
+		//bool is_connecte(const pub_t&)
 
 		void dump(ostream& os) const;
 
 		void send(int num, peer_t* exclude, datagram* d);
-		void check_latency(const pub_t&);
+		void check_latency(const peers_t&);
 
 		virtual string get_random_peer(const unordered_set<string>& exclude) const=0; // { return ""; }
 
 		vector<peer_t*> in_service() const;
-		vector<peer_t*> in_service(const pub_t& a) const;
-		void purge_slow(pub_t&a);
+		vector<peer_t*> in_service(const peers_t& a) const;
+		void purge_slow(peers_t&a);
 
-		void purge_excess(pub_t& a);
-		void purge_peers(pub_t& a);
-		void add_peers(pub_t& a);
+		void purge_excess(peers_t& a);
+		void purge_peers(peers_t& a);
+		void add_peers(peers_t& a);
 
-		pub_t active() const;
-		pub_t adjust_peer_number();
+		peers_t active() const;
+		peers_t adjust_peer_number();
 
 		void set_tor() { set_mode(0); }
 		void set_ip4() { set_mode(1); }
 
-		pub_t::iterator oldest(pub_t& v) const;
+		peers_t::iterator oldest(peers_t& v) const;
 		void set_mode(int mode);
 
 	private:

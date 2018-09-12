@@ -38,14 +38,14 @@ struct apiuser: user {
 using t_units=std::chrono::minutes;
 
 struct spread {
-	chrono::system_clock::time_point t;
+	chrono::steady_clock::time_point t;
 	double bid;
 	double ask;
 
-	int t_since(const chrono::system_clock::time_point t0) const {
+	int t_since(const chrono::steady_clock::time_point t0) const {
 		return std::chrono::duration_cast<t_units>(t - t0).count();
 	}
-	void dump(std::ostream& os, const chrono::system_clock::time_point& start) const {
+	void dump(std::ostream& os, const chrono::steady_clock::time_point& start) const {
 		os <<  std::chrono::duration_cast<t_units>(t - start).count() << " " << ask << endl;
 	}
 };
@@ -75,7 +75,7 @@ struct forex: public vector<spread> {
 			spread sp;
 			std::tm tm;
 			strptime(tokens[0].c_str(), "%Y%m%d %H%M%S", &tm);
-			sp.t=std::chrono::system_clock::from_time_t(std::mktime(&tm));
+			sp.t=std::chrono::steady_clock::from_time_t(std::mktime(&tm));
 			sp.bid=1/stod(tokens[1]);
 			if (abs(prevbid-sp.bid)>0.00004) {
 				incr+=rand()%2==0?1.0:-1.0;

@@ -18,14 +18,19 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 }
 
 void c::receive_file(peer_t* c, datagram* d) {
+assert(false);
+/*
 	cout << "dfs: receivd file from " << c->addr << endl;
 	string hash;
 	vector<uint8_t> data;
 	save(hash,data,-1);
 	delete d;
+*/
 }
 
 void c::send_file(peer_t* c, datagram* request) {
+assert(false);
+/*
 	cout << "dfs: sending requested file to " << c->addr << endl;
 	bool found=false;
 	if (found) {
@@ -37,9 +42,12 @@ void c::send_file(peer_t* c, datagram* request) {
 	else {
 		send(1,c,request);
 	}
+*/
 }
 
 void c::save(const string& hash, const vector<uint8_t>& data, int propagate) { //-1 nopes, 0=all peers; n num of peers
+assert(false);
+/*
 	cout << "dfs: save file " << hash << " propagate=" << propagate << endl;
 
 	if (propagate==-1) return;
@@ -47,9 +55,12 @@ void c::save(const string& hash, const vector<uint8_t>& data, int propagate) { /
 	//if file already exists return
 	//save with tmpname
 	//rename atomically
+*/
 }
 
 string c::load(const string& hash) {
+assert(false);
+/*
 	cout << "dfs: load file " << hash << endl;
 	string filename;
 	bool found=false;
@@ -58,6 +69,7 @@ string c::load(const string& hash) {
 
 	datagram* d=new datagram(protocol::file_request,hash);
 	send(1,0,d);
+*/
 }
 
 

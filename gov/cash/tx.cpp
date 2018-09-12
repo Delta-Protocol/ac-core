@@ -5,6 +5,9 @@
 #include <chrono>
 #include <us/gov/crypto/base58.h>
 #include <us/gov/likely.h>
+#include <chrono>
+#include <iostream>
+#include <sys/time.h>
 
 typedef us::gov::cash::tx c;
 using namespace us::gov;
@@ -13,51 +16,57 @@ using namespace std;
 
 constexpr array<const char*,c::num_sigcodes> c::sigcodestr;
 
-#include <sys/time.h>
-
 c::tx() {
-struct timeval tv;
-gettimeofday (&tv, NULL);
-memcpy(&nonce,&tv.tv_usec,sizeof(nonce));
+    //struct timeval tv;
+    //gettimeofday (&tv, NULL);
+    //memcpy(&nonce,&tv.tv_usec,sizeof(nonce));
+}
+
+c::tx(int) {  //saves cpu
 }
 
 void c::dump_sigcodes(ostream&os) {
 	os << sigcodestr[sigcode_all] << ' ' << sigcodestr[sigcode_none] << ' ' << sigcodestr[sigcode_this] << ' ';
 }
 
-bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount) {
-	inputs.push_back(input_t(addr,prev_balance,amount));
-	return true;
+void c::add_input(const hash_t& addr, const cash_t& amount) {
+	inputs.push_back(input_t(addr,amount));
 }
 
-bool c::add_input(const hash_t& addr, const cash_t& prev_balance, const cash_t& amount, const string& locking_program_input) {
-	inputs.push_back(input_t(addr,prev_balance,amount,locking_program_input));
-	return true;
+void c::add_input(const hash_t& addr, const cash_t& amount, const string& locking_program_input) {
+	inputs.push_back(input_t(addr,amount,locking_program_input));
 }
 
-pair<string,c> c::read(istream& is) {
-	pair<string,c> t;
+pair<string,unique_ptr<c>> c::read(istream& is) {
+	pair<string,unique_ptr<c>> t=make_pair("", unique_ptr<c>(new c(0)) );
     {
-    auto r=t.second.inputs.read(is);
+    auto r=t.second->inputs.read(is);
 	if (!r.empty()) {
         t.first=r;
+//        delete t.second;
+//        t.second=0;
         return move(t);       
     }
     }
-	auto r=t.second.outputs.read(is);
+	auto r=t.second->outputs.read(is);
 	if (!r.empty()) {
         t.first=r;
+ //       delete t.second;
+ //       t.second=0;
         return move(t);       
     }
-
+/*
 	is >> t.second.parent_block;
     if (!is.good()) {
         t.first="Unreadable parent_block";
         return move(t);       
     }
-	is >> t.second.nonce;
+*/
+	is >> t.second->ts;
     if (!is.good()) {
-        t.first="Unreadable nonce";
+        t.first="Unreadable timestamp";
+//        delete t.second;
+//        t.second=0;
         return move(t);       
     }
 	return move(t);
@@ -66,14 +75,14 @@ pair<string,c> c::read(istream& is) {
 void c::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcodes_t scs) const {
 	inputs.write_sigmsg(h,this_index,sigcode_input(scs));
 	outputs.write_sigmsg(h,this_index,sigcode_output(scs));
-	h.write(parent_block);
-	h.write(nonce);
+//	h.write(parent_block);
+	h.write(ts);
 }
 
 void c::write_pretty(ostream& os) const {
 	os << "---transaction---------------" << endl;
-	os << "  nonce: " << nonce << endl;
-	os << "  parent_block: " << parent_block << endl;
+	os << "  timestamp: " << ts << endl;
+//	os << "  parent_block: " << parent_block << endl;
 	os << "  -----" << inputs.size() << " inputs-------" << endl;
 	inputs.write_pretty(os);
 	os << "  -----" << outputs.size() << " outputs-------" << endl;
@@ -81,10 +90,12 @@ void c::write_pretty(ostream& os) const {
 	os << "-/-transaction---------------" << endl;
 }
 
+
 void c::write(ostream& os) const {
 	inputs.write(os);
 	outputs.write(os);
-	os << parent_block << ' ' << nonce << ' ';
+//	os << parent_block << ' ' << nonce << ' ';
+	os << ts << ' ';
 }
 
 string c::to_b58() const {
@@ -93,17 +104,18 @@ string c::to_b58() const {
 	return crypto::b58::encode(os.str());
 }
 
-pair<string,c> c::from_b58(const string& s) {
+pair<string,unique_ptr<c>> c::from_b58(const string& s) {
 	string txt=crypto::b58::decode(s);
 	istringstream is(txt);
-    pair<string,c> r;
-	auto x=read(is);
-    if (unlikely(!x.first.empty())) {
-        r.first=x.first;
-        return move(r);
-    }
-    r.second=x.second;
-    return move(r);
+//    pair<string,c*> r;
+//	auto ret=read(is);
+	return read(is);
+//    if (unlikely(!ret.first.empty())) {
+        //r.first=x.first;
+ //       return move(r);
+   // }
+    //r.second=x.second;
+    //return move(r);
 }
 
 void c::inputs_t::write_sigmsg(ec::sigmsg_hasher_t& h, size_t this_index, sigcode_t sc) const {
@@ -132,7 +144,7 @@ void c::inputs_t::write(ostream& os) const {
 string c::inputs_t::read(istream& is) {
 	size_t sz;
 	is >> sz;
-    if (unlikely(sz>100)) { //max number of outputs
+    if (unlikely(sz>100)) { //max number of outputs TODO
         return "Error. There is a limit of 100 inputs.";
     }
 	reserve(sz);
@@ -189,16 +201,17 @@ void c::input_t::write_sigmsg(ec::sigmsg_hasher_t& h) const {
 	h.write(address);
 
 //	h.write(reinterpret_cast<const unsigned char*>(&spend_code), sizeof(spend_code_t));
-	h.write(reinterpret_cast<const unsigned char*>(&prev_balance), sizeof(prev_balance));
+//	h.write(reinterpret_cast<const unsigned char*>(&prev_balance), sizeof(prev_balance));
 	h.write(reinterpret_cast<const unsigned char*>(&amount), sizeof(amount));
 }
 void c::input_t::write(ostream& os) const {
-	os << address << ' ' << prev_balance << ' ' << amount << ' ' << crypto::b58::encode(locking_program_input.empty()?"-":locking_program_input) << ' ';
+	os << address << ' ' /*<< prev_balance << ' '*/ << amount << ' ' << crypto::b58::encode(locking_program_input.empty()?"-":locking_program_input) << ' ';
 }
 
 void c::input_t::write_pretty(ostream& os) const {
 	os << "    address: " << address << endl;
-	os << "    balance: " << prev_balance << "; withdraw " << amount << "; final balance: " << (prev_balance-amount) << endl;
+//	os << "    balance: " << prev_balance << "; withdraw " << amount << "; final balance: " << (prev_balance-amount) << endl;
+	os << "    withdraw: " << amount << endl;
 	os << "    unlock with: " << locking_program_input << endl;
 }
 
@@ -221,7 +234,7 @@ pair<string,c::input_t> c::input_t::read(istream& is) {
 	pair<string,input_t> o0;
     auto& o=o0.second;
 	is >> o.address;
-	is >> o.prev_balance;
+//	is >> o.prev_balance;
 	is >> o.amount;
 	string locking_program_input_b58;
 	is >> locking_program_input_b58;
@@ -245,7 +258,7 @@ pair<string,c::output_t> c::output_t::read(istream& is) {
 	return move(o0);
 }
 
-bool c::add_output(const hash_t& addr, const cash_t& amount, const hash_t& locking_program) {
+void c::add_output(const hash_t& addr, const cash_t& amount, const hash_t& locking_program) {
 	outputs.push_back(output_t(addr,amount,locking_program));
 }
 

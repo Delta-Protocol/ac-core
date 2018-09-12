@@ -25,12 +25,14 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
     typedef cash::cash_t cash_t;
 	typedef cash::app::account_t account_t;
 
+
 	struct accounts_query_t:cash::app::accounts_t {
 		typedef cash::app::accounts_t b;
 		void dump(ostream& os) const;
 
-		blockchain::diff::hash_t parent_block;
+		engine::diff::hash_t parent_block;
 	};
+
 	struct input_account_t: cash::app::account_t {
 		typedef cash::app::account_t b;
 		typedef cash::hash_t hash_t;
@@ -42,7 +44,7 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 	};
 
 	struct input_accounts_t:vector<input_account_t> {
-		blockchain::diff::hash_t parent_block;
+	    engine::diff::hash_t parent_block;
 		cash::cash_t get_withdraw_amount() const;
 		void dump(ostream& os) const;
 	};
@@ -71,8 +73,8 @@ struct wallet: unordered_map<cash::hash_t,crypto::ec::keys> {
 
     string send(socket::peer_t&, const cash::tx&) const;
 
-    pair<string,cash::tx> tx_make_p2pkh(socket::peer_t&, const tx_make_p2pkh_input& i);
-    pair<string,cash::tx> tx_sign(socket::peer_t&, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
+    pair<string,unique_ptr<cash::tx>> tx_make_p2pkh(socket::peer_t&, const tx_make_p2pkh_input& i);
+    pair<string,unique_ptr<cash::tx>> tx_sign(socket::peer_t&, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo);
 
 	void dump(ostream& os) const;
 	void list(bool showpriv, ostream& os) const;

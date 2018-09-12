@@ -28,10 +28,6 @@ typedef us::gov::socket::datagram c;
 constexpr size_t c::h;
 constexpr size_t c::maxsize;
 
-struct kk {
-int a;
-};
-
 c::datagram(): dend(0) {
 }
 
@@ -58,10 +54,6 @@ c::datagram(uint16_t service, const string& payload):service(service) {
 	encode_service(service);
 	::memcpy(&(*this)[h],payload.c_str(),payload.size()); //no trailing zro
 	dend=size();
-}
-
-c::datagram(uint16_t service, vector<uint8_t>&&) {
-assert(false);
 }
 
 void c::encode_size(uint32_t sz) {
@@ -115,7 +107,7 @@ string c::sendto(int sock) const {
 	if (unlikely(sock==0)) {
             return "Error. Connection is closed.";
         }
-	uint8_t sz[h];
+	//uint8_t sz[h];
 	auto n = ::write(sock, &(*this)[0], size());
 	if (unlikely(n<0)) {
 		return "Error. Failure writting to socket.";
@@ -147,7 +139,7 @@ string c::recvfrom(int sock) {
                 }
 		uint32_t sz=decode_size();
 		if (sz>maxsize) {
-			return "Error. Incoming datagram is too big.";
+			return "Error. Incoming datagram exceeded size limit.";
 		}
 		resize(sz);
 		service=decode_service();
@@ -202,14 +194,17 @@ vector<string> c::parse_strings() const {
 #include <sstream>
 string c::parse_string() const {
 #ifdef DEBUG
+/*
 if (service==protocol::gov_id_peer_status) {
-assert(false);
+//assert(false);
     ostringstream os;
     os << "(uint16)" << parse_uint16();
     return os.str();
 }
-else if (service==protocol::file_response) {
-assert(false);
+else 
+*/
+if (service==protocol::file_response) {
+//assert(false);
     return "[binary]";
 }
 else {

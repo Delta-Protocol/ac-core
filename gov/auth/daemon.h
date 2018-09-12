@@ -8,6 +8,10 @@ namespace auth {
 
 using namespace std;
 
+
+typedef id::daemon daemon;
+
+/*
 struct daemon:id::daemon {
 	typedef id::daemon b;
 
@@ -18,10 +22,10 @@ struct daemon:id::daemon {
 //	virtual socket::client* create_client(int sock) override=0;
 	void dump(ostream& os) const;
 
-	virtual bool process_work(socket::peer_t *p, datagram*d) override;
+//	virtual bool process_work(socket::peer_t *p, datagram*d) override;
 
 };
-
+*/
 
 }
 }}

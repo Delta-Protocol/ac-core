@@ -8,6 +8,8 @@
 #include <crypto++/aes.h>
 
 using CryptoPP::GCM;
+//using CryptoPP::HexEncoder;
+//using CryptoPP::HexDecoder;
 using CryptoPP::BufferedTransformation;
 using CryptoPP::AuthenticatedSymmetricCipher;
 using CryptoPP::Redirector;
@@ -64,6 +66,7 @@ const vector<unsigned char> c::encrypt(const vector<unsigned char>& plaintext) {
         return vector<unsigned char>();
     }
     return move(ciphertext);
+
 }
 
 void c::set_iv_from_ciphertext(const vector<unsigned char>& ciphertext) {
@@ -106,6 +109,95 @@ const vector<unsigned char> c::decrypt(const vector<unsigned char>& ciphertext) 
 
     return move(decryptedtext);
 }
+
+
+/*std::string c::decrypt(const std::string& ciphertext){
+    
+    set_iv_from_ciphertext(ciphertext);
+    std::string plaintext;
+    try{
+        GCM< AES >::Decryption d;
+        d.SetKeyWithIV( key_, sizeof(key_), iv_, sizeof(key_) );
+        
+        AuthenticatedDecryptionFilter df( d, new StringSink( plaintext ), AuthenticatedDecryptionFilter::DEFAULT_FLAGS, tag_size_); 
+        
+        StringSource( &(ciphertext[sizeof(iv_)]), true, new Redirector( df) );
+
+        // If the object does not throw, here's the only opportunity to check the data's integrity
+        bool b = df.GetLastResult();
+        assert( true == b );
+    }
+    catch( CryptoPP::HashVerificationFilter::HashVerificationFailed& e ){
+        cerr << "Caught HashVerificationFailed..." << endl;
+        cerr << e.what() << endl;
+        cerr << endl;
+    }
+    catch( CryptoPP::InvalidArgument& e ){
+        cerr << "Caught InvalidArgument..." << endl;
+        cerr << e.what() << endl;
+        cerr << endl;
+    }
+    catch( CryptoPP::Exception& e ){
+        cerr << "Caught Exception..." << endl;
+        cerr << e.what() << endl;
+        cerr << endl;
+    }
+    return plaintext;
+}*/
+
+/*string c::decrypt(const string& iv_ciphertext){
+    
+    string ciphertext = retrieve_ciphertext_and_set_iv(iv_ciphertext);
+    string plaintext;
+    try
+    {
+        GCM< AES >::Decryption d;
+        d.SetKeyWithIV( key_, sizeof(key_), iv_, sizeof(key_) );
+        // d.SpecifyDataLengths( 0, cipher.size()-TAG_SIZE, 0 );
+
+        AuthenticatedDecryptionFilter df( d,
+            new StringSink( plaintext ),
+            AuthenticatedDecryptionFilter::DEFAULT_FLAGS,
+            TAG_SIZE
+        ); // AuthenticatedDecryptionFilter
+
+        // The StringSource dtor will be called immediately
+        //  after construction below. This will cause the
+        //  destruction of objects it owns. To stop the
+        //  behavior so we can get the decoding result from
+        //  the DecryptionFilter, we must use a redirector
+        //  or manually Put(...) into the filter without
+        //  using a StringSource.
+        StringSource( ciphertext, true,
+            new Redirector( df) //PASS EVERYTHING
+        ); // StringSource
+
+        // If the object does not throw, here's the only
+        //  opportunity to check the data's integrity
+        bool b = df.GetLastResult();
+        //assert( true == b );
+    }
+    catch( CryptoPP::HashVerificationFilter::HashVerificationFailed& e )
+    {
+        cerr << "Caught HashVerificationFailed..." << endl;
+        cerr << e.what() << endl;
+        cerr << endl;
+    }
+    catch( CryptoPP::InvalidArgument& e )
+    {
+        cerr << "Caught InvalidArgument..." << endl;
+        cerr << e.what() << endl;
+        cerr << endl;
+    }
+    catch( CryptoPP::Exception& e )
+    {
+        cerr << "Caught Exception..." << endl;
+        cerr << e.what() << endl;
+        cerr << endl;
+    }
+    return plaintext;
+
+}*/
 
 
 

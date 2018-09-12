@@ -1,3 +1,0 @@
-#!/bin/bash
-javac -cp ".:../libs/*:" PrintHeadNamedCurve.java
-java -cp ".:../libs/*:" PrintHeadNamedCurve

@@ -1,11 +1,10 @@
 #include <us/gov/auth.h>
-#include <us/gov/blockchain.h>
+#include <us/gov/engine.h>
 #include <us/gov/cash.h>
 #include <us/gov/signal_handler.h>
 #include <us/gov/socket/datagram.h>
-#include <us/gov/blockchain/protocol.h>
+#include <us/gov/engine/protocol.h>
 #include <us/gov/input.h>
-#include <us/gov/blockchain/protocol.h>
 #include <us/gov/auth/peer_t.h>
 
 using namespace us::gov;
@@ -109,8 +108,9 @@ struct shell_client: us::gov::auth::peer_t {
         virtual const keys& get_keys() const override {
 		return k;
 	}
+
     virtual bool authorize(const pubkey_t& p) const override {
-        return true;
+        return k.pub == p; //pub key of other end should be our pub key (only node sysop is allowed to rpc into gov)
     }
 
 	const keys& k;
@@ -143,8 +143,7 @@ void open_shell(const params&p) {
         if (!r.first.empty()) {
             assert(r.second==0);
             p.dump(cerr);
-            cerr << r.first << endl;
-            cerr << "us.gov is rejecting sysop connections. See -ds option." << endl;
+            cerr << "Rejected. " << r.first << endl;
             return;
         }
         assert(r.second!=0);
@@ -185,7 +184,7 @@ void run_daemon(const params&p) {
 	string homedir=p.homedir+"/gov";
 	cfg_daemon conf=cfg_daemon::load(homedir);
 	cout << "Node public key is " << conf.keys.pub << " address " << conf.keys.pub.hash() << endl;
-	blockchain::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
+	engine::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 	d.sysop_allowed=p.shell;
 	d.add(new cash::app());
 	d.run();
@@ -231,7 +230,7 @@ int main(int argc, char** argv) {
 
 	signal(SIGINT,sig_handler);
 	signal(SIGTERM,sig_handler);
-	signal(SIGPIPE, SIG_IGN);
+//	signal(SIGPIPE, SIG_IGN);
 
 	if (p.daemon) {
 		run_daemon(p);

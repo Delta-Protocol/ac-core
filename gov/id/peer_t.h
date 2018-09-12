@@ -39,22 +39,20 @@ namespace id {
                         b::dump_all(os);
                 }
 
-		virtual void on_connect() override; //backcalled only on the initiator.
-
         bool process_work(datagram*d);
 
 		void process_request(datagram* d, const keys&);
 		void process_peer_challenge(datagram* d, const keys&);
 		void process_challenge_response(datagram* d);
-		void process_peer_status(datagram* d);
+//		void process_peer_status(datagram* d);
 		void initiate_dialogue();
 		static string get_random_message();
 		static string to_string(const vector<unsigned char>& data);
 
-		vector<unsigned char> sign(const keys::priv_t& pk, const string& text) const;
-		stage_t verify(const pubkey_t&, const string& signature) const;
+		//vector<unsigned char> sign(const keys::priv_t& pk, const string& text) const;
+		//stage_t verify(const pubkey_t&, const string& signature) const;
 
-        bool verification_is_fine() const { return stage_peer==verified && stage_me==verified; }
+        bool verification_is_fine() const { return stage_peer==verified; }
 
 		virtual void verification_completed() {}
 
@@ -63,11 +61,13 @@ namespace id {
         virtual const keys& get_keys() const;
         virtual string run_auth_responder();
 
+        virtual string connect(const string& host, uint16_t port, bool block=false) override;
+
 		/// For every edge in the graph of nodes there are two nodes on each end, each node has an instance of this class, 
 		/// If one of these nodes is me and the other is peer
 		/// stage_me is my own stage (e.g. I am anonymous for him), stage_peer is the other end stage (e.g He is anonymous to me).
 		stage_t stage_peer{anonymous};
-		stage_t stage_me{anonymous};
+//		stage_t stage_me{anonymous};
 
 		string msg; //message sent to peer, to be signed by him to check his pubkey.
 		pubkey_t pubkey;

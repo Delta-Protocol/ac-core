@@ -1,6 +1,6 @@
-HOWTOFAQ
+HOWTOFAQ - Readme now
 
-The root directory of the sources is 'us', the directorory from which you should have opened this file.
+The root directory of the source tree is 'us', the directorory from which you should have opened this file.
 All relative directories (those not starting with /) mentioned here are based on the previous root directory.
 
 BUILD, DEBUG & INSTALL US-GOV and US-WALLET

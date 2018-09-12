@@ -19,6 +19,10 @@ using namespace std;
 //#include <us/api/apitool_generated_wallet_functions_cpp_override>
 #include <us/api/apitool_generated__functions_wallet_cpp_override>
 
+    void gen_keys(ostream&os);
+    static void priv_key(const priv_t& privkey, ostream&);
+    void mine_public_key(const string& pattern, ostream&);
+
     bool connect_backend(ostream&os);
     chrono::steady_clock::time_point connected_since;
 

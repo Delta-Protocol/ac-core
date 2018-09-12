@@ -9,6 +9,7 @@
 #include <csignal>
 #include <cassert>
 #include <memory>
+#include <atomic>
 #include <mutex>
 #include "datagram.h"
 #include "io.h"
@@ -21,20 +22,21 @@ namespace socket {
 	struct client {
 		client();
 		client(int sock);
-		virtual ~client() {
-			disconnect();
-			  //you must override destructor call the virtual function disconnect on the most specialized class
-		}
+		virtual ~client();
+
 		virtual string connect(const string& host, uint16_t port, bool block=false);
 		virtual void disconnect();
 
 	        inline bool connected() const { return sock!=0; }
 
 		string address() const;
-		virtual void ready() {}
+		virtual void on_detach() {}
+        virtual bool read_ready() const { return true; }
+
 
         pair<string,datagram*> recv(uint16_t expected_service);
         pair<string,datagram*> send_recv(datagram* d,uint16_t expected_service);
+
 
 	        pair<string,datagram*> send_recv(datagram* d); 
 		string send(datagram* d);
@@ -44,13 +46,13 @@ namespace socket {
 		void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port);
 		string init_sock(const string& host, uint16_t port, bool block=false);
 
-		virtual void on_connect() {}
-
 		void dump(ostream& os) const;
                 virtual void dump_all(ostream& os) const {
                         dump(os);
                 }
 
+
+        atomic<bool> busy{false};
 
 public:
 		int sock;

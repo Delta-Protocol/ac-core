@@ -26,15 +26,20 @@ c::evidences_t* c::retrieve_evidences() { //caller must take the lock
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
 	if (protocol::is_evidence(d->service)) {
+//cout << "relay_daemon: process_work - evidence" << endl;
 		datagram::hash_t h=d->compute_hash();
 		{
-		lock_guard<mutex> lock(mx_evidences);
+		unique_lock<mutex> lock(mx_evidences);
 		if (evidences->find(h)!=evidences->end()) {
-		delete d;
-		return true;
+            lock.unlock();
+  //  cout << "relay: ignoring evidence-not 1st time" << endl;
+		    delete d;
+    		return true;
 		}
 		evidences->emplace(h);
+//cout << "uniq evidences: " << evidences->size() << endl;
 		}
+    //cout << "relay: relaying evidence" << endl;
         send(*d, c); //relay
 
 		return process_evidence(d);
@@ -61,4 +66,3 @@ void c::dump(ostream& os) const {
 	os << "Unique evidences this cycle: " << z << endl;
 
 }
-

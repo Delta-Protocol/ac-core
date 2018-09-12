@@ -22,16 +22,17 @@ struct rpc_api: gov::auth::peer_t {
 
     virtual bool authorize(const pubkey_t& p) const override { return true; }
 
-	void ask(int service, ostream&os);
-	void ask(int service, const string& args, ostream&os);
+	void ask(uint16_t service, ostream&os);
+	void ask(uint16_t service, const string& args, ostream&os);
 
 	string walletd_host;
 	uint16_t walletd_port;
 
-	keys id;
     bool connect_walletd(ostream&);
+
+
+	keys id;
     chrono::steady_clock::time_point connected_since;
-    
 
 };
 

@@ -17,7 +17,7 @@ struct peer_t: auth::peer_t {
    }
    virtual const keys& get_keys() const;
 
-
+/*
 //----------------------------------------------------------------------REMOVE TO ENABLE AUTH AGAIN
 bool process_work(datagram*d) {
 //cout << "PROCESS WORK WALLET PEER" << endl;
@@ -25,13 +25,6 @@ bool process_work(datagram*d) {
         return false;
 }
 
-
-virtual void on_connect() override {
-cout << "ONCONNECT" << endl;
-    socket::peer_t::on_connect();
-//    initiate_dialogue();
-    
-}
 
     //TODO remove when java implements run_auth_responder
    virtual string run_auth_responder() override {
@@ -41,6 +34,7 @@ cout << "AUTH RESPONDER" << endl;
    }
 //-/--------------------------------------------------------------------REMOVE TO ENABLE AUTH AGAIN
 
+*/
 };
 
 }}
