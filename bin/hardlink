@@ -1,0 +1,32 @@
+#!/bin/bash
+
+root="$(dirname $(dirname $(readlink -f $0)))"
+
+ls $root
+
+if [ "$(ls -A .)" ]; then
+   echo "Not empty dir"
+   exit 1
+fi
+
+if [ -f $root/api/apitool_generated__protocol_gov_id_cpp ]; then
+   echo "Temporarily files found. Please run with a clean source tree"
+   exit 1
+fi
+
+pwd=`pwd`
+
+for i in `find $root -type f -not -path "$root/.git*"`; do
+j=${i#"$root/"}
+echo "creating hard link for $j"
+d=$(dirname $j)
+mkdir -p $d
+cd $d
+ln $i
+cd $pwd
+done
+
+
+
+
+

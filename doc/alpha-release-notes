@@ -1,0 +1,34 @@
+Engineering
+
+alpha release planned for end of this month.
+
+versioning: alpha means internal user testing, beta means user testing in a controlled environment, 1 means public release
+
+The release likely will experience delays if unexpected problems arise in 
+the following (now unmaintained) areas: Raspberry PI Operating System, API front-end
+
+The backend area is a bit off-schedule as well:
+areas in in-progress status: neuralyzer (hard disk optimization)
+                                     security in communications between mobile and node
+	                             protocol versioning
+
+
+alpha release include features:
+network node implementation delivered as an ISO image which can be burned into a memory SD card.
+the project has two major units: governance and wallet.
+governance
+    blockchain protocol implementation for which nodes are coordinated themselves.
+
+wallet
+    Android 6.0 app featuring a lean (minimum) interface for transfering cash each other via NFC(~Contact less) or QR Code.
+    REST API allowing accessing wallet functions programaticaly.
+    linux command 'us-wallet' to operate the wallet in two modes:
+       local: your wallet is stored in a file in your computer
+       rpc: your wallet resides in a remote server
+    wallet-daemon: required for allowing you have a wallet client remotely, e.g. the android app.
+
+    wallet functions: 
+		* key management.
+		* cash transfer.
+
+Both ISO image and Androud-app download links are available accessing the node via its IP Address with a browser.

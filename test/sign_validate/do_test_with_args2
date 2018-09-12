@@ -1,0 +1,27 @@
+#!/bin/bash
+
+
+PUB=$1
+SIG=$2
+MESSAGE=$3
+
+if [ "_$1" == "_" ]; then
+    echo "PUBKEY SIGNATURE MESSAGE"
+    exit 1
+fi
+
+#verified="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-sdk.jar" Main $PUB "verify" "$MESSAGE" "$SIG")"
+#verified2="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $PUB "verify" "$MESSAGE" "$SIG")"
+
+java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-sdk.jar" Main $PUB "verify" "$MESSAGE" "$SIG"
+LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $PUB "verify" "$MESSAGE" "$SIG"
+
+#if [ "$verified" == "true" ] && [ "$verified2" == "1" ]
+#then
+#    echo "PASSED"
+#else 
+#    echo "FAILED"
+#fi
+
+
+

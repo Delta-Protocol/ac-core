@@ -1,0 +1,22 @@
+#!/bin/sh
+dir=`mktemp -d`
+
+cd $dir
+echo $dir
+wget https://github.com/open-source-parsers/jsoncpp/archive/1.8.4.tar.gz
+tar -xzf 1.8.4.tar.gz
+cd jsoncpp-1.8.4
+
+mkdir -p build/release
+cd build/release
+cmake -DCMAKE_BUILD_TYPE=release -DBUILD_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON -G "Unix Makefiles" ../..
+make && make test && make install
+
+rm -rf $dir
+
+cd /usr/local/include
+mkdir jsoncpp
+cd jsoncpp
+ln -s ../json .
+exit
+
