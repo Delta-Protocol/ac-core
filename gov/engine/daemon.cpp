@@ -195,7 +195,7 @@ void c::evidence_processor() {
             uint64_t tip_ts=duration_cast<nanoseconds>((system_clock::now()-relay_interval).time_since_epoch()).count();
             if (i->first>tip_ts) {
         lock.unlock();
-            cout << "evidences calendar max size: " << max << endl;
+            //cout << "evidences calendar max size: " << max << endl;
                 thread_::_this.sleep_for(idle_wakeup);
                 continue;
             }
@@ -205,7 +205,7 @@ void c::evidence_processor() {
             calendar.erase(i);
             }
             if (e->ts<last_ev_ts) { //enforce tx order
-                cout << "deleting ev with ts " << e->ts << " older than last_ev_ts " << last_ev_ts << endl;
+                //cout << "deleting ev with ts " << e->ts << " older than last_ev_ts " << last_ev_ts << endl;
                 delete e;
                 continue;
             }
@@ -233,7 +233,7 @@ void c::run() {
 
 	thread synct(&syncd_t::run,&syncd);
 
-cout << "it looks stupid I am waiting for 5 secs now" << endl;
+//cout << "it looks stupid I am waiting for 5 secs now" << endl;
 	thread_::_this.sleep_for(chrono::seconds(5));
 
 	assert(pool==0);

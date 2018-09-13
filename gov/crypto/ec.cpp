@@ -335,7 +335,7 @@ string c::sign_encode(const keys::priv_t& pk, const sigmsg_hasher_t::value_type&
 }
 
 bool c::verify(const keys::pub_t& pk, const string& text, const string& signature_der_b58) const {
-	cout << "c++ verify: pub " << pk << " text: " << text << " sig: " << signature_der_b58 << endl;
+	//cout << "c++ verify: pub " << pk << " text: " << text << " sig: " << signature_der_b58 << endl;
 	sigmsg_hasher_t hasher;
 	hasher.write((const unsigned char*)text.c_str(),text.size());
 	sigmsg_hasher_t::value_type hash;
@@ -381,12 +381,12 @@ bool c::verify_not_normalized(const keys::pub_t& pk, const sigmsg_hasher_t::valu
 
 bool c::verify_not_normalized(const keys::pub_t& pk, const string& text, const string& signature_der_b58) const {
 
-	cout << "c++ verify: pub " << pk << " text: " << text << " sig: " << signature_der_b58 << endl;
+	//cout << "c++ verify: pub " << pk << " text: " << text << " sig: " << signature_der_b58 << endl;
 	sigmsg_hasher_t hasher;
 	hasher.write((const unsigned char*)text.c_str(),text.size());
 	sigmsg_hasher_t::value_type hash;
 	hasher.finalize(hash);
-	cout << "c++ verify sha256(text): " << hash << endl;
+	//cout << "c++ verify sha256(text): " << hash << endl;
 	return verify_not_normalized(pk, hash, signature_der_b58);
 }
 

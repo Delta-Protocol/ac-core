@@ -500,13 +500,13 @@ cout << "Starting server" << endl;
 		FD_SET(sock,&read_fd_set);
 		FD_SET(loopback,&read_fd_set);
         vector<int> sl=clients.update();
-cout << "select fds: " << endl;
+//cout << "select fds: " << endl;
         for (auto& i:sl) {
-cout << i << ", ";
+//cout << i << ", ";
             assert(i!=0);
             FD_SET(i,&read_fd_set); 
         }
-cout << endl;
+//cout << endl;
 		if (unlikely(::select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0)) {
 			cerr << "error in select" << endl;
 			continue;
@@ -519,7 +519,7 @@ cout << endl;
 			int nnew;
 			size = sizeof (clientname);
 			nnew = ::accept(sock, (struct sockaddr *) &clientname,&size);
-cout << "NEW connection fd " << nnew << endl;
+//cout << "NEW connection fd " << nnew << endl;
 			if (nnew < 0) {
 				cerr << "error in ::accept 2" << endl;
 				continue;
@@ -544,7 +544,7 @@ cout << "NEW connection fd " << nnew << endl;
 				continue;
 			}
 			auto p=c->second;
-cout << "Incoming data to fd " << i << endl;
+//cout << "Incoming data to fd " << i << endl;
 
             if (p->busy.load()) continue;
             p->busy.store(true);
