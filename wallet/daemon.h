@@ -1,7 +1,6 @@
 #ifndef USGOV_98e8c16336dfe2bb0f4b26ffe37d808f974893b94c081f2f0f0419f11ac5e0ae
 #define USGOV_98e8c16336dfe2bb0f4b26ffe37d808f974893b94c081f2f0f0419f11ac5e0ae
 
-
 #include <us/gov/auth/daemon.h>
 #include <us/gov/crypto/ec.h>
 #include "wallet.h"
@@ -18,7 +17,7 @@ using socket::datagram;
 
 struct peer_t;
 
-struct wallet_daemon: auth::daemon, daemon_local_api { //wallet_local_api, pairing_local_api {
+struct wallet_daemon: auth::daemon, daemon_local_api {
 	typedef auth::daemon b;
 	typedef b::keys keys;
 	typedef keys::pub_t pub_t;

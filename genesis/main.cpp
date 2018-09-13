@@ -1,9 +1,9 @@
 #include <us/gov/auth.h>
-#include <us/gov/blockchain.h>
+#include <us/gov/engine.h>
 #include <us/gov/cash.h>
 #include <us/gov/signal_handler.h>
 #include <us/gov/socket/datagram.h>
-#include <us/gov/blockchain/protocol.h>
+#include <us/gov/engine/protocol.h>
 
 using namespace us::gov;
 using namespace std;
@@ -35,10 +35,10 @@ void help() {
 }
 
 #include <us/gov/input.h>
-using us::gov::input::args_t;
+using us::gov::input::shell_args;
 using namespace us;
 
-string parse_options(args_t& args, params& p) {
+string parse_options(shell_args& args, params& p) {
     string cmd;
     while(true) {
         cmd=args.next<string>();
@@ -61,13 +61,13 @@ string parse_options(args_t& args, params& p) {
 #include <iomanip>
 #include <fstream>
 #include <us/gov/input.h>
-#include <us/gov/blockchain/diff.h>
+#include <us/gov/engine/diff.h>
 
-using us::gov::blockchain::diff;
+using us::gov::engine::diff;
 
-struct genesis_daemon: blockchain::daemon {
+struct genesis_daemon: engine::daemon {
 
-    genesis_daemon(const us::gov::crypto::ec::keys& a, const string& b):blockchain::daemon(a,b,0,0,vector<string>()) {
+    genesis_daemon(const us::gov::crypto::ec::keys& a, const string& b):engine::daemon(a,b,0,0,vector<string>()) {
 	    add(new cash::app());
     }
 
@@ -96,7 +96,7 @@ using us::gov::input::cfg1;
 
 int main(int argc, char** argv) {
 
-    args_t args(argc,argv);
+    shell_args args(argc,argv);
     params p;
     string address=parse_options(args,p);
 

@@ -55,10 +55,11 @@ int c::make_socket (uint16_t port) {
 	return sock;
 }
 
-
+/*
 void c::receive_and_process(client*c) {
-	clients.resume(c);
+//	clients.resume(*c);
 }
+*/
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -81,33 +82,40 @@ return false;
 void c::on_finish() {
 	clients.read_sockets();
 }
-
-void c::incorporate(client*c) {
+void c::attach(client*c, bool wakeupselect) {
 	assert(c);
 	assert(c->sock!=0);
-	clients.add(c);
+	clients.add(c,wakeupselect);
 }
 
-bool c::clients_t::is_here(client* c) const {
+void c::detach(client*c) {
+	assert(c);
+//	assert(c->sock!=0);
+	clients.remove(c);
+}
+/*
+bool c::clients_t::is_here(const client& c) const {
 	{
 	lock_guard<mutex> lock(mx);
-	auto i=find(c->sock);
+	auto i=find(c.sock);
 	if(i!=end()) return true;
 	}
 	if (wadd.find(c)) return true;
-	if (holds.find(c)) return true;
+	//if (holds.find(c)) return true;
 	return false;
 }
+*/
 
-void c::clients_t::add(client* c,bool wakeupselect) {
-	assert(!is_here(c));
+void c::clients_t::add(client* c, bool wakeupselect) {
+	//if (is_here(*c)) return;
 	wadd.add(c);
 	if (wakeupselect) read_sockets();
 }
+
 void c::clients_t::remove(client* c) {
-	assert(is_here(c));
-	wremove.add(c);
-	read_sockets();
+//	if (!is_here(*c)) return;
+	if (wremove.add(c))
+    	read_sockets();
 }
 
 void c::clients_t::read_sockets() {
@@ -115,7 +123,7 @@ void c::clients_t::read_sockets() {
 //	locli.send('W'); //wake up from select
 	::write(locli.sock, &w, 1);
 }
-
+/*
 void c::clients_t::hold(client* c) {
 	{
 	lock_guard<mutex> lock(mx);
@@ -137,8 +145,8 @@ void c::clients_t::resume(client* c) {
 	}
 	read_sockets();
 }
-
-void c::clients_t::import() {
+*/
+void c::clients_t::grow() {
 	unordered_set<client*> t;
 	{
 		lock_guard<mutex> lock(wadd.mx);
@@ -148,105 +156,165 @@ void c::clients_t::import() {
 	{
 	lock_guard<mutex> lock(mx);
 	for (auto i:t) {
-		if (!i) continue;
+//		if (unlikely(!i)) continue;
+		assert(i);
 		assert(find(i->sock)==end());
+        assert(i->sock!=0);
 		//cout << "socket: server: moved cli from wadd to the main container fd " << i->sock << endl;
 		emplace(i->sock,i);
 		//active_fd_set.set(i->sock);
 	}
 	}
+/*
 	for (auto i:t) {
-		if (!i) continue;
+		if (unlikely(!i)) continue;
 		i->ready();
 	}
+*/
+    if (!t.empty()) read_sockets();
 }
 
-void c::clients_t::finish() {
-	unordered_map<int,client*> copy;
+void c::clients_t::shrink() {
+//	unordered_map<int,client*> copy;
+	unordered_set<client*> copy;
 	{
 	lock_guard<mutex> lock(wremove.mx);
 	copy=wremove;
 	wremove.clear();
 	}
+	lock_guard<mutex> lock(mx);
 	for (auto c:copy) {
 		iterator i;
-		{
-		lock_guard<mutex> lock(mx);
-	    i=find(c.first);
-		}
-		if (i==end()) { //it is not in main container
-			if(!wadd.remove(c.second)) { //it it in the add waiting list?
+//assert(c->sock!=0);
+        c->on_detach();
+		i=find(c->sock);
+		if (likely(i!=end())) { //it is not in main container
+            erase(i); //no other thread can remove from main container, so i should be still valid
+            attic.add(c);
+        }
+        else {
+			if (wadd.remove(c)) {
+                attic.add(c);
+            }
+        }
+
+// { //it it in the add waiting list?
+/*
 				if(!holds.remove(c.second)) { //it it in the holds waiting list?
-					cerr << "clients_t::finish: could not locate fd " << c.second->sock << " in any container" << endl;
-					assert(false);
-					exit(1);
+					cout << "clients_t::finish: could not locate fd " << c.second->sock << " in any container" << endl;
+                    return;
+					//assert(false);
+					//exit(1);
 				}
 			}
+
 		}
 		else {
-			lock_guard<mutex> lock(mx);
-			erase(i); //no other thread can remove from main container, so i should be still valid
-		}
-		attic.emplace(c.second,chrono::steady_clock::now());
+*/
+
+//		lock_guard<mutex> lock(mx);
+//		}
+        //c.second->disconnect();
+
+       
 	}
 }
-
+#include <thread>
 c::clients_t::~clients_t() {
-	for (auto i:*this) delete i.second;
+//    grow(); // flush wadd
+    {
+	lock_guard<mutex> lock(mx);
+	for (auto i:*this) wremove.add(i.second); // flush me
+    }
+    shrink(); // flush wremove
+    //cout << "This wait can be improved" << endl;
+    //this_thread::sleep_for(2s); //TODO wait till threadpool is full (all workers have finished)
 }
 
 vector<int> c::clients_t::update() {
-	finish();
-	import();
-	attic.purge();
+        shrink();
+        grow();
+        attic.purge();
+ 
+        vector<int> s;
+        vector<client*> a;
+        
+        {
+        lock_guard<mutex> lock(mx);
+        s.reserve(size());
+        a.reserve(size());
+        for (auto i=begin(); i!=end();) {
+                auto& c=*i->second;
+                //if (!c.read_ready()) {
+                //    ++i;
+                //    continue;
+                //}
+                if (likely(c.sock) ) { //disconnected client?
+                        if (!c.busy.load()) s.emplace_back(c.sock);
+                        a.emplace_back(&c);
+                        ++i;
+                }
+                else {
+                        c.on_detach();
+                        attic.add(i->second);
+                        i=erase(i);
+                }
+        }
+        }
 
-	vector<int> s;
-	lock_guard<mutex> lock(mx);
-	s.reserve(size());
-	for (auto i=begin(); i!=end();) {
-		if (i->second->sock) { //disconnected client?
-			s.emplace_back(i->first);
-			++i;
-		}
-		else {
-			attic.emplace(i->second,chrono::steady_clock::now());
-			i=erase(i);
-		}
-	}
-	return move(s);
+        {
+        lock_guard<mutex> lock(mx_active);
+        active_=a;
+        }
+
+       return move(s);
 }
-
-c::pub_t c::clients_t::active() const { //called by worker threads
-	pub_t copy;
+/*
+vector<client*> c::clients_t::active() const { //called by worker threads
+    vector<client*> copy;
 	lock_guard<mutex> lock(mx);
-	{
-		lock_guard<mutex> lock2(holds.mx);
-		copy.reserve(size()+holds.size());
-		for (auto&i:holds) {
-			copy.emplace_back(i);
-		}
-	}
+	copy.reserve(size());
 	for (auto&i:*this) {
 		copy.emplace_back(i.second);
 	}
 	return move(copy);
 }
+*/
 
 c::clients_t::attic_t::~attic_t() {
-    for (auto&i:*this) delete i.first; 
+//    for (auto&i:*this) delete i.first;
+    for (auto&i:*this) delete i;
 }
 
+void c::clients_t::attic_t::add(client*cl) {
+//    emplace(cl,chrono::steady_clock::now());
+    emplace(cl);
+//    delete cl;
+}
 void c::clients_t::attic_t::purge() { //delete those clients that terminated long ago, in hope there is no more workers on them
-	using namespace std::chrono_literals;
-	vector<client*> tmp;
-	auto n=chrono::steady_clock::now();
-	for (auto&i: *this) {
-		if (n-i.second>30s) tmp.push_back(i.first);
+//    static chrono::duration keep_alive_for{1s}; //rocess_work is supposed to be fast, less than 1sec
+
+//	using namespace std::chrono_literals;
+//	vector<client*> tmp;
+//	auto n=chrono::steady_clock::now();
+	for (auto i=begin(); i!=end(); ) {
+        if ((*i)->busy.load()) {
+            ++i;
+            continue;
+        }
+        else {
+            delete *i;
+            i=erase(i);
+           
+        }
+//		if (n-i.second>keep_alive_for) tmp.push_back(i.first);
+//		tmp.push_back(i.first);
 	}
-	for (auto i:tmp) { 
-		erase(find(i)); 
-		delete i; 
-	}
+
+//	for (auto i:tmp) {
+//		erase(find(i));
+//		delete i;
+//	}
 }
 
 void c::dump(ostream& os) const {
@@ -268,22 +336,25 @@ void c::clients_t::dump(ostream& os) const {
 	wadd.dump(os);
 	os << "*remove buffer: " << endl;
 	wremove.dump(os);
-	os << "*hold buffer: " << endl;
-	holds.dump(os);
+	//os << "*hold buffer: " << endl;
+	//holds.dump(os);
 
 }
 
 c::clients_t::rmlist::~rmlist() {
-    for (auto i:*this) delete i.second; 
-}
-
-void c::clients_t::rmlist::add(client* c) {
 	lock_guard<mutex> lock(mx);
-	assert(c->sock);
-	assert(b::find(c->sock)==end());
-	emplace(c->sock,c);
+    assert(empty());
+//    for (auto i:*this) delete i.second; 
 }
 
+bool c::clients_t::rmlist::add(client* c) {
+	if(c->sock==0) return false;
+	lock_guard<mutex> lock(mx);
+//	if(b::find(c->sock)==end());
+    emplace(c);
+    return true;
+}
+/*
 bool c::clients_t::rmlist::remove(int fd) { //dont delete
 	lock_guard<mutex> lock(mx);
 	iterator i=b::find(fd);
@@ -296,23 +367,25 @@ bool c::clients_t::rmlist::find(int fd) const {
 	lock_guard<mutex> lock(mx);
 	return b::find(fd)!=end();
 }
-
+*/
 void c::clients_t::rmlist::dump(ostream& os) const {
 	lock_guard<mutex> lock(mx);
 	os << "Size: " << size() << endl;
 	for (auto i:*this) {
-		i.second->dump_all(os);
+		i->dump_all(os);
 		os << endl;
 	}
 }
 
 
 c::clients_t::wait::~wait() {
+	lock_guard<mutex> lock(mx);
     for (auto i:*this) delete i;
 }
-
+//#include "peer_t.h"
 void c::clients_t::wait::add(client* c) {
 	lock_guard<mutex> lock(mx);
+  //  assert(static_cast<peer_t*>(c)->parent!=0);
 	emplace(c);
 }
 
@@ -321,12 +394,12 @@ bool c::clients_t::wait::remove(client* c) { //dont delete
 	iterator i=b::find(c);
 	if (i==end()) return false;
 	erase(i);
-	return true;	
+	return true;
 }
 
-bool c::clients_t::wait::find(client* c) const {
+bool c::clients_t::wait::find(const client& c) const {
 	lock_guard<mutex> lock(mx);
-	return b::find(c)!=end();
+	return b::find(const_cast<client*>(&c))!=end();
 }
 
 void c::clients_t::wait::dump(ostream& os) const {
@@ -337,6 +410,39 @@ void c::clients_t::wait::dump(ostream& os) const {
 		os << endl;
 	}
 }
+
+/*
+c::clients_t::hold_t::~hold_t() {
+}
+
+void c::clients_t::hold_t::add(const client& c) {
+	lock_guard<mutex> lock(mx);
+        assert(static_cast<peer_t*>(c)->parent!=0);
+	emplace(&c);
+}
+
+bool c::clients_t::hold_t::remove(const client& c) {
+	lock_guard<mutex> lock(mx);
+	iterator i=b::find(&c);
+	if (unlikely(i==end())) return false;
+	erase(i);
+	return true;
+}
+
+bool c::clients_t::hold_t::find(const client& c) const {
+	lock_guard<mutex> lock(mx);
+	return b::find(&c)!=end();
+}
+
+void c::clients_t::hold_t::dump(ostream& os) const {
+	lock_guard<mutex> lock(mx);
+	os << "Size: " << size() << endl;
+	for (auto i:*this) {
+		i->dump_all(os);
+		os << endl;
+	}
+}
+*/
 
 client* c::create_client(int sock) {
 	return new client(sock);
@@ -388,12 +494,19 @@ void c::run() {
 
 	signal_handler::_this.add(this);
 	char discard[4]; //loopback recv buffer, up to 30 wake up signals
+cout << "Starting server" << endl;
 	while (true) {
 		FD_ZERO(&read_fd_set);
 		FD_SET(sock,&read_fd_set);
 		FD_SET(loopback,&read_fd_set);
-		vector<int> sl=clients.update();
-		for (auto& i:sl) FD_SET(i,&read_fd_set);
+        vector<int> sl=clients.update();
+cout << "select fds: " << endl;
+        for (auto& i:sl) {
+cout << i << ", ";
+            assert(i!=0);
+            FD_SET(i,&read_fd_set); 
+        }
+cout << endl;
 		if (unlikely(::select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0)) {
 			cerr << "error in select" << endl;
 			continue;
@@ -406,6 +519,7 @@ void c::run() {
 			int nnew;
 			size = sizeof (clientname);
 			nnew = ::accept(sock, (struct sockaddr *) &clientname,&size);
+cout << "NEW connection fd " << nnew << endl;
 			if (nnew < 0) {
 				cerr << "error in ::accept 2" << endl;
 				continue;
@@ -416,7 +530,8 @@ void c::run() {
                 delete cl;
             }
             else {
-			    clients.add(cl,false);
+                attach(cl,false);
+			    //clients.add(cl,false);
             }
 		}
 		for (int i:sl) { //Service all the sockets with input pending.
@@ -429,8 +544,14 @@ void c::run() {
 				continue;
 			}
 			auto p=c->second;
-			clients.hold(p);
+cout << "Incoming data to fd " << i << endl;
+
+            if (p->busy.load()) continue;
+            p->busy.store(true);
+			//clients.hold(p); 
+//cout << "receive_and_process fd " << i << endl;
 			receive_and_process(p);
+//cout << "/receive_and_process fd " << i << endl;
 		}
 	}
 	signal_handler::_this.remove(this);

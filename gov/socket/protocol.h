@@ -9,10 +9,6 @@ namespace protocol {
     static constexpr uint16_t protocol_suffix{0};
     static inline bool is_node_protocol(const uint16_t& i) { return (i&3)==protocol_suffix; } 
 
-    static constexpr uint16_t socket_base{100};
-    static constexpr uint16_t error{((socket_base+1)<<2)+protocol_suffix};
-    static constexpr uint16_t ping{((socket_base+2)<<2)+protocol_suffix};
-    static constexpr uint16_t pong{((socket_base+3)<<2)+protocol_suffix};
 #include <us/api/apitool_generated__protocol_gov_socket_cpp>
 
 }

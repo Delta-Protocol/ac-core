@@ -1,6 +1,7 @@
 #include "wallet.h"
 #include "protocol.h"
 #include <us/gov/input.h>
+#include <us/gov/protocol.h>
 
 using namespace us::wallet;
 using namespace std;
@@ -141,7 +142,7 @@ pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const c
         ret.first=response.first; //"Error. Backend is not answering.";
         return move(ret);
     }
-    if (response.second->service==us::gov::protocol::error) {
+    if (response.second->service==gov::protocol::gov_socket_error) {
         ret.first=response.second->parse_string();
         delete response.second;
         return move(ret);
@@ -168,10 +169,11 @@ pair<string,c::accounts_query_t> c::query_accounts(socket::peer_t& peer, const c
 				ret.second.emplace(i,move(a));
 			}
 		}
-		is >> ret.second.parent_block;
+//		is >> ret.second.parent_block;
 	}
 	return move(ret);
 }
+
 
 string c::refresh(socket::peer_t& peer) {
 	cash::app::query_accounts_t addresses;
@@ -188,10 +190,12 @@ string c::refresh(socket::peer_t& peer) {
 
 pair<string,c::input_accounts_t> c::select_sources(socket::peer_t& peer, const cash::cash_t& amount) {
     pair<string,c::input_accounts_t> ans;
+
     ans.first=refresh(peer);
 	if (unlikely(!ans.first.empty())) {
         return move(ans);
     }
+
 	vector<accounts_query_t::const_iterator> v;	
 	v.reserve(data.size());
 	for (accounts_query_t::const_iterator i=data.begin(); i!=data.end(); ++i) {
@@ -201,7 +205,7 @@ pair<string,c::input_accounts_t> c::select_sources(socket::peer_t& peer, const c
     //among all our balances we choose to consume those with lowest balance first (globally this algorithm will reduce the number of accounts with small amounts in the ledger)
 	sort(v.begin(),v.end(),[](const accounts_query_t::const_iterator&v1, const accounts_query_t::const_iterator&v2) { return v1->second.box < v2->second.box; });
 
-	ans.second.parent_block=data.parent_block;
+	//ans.second.parent_block=data.parent_block;
 	cash::cash_t remaining=amount;
 	for (auto&i:v) {
 		if (i->second.box<=remaining) {
@@ -226,24 +230,29 @@ void c::dump(ostream& os) const {
 }
 
 void c::list(bool showpriv, ostream& os) const {
-
+    os << "#: ";
+    if (showpriv)
+    	os << "[private Key] ";
+    os << "[public key] [address]" << endl;
+	int n=0;
     if (showpriv) {
-    	for (auto&i:*this)
-		os << i.second.priv <<' '<< i.second.pub <<' '<< i.first << endl;
+    	for (auto&i:*this) {
+	    	os << '#' << n++ << ": " << i.second.priv << ' ' << i.second.pub << ' ' << i.first << endl;
 	    }
-   
+   }
    else {
     	for (auto&i:*this) {
-		os << i.second.pub <<' '<< i.first << endl;	    
-	}
+	    	os << '#' << n++ << ": " << i.second.pub << ' ' << i.first << endl;
+	    }
    }
+   os << size() << " keys";
 }
-
+/*
 void c::accounts_query_t::dump(ostream& os) const {
 	b::dump(os);
 	os << "parent block: " << parent_block << endl;
 }
-
+*/
 c::input_account_t::input_account_t(const hash_t& address,const b& acc, const cash_t& withdraw_amount):b(acc),address(address),withdraw_amount(withdraw_amount) {
 }
 
@@ -277,13 +286,6 @@ string c::send(socket::peer_t& cli, const cash::tx& t) const {
 	if (fee<=0) {
 		return "Error. Individual inputs and fees must be positive.";
 	}
-/*
-	socket::peer_t cli;
-	if (!cli.connect(backend_host,backend_port,true)) {
-		cerr << "wallet: unable to connect to " << backend_host << ":" << backend_port << endl;
-		return false;
-	}
-*/
 	return cli.send(t.get_datagram());
 }
 
@@ -316,7 +318,7 @@ string c::generate_locking_program_input(const cash::tx& t, size_t this_index, c
 }
 
 
-pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
+pair<string,unique_ptr<cash::tx>> c::tx_sign(socket::peer_t& peer, const string& txb58, const cash::tx::sigcode_t& sigcodei, const cash::tx::sigcode_t& sigcodeo) {
 	auto sigcodes=cash::tx::combine(sigcodei,sigcodeo);
 
 	auto ret=cash::tx::from_b58(txb58);
@@ -325,7 +327,7 @@ pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, cons
     }
 
 	cash::app::query_accounts_t addresses;
-	for (auto&i:ret.second.inputs) {
+	for (auto&i:ret.second->inputs) {
 		addresses.emplace_back(i.address);
 	}
 	pair<string,wallet::accounts_query_t> r=query_accounts(peer,addresses);
@@ -337,7 +339,7 @@ pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, cons
 //	bases.dump(cout);
 //    string err;
 	int n=0;
-	for (auto&i:ret.second.inputs) {
+	for (auto&i:ret.second->inputs) {
 		auto b=bases.find(i.address);
 		if(unlikely(b==bases.end())) {
             ret.first="Error. Address not found.";
@@ -345,9 +347,9 @@ pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, cons
 			return move(ret);
 		}
 		const cash::app::account_t& src=b->second;
-		if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,ret.second)) {
-			i.locking_program_input=generate_locking_program_input(ret.second,n,sigcodes,i.address, src.locking_program);
-			if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,ret.second)) {	
+		if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,*ret.second)) {
+			i.locking_program_input=generate_locking_program_input(*ret.second,n,sigcodes,i.address,src.locking_program);
+			if (!cash::app::unlock(i.address, n,src.locking_program,i.locking_program_input,*ret.second)) {	
 				i.locking_program_input="";
 				//ostringstream os;
                 cerr << "warning, cannot unlock account " << i.address << endl;  //not an error, an input can be left unsigned
@@ -359,9 +361,10 @@ pair<string,cash::tx> c::tx_sign(socket::peer_t& peer, const string& txb58, cons
     return move(ret);
 }
 
-pair<string,cash::tx> c::tx_make_p2pkh(socket::peer_t& peer, const tx_make_p2pkh_input& i) { //non-empty first means error
-        pair<string,cash::tx> ret;
-        cash::tx& t=ret.second;
+pair<string,unique_ptr<cash::tx>> c::tx_make_p2pkh(socket::peer_t& peer, const tx_make_p2pkh_input& i) { //non-empty first means error
+        pair<string,unique_ptr<cash::tx>> ret;
+        ret.second.reset(new cash::tx());
+        cash::tx& t=*ret.second;
 
         auto sigcodes=cash::tx::combine(i.sigcode_inputs, i.sigcode_outputs);
 
@@ -371,7 +374,7 @@ pair<string,cash::tx> c::tx_make_p2pkh(socket::peer_t& peer, const tx_make_p2pkh
             return move(ret);
         }
         input_accounts_t& input_accounts=s.second;
-        
+
 		if (input_accounts.empty()) {
 			ret.first="Error. Insufficient balance";
 			return move(ret);
@@ -381,10 +384,10 @@ pair<string,cash::tx> c::tx_make_p2pkh(socket::peer_t& peer, const tx_make_p2pkh
             return move(ret);
         }
 
-		t.parent_block=input_accounts.parent_block;
+//		t.parent_block=input_accounts.parent_block;
 		t.inputs.reserve(input_accounts.size());
 		for (auto&i:input_accounts) {
-			t.add_input(i.address, i.box, i.withdraw_amount);
+			t.add_input(i.address/*, i.box*/, i.withdraw_amount);
 		}
 		t.add_output(i.rcpt_addr, i.amount, cash::p2pkh::locking_program_hash);
         auto fee=t.check();
@@ -435,27 +438,3 @@ c::tx_make_p2pkh_input c::tx_make_p2pkh_input::from_stream(istream& is) {
 	is >> i.sendover;
 	return move(i);
 }
-
-
-//---------impl of api functions that shall always be executed on the user pc and never query a remote server to do so
-
-#include <sstream>
-#include <us/gov/crypto.h>
-
-void wallet_api::priv_key(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {
-	if (!gov::crypto::ec::keys::verify(privkey)) {
-		os << "The private key is incorrect.";
-        return;
-	}
-	auto pub=gov::crypto::ec::keys::get_pubkey(privkey);
-	os << "Public key: " << pub << endl;
-	os << "Address: " << pub.compute_hash();
-}
-
-void wallet_api::gen_keys(ostream&os) {
-	gov::crypto::ec::keys k=gov::crypto::ec::keys::generate();
-	os << "Private key: " << k.priv.to_b58() << endl;
-	os << "Public key: " << k.pub.to_b58() << endl;
-	os << "Address: " << k.pub.compute_hash();
-}
-

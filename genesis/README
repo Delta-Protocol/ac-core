@@ -1,9 +1,6 @@
-to build, type:
+CREATE GENESIS NODE
+
 make
-
-then
-./us-genesis
-
-read onscreen help
+./us-genesis <ipaddress>
 
 

@@ -8,6 +8,33 @@ using namespace std;
 
 string file_prefix="apitool_generated__";
 
+struct langt {
+    string java;
+    string php;
+};
+
+unordered_map<string,langt> lang_type{
+{"const string&",{"String","?"}},
+{"const pub_t&",{"String","?"}},
+{"const priv_t&",{"String","?"}},
+{"bool",{"boolean","?"}},
+{"const hash_t&",{"String","?"}},
+{"const cash_t&",{"long","?"}},
+{"const tx_make_p2pkh_input&",{"tx_make_p2pkh_input","?"}},
+{"sigcode_t",{"sigcode_t","?"}},
+{"ostream&",{"OutputStream","?"}},
+};
+
+const string& lookup_java(const string& cpp_type) {
+    auto i=lang_type.find(cpp_type);
+    if (i==lang_type.end()) {
+        cerr << "Type " << cpp_type << " not found." << endl;
+        exit(1);
+    }
+    return i->second.java;
+}
+
+
 void include_snippet(const string& file,ostream&os) {
     ifstream f(file);
     while(f.good()) {
@@ -75,6 +102,24 @@ void include_snippet(const string& file,ostream&os) {
            os << ")=0;" << endl;
             
         }
+
+        void gen_java_purevir(ostream& os) const {
+            os << "  void " << name << "(";
+            if (!empty()) {
+                auto e=end();
+                --e;
+                int a=0;
+                for (auto i=cbegin(); i!=e; ++i) {
+                    ostringstream pname;
+                    pname << "arg" << a++;
+                    os << lookup_java(*i) << " " << pname.str() << ", ";
+                }
+               os << lookup_java(*rbegin()) << " os";
+            }
+           os << ");" << endl;
+            
+        }
+
         void gen_cpp_override(ostream& os) const {
             os << "  virtual void " << name << "(";
             if (!empty()) {
@@ -139,6 +184,68 @@ void include_snippet(const string& file,ostream&os) {
             os << "}" << endl;
         }
 
+        void gen_java_rpc_impl(ostream&os) const {
+            os << "@Override public void " << name << "(";
+            if (!empty()) {
+                auto e=end();
+                --e;
+                int a=0;
+                for (auto i=cbegin(); i!=e; ++i) {
+                    ostringstream args;
+                    args << "a" << a++;
+                    os << lookup_java(*i) << " " << args.str() << ", ";
+                }
+               os << lookup_java(*rbegin()) << " a" << a;
+            }
+            os << ") {" << endl;
+            int j=0;
+            assert(!empty());
+            if (size()==1) {
+                   if (custom_rpc_impl=="-") {
+                        os << "    endpoint.ask(protocol." << service << ", a0);" << endl;
+                    }
+                   else {
+                       os << custom_rpc_impl << endl;
+                   }
+                    
+            }
+            else if (size()==2 && lookup_java((*this)[0])=="String") {
+                   if (custom_rpc_impl=="-") {
+                        os << "    endpoint.ask(protocol." << service << ", a0, a1);" << endl;
+                    }
+                   else {
+                       os << custom_rpc_impl << endl;
+                   }
+            }
+            else {
+                   os << "    String o=new String();" << endl;                    
+                   auto e=end();
+                   --e; --e;
+                   auto i=cbegin(); 
+                   for (; i!=e; ++i) {
+                     if (lookup_java(*i)=="String") {
+                        os << "    o += a" << j++ << " + ' ';" << endl;
+                     }
+                     else {
+                        os << "    o += to_string(a" << j++ << ") + ' ';" << endl;
+                     }
+                   }
+                   if (lookup_java(*i)=="String") {
+                       os << "    o += a" << j++ << ";" << endl;
+                   }
+                   else {
+                        os << "    o += to_string(a" << j++ << ") + ' ';" << endl;
+                   }
+                   if (custom_rpc_impl=="-") {
+                       os << "    endpoint.ask(protocol." << service << ", o, a" << j << ");" << endl;
+                   }
+                   else {
+                       os << custom_rpc_impl << endl;
+                   }
+            }
+            os << "}" << endl;
+        }
+
         void gen_cpp_delegate(const string& typeredirect, ostream& os) const {
             os << "  inline virtual void " << name << "(";
             int j=0;
@@ -151,6 +258,30 @@ void include_snippet(const string& file,ostream&os) {
                os << *rbegin() << " a" << j;
             }
            os << ") override { " << typeredirect << "::" << name << "(";
+            j=0;
+            if (!empty()) {
+                auto e=end();
+                --e;
+                for (auto i=cbegin(); i!=e; ++i) {
+                    os << "a" << j++ << ", ";
+                }
+                os << "a" << j;
+            }
+            os << "); }" << endl;
+        }
+
+        void gen_java_delegate(const string& typeredirect, ostream& os) const {
+            os << "  @Override public void " << name << "(";
+            int j=0;
+            if (!empty()) {
+                auto e=end();
+                --e;
+                for (auto i=cbegin(); i!=e; ++i) {
+                    os << lookup_java(*i) << " a" << j++ << ", ";
+                }
+               os << lookup_java(*rbegin()) << " a" << j;
+            }
+           os << ") { " << typeredirect << "." << name << "(";
             j=0;
             if (!empty()) {
                 auto e=end();
@@ -233,16 +364,29 @@ struct api_t: vector<f> {
                 i.gen_cpp_override(os);
             }
     }
+
     void gen_cpp_purevir(ostream&os) const {
         info(os);
             for (auto&i:*this) {
                 i.gen_cpp_purevir(os);
             }
     }
+    void gen_java_purevir(ostream&os) const {
+        info(os);
+            for (auto&i:*this) {
+                i.gen_java_purevir(os);
+            }
+    }
     void gen_cpp_wallet_daemon_delegate(const string& t, ostream&os) const {
         info(os);
             for (auto&i:*this) {
                 i.gen_cpp_delegate(t,os);
+            }
+    }
+    void gen_java_wallet_daemon_delegate(const string& t, ostream&os) const {
+        info(os);
+            for (auto&i:*this) {
+                i.gen_java_delegate(t,os);
             }
     }
 
@@ -258,6 +402,14 @@ struct api_t: vector<f> {
         void gen_cpp_rpc_impl(ostream&os) const {
             for (auto&i:*this) {
                 i.gen_cpp_rpc_impl(os);
+                os << endl;
+            }
+
+        }
+
+        void gen_java_rpc_impl(ostream&os) const {
+            for (auto&i:*this) {
+                i.gen_java_rpc_impl(os);
                 os << endl;
             }
 
@@ -350,7 +502,8 @@ struct api_t: vector<f> {
 };
 
 string api_t::protocol_prefix_cpp{""};
-string api_t::protocol_prefix_java{"protocol_"};
+//string api_t::protocol_prefix_java{"protocol_"};
+string api_t::protocol_prefix_java{""};
 
 void gen_cpp_service_router(const api_t&a) {
     ostringstream fn;
@@ -382,6 +535,7 @@ void gen_cpp_service_handler_headers(const api_t&a) {
     a.gen_cpp_service_handler_headers(os);
     a.warn_f(os);
 }
+
 void gen_functions_cpp_rpc_impl(const api_t&a) {
     ostringstream fn;
     fn << file_prefix << "functions_" << a.name << "_cpp_rpc-impl";
@@ -390,6 +544,17 @@ void gen_functions_cpp_rpc_impl(const api_t&a) {
     ofstream os(file);
     a.warn_h(os);
     a.gen_cpp_rpc_impl(os);
+    a.warn_f(os);
+}
+
+void gen_functions_java_rpc_impl(const api_t&a) {
+    ostringstream fn;
+    fn << file_prefix << "functions_" << a.name << "_java_rpc-impl";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    a.warn_h(os);
+    a.gen_java_rpc_impl(os);
     a.warn_f(os);
 }
 
@@ -415,6 +580,17 @@ void gen_functions_cpp_purevir(const api_t&a) {
     a.warn_f(os);
 }
 
+void gen_functions_java_purevir(const api_t&a) {
+    ostringstream fn;
+    fn << file_prefix << "functions_" << a.name << "_java_purevir";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    a.warn_h(os);
+    a.gen_java_purevir(os);
+    a.warn_f(os);
+}
+
 void gen_fcgi_index_cpp(const api_t&a) {
     ostringstream fn;
     fn << file_prefix << "links_" << a.name << "_fcgi_query_strings";
@@ -426,7 +602,7 @@ void gen_fcgi_index_cpp(const api_t&a) {
     a.warn_f(os);
 }
 
-void gen_functions_wallet_daemon_impl(const api_t&w, const api_t&p) {
+void gen_functions_wallet_daemon_cpp_impl(const api_t&w, const api_t&p) {
     ostringstream fn;
     fn << file_prefix << "functions_wallet-daemon" << "_cpp_impl";
     string file=fn.str();
@@ -436,6 +612,19 @@ void gen_functions_wallet_daemon_impl(const api_t&w, const api_t&p) {
     w.gen_cpp_wallet_daemon_delegate("w",os);
     os << endl;
     p.gen_cpp_wallet_daemon_delegate("p",os);
+    w.warn_f(os);
+}
+
+void gen_functions_wallet_daemon_java_impl(const api_t&w, const api_t&p) {
+    ostringstream fn;
+    fn << file_prefix << "functions_wallet-daemon" << "_java_impl";
+    string file=fn.str();
+    cout << "writting file " << file  << endl;
+    ofstream os(file);
+    w.warn_h(os);
+    w.gen_java_wallet_daemon_delegate("w",os);
+    os << endl;
+    p.gen_java_wallet_daemon_delegate("p",os);
     w.warn_f(os);
 }
 
@@ -550,7 +739,8 @@ void gen_gov_protocol(const api_t& a, int base) {
 }
 
 void do_wallet_daemon(const api_t& w, int wbase, const api_t& p, int pbase) {
-    gen_functions_wallet_daemon_impl(w,p);
+    gen_functions_wallet_daemon_cpp_impl(w,p);
+    gen_functions_wallet_daemon_java_impl(w,p);
     gen_wallet_daemon_protocol(w,wbase,p,pbase);
 //    gen_functions_cpp_rpc_impl(w,p);
     gen_cpp_wallet_daemon_service_router(w,p);
@@ -561,8 +751,10 @@ void do_wallet_daemon(const api_t& w, int wbase, const api_t& p, int pbase) {
 
 void do_common_api(const api_t& a, int base) {
     gen_functions_cpp_purevir(a);
+    gen_functions_java_purevir(a);
     gen_functions_cpp_override(a);
     gen_functions_cpp_rpc_impl(a);
+    gen_functions_java_rpc_impl(a);
     gen_cpp_service_router(a);
     gen_cpp_service_handlers(a);
     gen_cpp_service_handler_headers(a);

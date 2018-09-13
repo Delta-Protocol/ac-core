@@ -1,78 +1,56 @@
 #!/bin/bash
 
+home=`mktemp -d`
+echo "home dir is $home"
+
+#---gov---
+LD_LIBRARY_PATH=gov govd/us-gov -d -home $home -genesis 127.0.0.1
+if [ $? -eq 0 ]; then
+    echo "gov-> PASS"
+ 
+else
+    echo "gov-> FAIL"
+	exit 1;
+
+fi
+
+ls $home
 
 
+LD_LIBRARY_PATH=gov govd/us-gov -d -home $home -p 46000 2>&1 >/dev/null &
+sleep 1
+pid=`ps ax | grep gov | grep -v grep | awk '{print $1}'`
+echo "pid=$pid"
 
-
-
-#------------start----------------|
-
-
-
-~/us/bin/user_daemons_ctl  start
-
-
-
-
-
-
-
-
-
-
-
-
-#LD_LIBRARY_PATH=gov govx/us-gov -d -home $home -p 46009 2>&1 >/dev/null &
-#sleep 1
-#pid=`ps ax | grep gov | grep -v grep | awk '{print $1}'`
-#echo "gov-pid = $pid"
 
 
 #---wallet---                                              wallet port  backend port
-#LD_LIBRARY_PATH=wallet:gov walletx/us-wallet -home $home -d -wp 16673 -bp 46001 2>&1 >/dev/null &
-#sleep 1
-#pid2=`ps ax | grep wallet | grep -v grep | awk '{print $1}'`
-#echo "wallet-pid = $pid2"
+LD_LIBRARY_PATH=wallet:gov walletd/us-wallet -home $home -d -wp 46001 -bp 46000 2>&1 >/dev/null &
+sleep 1
+pid2=`ps ax | grep wallet | grep -v grep | awk '{print $1}'`
+echo "pid2=$pid2"
 #exit 0
 
 
 #---Run-Test---
-#LD_LIBRARY_PATH=wallet:gov walletx/us-wallet -d -wp 46001 b
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#------------run-test-------------| ** keep it **
-
-#cd
-#cd us/test/wallet
-
-#g++ -std=c++17 -I../../.. -L../../gov -L../../wallet -lusgov -luswallet main.cpp api.cpp
-#LD_LIBRARY_PATH=../../gov:../../wallet ./a.out
-
-
-
-#--------stop---killall-pid------|
-
-~/us/bin/user_daemons_ctl  stop
-
-
-
+#LD_LIBRARY_PATH=wallet:gov walletd/us-wallet -d -wp 46001 b
+#
 
 exit 0
 
 
+a=`LD_LIBRARY_PATH=gov test/unit_tests 2>&1 >/dev/null`
+if [ $? -eq 0 ]; then
+    echo "PASS"
+    exit 0
+fi
+echo "FAIL"
+LD_LIBRARY_PATH=gov gdb -batch -ex "run" -ex "bt" test/unit_tests 2>&1 #| tail -n-3 | cut -d " " -f 4- | tac | nl -n ln | tac | sed "s/^/#/"
 
+if [[ ${home:0:4} = "/tmp" ]] 
+then
+rm -r $home
+fi
 
-
+exit 1
 

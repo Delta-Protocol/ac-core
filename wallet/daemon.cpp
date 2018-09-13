@@ -131,7 +131,10 @@ bool c::send_response__wallet_tx_check(socket::peer_t* c, socket::datagram* d) {
 
 bool c::send_response__wallet_ping(socket::peer_t* c, socket::datagram* d) {
     //handled in process_work
-   abort();
+   //abort();
+  ostringstream ans;
+  wallet_local_api::ping(ans);
+  return send_response(c,d,ans.str());
 }
 
 // pairing - master file: us/apitool/data/pairing
@@ -169,33 +172,39 @@ bool c::send_response__pairing_list_devices(socket::peer_t* c, socket::datagram*
 using namespace us::wallet::protocol;
 
 bool c::process_work(socket::peer_t *c, datagram*d) {
-	if (unlikely(d->service==us::wallet::protocol::wallet_ping)) {
-		ostringstream ans;
-		wallet_local_api::ping(ans);
-		return send_response(c,d,ans.str());
-    }
-
+cout << "daemon: process_work" << endl;
     if (b::process_work(c,d)) return true;
-
-    if (static_cast<peer_t*>(c)->process_work(d)) return true;
+cout << "A" << endl;
 
     if (static_cast<auth::peer_t*>(c)->stage!=auth::peer_t::authorized) {
         cout << "not authorized" << endl;
         delete d;
+	c->disconnect();
         return true;
     }
+cout << "b" << endl;
+
+
 	switch(d->service) {
         #include <us/api/apitool_generated__protocol_wallet-daemon_cpp_service_router>
 		break;
 		default: break;
 	}
+cout << "c" << endl;
+/*
+	if (unlikely(d->service==us::wallet::protocol::wallet_ping)) {
+		ostringstream ans;
+		wallet_local_api::ping(ans);
+		return send_response(c,d,ans.str());
+    	}
+*/
 	return false;
 }
 
 socket::client* c::create_client(int sock) {
-    auto p=new peer_t(sock);
-    p->parent=this;
-    return p;
+    return new peer_t(sock);
+//    p->parent=this;
+//    return p;
 }
 
 

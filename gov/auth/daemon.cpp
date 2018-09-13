@@ -5,6 +5,7 @@ using namespace us::gov;
 using namespace us::gov::auth;
 using namespace std;
 
+/*
 typedef us::gov::auth::daemon c;
 
 
@@ -16,13 +17,13 @@ c::daemon() {
 
 c::~daemon() {
 }
-
+/ *
 bool c::process_work(socket::peer_t *p, datagram*d) {
     if (b::process_work(p,d)) return true;
 //cout << "auth daemon: I should process this? " << d->service << endl;
     return static_cast<peer_t*>(p)->process_work(d);
 }
-
+* /
 void c::dump(ostream& os) const {
 	os << "Hello from auth::daemon" << endl;
     os << "active:" << endl;
@@ -33,4 +34,6 @@ void c::dump(ostream& os) const {
     }
 }
 
+
+*/
 

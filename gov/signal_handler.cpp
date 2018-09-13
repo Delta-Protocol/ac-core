@@ -19,7 +19,7 @@ void c::sleep_for(const chrono::steady_clock::duration& d) {
 	cv.wait_for(lock, d, [&]{ return terminated; });
 }
 
-void c::sleep_until(const chrono::system_clock::time_point& d) {
+void c::sleep_until(const chrono::steady_clock::time_point& d) {
 	unique_lock<mutex> lock(mx);
 	if (terminated) return;
 	cv.wait_until(lock, d, [&]{ return terminated; });
@@ -30,7 +30,7 @@ void c::sleep_until(const chrono::system_clock::time_point& d) {
 
 void c::finish() {
 	if (terminated) return;
-	cout << "starting ordered exit" << endl;
+//	cout << "starting ordered exit" << endl;
 	terminated=true;
 	cv.notify_all(); //wakeup speeping threads
 	for (auto&i:callbacks) i->on_finish(); //wake up socket listener

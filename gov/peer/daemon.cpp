@@ -17,11 +17,11 @@ c::~daemon() {
 
 void c::daemon_timer() { // network mutation
     cout << "Connecting to new Neighbours" << endl;
-	pub_t p=adjust_peer_number();
+	peers_t p=adjust_peer_number();
 	check_latency(p);
 }
 
-void c::check_latency(const pub_t& a) {
+void c::check_latency(const peers_t& a) {
 	for (auto&i:a) {
 		if (i->stage==peer_t::connected) {
 			cout << "SENDING PING from check_latency" << endl;
@@ -30,34 +30,35 @@ void c::check_latency(const pub_t& a) {
 	}
 }
 
-c::pub_t c::connected_peers() const {
+c::peers_t c::connected_peers() const {
 	auto a=active();
-	pub_t r;
+	peers_t r;
 	for (auto&i:a) {
 		if (i->stage==peer_t::connected) r.push_back(i);
 	}
 	return move(r);
 }
 
-c::pub_t c::active() const {
+c::peers_t c::active() const {
 	auto a=b::active();
-	return move( reinterpret_cast<pub_t&>(a) );
+	return move( reinterpret_cast<peers_t&>(a) );
 }
 
-c::pub_t c::adjust_peer_number() {
+c::peers_t c::adjust_peer_number() {
 	auto a=active();
 	add_peers(a);
 	purge_peers(a);
 	return move(a);
 }
 
-void c::add_peers(pub_t& a) {
+void c::add_peers(peers_t& a) {
 //cout << "add peers" << endl;
 //a.dump(cout);
 //cout << "--" << endl;
 	int n=edges-a.asize()+1; //must be signed int
 	unordered_set<string> exclude;
 	for (auto i:a) if (i!=0) exclude.emplace(i->addr);
+    int m=0;
 	while(n>0) {
 		string addr=get_random_peer(exclude);
 		if (!addr.empty()) {
@@ -67,9 +68,11 @@ void c::add_peers(pub_t& a) {
 //cout << "connecting to address " << addr << endl;
 				string r=p->connect(addr,16672);
                 if (likely(r.empty())) {
+                    attach(p,false);
 //cout << "connected to address " << addr << endl;
 					peer_t* pp=static_cast<peer_t*>(p);
 					a.push_back(pp);
+                    ++m;
 				}
 				else {
 //					cout << "peerd: unable to connect, deleting peer" << endl;
@@ -79,13 +82,14 @@ void c::add_peers(pub_t& a) {
 		}
 		--n;
 	}
+    if (m>0) clients.read_sockets();
 }
 
 vector<peer_t*> c::in_service() const {
 	return in_service(active());
 }
 
-vector<peer_t*> c::in_service(const pub_t& a) const {
+vector<peer_t*> c::in_service(const peers_t& a) const {
 	vector<peer_t*> ans;
 	for (auto& i:a) {
 		auto& c=static_cast<peer_t&>(*i);
@@ -94,8 +98,8 @@ vector<peer_t*> c::in_service(const pub_t& a) const {
 	return move(ans);
 }
 
-void c::purge_slow(pub_t&a) {
-	pub_t copy;
+void c::purge_slow(peers_t&a) {
+	peers_t copy;
 	copy.reserve(a.size());
 	for (auto& i:a) {
 		if (i->stage==peer_t::exceed_latency) {
@@ -109,8 +113,8 @@ void c::purge_slow(pub_t&a) {
 	a=copy;
 }
 
-c::pub_t::iterator c::oldest(pub_t& v) const {
-	pub_t::iterator o=v.end();
+c::peers_t::iterator c::oldest(peers_t& v) const {
+	peers_t::iterator o=v.end();
 	auto cur=chrono::steady_clock::now();
 	for (auto i=v.begin(); i!=v.end(); ++i) {
 		if (*i==0) continue;
@@ -127,14 +131,14 @@ void c::set_mode(int mode) { //0 tor; 1 ip4
 	for (auto i:active()) i->set_mode(mode);
 }
 */
-void c::purge_excess(pub_t& a) {
+void c::purge_excess(peers_t& a) {
 	while (a.asize()>edges) {
 		auto i=oldest(a);
 		if (i==a.end()) break;
 		(*i)->disconnect();
 		*i=0;
 	}
-	pub_t copy;
+	peers_t copy;
 	copy.reserve(a.size());
 	for (auto i:a) {
 		if (i) copy.emplace_back(i);
@@ -142,7 +146,7 @@ void c::purge_excess(pub_t& a) {
 	a=copy;
 }
 
-void c::purge_peers(pub_t& a) {
+void c::purge_peers(peers_t& a) {
 	purge_slow(a);
 	purge_excess(a);
 }

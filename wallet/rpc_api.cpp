@@ -42,13 +42,13 @@ bool c::connect_walletd(ostream&os) {
     return true;
 }
 
-void c::ask(int service, ostream&os) {
+void c::ask(uint16_t service, ostream&os) {
 	ask(service,"",os);
 }
 
 //chrono::steady_clock::time_point
 
-void c::ask(int service, const string& args, ostream&os) {
+void c::ask(uint16_t service, const string& args, ostream&os) {
 //cout << "asking " << service << " " << args << endl;
 	if (!connect_walletd(os)) return;
 

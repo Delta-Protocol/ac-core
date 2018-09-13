@@ -20,8 +20,13 @@ scope opening curly braces {
 Upper case are only used for MACROS, to yell, because macros don't respect c++ scope rules.
 Lower case is used elsewhere, identifiers, constants, etc.
 
-struct is preferred rather than class.
+Struct is preferred rather than class.
 
 protected and private sections are innofensive but are rather not written.
 
+source code organization is as flat as possible, with all components listed under the root directory
+avoiding fitting them into a tree-based classification. (relations form different graphs
+depending on classification criteria, rather than a single tree).
 
+--
+Brian Laporte - 22sFexQF7gMPxPw9BepUzehQoVecT42bnYMBrianHfK46

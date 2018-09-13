@@ -25,19 +25,23 @@ c::peer_t(int sock): b(sock), stage(service)/*,latency(100ms)*/ {
 c::~peer_t() {
 }
 
-void c::on_connect() {
-    b::on_connect();
+
+string c::connect(const string& host, uint16_t port, bool block) {
+    auto r=b::connect(host,port,block);
+    if (r.empty()) {
+    	stage=service;
+    }
+    return r;
 //	since=chrono::steady_clock::now();
 	//stage=connected;
-	stage=service;
 }
 
 
 void c::disconnect() {
-     {
-     lock_guard<mutex> lock(mx);
+//     {
+//     lock_guard<mutex> lock(mx);
      stage=disconnecting;
-     }
+//     }
      b::disconnect();
 }
 
@@ -86,7 +90,7 @@ namespace {
 void c::dump(ostream& os) const {
 //	os << this << "- mode: " << modestr[mode] << "; age: " << age(since) << "; latency: " << latency.count() << "us; stage: " << stagestr[stage] << endl;
 //	os << this << "- mode: " << modestr[mode] << " stage: " << stagestr[stage] << endl;
-	os << this << "- stage: " << stagestr[stage] << endl;
+	os << this << "peer stage: " << stagestr[stage] << endl;
 }
 
 

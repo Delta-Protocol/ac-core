@@ -78,7 +78,7 @@ void c::tx_make_p2pkh(const tx_make_p2pkh_input&i, ostream& os) {
 
     auto tx=wallet::tx_make_p2pkh(endpoint,i);
     if (tx.first.empty())
-    	os << tx.second;
+    	os << *tx.second;
     else 
     	os << tx.first;
 }
@@ -88,7 +88,7 @@ void c::tx_sign(const string&txb58, cash::tx::sigcode_t sigcodei, cash::tx::sigc
 
     auto tx=wallet::tx_sign(endpoint, txb58, sigcodei, sigcodeo);
 	if (tx.first.empty())
-	    os << tx.second;
+	    os << *tx.second;
 	else
 	    os << tx.first;
 }
@@ -100,7 +100,7 @@ void c::tx_send(const string&txb58, ostream&os) {
         os << r.first;
         return;
     }
-	string e=wallet::send(endpoint, r.second);
+	string e=wallet::send(endpoint, *r.second);
     if (unlikely(!e.empty())) {
 	    os << e;
         return;
@@ -114,7 +114,7 @@ void c::tx_decode(const string&txb58, ostream&os) {
         os << r.first;
         return;
     }
-	r.second.write_pretty(os);
+	r.second->write_pretty(os);
 }
 
 void c::tx_check(const string&txb58, ostream&os) {
@@ -123,7 +123,7 @@ void c::tx_check(const string&txb58, ostream&os) {
         os << "Cannot decode base58";
         return;
     }
-    const cash::tx& t=r.second;
+    const cash::tx& t=*r.second;
     bool fail=false;
 	auto fee=t.check();
 	if (fee<=0) {
@@ -150,7 +150,7 @@ void c::ping(ostream& os) {
     if (!connect_backend(os)) {
         return;
     }
-    auto r=endpoint.send_recv(new datagram(us::gov::protocol::ping,""),us::gov::protocol::pong);
+    auto r=endpoint.send_recv(new datagram(gov::protocol::gov_socket_ping,""),gov::protocol::gov_socket_pong);
     if (!r.first.empty()) {
         assert(r.second==0);
         os << "is not responding (Error): " << r.first;
@@ -166,4 +166,39 @@ void c::ping(ostream& os) {
     delete d;
 }
 
+
+
+//---------impl of api functions that shall always be executed on the user pc and never query a remote server to do so
+
+#include <sstream>
+#include <us/gov/crypto.h>
+
+void c::priv_key(const gov::crypto::ec::keys::priv_t& privkey, ostream&os) {
+    if (!gov::crypto::ec::keys::verify(privkey)) {
+        os << "The private key is incorrect.";
+        return;
+    }
+    auto pub=gov::crypto::ec::keys::get_pubkey(privkey);
+    os << "Public key: " << pub << endl;
+    os << "Address: " << pub.compute_hash();
+}
+
+void c::gen_keys(ostream&os) {
+    gov::crypto::ec::keys k=gov::crypto::ec::keys::generate();
+    os << "Private key: " << k.priv.to_b58() << endl;
+    os << "Public key: " << k.pub.to_b58() << endl;
+    os << "Address: " << k.pub.compute_hash();
+}
+
+void c::mine_public_key(const string& pattern, ostream& os) {
+    while(true) {
+        gov::crypto::ec::keys k=gov::crypto::ec::keys::generate();
+        string pubkey=k.pub.to_b58();
+        if (pubkey.find(pattern)!=string::npos) {
+            os << "Private key: " << k.priv.to_b58() << endl;
+            os << "Public key: " << k.pub.to_b58() << endl;
+            return;
+        }
+    }
+}
 

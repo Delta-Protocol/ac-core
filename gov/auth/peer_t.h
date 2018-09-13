@@ -17,21 +17,22 @@ struct peer_t: id::peer_t {
         };
         constexpr static array<const char*,num_stages> stagestr={"denied","authorized"};
 
+        peer_t(int sock=0);
+        virtual ~peer_t();
+
         virtual const keys& get_keys() const=0;
 
         virtual void verification_completed() override;
 
-	virtual bool authorize(const pubkey_t& p) const=0;
- void dump(ostream& os) const;
-                virtual void dump_all(ostream& os) const override {
+        virtual bool authorize(const pubkey_t& p) const=0;
+        void dump(ostream& os) const;
+        virtual void dump_all(ostream& os) const override {
                         dump(os);
                         b::dump_all(os);
                 }
 
         //virtual string run_auth() override;
 
-        peer_t(int sock=0);
-        virtual ~peer_t();
         stage_t stage{denied};
 };
 

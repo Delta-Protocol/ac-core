@@ -116,8 +116,7 @@ using namespace us::gov::input;
 
 
 struct args_t:unordered_map<string,string> {
-    const string& get(const string& param) const {
-    }
+    const string& get(const string& param) const;
     template<typename T>
     T get(const string& param) {
         auto i=find(param);

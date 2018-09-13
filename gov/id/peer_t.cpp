@@ -16,19 +16,22 @@ c::peer_t(int sock): b(sock) {
 c::~peer_t() {
 }
 
-void c::on_connect() {
-    b::on_connect();
-//cout << "ID: INITIATE DIALOGUE" << endl;
-    initiate_dialogue();
+string c::connect(const string& host, uint16_t port, bool block) {
+    auto r=b::connect(host,port,block);
+    if (likely(r.empty())) {
+        initiate_dialogue();
+    }
+    return r;
 }
 
+
 void c::dump(ostream& os) const {
-	os << this << ' ' << pubkey << "- peer says I am " << stagestr[stage_me] << "; I say peer is " << stagestr[stage_peer] << endl;
+	os << "id: " << this << ' ' << pubkey << " stage: " << stagestr[stage_peer] << endl;
 }
 
 void c::process_request(datagram* d, const keys& mykeys) {
 	string hello_msg=d->parse_string();
-//cout << "ID signing with priv " << mykeys.priv << " - " << mykeys.pub << endl;
+//cout << "ID signing with priv " << mykeys.priv << " - " << mykeys.pub << " " << hello_msg << endl;
 
 	string signature=crypto::ec::instance.sign_encode(mykeys.priv,hello_msg);
 //cout << "ID: process_request, msg2sign=" << hello_msg << " created signature=" << signature << endl;
@@ -63,7 +66,7 @@ void c::process_peer_challenge(datagram* d, const keys& mykeys) {
 		stage_peer=verified_fail;
 //cout << "ID: peer_pubk invalid" << endl;
 	}
-	else if (likely(crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58))) {
+	else if (likely(crypto::ec::instance.verify_not_normalized(peer_pubk,msg,peer_signature_der_b58))) {
 		stage_peer=verified;
 		pubkey=peer_pubk;
 //cout << "ID: peer_pubk ok" << endl;
@@ -81,9 +84,16 @@ void c::process_peer_challenge(datagram* d, const keys& mykeys) {
 
 	string signature_der_b58=crypto::ec::instance.sign_encode(mykeys.priv,hello_msg);
 	ostringstream os;
-	os << mykeys.pub << ' ' << signature_der_b58 << ' ' << stage_peer;
+	os << mykeys.pub << ' ' << signature_der_b58; // << ' ' << stage_peer;
 //cout << "ID sending id_challenge_response " << os.str() << endl;
+//while(true) {
 	send(new datagram(protocol::gov_id_challenge_response,os.str()));
+//    this_thread::sleep_for(1s);
+//}
+
+
+//cout << "verif completed " << stagestr[stage_peer] << endl;
+    verification_completed();
 
 }
 
@@ -94,24 +104,24 @@ void c::process_challenge_response(datagram* d) {
 
 	pubkey_t peer_pubk;
 	string peer_signature_der_b58;
-	string sveredict;
+	//string sveredict;
 
 	{
 	istringstream is(data);
 	is >> peer_pubk;
 	is >> peer_signature_der_b58;
-	is >> sveredict;
+	//is >> sveredict;
 	}
 //cout << "ID: process_challenge_response received peer_signature_der_b58 " << peer_signature_der_b58 << endl;
 //cout << "ID: process_challenge_response received peer_pubk " << peer_pubk << endl;
 //cout << "ID: process_challenge_response received veredict " << sveredict << endl;
-	stage_me=(stage_t)(stoi(sveredict));
+	//stage_me=(stage_t)(stoi(sveredict));
 	
 	if (unlikely(!peer_pubk.valid)) {
 		stage_peer=verified_fail;
 //cout << "ID: process_challenge_response FAIL1 " << endl;
 	}
-	else if (likely(crypto::ec::instance.verify(peer_pubk,msg,peer_signature_der_b58))) {
+	else if (likely(crypto::ec::instance.verify_not_normalized(peer_pubk,msg,peer_signature_der_b58))) {
 		stage_peer=peer_t::verified;
 		pubkey=peer_pubk;
 //cout << "ID: process_challenge_response peer pubkey " << pubkey << endl;
@@ -122,13 +132,15 @@ void c::process_challenge_response(datagram* d) {
 		stage_peer=peer_t::verified_fail;
 	}
 	msg.clear();
-	send(new datagram(protocol::gov_id_peer_status,(uint16_t) stage_peer));
+	//send(new datagram(protocol::gov_id_peer_status,(uint16_t) stage_peer));
 
 //cout << "ID: process_challenge_response  " << pubkey << endl;
 //cout << "ID: process_challenge_response calling verification_completed" << endl;
+cout << "verif completed " << stagestr[stage_peer] << endl;
+
 	verification_completed();
 }
-
+/*
 void c::process_peer_status(datagram* d) {
 	stage_me=(stage_t)(d->parse_uint16());
 //cout << "ID: process_peer_status " << stage_me << endl;
@@ -137,16 +149,16 @@ void c::process_peer_status(datagram* d) {
 //cout << "ID: calling verification_completed" << endl;
 	verification_completed();
 }
-
+*/
 void c::initiate_dialogue() {
 //cout << "ID: initiate_dialogue" << endl;
-	if (stage_me==anonymous && msg.empty()) {  //if msg not empty we are carrying on the wauth process already
+	if (msg.empty()) {  //if msg not empty we are carrying on the wauth process already
 		msg=get_random_message();		
 //cout << "ID: sending id_request" << endl;
 		send(new datagram(protocol::gov_id_request,msg));
 	}
 }
-
+/*
 #include <iomanip>
 #include <vector>
 string c::to_string(const vector<unsigned char>& data) {
@@ -154,15 +166,18 @@ string c::to_string(const vector<unsigned char>& data) {
 	for (auto i:data) os << hex << setfill('0') << setw(2) << (int)i;
 	return os.str();
 }
+*/
 
 #include <fstream>
+#include <us/gov/crypto/base58.h>
+
 string c::get_random_message() {
 //return "DUMMY-MSG";  //uncomment for deterministic debugging
 	vector<unsigned char> v;
 	v.resize(20);
     ifstream f("/dev/urandom");
     f.read(reinterpret_cast<char*>(&v[0]),v.size());
-	return to_string(v);
+	return crypto::b58::encode(v);
 }
 
 const c::keys& c::get_keys() const {
@@ -176,7 +191,6 @@ bool c::process_work(datagram*d) {
         case protocol::gov_id_request: process_request(d,get_keys()); break;
         case protocol::gov_id_peer_challenge: process_peer_challenge(d,get_keys()); break;
         case protocol::gov_id_challenge_response: process_challenge_response(d); break;
-        case protocol::gov_id_peer_status: process_peer_status(d); break;
     default: return false;
     }
     return true;
@@ -187,14 +201,15 @@ string c::run_auth_responder() {
 
     while(!program::_this.terminated) {
         if (stage_peer==verified || stage_peer==verified_fail) {
-        if (stage_me==verified || stage_me==verified_fail) {
             break;
-        }
         }
         pair<string,datagram*> r=recv();
         if (unlikely(!r.first.empty())) {
             assert(r.second==0);
-            return "Error. Peer not responding";
+            ostringstream os;
+            os << "Error. Peer not responding. " << r.first;
+            return os.str();
+
         }
 
         if (likely(process_work(r.second))) {
@@ -203,5 +218,6 @@ string c::run_auth_responder() {
         delete r.second;
         return "Error. Unrecognized datagram arrived";
     }
+//    cout << "aaa " << (stage_peer==verified) << endl;
     return stage_peer==verified?"":"Error. Peer failed to demonstrate identity";
 }

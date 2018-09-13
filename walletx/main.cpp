@@ -1,3 +1,4 @@
+#include "fcgi.h"
 #include <us/gov/cash.h>
 #include <us/gov/crypto.h>
 #include <string>
@@ -11,7 +12,6 @@
 #include <us/wallet/daemon.h>
 #include <us/gov/input.h>
 #include <us/wallet/daemon_api.h>
-#include "fcgi.h"
 #include <us/wallet/json/daemon_api.h>
 
 using namespace us::wallet;
@@ -81,17 +81,17 @@ void help(const params& p, ostream& os=cout) {
       if (!p.offline) {
 	    os << " -local    Local mode. Use a wallet directory, instead of connecting to a wallet daemon. [" << boolalpha << p.offline << "]" << endl;
       }
-      os << " -home <homedir>   homedir. [" << p.homedir << "]  requires -local" << endl;
+      os << " -home <homedir>   homedir. [" << p.homedir << "]  (requires -local)" << endl;
 	  os << " -d        Run a new wallet-daemon listening on port " << p.listening_port << " (see -lp). Ignored with -local" << endl;
 	  os << " -lp       Listening Port. Ignored with -local" << endl;
 #ifdef FCGI
-	  os << " -fcgi     Behave as a fast-cgi program. Requires -d. [" << (p.fcgi?"yes":"no") << "]" << endl;
+	  os << " -fcgi     Behave as a fast-cgi program. [" << (p.fcgi?"yes":"no") << "] (requires -d)" << endl;
 #endif
-	  os << " -json     output json instead of text. [" << boolalpha << p.json << "]" << endl;
-      os << " RPC to backend(us-gov) parameters:  Requires -local" << endl;
+	  os << " -json     output json instead of plain text. [" << boolalpha << p.json << "]" << endl;
+      os << " RPC to backend(us-gov) parameters: (requires -local)" << endl;
       os << "   -bhost <address>  us-gov IP address. [" << p.backend_host << "]" << endl;
       os << "   -bp <port>  TCP port. [" << p.backend_port << "]" << endl;
-      os << " RPC to wallet-daemon (us-wallet) parameters: Conflicts with -local" << endl;
+      os << " RPC to wallet-daemon (us-wallet) parameters: (conflicts with -local)" << endl;
 	  os << "   -whost <address>  walletd address. [" << p.walletd_host << "]" << endl;
 	  os << "   -wp <port>  walletd port. [" << p.walletd_port << "]" << endl;
     }
@@ -117,8 +117,9 @@ void help(const params& p, ostream& os=cout) {
     }
 	os << "  list [show_priv_keys=0|1]   Lists all keys. Default value for show_priv_keys is 0." << endl;
     if (p.advanced) {
-	  os << "  gen_keys               Generates a key pair without adding them to the wallet." << endl;
-	  os << "  priv_key <private key> Gives information about the given private key." << endl;
+	  os << "  gen_keys               Generates a key pair without adding them to the wallet. (requires -local)" << endl;
+      os << "  mine_public_key  <string> Finds a private key where its corrersponding public key contains the specified string. It will take from long to ages. (requires -local)" << endl;     
+	  os << "  priv_key <private key> Gives information about the given private key. (requires -local)" << endl;
     }
     os << endl;
     if (p.advanced) {
@@ -212,7 +213,9 @@ string parse_options(shell_args& args, params& p) {
 void tx(us::wallet::wallet_api& wapi, shell_args& args, const params& p, ostream& os) {
 	string command=args.next<string>();
 	if (command=="transfer") {
-        wapi.transfer(args.next<cash::hash_t>(),args.next<cash::cash_t>(),os);
+		auto a=args.next<cash::hash_t>();
+		auto b=args.next<cash::cash_t>(0);
+	        wapi.transfer(a,b,os);
 	}
 	else if (command=="make_p2pkh") {
         wallet::tx_make_p2pkh_input i;
@@ -314,7 +317,8 @@ void import_gov_k(us::wallet::wallet_api& x, const params& p) {
 #include <us/wallet/daemon_local_api.h>
 #include <us/wallet/daemon_rpc_api.h>
 
-void run_local(string command, shell_args& args, const params& p) {
+bool run_local(string command, shell_args& args, const params& p) {
+    bool ret=true;
 	auto homedir=p.homedir+"/wallet";
 	auto gov_homedir=p.homedir+"/wallet";
 
@@ -346,8 +350,14 @@ void run_local(string command, shell_args& args, const params& p) {
     	tx(wapi,args,p,os);
 	}
 	else if (command=="priv_key") {
-		auto privkey=args.next<crypto::ec::keys::priv_t>();
-		wapi.priv_key(privkey,os);
+        if (!p.offline) {
+            cerr << "Feature not available in RPC mode." << endl;
+            ret=false;
+        }
+        else {
+    		auto privkey=args.next<crypto::ec::keys::priv_t>();
+	    	dynamic_cast<us::wallet::daemon_local_api&>(wapi).priv_key(privkey,os);
+        }
 	}
 	else if (command=="address") {
 		command=args.next<string>();
@@ -360,6 +370,7 @@ void run_local(string command, shell_args& args, const params& p) {
 		}
 		else {
 			help(p);
+            ret=false;
 		}
 	}
 	else if (command=="list") {
@@ -369,11 +380,28 @@ void run_local(string command, shell_args& args, const params& p) {
 		wapi.balance(args.next<bool>(false),os);
 	}
 	else if (command=="gen_keys") {
-		wapi.gen_keys(os);
+        if (!p.offline) {
+            cerr << "Feature not available in RPC mode." << endl;
+            return false;
+        }
+        else {
+    		dynamic_cast<us::wallet::daemon_local_api&>(wapi).gen_keys(os);
+        }
+	}
+	else if (command=="mine_public_key") {
+        if (!p.offline) {
+            cerr << "Feature not available in RPC mode." << endl;
+            ret=false;
+        }
+        else {
+		    string pattern=args.next<string>();
+            dynamic_cast<us::wallet::daemon_local_api&>(wapi).mine_public_key(pattern,os);
+        }
 	}
     else if (command=="device_id") {
         if (p.offline) {
-            cout << "Not such a thing for a local wallet";
+            cerr << "Not such a thing for a local wallet";
+            ret=false;
         }
         else {
             auto f=cfg_id::load(homedir+"/rpc_client");
@@ -384,6 +412,7 @@ void run_local(string command, shell_args& args, const params& p) {
 		pub_t pub=args.next<pub_t>();
         if (!pub.valid) {
             os << "Error: Invalid public key";
+            ret=false;
         }
         else {
     	    auto name=args.next<string>();
@@ -403,9 +432,11 @@ void run_local(string command, shell_args& args, const params& p) {
 	else {
         cerr << "Invalid command " << command << endl;
 		help(p);
+        ret=false;
 	}
 	delete papi;
     cout << os.str() << endl;
+    return ret;    
 }
 
 /// \brief  Main function
@@ -437,7 +468,7 @@ int main(int argc, char** argv) {
         run_daemon(p);
         return 0;
     }
-    run_local(command,args,p);
+    if (!run_local(command,args,p)) return 1;
     return 0;
 }
 

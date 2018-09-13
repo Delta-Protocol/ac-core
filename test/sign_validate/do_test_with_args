@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#read -r priv_a public_a <<< $(LD_LIBRARY_PATH=../../gov:/usr/lib ../helpers/generate_keys_cpp) 
+#read -r priv_b public_b <<< $(LD_LIBRARY_PATH=../../gov:/usr/lib ../helpers/generate_keys_cpp) 
+
+priv_a="J59TE3YxbyT9wj1N55UZzQq1XT7GABqyC9KFVgNGqyng"
+public_a="24dfJnJGyVzcx4o5uti5WwSuqmhbDy2iymky9LpJRXs9m"
+
+echo "PRIVATE/PUB KEY: $priv_a / $public_a"
+
+function test {
+
+
+MESSAGE=$1
+echo "msg is: $MESSAGE"
+
+echo "=========C++"
+csig="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $priv_a "sign" "$MESSAGE")"
+echo "created signature: $csig"
+echo
+echo "Verifying signature C++"
+ver="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $public_a "verify" "$MESSAGE" "$csig")"
+echo "$ver"
+
+echo
+echo "=========JAVA"
+jsig="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-sdk.jar" Main $priv_a sign "$MESSAGE")"
+echo "created signature: $jsig"
+echo
+echo "Verifying signature"
+ver="$(java -cp ".:../../sdk/java/libs/*:../../sdk/java/us-sdk.jar" Main $public_a "verify" "$MESSAGE" "$jsig")"
+echo $ver
+
+echo "=========C++ + JAVA"
+echo
+echo "Verifying signature made in C++ with Java"
+ver="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $public_a "verify" "$MESSAGE" "$csig")"
+echo "$ver"
+
+echo "=========JAVA + C++"
+echo
+echo "Verifying signature made in Java with C++"
+ver="$(LD_LIBRARY_PATH=../../gov:/usr/lib ./test_cpp $public_a "verify" "$MESSAGE" "$jsig")"
+echo "$ver"
+
+
+#if [ "$verified" == "true" ] && [ "$verified2" == "1" ]
+#then
+#    echo "PASSED"
+#else
+#    echo "FAILED"
+#fi
+
+}
+
+
+test "abcdef"

@@ -19,7 +19,7 @@ struct daemon:socket::daemon {
 	using datagram=socket::datagram;
 
 	daemon();
-    daemon(uint16_t port, uint16_t edges);
+        daemon(uint16_t port, uint16_t edges);
 	virtual ~daemon();
 
 	virtual socket::client* create_client(int sock) override;
@@ -27,11 +27,9 @@ struct daemon:socket::daemon {
 
 	virtual bool process_work(socket::peer_t *p, datagram*d) override;
 
-    virtual const keys& get_keys() const=0;
+        virtual const keys& get_keys() const=0;
 
-	//virtual void report_in_service(vector<peer::peer_t*>&) override;
-
-	//keys id; //my id {priv,pub} keys, pub exposed to network
+        bool is_duplicate(const pub_t&) const;
 };
 
 

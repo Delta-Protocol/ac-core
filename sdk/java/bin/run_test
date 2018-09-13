@@ -1,0 +1,4 @@
+#!/bin/sh
+
+java -ea -cp us-sdk-test.jar:libs/*:us-sdk.jar:. main
+

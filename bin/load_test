@@ -1,0 +1,5 @@
+#!/bin/sh
+
+while [ true ]; do
+    us-wallet -local transfer gU5xx5Cvbm7NpPKz7TvdvBQmzXa 1
+done

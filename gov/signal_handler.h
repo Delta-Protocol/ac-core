@@ -18,7 +18,7 @@ struct signal_handler {
 	};
 
 	void sleep_for(const chrono::steady_clock::duration&);
-	void sleep_until(const chrono::system_clock::time_point&);
+	void sleep_until(const chrono::steady_clock::time_point&);
 
 	void finish();
 

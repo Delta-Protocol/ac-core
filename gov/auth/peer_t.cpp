@@ -10,20 +10,20 @@ c::peer_t(int sock):b(sock) {
 
 c::~peer_t() {
 }
- 
+
+#include <us/gov/engine/daemon.h>
+
 void c::verification_completed() {
-    b::verification_completed();
-    if (!verification_is_fine()) {
-        disconnect();
+    //b::verification_completed();
+    if (unlikely(!verification_is_fine())) {
         return;
     }
-   	if (!authorize(pubkey)) {
-        disconnect();
+   	if (unlikely(!authorize(pubkey))) {
         return;
    	}
    	stage=authorized;
 }
 void c::dump(ostream& os) const {
-    os << this << ' ' << pubkey << "- " << stagestr[stage] << endl;
+    os << "auth: " << this << ' ' << pubkey << " " << stagestr[stage] << endl;
 }
 

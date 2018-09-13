@@ -19,15 +19,15 @@ c::~daemon() {
 }
 
 socket::client* c::create_client(int sock) {
-    auto p=new peer_t(sock);
-    p->parent=this;
-    return p;
+    return new peer_t(sock);
+//    p->parent=this;
+//    return p;
 }
 
 bool c::process_work(socket::peer_t *p, datagram*d) {
-    if (b::process_work(p,d)) return true;
-//cout << "I should proc this" << endl;
-    return static_cast<peer_t*>(p)->process_work(d);
+    if (static_cast<peer_t*>(p)->process_work(d)) return true;
+    return b::process_work(p,d);
+//    return static_cast<peer_t*>(p)->process_work(d);
 }
 
 void c::dump(ostream& os) const {
@@ -39,6 +39,19 @@ void c::dump(ostream& os) const {
 	for (auto& i:v) {
 		i->dump(os);
 	}
+}
+
+bool c::is_duplicate(const pub_t& p) const {
+    vector<socket::client*> a=active();
+    int count = 0;
+    for (auto&i:a) {
+        if (p==static_cast<peer_t*>(i)->pubkey) {
+            count++;
+            if(count > 1)
+                return true;
+        }
+    }
+    return false;
 }
 
 

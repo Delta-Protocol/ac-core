@@ -16,15 +16,37 @@ c::peer_t(int sock): b(sock) {
 
 c::~peer_t() {
 }
-
+/*
 void c::ready() {
     parent->clients.read_sockets();
 //	parent->_ready.store(true);
 //	parent->cv.notify_all();
 }
+*/
+//string c::connect(const string& host, uint16_t port, bool block) {
+//    return b::connect(host,port,block);
+//}
 
-void c::on_connect() {
-	if (parent) parent->incorporate(this);
+void c::on_detach() {
+//cout << this_thread::get_id() << ": on_detach -spinlock" << endl;
+    while(!program::_this.terminated) { 
+//            cout << "."; cout.flush();
+            this_thread::yield(); //spinlock
+            if (!busy.load()) break;
+    }
+//cout << this_thread::get_id() << ": parent=0 & ::close" << endl;
+    parent=0;  
+    disconnect();
+}
+
+
+void c::disconnect() {
+    if (parent) { //managed client
+        parent->detach(this);
+    }
+    else {
+        b::disconnect();
+    }
 }
 
 bool c::process_work(datagram* d) { //executed by thread from pool 

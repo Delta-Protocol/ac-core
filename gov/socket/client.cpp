@@ -33,6 +33,10 @@ c::client(int sock):sock(sock) {
    if (sock!=0) addr=address();
 }
 
+c::~client() {
+    disconnect();
+}
+
 #ifdef SIM
 
 #else
@@ -56,22 +60,24 @@ string c::address() const {
 #endif 
 
 string c::connect(const string& host, uint16_t port, bool block) {
-	assert(sock==0); //disconnect();
 	lock_guard<mutex> lock(mx);
+	assert(sock==0); //disconnect();
 	string r=init_sock(host, port, block);
 	if (!r.empty()) {
         return r;
     }
 	addr=host;
-    on_connect();
 	return "";
 }
+
 #include <us/gov/stacktrace.h>
+
 void c::disconnect() {
+//cout << "disconnect fd " << sock << endl;
 	lock_guard<mutex> lock(mx);
 	if (unlikely(sock==0)) return;
-	close(sock);
-	sock=0;
+	::close(sock);
+	sock=0; //need the socket id even thout we cut connection
     //print_stacktrace();
 }
 
@@ -136,7 +142,7 @@ string c::init_sock(const string& host, uint16_t port, bool block) {
         return os.str();
 	}
     struct timeval tv;
-    tv.tv_sec = 3; //timeout_seconds;
+    tv.tv_sec = 3; //0; //timeout_seconds; TODO
     tv.tv_usec = 0;
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 	return "";
@@ -167,8 +173,17 @@ pair<string,datagram*> c::send_recv(datagram* d) {
 #ifdef DEBUG
 #include <us/gov/stacktrace.h>
 #include <fstream>
+#include <chrono>
+#include <sstream>
 
-ofstream _log("/tmp/us_gov_socket_io_log");
+string logfn() {
+ostringstream os;
+os << "/tmp/us_gov_socket_io_" << getpid();
+//cerr << "DEBUG: protocol log at " << os.str() << endl;
+return os.str();
+}
+
+ofstream _log(logfn());
 
 void interceptor(const datagram& d) {
 typedef unordered_set<uint16_t> dt;
@@ -190,6 +205,7 @@ if (++i%100==0) { //reload file
 }
 
 void dump_d(string prefix, const datagram& d, const string& addr) {
+_log << chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now().time_since_epoch()).count() << " ";
 _log << "SOCKET: " << prefix << " datagram " << d.service << " " << d.service_str() << " of size " << d.size() << " bytes. HASH " << d.compute_hash() << " to " << addr << endl;
 _log << "      : " << d.parse_string() << endl;
 }
@@ -234,11 +250,11 @@ pair<string,datagram*> c::recv() { //caller owns the returning object
             disconnect();
             break;
         }
-        if (likely(r.second->completed())) {
+        if (r.second->completed()) {
    #ifdef DEBUG
-   dump_d("recv", *r.second, addr); 
-//   interceptor(*r.second);
+           dump_d("recv", *r.second, addr); 
    #endif
+//   interceptor(*r.second);
             break;
         }
     }
@@ -287,6 +303,6 @@ string c::send(const datagram& d) {
 }
 
 void c::dump(ostream& os) const {
-	os << "memory address: " << this << "; socket: " << sock << "; inet address: " << addr;
+	os << "socket client: mem addr: " << this << " fd: " << sock << "; inet addr: " << addr << endl;
 }
 
