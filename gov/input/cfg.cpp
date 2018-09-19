@@ -26,7 +26,7 @@ c c::load(const string& home) {
     //keys
     auto x=b::load(home); 
 
-       string blocks_dir=abs_file(home,"blocks");
+       string blocks_dir=abs_file(home,"dfs");
 //        cout << "making sure dir for blocks exists" << endl;
 
         if (!ensure_dir(blocks_dir)) {

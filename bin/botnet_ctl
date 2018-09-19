@@ -177,7 +177,7 @@ fi
 if [ "_$cmd" == "_head" ]; then
     for n in "${nodes[@]}"; do
         echo -n "$n - "
-        ssh $n "cat ~/.us/gov/blocks/head"
+        ssh $n "cat ~/.us/gov/head"
     done
 fi
 if [ "_$cmd" == "_ping" ]; then  #uses us-wallet rpc to send a ping

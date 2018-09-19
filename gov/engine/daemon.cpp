@@ -13,11 +13,7 @@ void c::constructor() {
 	add(auth_app);
 }
 
-c::daemon(const keys& k): rng(chrono::steady_clock::now().time_since_epoch().count()), peerd(this), sysops(*this), syncd(this), id(k) { //dependency order
-	constructor();
-}
-
-c::daemon(const keys& k, const string& home, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::steady_clock::now().time_since_epoch().count()), peerd(port, edges, this, seed_nodes), home(home), syncd(this), sysops(*this), id(k) { //dependency order
+c::daemon(const keys& k, const string& home, uint16_t port, uint8_t edges, const vector<string>& seed_nodes): rng(chrono::steady_clock::now().time_since_epoch().count()), peerd(port, edges, this, seed_nodes, home), home(home), syncd(this), sysops(*this), id(k) { //dependency order
 	constructor();
 }
 
@@ -39,7 +35,7 @@ bool c::patch_db(const vector<diff::hash_t>& patches) { //this is syncd thread
 cout << "Applying " << patches.size() << " patches" << endl;
 	for (auto i=patches.rbegin(); i!=patches.rend(); ++i) {
 		const diff::hash_t& hash=*i;
-		string filename=blocksdir()+"/"+hash.to_b58();
+		string filename=dfs().homedir+"/"+hash.to_b58();
 		ifstream is(filename);
 		if (!is.good()) {
 			cerr << "corrupt filename 1 " << filename << endl;
@@ -157,12 +153,12 @@ void c::stage4(cycle_t& cycle) {
 }
 
 void c::load_head() {
-        string filename=blocksdir()+"/head";
-        ifstream is(filename);
-        diff::hash_t head(0);
-        if (is.good()) is >> head;
-        syncd.update(head,get_last_block_imported());
-        app::chaininfo.set_tip(head);
+    string filename=home+"/head";
+    ifstream is(filename);
+    diff::hash_t head(0);
+    if (is.good()) is >> head;
+    syncd.update(head,get_last_block_imported());
+    app::chaininfo.set_tip(head);
 }
 
 void c::evidence_processor() {
@@ -264,15 +260,11 @@ void c::run() {
 #include <us/gov/crypto/base58.h>
 #include <fstream>
 
-string c::blocksdir() const {
-    return home+"/blocks";
-}
-
 #include <us/gov/stacktrace.h>
 
 void c::save(const diff& bl) const {
 	ostringstream fn;
-	fn << blocksdir()+"/"+bl.hash().to_b58();
+	fn << dfs().homedir+"/"+bl.hash().to_b58();
 	{
 	ofstream os(fn.str());
 	bl.to_stream(os);
@@ -299,10 +291,10 @@ cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << fn.str()
 	if (b->hash()!=bl.hash()) {
 		cout << b->hash() << " " << bl.hash() << endl;
 		{
-		ofstream os(blocksdir()+"/"+bl.hash().to_b58()+"_");
+		ofstream os(dfs().homedir+"/"+bl.hash().to_b58()+"_");
 		b->to_stream(os);
 		}
-		cout << "ERROR B " << (blocksdir()+"/"+bl.hash().to_b58()+"_") << endl;
+		cout << "ERROR B " << (dfs().homedir+"/"+bl.hash().to_b58()+"_") << endl;
 		print_stacktrace();
 		assert(false);
 	}
@@ -328,20 +320,6 @@ peer_t* c::query_block(const diff::hash_t& hash) {
 	return n;
 }
 
-string c::load_block(const string& block_hash_b58) const {
-	ifstream is(blocksdir()+"/"+block_hash_b58);
-	if (!is.good()) return "";
-	return string((istreambuf_iterator<char>(is)), (istreambuf_iterator<char>()));
-}
-
-
-string c::load_block(const diff::hash_t& hash) const {
-	ifstream is(blocksdir()+"/"+hash.to_b58());
-	if (!is.good()) return "";
-	return string((istreambuf_iterator<char>(is)), (istreambuf_iterator<char>()));
-}
-
-
 #include <sys/stat.h>
 
 bool c::file_exists(const string& f) {
@@ -352,7 +330,7 @@ bool c::file_exists(const string& f) {
 
 
 bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
-	string filename=blocksdir()+"/"+h.to_b58();
+	string filename=dfs().homedir+"/"+h.to_b58();
 	if (!file_exists(filename)) return false;
 	ifstream is(filename);
 	if (!is.good()) return false;
@@ -506,43 +484,6 @@ void c::process_incoming_local_deltas(peer_t *c, datagram*d) {
 
 }
 
-void c::process_query_block(peer_t *c, datagram*d) {
-	auto hash_b58=d->parse_string();
-//cout << "Received a petition of block " << hash_b58 << " from " << c->pubkey << endl;
-	delete d;
-	string content=load_block(hash_b58);
-	if (content.empty()) {
-		cout << "block not found in HD, ignoring." << endl;
-		return;
-	}
-	c->send(new datagram(protocol::block,content));
-}
-
-void c::process_block(peer_t *c, datagram*d) {
-	auto content=d->parse_string();
-	delete d;
-	istringstream is(content);
-	diff* b=diff::from_stream(is);
-	if (unlikely(b==0)) return;
-	cout << "Received content of block " << b->hash() << " from " << c->addr << endl;
-
-	string filename=blocksdir()+"/"+b->hash().to_b58();
-	if (!file_exists(filename)) { //TODO write under different name and then rename atomically
-//		cout << "Saving it to disk " << filename << endl;
-		{
-		ofstream os(filename);
-		os << content;
-		}
-//		cout << "waking up sync demon after saving the block" << endl;
-//		syncdemon.update();
-		syncd.signal_file_arrived();
-	}
-//	else {
-//		cout << "File exists, ignoring. " << filename << endl;
-//	}
-	delete b;
-}
-
 void c::flush_evidences_on_hold() {
     unique_lock<mutex> lock(evidences_on_hold.mx);
     auto i=evidences_on_hold.begin();
@@ -653,14 +594,6 @@ bool c::process_work(peer_t *c, datagram*d) {
 	}
 */
 	switch(d->service) {
-		case protocol::query_block: {
-			process_query_block(c,d);
-			return true;
-		}
-		case protocol::block: {
-			process_block(c,d);
-			return true;
-		}
 		case protocol::vote_tip: {
 			process_vote_tip(c,d);
 			return true;
@@ -688,7 +621,7 @@ bool c::process_work(peer_t *c, datagram*d) {
 
 void c::set_last_block_imported_(const diff::hash_t& h) {
 	last_block_imported=h;
-	string filename=blocksdir()+"/head";
+	string filename=home+"/head";
 	ofstream os(filename);
 	os << last_block_imported << endl;
 }

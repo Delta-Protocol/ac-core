@@ -168,6 +168,15 @@ c::hash_t c::compute_hash() const {
 	hasher.finalize(v);
 	return move(v);
 }
+
+c::hash_t c::compute_payload_hash() const {
+    hasher_t hasher;
+    hasher.write(reinterpret_cast<const unsigned char*>(&*(begin()+h)),size());
+    hasher_t::value_type v;
+    hasher.finalize(v);
+    return move(v);
+}
+
 /*
 vector<string> c::parse_strings() const {
 	vector<string> ans;

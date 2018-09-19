@@ -6,10 +6,10 @@ using namespace std;
 
 typedef us::gov::engine::networking c;
 
-c::networking(engine::daemon* parent): parent(parent) {
+c::networking(engine::daemon* parent, const string& home): b(home), parent(parent) {
 }
 
-c::networking(uint16_t port, uint16_t edges, engine::daemon* parent, const vector<string>& seed_nodes): b(port, edges), parent(parent), seed_nodes(seed_nodes) {
+c::networking(uint16_t port, uint16_t edges, engine::daemon* parent, const vector<string>& seed_nodes, const string& home): b(port, edges, home), parent(parent), seed_nodes(seed_nodes) {
 
 }
 

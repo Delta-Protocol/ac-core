@@ -18,8 +18,8 @@ using namespace std;
 		struct networking:dfs::daemon {
 			typedef dfs::daemon b;
 			using b::keys;
-			networking(engine::daemon* parent);
-			networking(uint16_t port, uint16_t edges, engine::daemon* parent, const vector<string>& seed_nodes);
+			networking(engine::daemon* parent, const string& home);
+			networking(uint16_t port, uint16_t edges, engine::daemon* parent, const vector<string>& seed_nodes, const string& home);
 			virtual bool process_work(socket::peer_t *c, datagram*d) override;
 			virtual bool process_evidence(datagram*d) override;
 			bool process_work_sysop(peer::peer_t *c, datagram*d);

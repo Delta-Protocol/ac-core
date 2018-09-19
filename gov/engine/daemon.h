@@ -36,7 +36,6 @@ namespace engine {
 	struct daemon {
 		typedef crypto::ec::keys keys;
 
-		daemon(const keys&);
 		daemon(const keys&, const string& home, uint16_t port, uint8_t num_edges,const vector<string>& seed_nodes);
 		daemon(const daemon&)=delete;
 		daemon(daemon&&)=delete;
@@ -48,9 +47,10 @@ namespace engine {
 
 		static bool file_exists(const string& f);
 
-        string blocksdir() const;
-
         void eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle);
+
+        inline const dfs::daemon& dfs() const { return peerd; }
+        inline dfs::daemon& dfs() { return peerd; }
 
 		bool process_work(peer_t *c, datagram*d);
 		bool process_app_query(peer_t *c, datagram*d);
@@ -107,8 +107,6 @@ namespace engine {
 		void vote_tip(const diff& b);
 		void dump(ostream& os) const;
 		void list_apps(ostream& os) const;
-		string load_block(const diff::hash_t& hash) const;
-		string load_block(const string& block_hash_b58) const;
         void evidence_processor();
 
 		bool need_sync(const string& target) const;

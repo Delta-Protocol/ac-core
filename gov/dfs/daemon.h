@@ -14,22 +14,23 @@ namespace dfs { //distributed file system
 	struct daemon:relay::daemon {
 		typedef relay::daemon b;
 
-		daemon() {}
-		daemon(uint16_t port, uint16_t edges):b(port,edges) {}
+		daemon(const string& home): homedir(home+"/dfs") {}
+		daemon(uint16_t port, uint16_t edges, const string& home): b(port,edges), homedir(home+"/dfs") {}
 		virtual ~daemon() {}
 
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;
-		void receive_file(peer_t* c, datagram* d);
-
         void dump(ostream&) const;
 
-		void send_file(peer_t* c, datagram* request);
 		void save(const string& hash, const vector<uint8_t>& data, int propagate);  //-1 nopes, 0=all peers; n num of peers
-
 		string load(const string& hash);
+
+		void request(peer_t *c, datagram*d);
+		void response(peer_t *c, datagram*d);
 
 		static string resolve_filename(const string& filename);
 
+		string homedir;
+		unordered_map<string, condition_variable*> file_cv;
 	};
 
 }
