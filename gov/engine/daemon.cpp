@@ -35,7 +35,7 @@ bool c::patch_db(const vector<diff::hash_t>& patches) { //this is syncd thread
 cout << "Applying " << patches.size() << " patches" << endl;
 	for (auto i=patches.rbegin(); i!=patches.rend(); ++i) {
 		const diff::hash_t& hash=*i;
-		string filename=dfs().homedir+"/"+hash.to_b58();
+		string filename=dfs().get_path_from(hash.to_b58());
 		ifstream is(filename);
 		if (!is.good()) {
 			cerr << "corrupt filename 1 " << filename << endl;
@@ -264,7 +264,7 @@ void c::run() {
 
 void c::save(const diff& bl) const {
 	ostringstream fn;
-	fn << dfs().homedir+"/"+bl.hash().to_b58();
+	fn << dfs().get_path_from(bl.hash().to_b58(),true);
 	{
 	ofstream os(fn.str());
 	bl.to_stream(os);
@@ -291,10 +291,10 @@ cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << fn.str()
 	if (b->hash()!=bl.hash()) {
 		cout << b->hash() << " " << bl.hash() << endl;
 		{
-		ofstream os(dfs().homedir+"/"+bl.hash().to_b58()+"_");
+		ofstream os(dfs().get_path_from(bl.hash().to_b58(),true)+"_");
 		b->to_stream(os);
 		}
-		cout << "ERROR B " << (dfs().homedir+"/"+bl.hash().to_b58()+"_") << endl;
+		cout << "ERROR B " << (dfs().get_path_from(bl.hash().to_b58())+"_") << endl;
 		print_stacktrace();
 		assert(false);
 	}
@@ -330,7 +330,7 @@ bool c::file_exists(const string& f) {
 
 
 bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
-	string filename=dfs().homedir+"/"+h.to_b58();
+	string filename=dfs().get_path_from(h.to_b58());
 	if (!file_exists(filename)) return false;
 	ifstream is(filename);
 	if (!is.good()) return false;

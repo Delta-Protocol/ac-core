@@ -45,7 +45,7 @@ void c::run() {
 				}
 				else {
 					cout << "SYNCD: querying file for " << cu << endl;
-					d->dfs().file_cv.emplace(cu.to_b58(),&cv);
+					d->dfs().load(cu.to_b58(),&cv);
 					if (likely(d->query_block(cu)!=0)) { //the petition was delivered
 			                    if (last_queryed!=cu) {
                         			last_queryed=cu;

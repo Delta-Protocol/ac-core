@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 
+using namespace std::chrono;
 namespace fs = std::filesystem;
 
 using namespace us::gov;
@@ -25,7 +26,7 @@ void c::request(peer_t *c, datagram*d) {
     auto hash_b58=d->parse_string();
     delete d;
 
-    ifstream is(homedir+"/"+hash_b58);
+    ifstream is(get_path_from(hash_b58));
     if (!is.good()) {
         cout << "block not found in HD, ignoring." << endl;
         return;
@@ -40,7 +41,7 @@ void c::response(peer_t *c, datagram*d) {
     delete d;
 
     auto hash_b58 = d->compute_payload_hash().to_b58();
-    string filename=homedir+"/"+hash_b58;
+    string filename=get_path_from(hash_b58,true);
     if (unlikely(!fs::exists(filename))) {
         {
             ofstream os(filename);
@@ -49,10 +50,47 @@ void c::response(peer_t *c, datagram*d) {
 
         auto it = file_cv.find(hash_b58);
         if(unlikely(it != end(file_cv))) {
-            it->second->notify_all();
+            it->second.first->notify_all();
             file_cv.erase(it);
         }
     }
+
+    purge_file_cv();
+}
+
+void c::load(const string& hash_b58, condition_variable* pcv) {
+    assert(pcv != 0);
+    auto now = system_clock::now();
+    file_cv.emplace(hash_b58, make_pair(pcv,now));
+}
+
+void c::purge_file_cv() {
+    auto it = begin(file_cv);
+    auto now = system_clock::now();
+    while(it != end(file_cv)) {
+        auto elapsed = duration_cast<seconds>(now-it->second.second);
+        if(elapsed>60s) {
+            it = file_cv.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
+string c::get_path_from(const string& hash_b58, bool create_dirs) const {
+    auto file_path=homedir +"/"+resolve_filename(hash_b58);
+
+    if(create_dirs) {
+        fs::path dir(file_path);
+
+        auto p=dir.parent_path();
+        if(!(fs::exists(p))) {
+            if(!fs::create_directories(p))
+                return "";
+        }
+    }
+
+    return file_path;
 }
 
 void c::save(const string& hash, const vector<uint8_t>& data, int propagate) { //-1 nopes, 0=all peers; n num of peers
