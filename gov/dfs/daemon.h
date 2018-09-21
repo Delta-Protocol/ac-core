@@ -23,17 +23,29 @@ namespace dfs { //distributed file system
 
 		void save(const string& hash, const vector<uint8_t>& data, int propagate);  //-1 nopes, 0=all peers; n num of peers
 		string load(const string& hash);
-		void load(const string& hash_b58, condition_variable* cv);
 
 		void request(peer_t *c, datagram*d);
 		void response(peer_t *c, datagram*d);
 
-		void purge_file_cv();
 		static string resolve_filename(const string& filename);
 		string get_path_from(const string& hash_b58, bool create_dirs=false) const;
 
 		string homedir;
-		unordered_map<string, pair<condition_variable*,chrono::system_clock::time_point>> file_cv;
+
+		struct file_cv_t:unordered_map<string,pair<condition_variable*,chrono::system_clock::time_point>> {
+		    file_cv_t() {
+		    }
+
+		    ~file_cv_t() {
+		    }
+
+		    void add(const string& hash_b58, condition_variable* pcv);
+		    void notify_and_erase(const string& hash_b58);
+		    void purge();
+
+		    mutex mx;
+		};
+		file_cv_t file_cv;
 	};
 
 }

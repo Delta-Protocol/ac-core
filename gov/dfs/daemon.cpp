@@ -48,49 +48,40 @@ void c::response(peer_t *c, datagram*d) {
             os << content;
         }
 
-        auto it = file_cv.find(hash_b58);
-        if(unlikely(it != end(file_cv))) {
-            it->second.first->notify_all();
-            file_cv.erase(it);
-        }
+        file_cv.notify_and_erase(hash_b58);
     }
 
-    purge_file_cv();
+    file_cv.purge();
 }
 
-void c::load(const string& hash_b58, condition_variable* pcv) {
+void c::file_cv_t::notify_and_erase(const string& hash_b58) {
+    lock_guard<mutex> lock(mx);
+    auto it = this->find(hash_b58);
+    if(unlikely(it != this->end())) {
+        it->second.first->notify_all();
+        this->erase(it);
+    }
+}
+
+void c::file_cv_t::add(const string& hash_b58, condition_variable* pcv) {
+    lock_guard<mutex> lock(mx);
     assert(pcv != 0);
     auto now = system_clock::now();
-    file_cv.emplace(hash_b58, make_pair(pcv,now));
+    this->emplace(hash_b58, make_pair(pcv,now));
 }
 
-void c::purge_file_cv() {
-    auto it = begin(file_cv);
+void c::file_cv_t::purge() {
+    lock_guard<mutex> lock(mx);
+    auto it = this->begin();
     auto now = system_clock::now();
-    while(it != end(file_cv)) {
+    while(it != this->end()) {
         auto elapsed = duration_cast<seconds>(now-it->second.second);
         if(elapsed>60s) {
-            it = file_cv.erase(it);
+            it = this->erase(it);
         } else {
             it++;
         }
     }
-}
-
-string c::get_path_from(const string& hash_b58, bool create_dirs) const {
-    auto file_path=homedir +"/"+resolve_filename(hash_b58);
-
-    if(create_dirs) {
-        fs::path dir(file_path);
-
-        auto p=dir.parent_path();
-        if(!(fs::exists(p))) {
-            if(!fs::create_directories(p))
-                return "";
-        }
-    }
-
-    return file_path;
 }
 
 void c::save(const string& hash, const vector<uint8_t>& data, int propagate) { //-1 nopes, 0=all peers; n num of peers
@@ -137,6 +128,22 @@ string c::resolve_filename(const string& filename) {
 		res.end()-1;//delete the last slash '/'
 	}
 	return &res[1];
+}
+
+string c::get_path_from(const string& hash_b58, bool create_dirs) const {
+    auto file_path=homedir +"/"+resolve_filename(hash_b58);
+
+    if(create_dirs) {
+        fs::path dir(file_path);
+
+        auto p=dir.parent_path();
+        if(!(fs::exists(p))) {
+            if(!fs::create_directories(p))
+                return "";
+        }
+    }
+
+    return file_path;
 }
 
 void c::dump(ostream&os) const {
