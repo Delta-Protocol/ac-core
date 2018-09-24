@@ -97,18 +97,17 @@ assert(false);
 */
 }
 
-string c::load(const string& hash) {
-assert(false);
-/*
-	cout << "dfs: load file " << hash << endl;
-	string filename;
-	bool found=false;
-	if (found) return filename;
-	cout << "dfs: not found locally" << endl;
-
-	datagram* d=new datagram(protocol::file_request,hash);
-	send(1,0,d);
-*/
+string c::load(const string& hash_b58, condition_variable * cv) {
+    auto filename=homedir +"/"+resolve_filename(hash_b58);
+    if(fs::exists(filename)) {
+        return filename;
+    } else {
+        file_cv.add(hash_b58,cv);
+        auto n=this->get_random_edge();
+        if (unlikely(n==0)) return "";
+        auto r=n->send(new datagram(protocol::file_request,hash_b58));
+        return "";
+    }
 }
 
 string c::resolve_filename(const string& filename) {
@@ -118,7 +117,7 @@ string c::resolve_filename(const string& filename) {
 	int max_length = filename.size()/2 +filename.size(); //final string length with slashes
 	res.reserve(max_length);
     for(int i=0; i < filename.size(); i++){// slash"/" every 2 char
-        if((i&1) == 0){ 
+        if((i&1) == 0){
 			res+="/";
         }
 		res+=filename[i];
@@ -138,8 +137,7 @@ string c::get_path_from(const string& hash_b58, bool create_dirs) const {
 
         auto p=dir.parent_path();
         if(!(fs::exists(p))) {
-            if(!fs::create_directories(p))
-                return "";
+            assert(fs::create_directories(p));
         }
     }
 

@@ -36,8 +36,10 @@ void c::run() {
 				}
 				if (cu==he) patches.clear();
 //				cout << "SYNCD: head:" << he << " cur: " << cu << " tail: " << ta << " ;" << patches.size() << " patches" << endl;
+
 				hash_t prev;
-				if (d->get_prev(cu,prev)) { //file exists, read it
+				auto filename=d->dfs().load(cu.to_b58(),&cv);
+				if (likely(d->get_prev(filename,prev))) { //file exists, read it
 //					cout << "SYNCD: found file for " << cu << endl;
 					patches.push_back(cu);
 					lock_guard<mutex> lock(mx);
@@ -45,24 +47,23 @@ void c::run() {
 				}
 				else {
 					cout << "SYNCD: querying file for " << cu << endl;
-					d->dfs().file_cv.add(cu.to_b58(),&cv);
-					if (likely(d->query_block(cu)!=0)) { //the petition was delivered
-			                    if (last_queryed!=cu) {
-                        			last_queryed=cu;
-			                        query_reps=100;
-			                    }
-			                    else {
-			                        cout << "countown to clearing " << query_reps << endl;
-			                        if (--query_reps==0) { // TODO we are in a deadlock
-			                            {
-			            		    lock_guard<mutex> lock(mx);
-			                            head=cur=tail=0;
-			                            }
-			                            cout << "triggering db reset" << endl;
-			                            d->clear();
-			                        }
-			                    }
-					}
+					//the petition was delivered
+                    if (last_queryed!=cu) {
+                        last_queryed=cu;
+                        query_reps=100;
+                    }
+                    else {
+                        cout << "countown to clearing " << query_reps << endl;
+                        if (--query_reps==0) { // TODO we are in a deadlock
+                            {
+                        lock_guard<mutex> lock(mx);
+                            head=cur=tail=0;
+                            }
+                            cout << "triggering db reset" << endl;
+                            d->clear();
+                        }
+                    }
+
                     {
                        unique_lock<mutex> lock(mx_wait4file);
                        if (!file_arrived) cv.wait_for(lock, 3s, [&]{ return file_arrived || program::_this.terminated; });

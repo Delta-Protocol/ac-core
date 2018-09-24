@@ -22,6 +22,7 @@ namespace dfs { //distributed file system
         void dump(ostream&) const;
 
 		void save(const string& hash, const vector<uint8_t>& data, int propagate);  //-1 nopes, 0=all peers; n num of peers
+		string load(const string& hash, condition_variable * cv);
 		string load(const string& hash);
 
 		void request(peer_t *c, datagram*d);
@@ -29,6 +30,7 @@ namespace dfs { //distributed file system
 
 		static string resolve_filename(const string& filename);
 		string get_path_from(const string& hash_b58, bool create_dirs=false) const;
+		virtual peer_t* get_random_edge() const = 0;
 
 		string homedir;
 

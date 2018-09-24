@@ -2,6 +2,7 @@
 #include "daemon.h"
 
 using namespace us::gov::engine;
+using namespace us::gov;
 using namespace std;
 
 typedef us::gov::engine::networking c;
@@ -60,6 +61,9 @@ string c::get_random_peer(const unordered_set<string>& exclude_addrs) const { //
 	}
 //	if (!n.empty()) cout << "Random node at " << n << endl;
 	return move(n);
+}
+dfs::peer_t* c::get_random_edge() const {
+    return parent->get_random_edge();
 }
 
 bool c::process_evidence(datagram*d) {

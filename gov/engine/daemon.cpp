@@ -307,7 +307,7 @@ string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
 //cout << "get rnd node from authapp " << s << endl;
 	return s;
 }
-
+/*
 peer_t* c::query_block(const diff::hash_t& hash) {
 	auto n=get_random_edge();
 	if (unlikely(n==0)) return n;
@@ -319,7 +319,7 @@ peer_t* c::query_block(const diff::hash_t& hash) {
 	}
 	return n;
 }
-
+*/
 #include <sys/stat.h>
 
 bool c::file_exists(const string& f) {
@@ -329,9 +329,8 @@ bool c::file_exists(const string& f) {
 }
 
 
-bool c::get_prev(const diff::hash_t& h, diff::hash_t& prev) const {
-	string filename=dfs().get_path_from(h.to_b58());
-	if (!file_exists(filename)) return false;
+bool c::get_prev(const string& filename, diff::hash_t& prev) const {
+	if (unlikely(filename.empty())) return false;
 	ifstream is(filename);
 	if (!is.good()) return false;
 	is >> prev;

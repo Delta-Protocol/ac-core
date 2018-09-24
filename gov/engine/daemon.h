@@ -55,8 +55,6 @@ namespace engine {
 		bool process_work(peer_t *c, datagram*d);
 		bool process_app_query(peer_t *c, datagram*d);
 		bool process_evidence(datagram*d);
-		void process_query_block(peer_t *c, datagram*d);
-		void process_block(peer_t *c, datagram*d);
 		void process_vote_tip(peer_t *c, datagram*d);
 
 		void relay(int num, peer_t* exclude, datagram* d) {
@@ -115,7 +113,7 @@ namespace engine {
 		void process_incoming_local_deltas(peer_t *c, datagram*d);
 
 		bool sysop_allowed{false};
-		bool get_prev(const diff::hash_t& h, diff::hash_t& prev) const;
+		bool get_prev(const string& filename, diff::hash_t& prev) const;
 
 		void send(const local_deltas& g, peer_t* exclude=0);
 
@@ -147,7 +145,7 @@ namespace engine {
 
 		string shell_command(int app_id, const string& cmdline) const;
 
-		peer_t* query_block(const diff::hash_t& hash); //returns the peer where the block was queryed to
+		//peer_t* query_block(const diff::hash_t& hash); //returns the peer where the block was queryed to
 		void save(const diff& bl) const;
 
 		struct apps:unordered_map<int,app*> {
