@@ -212,11 +212,11 @@ if (service==protocol::gov_id_peer_status) {
 }
 else 
 */
-if (service==protocol::file_response) {
+//if (service==protocol::file_response) {
 //assert(false);
-    return "[binary]";
-}
-else {
+//    return "[binary]";
+//}
+//else {
 #endif
     int sz=size()-h+1;
     if (unlikely(sz<2)) return ""; //minimum 2bytes for a non-empty c string
@@ -225,7 +225,7 @@ else {
     cstr[sz-1]='\0';
     return string(cstr);
 #ifdef DEBUG
-}
+//}
 #endif
 //	return string(reinterpret_cast<const char*>(&*(begin()+h)),size()-h);
 }

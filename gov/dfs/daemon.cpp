@@ -133,6 +133,7 @@ string c::resolve_filename(const string& filename) {
 
 string c::get_path_from(const string& hash_b58, bool create_dirs) const {
     auto file_path=homedir +"/"+resolve_filename(hash_b58);
+    cout << "getting file path: " << file_path << endl;
 
     if(create_dirs) {
         fs::path dir(file_path);
