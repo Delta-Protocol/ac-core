@@ -171,7 +171,7 @@ c::hash_t c::compute_hash() const {
 
 c::hash_t c::compute_payload_hash() const {
     hasher_t hasher;
-    hasher.write(reinterpret_cast<const unsigned char*>(&*(begin()+h)),size());
+    hasher.write(reinterpret_cast<const unsigned char*>(&*(begin()+h)),size()-h);
     hasher_t::value_type v;
     hasher.finalize(v);
     return move(v);

@@ -39,20 +39,19 @@ void c::request(peer_t *c, datagram*d) {
 }
 
 void c::response(peer_t *c, datagram*d) {
-    auto content=d->parse_string();
-    delete d;
-
     auto hash_b58 = d->compute_payload_hash().to_b58();
+
     string filename=get_path_from(hash_b58,true);
     if (unlikely(!fs::exists(filename))) {
         {
             ofstream os(filename);
+            auto content=d->parse_string();
             os << content;
         }
 
         file_cv.notify_and_erase(hash_b58);
     }
-
+    delete d;
     file_cv.purge();
 }
 
