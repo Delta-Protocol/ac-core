@@ -23,8 +23,9 @@ bool c::process_work(socket::peer_t *c, datagram*d) {
 }
 
 void c::request(peer_t *c, datagram*d) {
-    auto hash_b58=d->parse_string();
+    auto  hash_b58=d->parse_string();
     delete d;
+    cout << "received request for file " << hash_b58 << endl;
 
     ifstream is(get_path_from(hash_b58));
     if (!is.good()) {
@@ -32,8 +33,9 @@ void c::request(peer_t *c, datagram*d) {
         return;
     }
 
+    cout << "sending  file " << hash_b58 << endl;
     string content=string((istreambuf_iterator<char>(is)), (istreambuf_iterator<char>()));
-    c->send(new datagram(protocol::file_request,content));
+    c->send(new datagram(protocol::file_response,content));
 }
 
 void c::response(peer_t *c, datagram*d) {
@@ -105,6 +107,7 @@ string c::load(const string& hash_b58, condition_variable * cv) {
         file_cv.add(hash_b58,cv);
         auto n=this->get_random_edge();
         if (unlikely(n==0)) return "";
+        cout << "DFS: querying file for " << hash_b58 << endl;
         auto r=n->send(new datagram(protocol::file_request,hash_b58));
         return "";
     }

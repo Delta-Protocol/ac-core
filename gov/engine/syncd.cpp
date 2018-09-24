@@ -46,7 +46,6 @@ void c::run() {
 					cur=prev;
 				}
 				else {
-					cout << "SYNCD: querying file for " << cu << endl;
 					//the petition was delivered
                     if (last_queryed!=cu) {
                         last_queryed=cu;
