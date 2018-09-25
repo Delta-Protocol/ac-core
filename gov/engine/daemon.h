@@ -144,10 +144,7 @@ namespace engine {
 		void set_last_block_imported_(const diff::hash_t&);
 
 		string shell_command(int app_id, const string& cmdline) const;
-
-		//peer_t* query_block(const diff::hash_t& hash); //returns the peer where the block was queryed to
-		void save(const diff& bl) const;
-
+		
 		struct apps:unordered_map<int,app*> {
 			virtual ~apps() { for (auto i:*this) delete i.second; }
 			void dump(ostream& os) const;

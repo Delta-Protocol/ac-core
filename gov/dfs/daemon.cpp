@@ -122,7 +122,7 @@ string c::load(const string& hash_b58, condition_variable * pcv, bool file_arriv
 }
 
 string c::load(const string& hash_b58) {
-    string filename{""};
+    string filename;
     if(!file_cv.exists(hash_b58)) {
         condition_variable * pcv = new condition_variable;
         filename=load(hash_b58, pcv, false);
@@ -133,17 +133,50 @@ string c::load(const string& hash_b58) {
     return filename;
 }
 
-void c::save(const string& hash, const vector<uint8_t>& data, int propagate) { //-1 nopes, 0=all peers; n num of peers
-assert(false);
-/*
-    cout << "dfs: save file " << hash << " propagate=" << propagate << endl;
+#include <us/gov/engine/diff.h>
+#include <us/gov/stacktrace.h>
 
-    if (propagate==-1) return;
+void c::save(const string& hash_b58, const string& data) {
+    ostringstream filename;
+    filename << get_path_from(hash_b58,true);
 
-    //if file already exists return
-    //save with tmpname
-    //rename atomically
-*/
+    if(likely(!fs::exists(filename.str()))) {
+        ofstream os(filename.str());
+        os << data;
+    }
+
+#ifdef DEBUG
+cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << filename.str() << endl;
+    if (!fs::exists(filename.str())) {
+        cerr << "file should be in the filesystem, I just saved it" << endl;
+        print_stacktrace();
+        assert(false);
+    }
+    ifstream is(filename.str());
+    if (!is.good()) {
+        cerr << "file should be good in the filesystem, I just saved it" << endl;
+        print_stacktrace();
+        assert(false);
+    }
+    engine::diff*b=engine::diff::from_stream(is);
+    if (!b) {
+        cout << "ERROR A" << endl;
+        print_stacktrace();
+        assert(false);
+    }
+    if (b->hash().to_b58()!=hash_b58) {
+        cout << b->hash() << " " << hash_b58 << endl;
+        {
+        ofstream os(get_path_from(hash_b58,true)+"_");
+        b->to_stream(os);
+        }
+        cout << "ERROR B " << (get_path_from(hash_b58)+"_") << endl;
+        print_stacktrace();
+        assert(false);
+    }
+    delete b;
+#endif
+
 }
 
 string c::resolve_filename(const string& filename) {

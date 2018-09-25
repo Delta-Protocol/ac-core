@@ -21,7 +21,7 @@ namespace dfs { //distributed file system
 		virtual bool process_work(socket::peer_t *c, datagram*d) override;
         void dump(ostream&) const;
 
-		void save(const string& hash, const vector<uint8_t>& data, int propagate);  //-1 nopes, 0=all peers; n num of peers
+		void save(const string& hash, const string& data);
 		string load(const string& hash_b58, condition_variable * pcv, bool file_arrived);
 		string load(const string& hash_b58);
 

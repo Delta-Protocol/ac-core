@@ -72,6 +72,12 @@ void c::to_stream(ostream& os) const {
 	}
 }
 
+string c::parse_string() const {
+    stringstream ss;
+    this->to_stream(ss);
+    return ss.str();
+}
+
 c* c::from_stream(istream& is) {
 	c* bl=new c();
 	is >> bl->prev;

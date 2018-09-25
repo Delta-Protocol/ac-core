@@ -52,7 +52,7 @@ void c::run() {
                         query_reps=100;
                     }
                     else {
-                        cout << "countown to clearing " << query_reps << endl;
+                        cout << "countdown to clearing " << query_reps << endl;
                         if (--query_reps==0) { // TODO we are in a deadlock
                             {
                         lock_guard<mutex> lock(mx);

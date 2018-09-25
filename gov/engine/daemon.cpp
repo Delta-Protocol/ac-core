@@ -91,8 +91,9 @@ diff::hash_t c::get_last_block_imported() const {
 
 void c::eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle) {
 		if (likely(cycle.new_diff!=0)) {
-			if (likely(voted_tip==cycle.new_diff->hash())) {
-				save(*cycle.new_diff);
+		    auto& nd = cycle.new_diff;
+			if (likely(voted_tip==nd->hash())) {
+				dfs().save(nd->hash().to_b58(),nd->parse_string());
 				if (!import(*cycle.new_diff)) {
 			        clear();
 					cerr << "DB CLEARED" << endl;
@@ -260,74 +261,11 @@ void c::run() {
 #include <us/gov/crypto/base58.h>
 #include <fstream>
 
-#include <us/gov/stacktrace.h>
-
-void c::save(const diff& bl) const {
-	ostringstream fn;
-	fn << dfs().get_path_from(bl.hash().to_b58(),true);
-	{
-	ofstream os(fn.str());
-	bl.to_stream(os);
-	}
-#ifdef DEBUG
-cout << "------------SAVE CHECK - DEBUG MODE------------" << "file " << fn.str() << endl;
-	if (!file_exists(fn.str())) {
-		cerr << "file should be in the filesystem, I just saved it" << endl;
-		print_stacktrace();
-		assert(false);
-	}
-	ifstream is(fn.str());
-	if (!is.good()) {
-		cerr << "file should be good in the filesystem, I just saved it" << endl;
-		print_stacktrace();
-		assert(false);
-	}
-	diff*b=diff::from_stream(is);
-	if (!b) {
-		cout << "ERROR A" << endl;
-		print_stacktrace();
-		assert(false);
-	}
-	if (b->hash()!=bl.hash()) {
-		cout << b->hash() << " " << bl.hash() << endl;
-		{
-		ofstream os(dfs().get_path_from(bl.hash().to_b58(),true)+"_");
-		b->to_stream(os);
-		}
-		cout << "ERROR B " << (dfs().get_path_from(bl.hash().to_b58())+"_") << endl;
-		print_stacktrace();
-		assert(false);
-	}
-	delete b;
-#endif
-}
-
 string c::get_random_node(const unordered_set<string>& exclude_addrs) const {
 	auto s=auth_app->get_random_node(rng,exclude_addrs);
 //cout << "get rnd node from authapp " << s << endl;
 	return s;
 }
-/*
-peer_t* c::query_block(const diff::hash_t& hash) {
-	auto n=get_random_edge();
-	if (unlikely(n==0)) return n;
-//	cout << "querying diff " << hash << " to " << n->pubkey << endl;
-	auto r=n->send(new datagram(protocol::query_block,hash.to_b58()));
-	if (unlikely(!r.empty())) {
-		cerr << "delivery failed. " << r << endl;
-		return 0;
-	}
-	return n;
-}
-*/
-#include <sys/stat.h>
-
-bool c::file_exists(const string& f) {
-	struct stat s;
-	stat(f.c_str(), &s);
-	return S_ISREG(s.st_mode);
-}
-
 
 bool c::get_prev(const string& filename, diff::hash_t& prev) const {
 	if (unlikely(filename.empty())) return false;

@@ -66,7 +66,7 @@ namespace engine {
 
 		void to_stream(ostream&) const;
 		static diff* from_stream(istream&);
-
+		string parse_string() const;
 
 		mutable hash_t hash_cached;
 		mutable bool h{false}; //there exist a hash cached

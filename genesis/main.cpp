@@ -80,7 +80,7 @@ struct genesis_daemon: engine::daemon {
         pool->allow(*mg);
         pool->add(mg);
         pool->end_adding();
-        save(*pool);
+        dfs().save(pool->hash().to_b58(),pool->parse_string());
         if (!import(*pool)) {
             cerr << "Error creating blockchain" << endl;
             exit(1);
