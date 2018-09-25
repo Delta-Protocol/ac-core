@@ -38,7 +38,7 @@ void c::run() {
 //				cout << "SYNCD: head:" << he << " cur: " << cu << " tail: " << ta << " ;" << patches.size() << " patches" << endl;
 
 				hash_t prev;
-				auto filename=d->dfs().load(cu.to_b58(),&cv);
+				auto filename=d->dfs().load(cu.to_b58());
 				if (likely(d->get_prev(filename,prev))) { //file exists, read it
 //					cout << "SYNCD: found file for " << cu << endl;
 					patches.push_back(cu);
@@ -62,12 +62,13 @@ void c::run() {
                             d->clear();
                         }
                     }
-
+/*
                     {
-                       unique_lock<mutex> lock(mx_wait4file);
+                       unique_lock<mutex> lock(mx); //_wait4file);
                        if (!file_arrived) cv.wait_for(lock, 3s, [&]{ return file_arrived || program::_this.terminated; });
                        file_arrived=false;
                     }
+                    */
 				}
 				if (program::_this.terminated) return;
 			}
@@ -85,12 +86,12 @@ void c::run() {
 		wait();
 	}
 }
-
+/*
 void c::signal_file_arrived() {
        file_arrived=true;
-       cv.notify_all();
+       cv_wait4file.notify_all();
 }
-
+*/
 void c::update(const diff::hash_t& h, const diff::hash_t& t) {
 //cout << "syncd: UPDATE head " << h << " tail " << t << endl;
 	{

@@ -22,8 +22,8 @@ namespace dfs { //distributed file system
         void dump(ostream&) const;
 
 		void save(const string& hash, const vector<uint8_t>& data, int propagate);  //-1 nopes, 0=all peers; n num of peers
-		string load(const string& hash, condition_variable * cv);
-		string load(const string& hash);
+		string load(const string& hash_b58, condition_variable * pcv, bool file_arrived);
+		string load(const string& hash_b58);
 
 		void request(peer_t *c, datagram*d);
 		void response(peer_t *c, datagram*d);
@@ -34,15 +34,24 @@ namespace dfs { //distributed file system
 
 		string homedir;
 
-		struct file_cv_t:unordered_map<string,pair<condition_variable*,chrono::system_clock::time_point>> {
+		struct params {
+		    condition_variable * pcv;
+		    chrono::system_clock::time_point time;
+		    bool file_arrived;
+		};
+
+		struct file_cv_t:unordered_map<string, params> {
 		    file_cv_t() {
 		    }
 
 		    ~file_cv_t() {
 		    }
 
-		    void add(const string& hash_b58, condition_variable* pcv);
+		    bool exists(const string& hash_b58);
+
+		    void add(const string& hash_b58, condition_variable * pcv, bool file_arrived);
 		    void notify_and_erase(const string& hash_b58);
+		    void wait_for(const string& hash_b58);
 		    void purge();
 
 		    mutex mx;

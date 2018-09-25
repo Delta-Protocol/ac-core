@@ -30,17 +30,18 @@ using namespace std;
 			daemon* d;
 			condition_variable cv;
 			mutable mutex mx;
+
 			bool in_sync() const;
 			hash_t head;
 			hash_t cur;
 			hash_t tail;
 			bool resume{false};
 
-			void signal_file_arrived();
+			//void signal_file_arrived();
 
 		    
-            condition_variable cv_wait4file;
-		    mutex mx_wait4file;
+            //condition_variable cv_wait4file;
+		    //mutex mx_wait4file;
 			bool file_arrived{false};
 
 

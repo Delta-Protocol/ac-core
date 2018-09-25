@@ -51,6 +51,7 @@ void c::response(peer_t *c, datagram*d) {
 
         file_cv.notify_and_erase(hash_b58);
     }
+
     delete d;
     file_cv.purge();
 }
@@ -58,26 +59,32 @@ void c::response(peer_t *c, datagram*d) {
 void c::file_cv_t::notify_and_erase(const string& hash_b58) {
     lock_guard<mutex> lock(mx);
     auto it = this->find(hash_b58);
+
     if(unlikely(it != this->end())) {
-        it->second.first->notify_all();
+        assert(it->second.pcv != 0);
+        it->second.file_arrived=true;
+        it->second.pcv->notify_all();
+        delete it->second.pcv;
         this->erase(it);
     }
 }
 
-void c::file_cv_t::add(const string& hash_b58, condition_variable* pcv) {
+void c::file_cv_t::add(const string& hash_b58, condition_variable * pcv, bool file_arrived) {
     lock_guard<mutex> lock(mx);
-    assert(pcv != 0);
+    assert(pcv!=0);
     auto now = system_clock::now();
-    this->emplace(hash_b58, make_pair(pcv,now));
+    this->emplace(hash_b58, c::params({pcv,now,file_arrived}));
 }
 
 void c::file_cv_t::purge() {
     lock_guard<mutex> lock(mx);
     auto it = this->begin();
     auto now = system_clock::now();
+
     while(it != this->end()) {
-        auto elapsed = duration_cast<seconds>(now-it->second.second);
+        auto elapsed = duration_cast<seconds>(now-it->second.time);
         if(elapsed>60s) {
+            delete it->second.pcv;
             it = this->erase(it);
         } else {
             it++;
@@ -85,31 +92,58 @@ void c::file_cv_t::purge() {
     }
 }
 
-void c::save(const string& hash, const vector<uint8_t>& data, int propagate) { //-1 nopes, 0=all peers; n num of peers
-assert(false);
-/*
-	cout << "dfs: save file " << hash << " propagate=" << propagate << endl;
-
-	if (propagate==-1) return;
-	
-	//if file already exists return
-	//save with tmpname
-	//rename atomically
-*/
+bool c::file_cv_t::exists(const string& hash_b58) {
+    lock_guard<mutex> lock(mx);
+    return this->find(hash_b58) != this->end();
 }
 
-string c::load(const string& hash_b58, condition_variable * cv) {
+void c::file_cv_t::wait_for(const string& hash_b58) {
+    unique_lock<mutex> lock(mx);
+    auto it = find(hash_b58);
+    if(it !=  this->end()) {
+        it->second.pcv->wait_for(lock, 3s, [&]{ return it->second.file_arrived || program::_this.terminated; });
+        it->second.file_arrived = false;
+    }
+
+}
+
+string c::load(const string& hash_b58, condition_variable * pcv, bool file_arrived) {
     auto filename=homedir +"/"+resolve_filename(hash_b58);
     if(fs::exists(filename)) {
         return filename;
     } else {
-        file_cv.add(hash_b58,cv);
+        file_cv.add(hash_b58,pcv,file_arrived);
         auto n=this->get_random_edge();
         if (unlikely(n==0)) return "";
         cout << "DFS: querying file for " << hash_b58 << endl;
         auto r=n->send(new datagram(protocol::file_request,hash_b58));
         return "";
     }
+}
+
+string c::load(const string& hash_b58) {
+    string filename{""};
+    if(!file_cv.exists(hash_b58)) {
+        condition_variable * pcv = new condition_variable;
+        filename=load(hash_b58, pcv, false);
+    }
+
+    if(filename.empty()) file_cv.wait_for(hash_b58);
+
+    return filename;
+}
+
+void c::save(const string& hash, const vector<uint8_t>& data, int propagate) { //-1 nopes, 0=all peers; n num of peers
+assert(false);
+/*
+    cout << "dfs: save file " << hash << " propagate=" << propagate << endl;
+
+    if (propagate==-1) return;
+
+    //if file already exists return
+    //save with tmpname
+    //rename atomically
+*/
 }
 
 string c::resolve_filename(const string& filename) {
@@ -133,7 +167,6 @@ string c::resolve_filename(const string& filename) {
 
 string c::get_path_from(const string& hash_b58, bool create_dirs) const {
     auto file_path=homedir +"/"+resolve_filename(hash_b58);
-    cout << "getting file path: " << file_path << endl;
 
     if(create_dirs) {
         fs::path dir(file_path);
