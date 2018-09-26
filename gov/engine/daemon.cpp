@@ -90,9 +90,11 @@ diff::hash_t c::get_last_block_imported() const {
 }
 
 void c::eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle) {
+        cout << "eat_diff" << endl;
 		if (likely(cycle.new_diff!=0)) {
 		    auto& nd = cycle.new_diff;
 			if (likely(voted_tip==nd->hash())) {
+			    cout << "saving: " << nd->hash() << endl;
 				dfs().save(nd->hash().to_b58(),nd->parse_string());
 				if (!import(*cycle.new_diff)) {
 			        clear();
