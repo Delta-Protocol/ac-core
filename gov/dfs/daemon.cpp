@@ -41,6 +41,10 @@ void c::request(peer_t *c, datagram*d) {
 void c::response(peer_t *c, datagram*d) {
     auto hash_b58 = d->compute_payload_hash().to_b58();
 
+    if(!file_cv.exists(hash_b58)) {
+        c->disconnect(); //disconnect if not honest node
+    }
+
     string filename=get_path_from(hash_b58,true);
     if (unlikely(!fs::exists(filename))) {
         {
