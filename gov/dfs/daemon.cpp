@@ -42,6 +42,7 @@ void c::response(peer_t *c, datagram*d) {
     auto hash_b58 = d->compute_payload_hash().to_b58();
 
     if(!file_cv.exists(hash_b58)) {
+        cout << "disconnecting peer file not found for: " << hash_b58 << endl;
         c->disconnect(); //disconnect if not honest node
     }
 
@@ -108,7 +109,6 @@ void c::file_cv_t::wait_for(const string& hash_b58) {
         it->second.pcv->wait_for(lock, 3s, [&]{ return it->second.file_arrived || program::_this.terminated; });
         it->second.file_arrived = false;
     }
-
 }
 
 string c::load(const string& hash_b58, condition_variable * pcv, bool file_arrived) {
