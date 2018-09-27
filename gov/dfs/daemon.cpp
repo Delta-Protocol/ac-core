@@ -141,7 +141,7 @@ string c::load(const string& hash_b58) {
 #include <us/gov/stacktrace.h>
 
 bool c::exists(const string& hash_b58) const {
-    return !fs::exists(get_path_from(hash_b58,false));
+    return fs::exists(get_path_from(hash_b58,false));
 }
 
 void c::save(const string& hash_b58, const string& data) {
