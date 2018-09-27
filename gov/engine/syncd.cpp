@@ -19,12 +19,12 @@ void c::run() {
     int query_reps{reset_countdown};
     hash_t last_queryed;
 	while(!program::_this.terminated) {
-//		cout << "SYNCD: Start" << endl;
+		cout << "SYNCD: Start" << endl;
 		hash_t he(0), ta(0), cu(0);
 		{
 			vector<hash_t> patches;
 			while(true) {
-//				cout << "SYNCD: begin iteration " << endl;
+				cout << "SYNCD: begin iteration " << endl;
 				{
 				lock_guard<mutex> lock(mx);
 				if (cur==tail) break;
@@ -55,6 +55,7 @@ void c::run() {
                         cout << "countdown to clearing " << query_reps << endl;
                         if (--query_reps==0) { // TODO we are in a deadlock
                             {
+                                query_reps=100;
                         lock_guard<mutex> lock(mx);
                             head=cur=tail=0;
                             }
@@ -84,6 +85,7 @@ void c::run() {
             d->on_sync();
 		}
 		wait();
+		cout << "SYNCD: sync iteration completed" << endl;
 	}
 }
 /*
