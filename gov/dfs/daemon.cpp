@@ -111,6 +111,13 @@ void c::file_cv_t::wait_for(const string& hash_b58) {
     }
 }
 
+void c::file_cv_t::erase_only(const string& hash_b58) {
+    unique_lock<mutex> lock(mx);
+    auto it = find(hash_b58);
+    delete it->second.pcv;
+    this->erase(it);
+}
+
 string c::load(const string& hash_b58, condition_variable * pcv, bool file_arrived) {
     auto filename=homedir +"/"+resolve_filename(hash_b58);
     if(fs::exists(filename)) {
@@ -134,6 +141,7 @@ string c::load(const string& hash_b58) {
     }
     cout <<"DFS file found: " << boolalpha << !filename.empty() << " for hash:" << hash_b58 << endl;
     if(filename.empty()) file_cv.wait_for(hash_b58);
+    file_cv.erase(hash_b58);
 
     return filename;
 }

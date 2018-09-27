@@ -52,6 +52,7 @@ namespace dfs { //distributed file system
 
 		    void add(const string& hash_b58, condition_variable * pcv, bool file_arrived);
 		    void notify_and_erase(const string& hash_b58);
+		    void erase_only(const string& hash_b58);
 		    void wait_for(const string& hash_b58);
 		    void purge();
 
