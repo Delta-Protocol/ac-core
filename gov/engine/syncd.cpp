@@ -24,7 +24,7 @@ void c::run() {
 		{
 			vector<hash_t> patches;
 			while(true) {
-				cout << "SYNCD: begin iteration " << endl;
+				//cout << "SYNCD: begin iteration " << endl;
 				{
 				lock_guard<mutex> lock(mx);
 				if (cur==tail) break;
