@@ -32,6 +32,7 @@ namespace dfs { //distributed file system
 		string get_path_from(const string& hash_b58, bool create_dirs=false) const;
 		virtual peer_t* get_random_edge() const = 0;
 
+		bool exists(const string& hash_b58) const;
 		string homedir;
 
 		struct params {

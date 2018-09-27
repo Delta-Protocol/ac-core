@@ -96,14 +96,22 @@ void c::eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle) {
 			if (likely(voted_tip==nd->hash())) {
 			    cout << "saving: " << nd->hash() << endl;
 				dfs().save(nd->hash().to_b58(),nd->parse_string());
+                assert(dfs().exists(nd->hash().to_b58()));
 				if (!import(*cycle.new_diff)) {
 			        clear();
 					cerr << "DB CLEARED" << endl;
 				}
 			}
+			else {
+			    cout << "WARNING: tip is not the most voted one: " << nd->hash() << endl;
+			}
+
 			delete cycle.new_diff;
 			cycle.new_diff=0;
+		} else {
+		    cout << "WARNING: block not computed " << endl;
 		}
+
 		syncd.update(voted_tip,get_last_block_imported()); //head,tail
 }
 

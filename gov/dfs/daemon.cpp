@@ -140,6 +140,10 @@ string c::load(const string& hash_b58) {
 #include <us/gov/engine/diff.h>
 #include <us/gov/stacktrace.h>
 
+bool c::exists(const string& hash_b58) const {
+    return !fs::exists(get_path_from(hash_b58,false));
+}
+
 void c::save(const string& hash_b58, const string& data) {
     ostringstream filename;
     filename << get_path_from(hash_b58,true);
