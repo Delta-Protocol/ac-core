@@ -148,7 +148,7 @@ void c::save(const string& hash_b58, const string& data) {
     ostringstream filename;
     filename << get_path_from(hash_b58,true);
 
-    if(likely(!fs::exists(filename.str()))) {
+    if(!fs::exists(filename.str())) {
         ofstream os(filename.str());
         os << data;
     }
