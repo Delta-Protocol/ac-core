@@ -29,7 +29,11 @@ void c::request(peer_t *c, datagram*d) {
 
     ifstream is(get_path_from(hash_b58));
     if (!is.good()) {
-        cout << "block not found in HD, ignoring." << endl;
+        auto n=this->get_random_edge();
+        if (unlikely(n==0)) return;
+        cout << "block not found in HD, requesting it to peer " << n->addr << endl;
+        auto r=n->send(new datagram(protocol::file_request,hash_b58));
+        cout << r << endl;
         return;
     }
 
@@ -42,7 +46,7 @@ void c::response(peer_t *c, datagram*d) {
     auto hash_b58 = d->compute_payload_hash().to_b58();
 
     if(!file_cv.exists(hash_b58)) {
-        cout << "disconnecting peer file not found for: " << hash_b58 << endl;
+        cout << "disconnecting peer because file not found: " << hash_b58 << endl;
         c->disconnect(); //disconnect if not honest node
     }
 
@@ -128,6 +132,7 @@ string c::load(const string& hash_b58, condition_variable * pcv, bool file_arriv
         if (unlikely(n==0)) return "";
         cout << "DFS: querying file for " << hash_b58 << " from peer " << n->addr << endl;
         auto r=n->send(new datagram(protocol::file_request,hash_b58));
+        cout << r << endl;
         return "";
     }
 }
