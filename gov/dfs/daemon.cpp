@@ -125,8 +125,10 @@ void c::file_cv_t::wait_for(const string& hash_b58) {
 void c::file_cv_t::remove(const string& hash_b58) {
     unique_lock<mutex> lock(mx);
     auto it = find(hash_b58);
-    delete it->second.pcv;
-    this->erase(it);
+    if(it != this->end()) {
+        delete it->second.pcv;
+        this->erase(it);
+    }
 }
 
 void c::recents_t::add(const string& hash_b58) {
