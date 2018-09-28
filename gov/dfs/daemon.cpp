@@ -172,12 +172,12 @@ string c::load(const string& hash_b58, condition_variable * pcv, bool file_arriv
 
 string c::load(const string& hash_b58) {
     string filename;
-    cout << "DFS: retrieving block" << endl;
+    //cout << "DFS: retrieving block" << endl;
     if(!file_cv.exists(hash_b58)) {
         condition_variable * pcv = new condition_variable;
         filename=load(hash_b58, pcv, false);
     }
-    cout <<"DFS file found: " << boolalpha << !filename.empty() << " for hash:" << hash_b58 << endl;
+    //cout <<"DFS file found: " << boolalpha << !filename.empty() << " for hash:" << hash_b58 << endl;
     if(filename.empty()) file_cv.wait_for(hash_b58);
 
     file_cv.remove(hash_b58);
