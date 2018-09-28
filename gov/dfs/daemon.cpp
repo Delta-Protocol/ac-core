@@ -67,9 +67,14 @@ void c::response(peer_t *c, datagram*d) {
 }
 
 void c::daemon_timer() {
+    b::daemon_timer();
     cout << "DFS housekeeping" << endl;
     file_cv.purge(); //cover case when nobody answers
     recents.purge();
+
+    auto n=this->get_random_edge();
+    auto r=n->send(new datagram(protocol::file_response,"hellohello0"));
+    cout << "DFS message sent" << endl;
 }
 
 void c::file_cv_t::notify_and_erase(const string& hash_b58) {
