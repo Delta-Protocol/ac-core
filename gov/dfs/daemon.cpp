@@ -73,6 +73,7 @@ void c::daemon_timer() {
     recents.purge();
 
     auto n=this->get_random_edge();
+    if (unlikely(n==0)) return;
     auto r=n->send(new datagram(protocol::file_response,"hellohello0"));
     cout << "DFS message sent" << endl;
 }
