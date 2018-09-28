@@ -29,9 +29,9 @@ void c::request(peer_t *c, datagram*d) {
 
     ifstream is(get_path_from(hash_b58));
     if (!is.good()) {
-        auto n=this->get_random_edge();
+        auto n=this->get_random_edge(c);
         if (unlikely(n==0)) return;
-        cout << "block not found in HD, requesting it to peer " << n->addr << endl;
+        cout << "block not found in HD, requesting it from peer " << n->addr << endl;
         auto r=n->send(new datagram(protocol::file_request,hash_b58));
         cout << r << endl;
         return;
@@ -46,8 +46,10 @@ void c::response(peer_t *c, datagram*d) {
     auto hash_b58 = d->compute_payload_hash().to_b58();
 
     if(!file_cv.exists(hash_b58)) {
-        cout << "disconnecting peer because file not found: " << hash_b58 << endl;
-        c->disconnect(); //disconnect if not honest node
+        if(!recents.exists(hash_b58)) {
+            cout << "DFS - disconnecting peer because of file: " << hash_b58 << endl;
+            c->disconnect();
+        }
     }
 
     string filename=get_path_from(hash_b58,true);
@@ -62,7 +64,12 @@ void c::response(peer_t *c, datagram*d) {
     }
 
     delete d;
-    file_cv.purge();
+}
+
+void c::daemon_timer() {
+    cout << "DFS housekeeping" << endl;
+    file_cv.purge(); //cover case when nobody answers
+    recents.purge();
 }
 
 void c::file_cv_t::notify_and_erase(const string& hash_b58) {
@@ -115,11 +122,37 @@ void c::file_cv_t::wait_for(const string& hash_b58) {
     }
 }
 
-void c::file_cv_t::erase_only(const string& hash_b58) {
+void c::file_cv_t::remove(const string& hash_b58) {
     unique_lock<mutex> lock(mx);
     auto it = find(hash_b58);
     delete it->second.pcv;
     this->erase(it);
+}
+
+void c::recents_t::add(const string& hash_b58) {
+    lock_guard<mutex> lock(mx);
+    auto now = system_clock::now();
+    this->emplace(hash_b58, now);
+}
+
+bool c::recents_t::exists(const string& hash_b58) {
+    lock_guard<mutex> lock(mx);
+    return this->find(hash_b58) != this->end();
+}
+
+void c::recents_t::purge() {
+    lock_guard<mutex> lock(mx);
+    auto it = this->begin();
+    auto now = system_clock::now();
+
+    while(it != this->end()) {
+        auto elapsed = duration_cast<seconds>(now-it->second);
+        if(elapsed>60s) {
+            it = this->erase(it);
+        } else {
+            it++;
+        }
+    }
 }
 
 string c::load(const string& hash_b58, condition_variable * pcv, bool file_arrived) {
@@ -146,7 +179,9 @@ string c::load(const string& hash_b58) {
     }
     cout <<"DFS file found: " << boolalpha << !filename.empty() << " for hash:" << hash_b58 << endl;
     if(filename.empty()) file_cv.wait_for(hash_b58);
-    file_cv.erase(hash_b58);
+
+    file_cv.remove(hash_b58);
+    recents.add(hash_b58);  // to cover the case in which we received more than one answer, those response cannot be considered evil
 
     return filename;
 }

@@ -30,7 +30,8 @@ namespace dfs { //distributed file system
 
 		static string resolve_filename(const string& filename);
 		string get_path_from(const string& hash_b58, bool create_dirs=false) const;
-		virtual peer_t* get_random_edge() const = 0;
+        virtual peer_t* get_random_edge() const = 0;
+		virtual peer_t* get_random_edge(const peer_t* exclude) const = 0;
 
 		bool exists(const string& hash_b58) const;
 		string homedir;
@@ -40,6 +41,8 @@ namespace dfs { //distributed file system
 		    chrono::system_clock::time_point time;
 		    bool file_arrived;
 		};
+
+		virtual void daemon_timer();
 
 		struct file_cv_t:unordered_map<string, params> {
 		    file_cv_t() {
@@ -52,13 +55,28 @@ namespace dfs { //distributed file system
 
 		    void add(const string& hash_b58, condition_variable * pcv, bool file_arrived);
 		    void notify_and_erase(const string& hash_b58);
-		    void erase_only(const string& hash_b58);
+		    void remove(const string& hash_b58);
 		    void wait_for(const string& hash_b58);
 		    void purge();
 
 		    mutex mx;
 		};
 		file_cv_t file_cv;
+
+		struct recents_t:unordered_map<string,chrono::system_clock::time_point> {
+		    recents_t() {
+            }
+
+            ~recents_t() {
+            }
+
+            bool exists(const string& hash_b58);
+            void add(const string& hash_b58);
+            void purge();
+
+            mutex mx;
+		};
+		recents_t recents;
 	};
 
 }

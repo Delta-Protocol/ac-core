@@ -285,17 +285,36 @@ bool c::get_prev(const string& filename, diff::hash_t& prev) const {
 	return true;
 }
 
-peer_t* c::get_random_edge() {
-    auto n=get_people(); //sysops are not taken into account
+peer_t* c::get_random_edge() const {
+    auto n=get_nodes(); //sysops are not taken into account
     cout << n.size() << " nodes available" << endl;
 	if (n.empty()) return 0;
 	uniform_int_distribution<> d(0, n.size()-1);
 	auto i=n.begin();
 	advance(i,d(rng));
-    return reinterpret_cast<peer_t*>(*i);
+    return *i;
 }
 
-vector<peer_t*> c::get_nodes() {
+peer_t* c::get_random_edge(const peer_t* exclude) const {
+    auto n=get_nodes(exclude); //sysops are not taken into account
+    cout << n.size() << " nodes available" << endl;
+    if (n.empty()) return 0;
+    uniform_int_distribution<> d(0, n.size()-1);
+    auto i=n.begin();
+    advance(i,d(rng));
+    return *i;
+}
+
+vector<peer_t*> c::get_nodes(const peer_t* exclude) const {
+    vector<peer_t*> v;
+    for (auto& i:peerd.in_service()) {
+        auto p=static_cast<peer_t*>(i);
+        if (p != exclude && p->stage==peer_t::node) v.push_back(p);
+    }
+    return v;
+}
+
+vector<peer_t*> c::get_nodes() const{
     vector<peer_t*> v;
     for (auto& i:peerd.in_service()) {
         auto p=static_cast<peer_t*>(i);

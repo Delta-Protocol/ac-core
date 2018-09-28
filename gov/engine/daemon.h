@@ -152,19 +152,21 @@ namespace engine {
 
 		};
 
-		vector<peer_t*> get_nodes();
+		vector<peer_t*> get_nodes() const;
 		vector<peer_t*> get_people();
 
 		bool patch_db(const vector<diff::hash_t>& patches);
 
 		string get_random_node(const unordered_set<string>& exclude_addrs) const;
+		vector<peer_t*> get_nodes(const peer_t* exclude) const;
+		peer_t* get_random_edge(const peer_t* exclude) const;
 
 		const diff::hash_t& dbhash_off() const;
 
 		mutable diff::hash_t cached_dbhash;
 		mutable bool cached_dbhash_ok{false};
 
-		peer_t* get_random_edge();
+		peer_t* get_random_edge() const;
 
 		networking peerd;
 

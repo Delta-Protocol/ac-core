@@ -62,6 +62,11 @@ string c::get_random_peer(const unordered_set<string>& exclude_addrs) const { //
 //	if (!n.empty()) cout << "Random node at " << n << endl;
 	return move(n);
 }
+
+dfs::peer_t* c::get_random_edge(const dfs::peer_t* exclude) const {
+    return parent->get_random_edge(static_cast<const peer_t*>(exclude));
+}
+
 dfs::peer_t* c::get_random_edge() const {
     return parent->get_random_edge();
 }

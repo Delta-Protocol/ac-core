@@ -24,7 +24,8 @@ using namespace std;
 			virtual bool process_evidence(datagram*d) override;
 			bool process_work_sysop(peer::peer_t *c, datagram*d);
 			virtual string get_random_peer(const unordered_set<string>& exclude) const override; //returns ipaddress //there exist a possibility of returning "" even though there were eligible items available
-			virtual dfs::peer_t* get_random_edge() const override;
+			virtual dfs::peer_t* get_random_edge(const dfs::peer_t* exclude) const override;
+            virtual dfs::peer_t* get_random_edge() const override;
 
             virtual const keys& get_keys() const override;
             virtual vector<relay::peer_t*> get_nodes() override;
