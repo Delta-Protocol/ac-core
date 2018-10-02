@@ -77,8 +77,9 @@ namespace dfs { //distributed file system
             mutex mx;
 		};
 		recents_t recents;
-	};
 
+		bool remove(const string& hash_b58);
+	};
 }
 
 }}

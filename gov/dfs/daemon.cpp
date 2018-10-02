@@ -273,6 +273,37 @@ string c::get_path_from(const string& hash_b58, bool create_dirs) const {
     return file_path;
 }
 
+bool c::remove(const string& hash_b58) {
+    auto sub  = "/" + resolve_filename(hash_b58);
+    auto path = homedir + sub;
+
+    bool deleted = std::remove(path.c_str());
+    if(deleted != 0) return false;
+
+    string tmp;
+    for(auto i=sub.length()-1; i; i--) {
+
+        if(sub[i] == '/') {
+            tmp = path.substr(0,homedir.length() + i);
+
+            if(!fs::exists(tmp)) {
+                cerr << "Filesystem inconsistent - folder " << tmp << " does not exists" << endl;
+                return false;
+            }
+
+            if (fs::is_empty(tmp)) {
+                std::remove(tmp.c_str());
+            } else {
+                break; // no need to scan the parent folder
+            }
+
+            tmp="";
+        }
+    }
+
+    return true;
+}
+
 void c::dump(ostream&os) const {
     os << "Hello from dfs::daemon" << endl;
     os << "Nothing to say here yet" << endl;    
