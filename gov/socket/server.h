@@ -40,7 +40,7 @@ namespace socket {
 
         bool banned_throttle(const string& addr);
 
-		virtual void receive_and_process(client*c) { c->busy.store(false); };
+		virtual void receive_and_process(client*c) { c->m_busy.store(false); };
        	typedef crypto::ec::keys::pub_t pub_t;
 
 		struct clients_t: unordered_map<int,client*> {

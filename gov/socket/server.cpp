@@ -84,7 +84,7 @@ void c::on_finish() {
 }
 void c::attach(client*c, bool wakeupselect) {
 	assert(c);
-	assert(c->sock!=0);
+	assert(c->m_sock!=0);
 	clients.add(c,wakeupselect);
 }
 
@@ -121,7 +121,7 @@ void c::clients_t::remove(client* c) {
 void c::clients_t::read_sockets() {
 	static char w='w';
 //	locli.send('W'); //wake up from select
-	::write(locli.sock, &w, 1);
+	::write(locli.m_sock, &w, 1);
 }
 /*
 void c::clients_t::hold(client* c) {
@@ -158,10 +158,10 @@ void c::clients_t::grow() {
 	for (auto i:t) {
 //		if (unlikely(!i)) continue;
 		assert(i);
-		assert(find(i->sock)==end());
-        assert(i->sock!=0);
+		assert(find(i->m_sock)==end());
+        assert(i->m_sock!=0);
 		//cout << "socket: server: moved cli from wadd to the main container fd " << i->sock << endl;
-		emplace(i->sock,i);
+		emplace(i->m_sock,i);
 		//active_fd_set.set(i->sock);
 	}
 	}
@@ -187,7 +187,7 @@ void c::clients_t::shrink() {
 		iterator i;
 //assert(c->sock!=0);
         c->on_detach();
-		i=find(c->sock);
+		i=find(c->m_sock);
 		if (likely(i!=end())) { //it is not in main container
             erase(i); //no other thread can remove from main container, so i should be still valid
             attic.add(c);
@@ -249,8 +249,8 @@ vector<int> c::clients_t::update() {
                 //    ++i;
                 //    continue;
                 //}
-                if (likely(c.sock) ) { //disconnected client?
-                        if (!c.busy.load()) s.emplace_back(c.sock);
+                if (likely(c.m_sock) ) { //disconnected client?
+                        if (!c.m_busy.load()) s.emplace_back(c.m_sock);
                         a.emplace_back(&c);
                         ++i;
                 }
@@ -298,7 +298,7 @@ void c::clients_t::attic_t::purge() { //delete those clients that terminated lon
 //	vector<client*> tmp;
 //	auto n=chrono::steady_clock::now();
 	for (auto i=begin(); i!=end(); ) {
-        if ((*i)->busy.load()) {
+        if ((*i)->m_busy.load()) {
             ++i;
             continue;
         }
@@ -348,7 +348,7 @@ c::clients_t::rmlist::~rmlist() {
 }
 
 bool c::clients_t::rmlist::add(client* c) {
-	if(c->sock==0) return false;
+	if(c->m_sock==0) return false;
 	lock_guard<mutex> lock(mx);
 //	if(b::find(c->sock)==end());
     emplace(c);
@@ -526,7 +526,7 @@ cout << "Starting server" << endl;
 			}
 //			cout << "socket: server: accepted, creating client for fd " << nnew << endl;
 			auto cl=create_client(nnew);
-            if (unlikely(banned_throttle(cl->addr))) {
+            if (unlikely(banned_throttle(cl->m_addr))) {
                 delete cl;
             }
             else {
@@ -546,8 +546,8 @@ cout << "Starting server" << endl;
 			auto p=c->second;
 //cout << "Incoming data to fd " << i << endl;
 
-            if (p->busy.load()) continue;
-            p->busy.store(true);
+            if (p->m_busy.load()) continue;
+            p->m_busy.store(true);
 			//clients.hold(p); 
 //cout << "receive_and_process fd " << i << endl;
 			receive_and_process(p);

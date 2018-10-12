@@ -1,8 +1,9 @@
 #include "peer_t.h"
-#include "daemon.h"
 #include "protocol.h"
 #include <us/gov/likely.h>
+#include<thread>
 
+#include "daemon.h"
 typedef us::gov::socket::peer_t c;
 using namespace us::gov::socket;
 using namespace std;
@@ -32,7 +33,7 @@ void c::on_detach() {
     while(!program::_this.terminated) { 
 //            cout << "."; cout.flush();
             this_thread::yield(); //spinlock
-            if (!busy.load()) break;
+            if (!m_busy.load()) break;
     }
 //cout << this_thread::get_id() << ": parent=0 & ::close" << endl;
     parent=0;  

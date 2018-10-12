@@ -1,8 +1,9 @@
 #ifndef USGOV_2d8af251450aa79ce1d82cd9d9330072930013905de9945ca29228083ef3eee4
 #define USGOV_2d8af251450aa79ce1d82cd9d9330072930013905de9945ca29228083ef3eee4
 
-#include "client.h"
 #include <atomic>
+
+#include "client.h"
 
 namespace us { namespace gov {
 namespace socket {

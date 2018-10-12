@@ -1,42 +1,44 @@
 #ifndef USGOV_f06019c0635c00639ca65f74f67bed1a4db6bb3d506993ed4bac336c93eb48bb
 #define USGOV_f06019c0635c00639ca65f74f67bed1a4db6bb3d506993ed4bac336c93eb48bb
 
-#include "server.h"
+#include <cstdint>
+#include <iostream>
+
 #include "ctpl_stl.h"
-#include <atomic>
+#include "server.h"
 
-namespace us { namespace gov {
-namespace socket {
-	using namespace std;
+namespace ctpl {
+class thread_pool;
+} /* namespace ctpl */
 
-	struct peer_t;
+namespace us { namespace gov { namespace socket {
+using namespace std;
 
-struct daemon: server {
-	typedef server b;
-	daemon();
-	daemon(uint16_t port, int edges);
-	virtual ~daemon();
-	virtual client* create_client(int sock) override;
+class peer_t;
 
-	void run();
-	virtual void on_finish() override;
+class daemon: public server {
 
-        virtual void attach(client*,bool wakeupselect=true) override;
-        //virtual void detach(client*) override;
+public:
 
+    daemon();
+    daemon(uint16_t port, int edges);
+    virtual ~daemon();
 
-	void dump(ostream& os) const;
+    void run();
+    virtual void on_finish() override;
+    virtual client* create_client(int sock) override;
+    virtual void receive_and_process(client*) override;
+    virtual void attach(client*,bool wakeupselect=true) override;
 
-	void send(int num, peer_t* exclude, datagram* d);
+    virtual void daemon_timer() {}
+    virtual bool process_work(peer_t *c, datagram*d);
 
-	virtual void receive_and_process(client*) override;
-	void process_work(peer_t *c);
-	virtual bool process_work(peer_t *c, datagram*d);
+    void process_work(peer_t *c);
+    void send(int num, peer_t* exclude, datagram* d);
 
-	virtual void daemon_timer() {}
+    void dump(ostream& os) const;
 
-	ctpl::thread_pool* pool{0};
-
+    ctpl::thread_pool* m_pool{0};
 
     struct perf_t {
         struct disconnections_t {
@@ -54,13 +56,9 @@ struct daemon: server {
     };
 
     perf_t perf;
-
 };
 
-
-}
-
-}}
+}}}
 
 #endif
 

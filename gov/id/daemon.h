@@ -1,7 +1,8 @@
 #ifndef USGOV_d503861e22c19bdbfae6ed39978276fcf121cce8fb47df51d65ca7fb26ff55e9
 #define USGOV_d503861e22c19bdbfae6ed39978276fcf121cce8fb47df51d65ca7fb26ff55e9
 
-#include <us/gov/socket/daemon.h>
+#include "../socket/daemon.h"
+
 #include <us/gov/crypto.h>
 //#include <us/gov/peer.h>
 

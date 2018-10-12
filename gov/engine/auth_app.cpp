@@ -71,7 +71,7 @@ void c::basic_auth_completed(peer_t* p) {
 	}
 	if (i==db.hall.end()) {
 		p->stage=peer_t::out;
-		pool->to_hall.push_back(make_pair(p->pubkey.hash(),p->addr));
+		pool->to_hall.push_back(make_pair(p->pubkey.hash(),p->m_addr));
 	}
 	else {
 		p->stage=peer_t::hall;

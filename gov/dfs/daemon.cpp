@@ -31,7 +31,7 @@ void c::request(peer_t *c, datagram*d) {
     if (!is.good()) {
         auto n=this->get_random_edge(c);
         if (unlikely(n==0)) return;
-        cout << "block not found in HD, requesting it from peer " << n->addr << endl;
+        cout << "block not found in HD, requesting it from peer " << n->m_addr << endl;
         auto r=n->send(new datagram(protocol::file_request,hash_b58));
         cout << r << endl;
         return;
@@ -166,7 +166,7 @@ string c::load(const string& hash_b58, condition_variable * pcv, bool file_arriv
         file_cv.add(hash_b58,pcv,file_arrived);
         auto n=this->get_random_edge();
         if (unlikely(n==0)) return "";
-        cout << "DFS: querying file for " << hash_b58 << " from peer " << n->addr << endl;
+        cout << "DFS: querying file for " << hash_b58 << " from peer " << n->m_addr << endl;
         auto r=n->send(new datagram(protocol::file_request,hash_b58));
         cout << r << endl;
         return "";

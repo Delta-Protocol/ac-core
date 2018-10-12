@@ -57,7 +57,7 @@ void c::add_peers(peers_t& a) {
 //cout << "--" << endl;
 	int n=edges-a.asize()+1; //must be signed int
 	unordered_set<string> exclude;
-	for (auto i:a) if (i!=0) exclude.emplace(i->addr);
+	for (auto i:a) if (i!=0) exclude.emplace(i->m_addr);
     int m=0;
 	while(n>0) {
 		string addr=get_random_peer(exclude);
@@ -172,7 +172,7 @@ void c::send(int num, peer_t* exclude, datagram* d) {
 void c::dump(ostream& os) const {
 	os << "Hello from peer::daemon" << endl;
 	os << "Max edges: " << edges << endl;
-	os << "Thread pool size: " << pool->size() << endl;
+	os << "Thread pool size: " << m_pool->size() << endl;
 	os << "Active: " << endl;
 	active().dump(os);
 }
