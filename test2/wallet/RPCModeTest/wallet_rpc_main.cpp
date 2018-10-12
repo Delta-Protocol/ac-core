@@ -3,6 +3,7 @@
 
 using namespace std;
 
+/*
 int main() {
 
 	cout << "I am in RPC Main.cpp" << endl;
@@ -11,3 +12,4 @@ int main() {
 
 	exit(0);
 }
+*/

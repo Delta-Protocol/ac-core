@@ -372,7 +372,7 @@ struct test_client: client {
 	
 	test_client(int sock):client(sock) {}
 
-	virtual void on_connect() override {
+	virtual void on_connect() {
 		//cout << "connected" << endl;
 	}
 };

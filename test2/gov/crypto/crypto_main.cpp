@@ -6,6 +6,7 @@
 
 using namespace std;
 
+/*
 int main() {
 
 	test_symmetric_encryption();
@@ -13,3 +14,4 @@ int main() {
 
 	exit(0);
 }
+*/

@@ -6,7 +6,7 @@
 #include "daemon_api.h"
 
 //#include <us/wallet/api.h>
-#include <us/wallet/wallet.h>
+//#include <us/wallet/wallet.h>
 
 using namespace std;
 //using namespace us::wallet::json

@@ -9,10 +9,10 @@
 
 //#include <us/wallet/api.h>
 //#include <us/wallet/wallet_local_api.h> //------here--
-#include <us/wallet/rpc_api.h> //---------------here--
+//#include <us/wallet/rpc_api.h> //---------------here--
 
 
-#include <us/wallet/wallet.h>
+//#include <us/wallet/wallet.h>
 
 #include <us/gov/socket/datagram.h>
 #include <us/gov/crypto.h>
@@ -22,12 +22,13 @@
 #include <thread>
 
 using namespace std;
-using namespace us::wallet;
+//using namespace us::wallet;
 using datagram=us::gov::socket::datagram;
 
+/*
 struct test_api : rpc_api {
 
-	test_api( string walletd_host, uint16_t walletd_port, int gov_port): rpc_api( walletd_host, walletd_port ), gov_p(gov_port) {}
+	test_api( string walletd_host, uint16_t walletd_port, int gov_port): rpc_api(walletd_host, walletd_port ), gov_p(gov_port) {}
 
  	int gov_p;
 
@@ -199,3 +200,4 @@ void testing_wallet_api()
 		test("127.0.0.1" , 16677 , 16670 , "3U8AUYbfGWkUncvPSNwR9o3Z8BBs" ,  1234560   ,   2000  , "Hn6yynQuh4HP3HtmUnP1D3mrsiNThopgzVDxYxY5xU72"  , true   , 3 , false );
     }
 }
+*/

@@ -16,6 +16,8 @@ secp256k1
 fastcgi++
 build
 api/apitool
+*.gch
+unit_tests
 api/apitool_generated__*
 *.class
 *.swp

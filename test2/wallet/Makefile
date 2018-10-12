@@ -1,17 +1,14 @@
-CPPS := $(wildcard *.cpp)
-HS := $(wildcard *.h)
-INC := ../..
+CPPS := $(wildcard *.cpp) $(wildcard */*.cpp)
+HS := $(wildcard *.h) $(wildcard */*.h)
 CXXFLAGS = -O0 -g -std=c++17
 
-all: buildWalletTest
+.PHONY: all
+all: clean ut_wallet
 
-buildWalletTest:
-	g++ ${CXXFLAGS} -I${INC} ${CPPS} -pthread -lcrypto++ -I../../.. -L../../gov -L/usr/lib -lusgov -o walletTest.o
+ut_wallet:
+	g++ ${CXXFLAGS} -I./ -I../ -I../../ -I../../../ ${HS} -pthread -lcrypto++ -lgtest -L../../gov -L../../wallet -L/usr/lib -lusgov -c ${CPPS}
 
 clean:
 	find . -name "*.o" -delete
+	find . -name "*.gch" -delete
 	find . -name "*.class" -delete
-
-.PHONY: runTest
-runTest:
-	echo 'hello'

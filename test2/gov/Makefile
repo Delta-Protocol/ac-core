@@ -1,18 +1,19 @@
-CPPS := $(wildcard *.cpp)
-HS := $(wildcard *.h)
+CPPS := $(wildcard *.cpp) $(wildcard */*.cpp)
+HS := $(wildcard *.h) $(wildcard */*.h)
 INC := ../../..
 CXXFLAGS = -O0 -g -std=c++17
-GOVUNITS := $(wildcard ./*/*.o)
+GOVUNITS := $(wildcard ./*/*.o) $(wildcard */*.o) $(wildcard .o)
 
 export CXXFLAGS
 
 .PHONY: all
-all: clean unit_tests
+all: clean ut_gov
 
-unit_tests:
-	g++ ${CXXFLAGS} -I${INC} ${CPPS} ${GOVUNITS} -pthread -lsecp256k1 -lcrypto++ -lusgov -L/usr/lib -L../../../us/gov -o unit_tests.o
+ut_gov:
+	g++ ${CXXFLAGS} -I${INC} ${HS} ${GOVUNITS} -pthread -lsecp256k1 -lcrypto++ -lusgov -lgtest -L/usr/lib -L../../../us/gov -c ${CPPS}
 
 clean:
 	find . -name "*.o" -delete
+	find . -name "*.gch" -delete
 	find . -name "*.class" -delete
 	
