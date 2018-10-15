@@ -5,48 +5,37 @@
 
 #include "client.h"
 
-namespace us { namespace gov {
-namespace socket {
-	using namespace std;
-	struct daemon;
+namespace us { namespace gov { namespace socket {
+using namespace std;
 
-	struct peer_t: client {
-	typedef client b;
+class daemon;
 
-	peer_t();
-	peer_t(int sock);
-	virtual ~peer_t();
-        void process_pong();
+class peer_t: public client {
+public:
+
+    peer_t();
+    peer_t(int sock);
+    virtual ~peer_t();
+
+    void process_pong();
 	bool is_slow() const; //take a lock before call
 
-        bool ping();
+    bool ping();
+    bool process_work(datagram* d);
 
-	bool process_work(datagram* d);
-//	virtual void ready() override;
-	void dump(ostream& os) const {
-	}
-	virtual void dump_all(ostream& os) const override {
-		dump(os);
-		b::dump_all(os);
-	}
+    void dump(ostream& os) const {}
+    virtual void dump_all(ostream& os) const override {
+        dump(os);
+        client::dump_all(os);
+    }
 
-        //virtual string connect(const string& host, uint16_t port, bool block=false) override;
-        virtual void disconnect() override;
-
+    virtual void disconnect() override;
     virtual void on_detach() override;
 
-//    virtual bool read_ready() const override { return idle.load(); }
+    daemon* parent{0};
+};
 
-
-
-	daemon* parent{0};
-	// chrono::microseconds latency;
-
-//     mutable mutex mx_idle;
-//     atomic<bool> idle{true};
-	};
-}
-}}
+}}}
 
 #endif
 

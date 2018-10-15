@@ -160,7 +160,7 @@ pair<string,datagram*> client::recv(uint16_t expected_service) { //caller owns t
         return move(r);
     }
     datagram*d=r.second;
-    while(true) { ///delete garbage injected by hackers, discovered when gov trolled wallet with vote mesages
+    while(true) { ///delete garbage injected by hackers
         if (d->service==us::gov::protocol::gov_socket_error) {
             return move(r);
         }

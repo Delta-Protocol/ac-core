@@ -1,3 +1,4 @@
+#include <signal.h>
 #include "fcgi.h"
 #include <us/gov/cash.h>
 #include <us/gov/crypto.h>

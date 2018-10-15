@@ -1,3 +1,5 @@
+#include <signal.h>
+
 #include <us/gov/auth.h>
 #include <us/gov/engine.h>
 #include <us/gov/cash.h>
