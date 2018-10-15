@@ -4,10 +4,8 @@
 #include <stdint.h>
 #include <us/gov/peer/protocol.h>
 
-namespace us { namespace gov {
-namespace protocol {
-	static constexpr uint16_t loan_base{800};
-}
-}}
+namespace us { namespace gov { namespace protocol {
+    static constexpr uint16_t loan_base{800};
+}}}
 
 #endif
