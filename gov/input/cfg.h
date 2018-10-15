@@ -5,12 +5,11 @@
 #include <vector>
 #include "cfg1.h"
 
-namespace us { namespace gov { 
-namespace input {
+namespace us { namespace gov { namespace input {
 using namespace std;
 
-struct cfg: cfg1 {
-    typedef cfg1 b;
+class cfg: public cfg1 {
+public:
 
     cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes);
     cfg(const cfg& other);
@@ -22,9 +21,6 @@ struct cfg: cfg1 {
 
 typedef cfg cfg_daemon;
 
-}
-}}
-                                                                
+}}}
 
 #endif
-
