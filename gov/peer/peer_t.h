@@ -1,68 +1,56 @@
 #ifndef USGOV_e71c29d5f8c07b8000435dfe6a5f1e49605b1b2041dad14a3ac898464ed5dd49
 #define USGOV_e71c29d5f8c07b8000435dfe6a5f1e49605b1b2041dad14a3ac898464ed5dd49
 
-//#include <us/gov/socket/peer_t.h>
-#include <us/gov/auth/peer_t.h>
-#include <vector>
-#include <thread>
-#include <iostream>
-#include <random>
-#include <algorithm>
-#include <sstream>
-#include <chrono>
-#include <cassert>
 #include <array>
-#include <unordered_set>
-namespace us { namespace gov {
-namespace peer {
-	using namespace std;
+#include <chrono>
+#include <cstdint>
+#include <iostream>
+#include <string>
 
-	struct daemon;
-//	struct peer_t: socket::peer_t {
-	struct peer_t: auth::peer_t {
-//		typedef socket::peer_t b;
-		typedef auth::peer_t b;
+#include "us/gov/auth/peer_t.h"
 
-		using datagram=socket::datagram;
+namespace us { namespace gov { namespace peer {
+using namespace std;
 
-		enum stage_t {
-			disconnected=0,
-			connected,
-			exceed_latency,
-			service,
-			disconnecting,
-			num_stages
-		};
-		constexpr static array<const char*,num_stages> stagestr={"disconnected","connected","latency","service","disconnecting"};
-//		constexpr static array<const char*,2> modestr={"tor","ip4"};
-		peer_t(int sock);
-		virtual ~peer_t();
-		//datagram* complete_datagram();
+class daemon;
 
-		//bool process_work(datagram* d);
-/*
-		void set_mode(int m) {
-			lock_guard<mutex> lock(mx);
-			mode=m;
-		}
-*/
-        virtual string connect(const string& host, uint16_t port, bool block=false) override;
-		virtual void disconnect() override;
+class peer_t: public auth::peer_t {
+public:
 
-		void dump(ostream& os) const;
-                virtual void dump_all(ostream& os) const override {
-                        dump(os);
-                        b::dump_all(os);
-                }
-		chrono::steady_clock::time_point sent_ping;
-		chrono::steady_clock::time_point since;
-//		int mode; //0 tor; 1 ip4
-		stage_t stage;
+    using datagram=socket::datagram;
+    enum stage_t {
+        disconnected=0,
+        connected,
+        exceed_latency,
+        service,
+        disconnecting,
+        num_stages
+    };
 
-	};
+    constexpr static
+    array<const char*,num_stages> stagestr={"disconnected",
+                                            "connected",
+                                            "latency",
+                                            "service",
+                                            "disconnecting"};
 
-}
-}}
+    peer_t(int sock);
+    virtual ~peer_t();
+    virtual string connect(const string& host, uint16_t port, bool block=false) override;
+    virtual void disconnect() override;
+
+    void dump(ostream& os) const;
+    virtual void dump_all(ostream& os) const override {
+        dump(os);
+        auth::peer_t::dump_all(os);
+    }
+
+    chrono::steady_clock::time_point sent_ping;
+    chrono::steady_clock::time_point since;
+    stage_t stage;
+};
+
+}}}
 
 #endif
 

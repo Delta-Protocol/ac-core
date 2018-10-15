@@ -3,11 +3,8 @@
 
 #include <inttypes.h>
 
-namespace us { namespace gov {
-namespace protocol {
-
-	static constexpr uint16_t peer_base{300};
-}
-}}
+namespace us { namespace gov { namespace protocol {
+    static constexpr uint16_t peer_base{300};
+}}}
 
 #endif
