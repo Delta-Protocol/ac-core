@@ -13,7 +13,7 @@ struct peer_t: auth::peer_t {
    virtual ~peer_t();
 
    virtual bool authorize(const pub_t& p) const override {
-        return static_cast<wallet_daemon*>(parent)->authorize(p);
+        return static_cast<wallet_daemon*>(m_parent)->authorize(p);
    }
    virtual const keys& get_keys() const;
 

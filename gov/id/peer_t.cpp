@@ -182,8 +182,8 @@ string c::get_random_message() {
 }
 
 const c::keys& c::get_keys() const {
-    assert(parent!=0);
-    return static_cast<const daemon*>(parent)->get_keys();
+    assert(m_parent!=0);
+    return static_cast<const daemon*>(m_parent)->get_keys();
 }
 
 
@@ -198,7 +198,7 @@ bool c::process_work(datagram*d) {
 }
 
 string c::run_auth_responder() {
-    assert(parent==0); //this object should not be managed by a daemon to use this function
+    assert(m_parent==0); //this object should not be managed by a daemon to use this function
 
     while(!program::_this.terminated) {
         if (stage_peer==verified || stage_peer==verified_fail) {

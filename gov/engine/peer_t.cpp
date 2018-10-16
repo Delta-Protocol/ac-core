@@ -20,10 +20,10 @@ void c::verification_completed() {
 		return;
     }
 
-    static_cast<networking*>(parent)->parent->auth_app->basic_auth_completed(this);
+    static_cast<networking*>(m_parent)->parent->auth_app->basic_auth_completed(this);
 
     if (unlikely(stage==sysop)) { // override logic of layer below
-        if (static_cast<networking*>(parent)->parent->sysop_allowed) {
+        if (static_cast<networking*>(m_parent)->parent->sysop_allowed) {
             us::gov::auth::peer_t::stage=us::gov::auth::peer_t::authorized;
             send(new datagram(us::gov::protocol::sysop,"go ahead"));
         }
@@ -46,12 +46,12 @@ void c::dump(ostream& os) const {
 
 
 const keys& c::get_keys() const {
-    assert(parent != 0);
-    return static_cast<id::daemon*>(parent)->get_keys();
+    assert(m_parent != 0);
+    return static_cast<id::daemon*>(m_parent)->get_keys();
 }
 
 bool c::authorize(const pubkey_t& p) const {
-    if(unlikely(parent == 0)) return true;
-    return not static_cast<id::daemon*>(parent)->is_duplicate(p);
+    if(unlikely(m_parent == 0)) return true;
+    return not static_cast<id::daemon*>(m_parent)->is_duplicate(p);
 }
 

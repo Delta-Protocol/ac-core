@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "daemon.h"
 #include "protocol.h"
 
@@ -78,7 +80,7 @@ void daemon::add_peers(peers_t& a) {
         }
         --n;
     }
-    if (m>0) clients.read_sockets();
+    if (m>0) m_clients.read_sockets();
 }
 
 vector<peer_t*> daemon::in_service() const {

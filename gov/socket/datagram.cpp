@@ -20,14 +20,14 @@ using namespace us::gov::socket;
 constexpr size_t datagram::h;
 constexpr size_t datagram::maxsize;
 
-datagram::datagram(): dend(0) {
+datagram::datagram(): m_dend(0) {
 }
 
 datagram::datagram(uint16_t service):service(service) {
     resize(h);
     encode_size(size());
     encode_service(service);
-    dend=size();
+    m_dend=size();
 }
 
 datagram::datagram(uint16_t service, uint16_t payload):service(service) {
@@ -36,7 +36,7 @@ datagram::datagram(uint16_t service, uint16_t payload):service(service) {
     encode_service(service);
     (*this)[h]=payload&0xff;
     (*this)[h+1]=payload>>8; //&0xff;
-    dend=size();
+    m_dend=size();
 }
 
 datagram::datagram(uint16_t service, const string& payload):service(service) {
@@ -45,7 +45,7 @@ datagram::datagram(uint16_t service, const string& payload):service(service) {
     encode_size(size());
     encode_service(service);
     ::memcpy(&(*this)[h],payload.c_str(),payload.size()); //no trailing zro
-    dend=size();
+    m_dend=size();
 }
 
 void datagram::encode_size(uint32_t sz) {
@@ -81,7 +81,7 @@ uint16_t datagram::decode_service() const {
 }
 
 bool datagram::completed() const {
-    return dend==size() && !empty();
+    return m_dend==size() && !empty();
 }
 
 #ifdef SIM
@@ -118,9 +118,9 @@ string datagram::recvfrom(int sock) {
         return "Error. Connection is closed.";
     }
 
-    if (dend<h) {
+    if (m_dend<h) {
         if (size()<h) resize(h);
-        ssize_t nread = ::recv(sock, &(*this)[dend], h-dend, 0);
+        ssize_t nread = ::recv(sock, &(*this)[m_dend], h-m_dend, 0);
         if (unlikely(nread<=0)) {
             if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024
                 return "Timeout waiting for data from peer.";
@@ -130,8 +130,8 @@ string datagram::recvfrom(int sock) {
             }
         }
 
-        dend+=nread;
-        if (dend<h) {
+        m_dend+=nread;
+        if (m_dend<h) {
             return ""; //need to recv more
         }
         uint32_t sz=decode_size();
@@ -140,12 +140,12 @@ string datagram::recvfrom(int sock) {
         }
         resize(sz);
         service=decode_service();
-        if (dend==sz) {
+        if (m_dend==sz) {
             return "";
         }
     }
 
-    ssize_t nread = ::recv(sock, &(*this)[dend], size()-dend,0);
+    ssize_t nread = ::recv(sock, &(*this)[m_dend], size()-m_dend,0);
     if (nread<=0) {
         if (errno==EINPROGRESS || errno==EAGAIN) { //https://stackoverflow.com/questions/2876024
             return "Error.3 Timeout waiting for data from peer.";
@@ -154,7 +154,7 @@ string datagram::recvfrom(int sock) {
             return "Error. Incoming datagram is too big.";
         }
     }
-    dend+=nread;
+    m_dend+=nread;
     return "";
 }
 #endif

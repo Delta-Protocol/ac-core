@@ -56,7 +56,7 @@ namespace id {
 
 		virtual void verification_completed() {}
 
-		daemon* get_parent() { return reinterpret_cast<daemon*>(parent); }
+		daemon* get_parent() { return reinterpret_cast<daemon*>(m_parent); }
 
         virtual const keys& get_keys() const;
         virtual string run_auth_responder();

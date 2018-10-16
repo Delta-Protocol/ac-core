@@ -24,13 +24,13 @@ void peer_t::on_detach() {
         this_thread::yield(); //spinlock
         if (!m_busy.load()) break;
     }
-    parent=0;  
+    m_parent=0;
     disconnect();
 }
 
 void peer_t::disconnect() {
-    if (parent) { //managed client
-        parent->detach(this);
+    if (m_parent) { //managed client
+        m_parent->detach(this);
     }
     else {
         client::disconnect();
@@ -58,12 +58,12 @@ bool peer_t::process_work(datagram* d) { //executed by thread from pool
 void peer_t::process_pong() {
 }
 
-
 bool peer_t::ping() {
     return send(new datagram(protocol::gov_socket_ping,"ping")).empty();
 }
 
-bool peer_t::is_slow() const {
-    return false;
+void peer_t::dump_all(ostream& os) const {
+    dump(os);
+    client::dump_all(os);
 }
 

@@ -7,10 +7,6 @@
 #include "ctpl_stl.h"
 #include "server.h"
 
-namespace ctpl {
-class thread_pool;
-} /* namespace ctpl */
-
 namespace us { namespace gov { namespace socket {
 using namespace std;
 
@@ -25,22 +21,26 @@ public:
     virtual ~daemon();
 
     void run();
+    void dump(ostream& os) const;
+
+protected:
+
+    virtual void daemon_timer() {}
+    virtual bool process_work(peer_t *c, datagram*d);
+
     virtual void on_finish() override;
     virtual client* create_client(int sock) override;
     virtual void receive_and_process(client*) override;
     virtual void attach(client*,bool wakeupselect=true) override;
 
-    virtual void daemon_timer() {}
-    virtual bool process_work(peer_t *c, datagram*d);
-
-    void process_work(peer_t *c);
-    void send(int num, peer_t* exclude, datagram* d);
-
-    void dump(ostream& os) const;
-
     ctpl::thread_pool* m_pool{0};
 
-    struct perf_t {
+private:
+
+    void process_work(peer_t *c);
+
+    class perf_t {
+    public:
         struct disconnections_t {
             struct datagram_t {
                 uint64_t normal{0};
@@ -55,7 +55,7 @@ public:
         disconnections_t disconnections;
     };
 
-    perf_t perf;
+    perf_t m_perf;
 };
 
 }}}

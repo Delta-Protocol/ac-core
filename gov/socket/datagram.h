@@ -13,9 +13,8 @@ namespace us { namespace gov { namespace socket {
 using namespace std;
 
 class datagram: public vector<uint8_t> {
-public:
 
-    typedef vector<uint8_t> b;
+public:
 
     typedef crypto::ripemd160 hasher_t;
     typedef hasher_t::value_type hash_t;
@@ -32,22 +31,21 @@ public:
     hash_t compute_hash() const;
     hash_t compute_payload_hash() const;
 
-    static string service_str(uint16_t svc);
-    inline string service_str() const { return service_str(service); }
-
     string sendto(int sock) const;
     string recvfrom(int sock);
 
-    vector<string> parse_strings() const;
     string parse_string() const;
     uint16_t parse_uint16() const;
 
     void dump(ostream&) const;
 
     uint16_t service;
-    size_t dend;
 
 private:
+
+    size_t m_dend;
+    static string service_str(uint16_t svc);
+    inline string service_str() const { return service_str(service); }
 
     uint32_t decode_size() const;
     uint16_t decode_service() const;

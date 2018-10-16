@@ -33,8 +33,8 @@ daemon::~daemon() {
 
 void daemon::attach(client*c, bool wakeupselect) {
     assert(c!=0);
-    assert(static_cast<peer_t*>(c)->parent==0);
-    static_cast<peer_t*>(c)->parent=this;
+    assert(static_cast<peer_t*>(c)->m_parent==0);
+    static_cast<peer_t*>(c)->m_parent=this;
     server::attach(c, wakeupselect);
 }
 
@@ -73,7 +73,7 @@ void daemon::receive_and_process(client* c) {
     }
     else {
         c->disconnect();
-        ++perf.disconnections.thread_pool.full;
+        ++m_perf.disconnections.thread_pool.full;
     }
 }
 
@@ -95,13 +95,13 @@ void daemon::process_work(peer_t *c) {
         if (!processed) {
             delete r.second;
             c->disconnect();
-            ++perf.disconnections.datagram.unknown_service;
+            ++m_perf.disconnections.datagram.unknown_service;
         }
         break;
     }
 
     c->m_busy.store(false);
-    clients.read_sockets(); //might have more datagrams to process
+    m_clients.read_sockets(); //might have more datagrams to process
 }
 
 bool daemon::process_work(socket::peer_t *c, datagram*d) {

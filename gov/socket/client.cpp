@@ -112,7 +112,7 @@ string client::init_sock(const string& host, uint16_t port, bool block) {
             while(true) {
                 int a=getpeername(m_sock, (struct sockaddr*)&addr, &lena);
                 if (a==0) break;
-                if (chrono::duration_cast<std::chrono::milliseconds>(clock::now() - t1).count()>500) {
+                if (chrono::duration_cast<chrono::milliseconds>(clock::now() - t1).count()>500) {
                     return "Error. Timeout obtaining peername";
                 }
                 this_thread::sleep_for(10ms);
@@ -154,13 +154,13 @@ pair<string,datagram*> client::send_recv(datagram* d) {
     return recv();
 }
 
-pair<string,datagram*> client::recv(uint16_t expected_service) { //caller owns the returning object
+pair<string,datagram*> client::recv(uint16_t expected_service) {
     auto r=recv();
     if (!r.first.empty()) {
         return move(r);
     }
     datagram*d=r.second;
-    while(true) { ///delete garbage injected by hackers
+    while(true) { //delete garbage injected by hackers
         if (d->service==us::gov::protocol::gov_socket_error) {
             return move(r);
         }
@@ -176,10 +176,10 @@ pair<string,datagram*> client::recv(uint16_t expected_service) { //caller owns t
         }
         d=r.second;
     }
-    return make_pair("",d);
+    return make_pair("",d); //caller owns the returning object
 }
 
-pair<string,datagram*> client::recv() { //caller owns the returning object
+pair<string,datagram*> client::recv() {
     pair<string,datagram*> r;
     r.second=new datagram();
     while(!program::_this.terminated) {
@@ -195,7 +195,7 @@ pair<string,datagram*> client::recv() { //caller owns the returning object
             break;
         }
     }
-    return move(r);
+    return move(r); //caller owns the returning object
 }
 
 string client::send(datagram* d) {

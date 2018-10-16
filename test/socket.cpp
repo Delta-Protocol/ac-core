@@ -21,7 +21,7 @@ void test_1(int serviceNumber){
 
 	//constructors results
 	cout << "resize(h) ---d.h----->  " << d.h << endl;
-	cout << "d.dend = d.size()---->  " << d.dend << " - " << d.size() << endl;
+	cout << "d.dend = d.size()---->  " << d.m_dend << " - " << d.size() << endl;
 	cout << "d.size--------------->  " << d.size() << endl;
 
 	//rest of the code--------------------------------------
@@ -43,7 +43,7 @@ void test_2(int serviceNumber, int payloadNumber){
 
 	//constructors results
 	cout << "resize(h+2) ----------------->  " << d.h+2  << endl;
-	cout << "dend=size() ----------------->  " << d.dend << " - " << d.size() << endl;
+	cout << "dend=size() ----------------->  " << d.m_dend << " - " << d.size() << endl;
 
 	//rest of the code--------------------------------------
 	cout << "maxsize---------> " << d.maxsize << endl;
@@ -67,7 +67,7 @@ void test_3(int serviceNumber , string payloadString){
 	cout << "h--------------------------------> " << d.h 			    << endl;
 	cout << "d.payloadString.size() ----------> " << payloadString.size()       << endl;
 	cout << "d.size()-------------------------> " << d.size()                   << endl;
-	cout << "dend=size()----------------------> " << d.dend << " - "<< d.size() << endl;
+	cout << "dend=size()----------------------> " << d.m_dend << " - "<< d.size() << endl;
 
 	//rest of the code-------------------------------------
 	cout << "parse_string()--> " << "\""             << d.parse_string() << "\"" << endl;
@@ -93,7 +93,7 @@ class TestDatagram {
   
       bool test_data(const int& dend, const int& size,  const int& service , const string& hash ,const int& complete ) //const int& error ,
 	{ 
-		if( d.dend != dend || d.size()!= size || d.service != service ||  d.compute_hash().to_b58() != hash || d.completed() != complete) //d.error != error || 
+		if( d.m_dend != dend || d.size()!= size || d.service != service ||  d.compute_hash().to_b58() != hash || d.completed() != complete) //d.error != error || 
 		{ 
 			assert (false);
 		}

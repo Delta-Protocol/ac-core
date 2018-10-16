@@ -14,6 +14,6 @@ c::~peer_t() {
 }
 
 const c::keys& c::get_keys() const {
-    return static_cast<wallet_daemon*>(parent)->id;
+    return static_cast<wallet_daemon*>(m_parent)->id;
 }
 

@@ -14,10 +14,10 @@
 using namespace std;
 using namespace us::gov::socket;
 
-server::server():port(0) {
+server::server():m_port(0) {
 }
 
-server::server(uint16_t p):port(p) {
+server::server(uint16_t p):m_port(p) {
 }
 
 server::~server() {
@@ -32,7 +32,10 @@ int server::make_socket (uint16_t port) {
         return 0;
     }
 
-    { int optval = 1; setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval); }
+    {
+        int optval = 1;
+        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+    }
 
     name.sin_family = AF_INET;
     name.sin_port = htons (port);
@@ -58,18 +61,18 @@ return false;
 }
 
 void server::on_finish() {
-    clients.read_sockets();
+    m_clients.read_sockets();
 }
 
 void server::attach(client*c, bool wakeupselect) {
     assert(c);
     assert(c->m_sock!=0);
-    clients.add(c,wakeupselect);
+    m_clients.add(c,wakeupselect);
 }
 
 void server::detach(client*c) {
     assert(c);
-    clients.remove(c);
+    m_clients.remove(c);
 }
 
 void server::clients_t::add(client* c, bool wakeupselect) {
@@ -199,10 +202,10 @@ void server::clients_t::attic_t::purge() {
 
 void server::dump(ostream& os) const {
     os << "Hello from socker::server" << endl;
-    os << "Listening socket: " << sock << endl;
+    os << "Listening socket: " << m_sock << endl;
     os << "Clients: " << endl;
 
-    clients.dump(os);
+    m_clients.dump(os);
 }
 
 void server::clients_t::dump(ostream& os) const {
@@ -281,27 +284,27 @@ void server::run() {
     int i;
     struct sockaddr_in clientname;
     unsigned int size;
-    assert(port);
-    sock = make_socket(port);
+    assert(m_port);
+    m_sock = make_socket(m_port);
 
-    if (!sock) {
+    if (!m_sock) {
         cerr << "error making socket" << endl;
         program::_this.finish();
         return;
     }
 
-    if (::listen (sock, 1) < 0) {
+    if (::listen (m_sock, 1) < 0) {
         cerr << "error listen" << endl;
-        close(sock);
-        sock=0;
+        close(m_sock);
+        m_sock=0;
         program::_this.finish();
         return;
     }
 
-    auto r=clients.locli.connect("127.0.0.1",port);
+    auto r=m_clients.locli.connect("127.0.0.1",m_port);
     if (unlikely(!r.empty())) {
-        close(sock);
-        sock=0;
+        close(m_sock);
+        m_sock=0;
         cerr << "failed connecting the loopback client. " << r << endl;
         program::_this.finish();
         return;
@@ -310,10 +313,10 @@ void server::run() {
     // Initialize the set of active sockets.
     int loopback;
     size = sizeof (clientname);
-    loopback = ::accept(sock, (struct sockaddr *) &clientname,&size);
+    loopback = ::accept(m_sock, (struct sockaddr *) &clientname,&size);
     if (loopback < 0) {
         cerr << "error in ::accept" << endl;
-        close(sock);
+        close(m_sock);
         program::_this.finish();
         return;
     }
@@ -323,9 +326,9 @@ void server::run() {
 
     while (true) {
         FD_ZERO(&read_fd_set);
-        FD_SET(sock,&read_fd_set);
+        FD_SET(m_sock,&read_fd_set);
         FD_SET(loopback,&read_fd_set);
-        vector<int> sl=clients.update();
+        vector<int> sl=m_clients.update();
 
         for (auto& i:sl) {
             assert(i!=0);
@@ -342,10 +345,10 @@ void server::run() {
             ::recv(loopback,&discard,4,0);
         }
 
-        if (FD_ISSET(sock, &read_fd_set)) {
+        if (FD_ISSET(m_sock, &read_fd_set)) {
             int nnew;
             size = sizeof (clientname);
-            nnew = ::accept(sock, (struct sockaddr *) &clientname,&size);
+            nnew = ::accept(m_sock, (struct sockaddr *) &clientname,&size);
 
             if (nnew < 0) {
                 cerr << "error in ::accept 2" << endl;
@@ -365,8 +368,8 @@ void server::run() {
             if (likely(!FD_ISSET (i, &read_fd_set))) continue;
 
             //no need lock, this thread is the only that changes size of clients
-            auto c=clients.find(i);
-            if (unlikely(c==clients.end())) {
+            auto c=m_clients.find(i);
+            if (unlikely(c==m_clients.end())) {
                 cerr << "data arrived for an unknown fd " << i << endl;
                 continue;
             }
@@ -379,10 +382,10 @@ void server::run() {
     }
 
     signal_handler::_this.remove(this);
-    close(sock);
+    close(m_sock);
     close(loopback);
-    sock=0;
+    m_sock=0;
     loopback=0;
-    clients.locli.disconnect();
+    m_clients.locli.disconnect();
 }
 
