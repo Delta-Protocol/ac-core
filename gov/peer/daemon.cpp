@@ -7,10 +7,10 @@ using namespace us::gov;
 using namespace us::gov::peer;
 using namespace std;
 
-daemon::daemon(): edges(0) {
+daemon::daemon(): m_edges(0) {
 }
 
-daemon::daemon(uint16_t port, uint16_t edges): edges(edges), auth::daemon(port,edges) {
+daemon::daemon(uint16_t port, uint16_t edges): m_edges(edges), auth::daemon(port,edges) {
 }
 
 daemon::~daemon() {
@@ -24,20 +24,11 @@ void daemon::daemon_timer() { // network mutation
 
 void daemon::check_latency(const peers_t& a) {
     for (auto&i:a) {
-        if (i->stage==peer_t::connected) {
+        if (i->m_stage==peer_t::connected) {
             cout << "SENDING PING from check_latency" << endl;
             i->ping();
         }
     }
-}
-
-daemon::peers_t daemon::connected_peers() const {
-    auto a=active();
-    peers_t r;
-    for (auto& i : a) {
-        if (i->stage==peer_t::connected) r.push_back(i);
-    }
-    return move(r);
 }
 
 daemon::peers_t daemon::active() const {
@@ -53,7 +44,7 @@ daemon::peers_t daemon::adjust_peer_number() {
 }
 
 void daemon::add_peers(peers_t& a) {
-    int n=edges-a.asize()+1; //must be signed int
+    int n=m_edges-a.asize()+1; //must be signed int
     unordered_set<string> exclude;
     for (auto i:a) if (i!=0) exclude.emplace(i->m_addr);
     int m=0;
@@ -91,7 +82,7 @@ vector<peer_t*> daemon::in_service(const peers_t& a) const {
     vector<peer_t*> ans;
     for (auto& i:a) {
         auto& c=static_cast<peer_t&>(*i);
-        if (c.stage==peer_t::service) ans.push_back(&c);
+        if (c.m_stage==peer_t::service) ans.push_back(&c);
     }
     return move(ans);
 }
@@ -100,7 +91,7 @@ void daemon::purge_slow(peers_t&a) {
     peers_t copy;
     copy.reserve(a.size());
     for (auto& i:a) {
-        if (i->stage==peer_t::exceed_latency) {
+        if (i->m_stage==peer_t::exceed_latency) {
             i->disconnect();
         }
         else {
@@ -116,8 +107,8 @@ daemon::peers_t::iterator daemon::oldest(peers_t& v) const {
     for (auto i=v.begin(); i!=v.end(); ++i) {
         if (*i==0) continue;
         auto& c=static_cast<peer_t&>(**i);
-        if (c.since<cur) {
-            cur=c.since;
+        if (c.m_since<cur) {
+            cur=c.m_since;
             o=i;
         }
     }
@@ -125,7 +116,7 @@ daemon::peers_t::iterator daemon::oldest(peers_t& v) const {
 }
 
 void daemon::purge_excess(peers_t& a) {
-    while (a.asize()>edges) {
+    while (a.asize()>m_edges) {
         auto i=oldest(a);
         if (i==a.end()) break;
         (*i)->disconnect();
@@ -167,7 +158,7 @@ void daemon::send(int num, peer_t* exclude, datagram* d) {
 
 void daemon::dump(ostream& os) const {
     os << "Hello from peer::daemon" << endl;
-    os << "Max edges: " << edges << endl;
+    os << "Max edges: " << m_edges << endl;
     os << "Thread pool size: " << m_pool->size() << endl;
     os << "Active: " << endl;
     active().dump(os);

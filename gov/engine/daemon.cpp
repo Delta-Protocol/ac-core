@@ -360,7 +360,7 @@ local_deltas* c::create_local_deltas() {
 	auto* mg=new local_deltas();
 
 	{
-    lock_guard<mutex> lock(peerd.mx_evidences);
+    lock_guard<mutex> lock(peerd.m_mx_evidences);
 	for (auto&i:apps_) {
 		auto* amg=i.second->create_local_delta(); //
 		if (amg!=0) {

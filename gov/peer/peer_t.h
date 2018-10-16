@@ -11,13 +11,18 @@
 
 namespace us { namespace gov { namespace peer {
 using namespace std;
+using datagram=socket::datagram;
 
 class daemon;
 
 class peer_t: public auth::peer_t {
+
+protected:
+
+    virtual void dump_all(ostream& os) const override;
+
 public:
 
-    using datagram=socket::datagram;
     enum stage_t {
         disconnected=0,
         connected,
@@ -36,18 +41,17 @@ public:
 
     peer_t(int sock);
     virtual ~peer_t();
-    virtual string connect(const string& host, uint16_t port, bool block=false) override;
+
     virtual void disconnect() override;
+    virtual string connect(const string& host,
+                           uint16_t port,
+                           bool block=false) override;
 
     void dump(ostream& os) const;
-    virtual void dump_all(ostream& os) const override {
-        dump(os);
-        auth::peer_t::dump_all(os);
-    }
 
-    chrono::steady_clock::time_point sent_ping;
-    chrono::steady_clock::time_point since;
-    stage_t stage;
+    chrono::steady_clock::time_point m_sent_ping;
+    chrono::steady_clock::time_point m_since;
+    stage_t m_stage;
 };
 
 }}}

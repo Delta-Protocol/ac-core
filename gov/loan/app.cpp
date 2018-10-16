@@ -15,34 +15,30 @@ int local_delta::app_id() const {
 }
 
 app::app() {
-    pool=new loan::local_delta();
-    policies_local=policies;
+    m_pool=new loan::local_delta();
+    m_policies_local=m_policies;
 }
 
 app::~app() {
-    delete pool;
+    delete m_pool;
 }
 
 void app::add_policies() {
-    lock_guard<mutex> lock(mx_pool);
-    lock_guard<mutex> lock2(mx_policies);
+    lock_guard<mutex> lock(m_mx_pool);
+    lock_guard<mutex> lock2(m_mx_policies);
     for (int i=0; i<policies_traits::num_params; ++i)
-        (*pool)[i] = policies_local[i];
+        (*m_pool)[i] = m_policies_local[i];
 }
 
 engine::app::local_delta* app::create_local_delta() {
     add_policies();
-    lock_guard<mutex> lock(mx_pool);
-    auto full=pool;
-    pool=new loan::local_delta();
+    lock_guard<mutex> lock(m_mx_pool);
+    auto full=m_pool;
+    m_pool=new loan::local_delta();
     return full; //send collected transactions to the network
 }
 
 void app::dbhash(hasher_t&) const {
-}
-
-void app::db_t::dump(ostream& os) const {
-    // TO IMPLEMENT
 }
 
 void app::import(const engine::app::delta& gg, const engine::pow_t& w) {
@@ -58,14 +54,21 @@ void us::gov::loan::local_delta::from_stream(istream& is) {
 }
 
 void us::gov::loan::delta::to_stream(ostream& os) const {
-    b::b1::to_stream(os);
+    base_t::b1::to_stream(os);
 
 }
 
 delta* us::gov::loan::delta::from_stream(istream& is) {
     delta* g=new delta();
-    static_cast<b*>(g)->from_stream(is);
+    static_cast<base_t*>(g)->from_stream(is);
     return g;
+}
+
+uint64_t us::gov::loan::delta::merge(engine::app::local_delta* other0) {
+    local_delta* other=static_cast<local_delta*>(other0);
+    auto val=other->m_fees;
+    base_t::merge(other0);
+    return val;
 }
 
 string app::shell_command(const string& cmdline) {
@@ -90,8 +93,8 @@ string app::shell_command(const string& cmdline) {
         is >> n;
         is >> value;
         if (n>=0 && n<policies_traits::num_params) {
-            lock_guard<mutex> lock(mx_policies);
-            policies_local[n]=value;
+            lock_guard<mutex> lock(m_mx_policies);
+            m_policies_local[n]=value;
         }
         else {
             os << "parameter " << n << " not found" << endl;
@@ -107,13 +110,13 @@ string app::shell_command(const string& cmdline) {
 }
 
 void app::dump_policies(ostream& os) const {
-    lock_guard<mutex> lock(mx_policies);
+    lock_guard<mutex> lock(m_mx_policies);
     os << policies_traits::num_params << " consensus variables:" << endl;
 
     for (int i=0; i<policies_traits::num_params; ++i) {
         os << "  " << i << ". " << policies_traits::paramstr[i]
-           << " [avg] consensus value: " << policies[i]
-           << " local value:" << policies_local[i] << endl;
+           << " [avg] consensus value: " << m_policies[i]
+           << " local value:" << m_policies_local[i] << endl;
     }
 }
 
