@@ -1,5 +1,9 @@
-#ifndef USGOV_f06019c0635c00639ca65f74f67bed1a4db6bb3d506993ed4bac336c93eb48bb
-#define USGOV_f06019c0635c00639ca65f74f67bed1a4db6bb3d506993ed4bac336c93eb48bb
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
+#ifndef US_GOV_SOCKET_DAEMON_H
+#define US_GOV_SOCKET_DAEMON_H
 
 #include <cstdint>
 #include <iostream>
@@ -13,9 +17,7 @@ using namespace std;
 class peer_t;
 
 class daemon: public server {
-
 public:
-
     daemon();
     daemon(uint16_t port, int edges);
     virtual ~daemon();
@@ -24,7 +26,6 @@ public:
     void dump(ostream& os) const;
 
 protected:
-
     virtual void daemon_timer() {}
     virtual bool process_work(peer_t *c, datagram*d);
 
@@ -36,7 +37,6 @@ protected:
     ctpl::thread_pool* m_pool{0};
 
 private:
-
     void process_work(peer_t *c);
 
     class perf_t {

@@ -1,5 +1,9 @@
-#ifndef USGOV_9bf343e8ad5f89ce96b35e9e287ad85205c61b8bd324f693e11d2b89c55a1930
-#define USGOV_9bf343e8ad5f89ce96b35e9e287ad85205c61b8bd324f693e11d2b89c55a1930
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
+#ifndef US_GOV_SOCKET_PROTOCOL_H
+#define US_GOV_SOCKET_PROTOCOL_H
 
 #include <inttypes.h>
 

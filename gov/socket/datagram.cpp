@@ -1,20 +1,23 @@
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
 /** @file */
 
 #include "datagram.h"
 
-#include <asm-generic/errno.h>
 #include <asm-generic/errno-base.h>
-#include <errno.h>
+#include <asm-generic/errno.h>
 #include <sys/socket.h>
-#include <unistd.h>
 #include <algorithm>
-#include <cassert>
-#include <cstring>
 #include <iterator>
+#include <unistd.h>
+#include <cassert>
+#include <errno.h>
+#include <cstring>
 
-#include "../likely.h"
+#include "us/gov/likely.h"
 
-using namespace std;
 using namespace us::gov::socket;
 
 constexpr size_t datagram::h;

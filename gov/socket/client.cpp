@@ -1,15 +1,19 @@
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
 #include "client.h"
 
 #include <asm-generic/errno.h>
 #include <asm-generic/socket.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <algorithm>
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
 #include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <unistd.h>
-#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <sstream>
@@ -20,7 +24,6 @@
 #include "us/gov/likely.h"
 #include "protocol.h"
 
-using namespace std;
 using namespace us::gov::socket;
 
 client::client():m_sock(0) {

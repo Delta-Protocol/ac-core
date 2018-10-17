@@ -1,14 +1,18 @@
-#ifndef USGOV_dfd7f74406ecd7bf1a137eafe457ab52dcb9c50fe177017cc67b73de69834ecb
-#define USGOV_dfd7f74406ecd7bf1a137eafe457ab52dcb9c50fe177017cc67b73de69834ecb
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
 
-#include <atomic>
-#include <cstdint>
-#include <iostream>
-#include <mutex>
-#include <string>
-#include <utility>
+#ifndef US_GOV_SOCKET_CLIENT_H
+#define US_GOV_SOCKET_CLIENT_H
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <iostream>
+#include <cstdint>
+#include <utility>
+#include <atomic>
+#include <mutex>
+#include <string>
 
 #include "datagram.h"
 
@@ -16,9 +20,7 @@ namespace us { namespace gov { namespace socket {
 using namespace std;
 
 class client {
-
 private:
-
     void init_sockaddr(struct sockaddr_in *name,
                        const char *hostname,
                        uint16_t port);
@@ -31,7 +33,6 @@ private:
     mutable string m_msg;
 
 public:
-
     atomic<bool> m_busy{false};
     string m_addr;
     int m_sock;

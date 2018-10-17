@@ -1,9 +1,13 @@
-#ifndef USGOV_39bdfeac516fc1718aed51b86fa8d93d0d07d38ad969652da578521c0fd96067
-#define USGOV_39bdfeac516fc1718aed51b86fa8d93d0d07d38ad969652da578521c0fd96067
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
 
+#ifndef US_GOV_SOCKET_DATAGRAM_H
+#define US_GOV_SOCKET_DATAGRAM_H
+
+#include <iostream>
 #include <stddef.h>
 #include <cstdint>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -13,9 +17,7 @@ namespace us { namespace gov { namespace socket {
 using namespace std;
 
 class datagram: public vector<uint8_t> {
-
 public:
-
     typedef crypto::ripemd160 hasher_t;
     typedef hasher_t::value_type hash_t;
 
@@ -42,7 +44,6 @@ public:
     uint16_t service;
 
 private:
-
     size_t m_dend;
     static string service_str(uint16_t svc);
     inline string service_str() const { return service_str(service); }

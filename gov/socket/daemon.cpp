@@ -1,3 +1,7 @@
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
 #include "daemon.h"
 
 #include <atomic>
@@ -9,7 +13,6 @@
 
 #include "us/gov/signal_handler.h"
 #include "us/gov/likely.h"
-
 #include "ctpl_stl.h"
 #include "datagram.h"
 #include "peer_t.h"
@@ -18,7 +21,6 @@ using namespace us::gov::socket;
 using namespace us::gov;
 
 using namespace std::chrono_literals;
-using namespace std;
 
 daemon::daemon():m_pool(0) {
 }
@@ -114,3 +116,4 @@ bool daemon::process_work(socket::peer_t *c, datagram*d) {
 client* daemon::create_client(int sock) {
     return new peer_t(sock);
 }
+

@@ -1,8 +1,13 @@
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
 #include "peer_t.h"
-#include "protocol.h"
-#include <us/gov/likely.h>
+
 #include<thread>
 
+#include "us/gov/likely.h"
+#include "protocol.h"
 #include "daemon.h"
 
 typedef us::gov::socket::peer_t c;
