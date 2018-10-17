@@ -8,14 +8,14 @@
 using namespace std;
 using namespace us::gov::input;
 
-cfg1::cfg1(const keys_t::priv_t& privk, const string& home): keys(privk), cfg0(home) {
-    if (!keys.pub.valid) {
+cfg1::cfg1(const keys_t::priv_t& privk, const string& home): m_keys(privk), cfg0(home) {
+    if (!m_keys.pub.valid) {
         cerr << "Invalid node pubkey" << endl;
         exit(1);
     }
 }
 
-cfg1::cfg1(const cfg1& other): keys(other.keys), cfg0(other) {
+cfg1::cfg1(const cfg1& other): m_keys(other.m_keys), cfg0(other) {
 }
 
 cfg1::~cfg1() {
@@ -72,6 +72,6 @@ cfg1 cfg1::load(const string& home) {
         exit(1);
     }
 
-    return cfg1(pk.second,x.home);
+    return cfg1(pk.second,x.m_home);
 }
 

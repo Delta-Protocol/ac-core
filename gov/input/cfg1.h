@@ -11,7 +11,9 @@ namespace us { namespace gov { namespace input {
 using namespace std;
 
 class cfg1: public cfg0 {
+
 public:
+
     typedef crypto::ec::keys keys_t;
 
     cfg1(const keys_t::priv_t& privk, const string& home);
@@ -23,7 +25,8 @@ public:
     static void write_k(const string& home, const keys_t::priv_t& priv);
  
     static cfg1 load(const string& home);
-    keys_t keys;
+
+    keys_t m_keys;
 };
 
 typedef cfg1 cfg_id;

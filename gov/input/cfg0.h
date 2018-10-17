@@ -7,6 +7,7 @@ namespace us { namespace gov { namespace input {
 using namespace std;
 
 class cfg0 {
+
 public:
 
     cfg0(const string& home);
@@ -23,7 +24,7 @@ public:
     static void mkdir_tree(string sub, string dir);
     static cfg0 load(const string& home);
 
-    string home;
+    string m_home;
 };
 
 typedef cfg0 cfg_filesystem;

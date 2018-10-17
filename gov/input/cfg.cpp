@@ -11,10 +11,10 @@ using namespace std;
 using namespace us::gov::input;
 
 cfg::cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes)
-:cfg1(privk, home), seed_nodes(seed_nodes) {
+:cfg1(privk, home), m_seed_nodes(seed_nodes) {
 }
 
-cfg::cfg(const cfg& other): cfg1(other), seed_nodes(other.seed_nodes) {
+cfg::cfg(const cfg& other): cfg1(other), m_seed_nodes(other.m_seed_nodes) {
 }
 
 cfg::~cfg() {
@@ -50,6 +50,6 @@ cfg cfg::load(const string& home) {
             addrs.push_back(addr);
     }
 
-    return cfg(x.keys.priv,x.home,move(addrs));
+    return cfg(x.m_keys.priv,x.m_home,move(addrs));
 }
 

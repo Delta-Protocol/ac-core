@@ -9,6 +9,7 @@ namespace us { namespace gov { namespace input {
 using namespace std;
 
 class cfg: public cfg1 {
+
 public:
 
     cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes);
@@ -16,7 +17,7 @@ public:
     virtual ~cfg();
 
     static cfg load(const string& home);
-    vector<string> seed_nodes;
+    vector<string> m_seed_nodes;
 };
 
 typedef cfg cfg_daemon;

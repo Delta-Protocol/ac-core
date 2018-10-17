@@ -126,7 +126,7 @@ void open_shell(const params&p) {
 	cfg_id conf=cfg_id::load(homedir);
 
 
-	shell_client peer(conf.keys);
+	shell_client peer(conf.m_keys);
     auto r=peer.connect(p.sysophost,p.port,true);
     if (!r.empty()) {
         p.dump(cerr);
@@ -185,8 +185,8 @@ void run_daemon(const params&p) {
 	using us::gov::input::cfg_daemon;
 	string homedir=p.homedir+"/gov";
 	cfg_daemon conf=cfg_daemon::load(homedir);
-	cout << "Node public key is " << conf.keys.pub << " address " << conf.keys.pub.hash() << endl;
-	engine::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
+	cout << "Node public key is " << conf.m_keys.pub << " address " << conf.m_keys.pub.hash() << endl;
+	engine::daemon d(conf.m_keys,conf.m_home,p.port,p.edges,conf.m_seed_nodes);
 	d.sysop_allowed=p.shell;
 	d.add(new cash::app());
 	d.run();

@@ -125,13 +125,13 @@ int main(int argc, char** argv) {
 
 	cfg conf=cfg::load(p.homedir);
 
-	if (!conf.keys.pub.valid) {
+	if (!conf.m_keys.pub.valid) {
 		cerr << "Invalid node pubkey" << endl;
 		exit(1);
 	}
 
-        cout << "Node public key is " << conf.keys.pub << " address " << conf.keys.pub.hash() << endl;
-	genesis_daemon d(conf.keys,conf.home); //,0,0,vector<string>());
+        cout << "Node public key is " << conf.m_keys.pub << " address " << conf.m_keys.pub.hash() << endl;
+	genesis_daemon d(conf.m_keys,conf.m_home); //,0,0,vector<string>());
 
 //    cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
     d.start_new_blockchain(address);

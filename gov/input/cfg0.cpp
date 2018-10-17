@@ -11,10 +11,10 @@
 using namespace std;
 using namespace us::gov::input;
 
-cfg0::cfg0(const string& home): home(home) {
+cfg0::cfg0(const string& home): m_home(home) {
 }
 
-cfg0::cfg0(const cfg0& other): home(other.home) {
+cfg0::cfg0(const cfg0& other): m_home(other.m_home) {
 }
 
 cfg0::~cfg0() {

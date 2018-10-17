@@ -2,43 +2,45 @@
 #define USGOV_c7f3786a215777af6d278776cd1585700df3c118631b0669869d84d1140ea704
 
 #include <condition_variable>
-#include <mutex>
-#include <chrono>
 #include <unordered_set>
+#include <chrono>
 #include <mutex>
 #include <map>
 
 namespace us { namespace gov {
 using namespace std;
 
-struct signal_handler {
+class signal_handler {
 
-	struct callback {
-		virtual void on_finish()=0;
-	};
+public:
 
-	void sleep_for(const chrono::steady_clock::duration&);
-	void sleep_until(const chrono::steady_clock::time_point&);
+    class callback {
+    public:
+        virtual void on_finish()=0;
+    };
 
-	void finish();
+    void sleep_for(const chrono::steady_clock::duration&);
+    void sleep_until(const chrono::steady_clock::time_point&);
 
-	volatile bool terminated{false};
+    void finish();
 
-	inline void add(callback*i) { callbacks.emplace(i); }
-	inline void remove(callback*i) { callbacks.erase(callbacks.find(i)); }
+    volatile bool terminated{false};
 
-	static signal_handler _this;
+    inline void add(callback*i) { m_callbacks.emplace(i); }
+    inline void remove(callback*i) { m_callbacks.erase(m_callbacks.find(i)); }
+
+    static signal_handler _this;
 
 private:
-	unordered_set<callback*> callbacks;
-	condition_variable cv;
-	mutex mx;
+
+    unordered_set<callback*> m_callbacks;
+    condition_variable m_cv;
+    mutex m_mx;
 };
 
 typedef signal_handler thread_;
 typedef signal_handler program;
 
 }}
-
 
 #endif
