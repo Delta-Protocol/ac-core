@@ -4,7 +4,7 @@
 
 #include "peer_t.h"
 
-#include<thread>
+#include <thread>
 
 #include "us/gov/likely.h"
 #include "protocol.h"

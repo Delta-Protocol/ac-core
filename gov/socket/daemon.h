@@ -13,17 +13,39 @@
 
 namespace us { namespace gov { namespace socket {
 using namespace std;
-
 class peer_t;
 
+/*!
+ * \class daemon
+ *
+ * \brief Daemon running the background until a termination signal is received
+ *
+ * It runs the server in a thread and mange the clients' incoming workload
+ * by using a threadpool.
+ */
 class daemon: public server {
-public:
-    daemon();
-    daemon(uint16_t port, int edges);
-    virtual ~daemon();
+private:
+    class perf_t {
+    public:
+        struct disconnections_t {
+            struct datagram_t {
+                uint64_t normal{0};
+                uint8_t unknown_service{0};
+            };
 
-    void run();
-    void dump(ostream& os) const;
+            struct thread_pool_t {
+                uint64_t full{0};
+            };
+
+            datagram_t datagram;
+            thread_pool_t thread_pool;
+        };
+
+        disconnections_t disconnections;
+    };
+    perf_t m_perf;
+
+    void process_work(peer_t *c);
 
 protected:
     virtual void daemon_timer() {}
@@ -36,26 +58,41 @@ protected:
 
     ctpl::thread_pool* m_pool{0};
 
-private:
-    void process_work(peer_t *c);
+public:
+    /** @brief Default constructor. Initialise the threadpool size to zero
+     *
+     */
+    daemon();
 
-    class perf_t {
-    public:
-        struct disconnections_t {
-            struct datagram_t {
-                uint64_t normal{0};
-                uint8_t unknown_service{0};
-            };
-            struct thread_pool_t {
-                uint64_t full{0};
-            };
-            datagram_t datagram;
-            thread_pool_t thread_pool;
-        };
-        disconnections_t disconnections;
-    };
+    /** @brief Construct the daemon
+     *  @param[in] port server is listening a the specified port
+     *  @param[in] edges initialise the size of the threadpool
+     *
+     */
+    daemon(uint16_t port, int edges);
 
-    perf_t m_perf;
+    /** @brief Virtual destructor
+     *
+     */
+    virtual ~daemon();
+
+    /** @brief Main loop that execute the daemon
+     *  @return Void
+     *
+     *  It creates an istance of the server running in its own thread. The
+     *  server manage the incoming clients connections and each client workload
+     *  will will be added and managed by the threadpool defined in this
+     *  class.
+     *
+     */
+    void run();
+
+    /** @brief Virtual destructor
+     *  @param[in] os output stream to print information to
+     *  @return Void
+     *
+     */
+    void dump(ostream& os) const;
 };
 
 }}}

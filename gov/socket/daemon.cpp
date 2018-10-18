@@ -56,7 +56,7 @@ void daemon::run() {
         while(!thread_::_this.terminated) {
             daemon_timer();
             m_pool->dump(cout);
-            thread_::_this.sleep_for(chrono::seconds(30)); //TODO not every 30 secs but at some safe point in the cycle
+            thread_::_this.sleep_for(chrono::seconds(30));
         }
     }
     listen.join();

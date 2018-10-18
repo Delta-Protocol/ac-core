@@ -6,14 +6,21 @@
 #define US_GOV_SOCKET_PEER_T_H
 
 #include <atomic>
-
 #include "client.h"
 
 namespace us { namespace gov { namespace socket {
 using namespace std;
-
 class daemon;
 
+/*!
+ * \class peer_t
+ *
+ * \brief Extends client functionalities
+ *
+ * It is initialised with the same socket as for the client. A node can have
+ * more than one peer to process workload.
+ *
+ */
 class peer_t: public client {
 private:
     void process_pong();
@@ -24,15 +31,53 @@ protected:
     virtual void on_detach() override;
 
 public:
+    /** @brief Default constructor
+     *
+     *  Initialise the base client socket with identifier 0
+     */
     peer_t();
-    peer_t(int sock);
+
+    /** @brief Constructor with specified socket identifier
+     *  @param[in] sock the socket identifier for communicating
+     *
+     *  Initialise the base client socket with the indentifier provided
+     */
+    explicit peer_t(int sock);
+
+    /** @brief Virtual destructor
+     *
+     */
     virtual ~peer_t();
 
+    /** @brief Send a datagram ping over the established socket
+     *
+     */
     bool ping();
-    bool process_work(datagram* d);
 
+    /** @brief Process a datagram
+     *  @param[in] dgram datagram to process
+     *  @return true if work is processed, false otherwise
+     *
+     *  Based on the work to process it will send the appropriate
+     *  datagram in response
+     */
+    bool process_work(datagram* dgram);
+
+    /** @brief Disconnect peer
+     *
+     *  If the peer is the parent itself (the one who created the new
+     *  neighbour client) then it will detach the client by moving it in
+     *  the list of candidates for disconnection. Otherwise
+     *  just close the socket directly.
+     */
     virtual void disconnect() override;
 
+    /** @brief Member variable holding the pointer to the parent daemon
+     *
+     *  The parent is initialised when the client is created
+     *  by the daemon (in socket layer) and it is used to identify who
+     *  created the peer and access functionalities exposed by the parent only.
+     */
     daemon* m_parent{0};
 };
 
