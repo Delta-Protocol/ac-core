@@ -1,6 +1,11 @@
-#include <algorithm>
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
 
 #include "daemon.h"
+
+#include <algorithm>
+
 #include "protocol.h"
 
 using namespace us::gov;

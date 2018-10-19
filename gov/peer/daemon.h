@@ -1,14 +1,18 @@
-#ifndef USGOV_bf993116c1d89300316c0dd4fa2ef165d5b9128da89d33c44cfe50e95622fce8
-#define USGOV_bf993116c1d89300316c0dd4fa2ef165d5b9128da89d33c44cfe50e95622fce8
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
 
-#include <stddef.h>
-#include <cstdint>
-#include <iostream>
-#include <string>
+#ifndef US_GOV_PEER_DAEMON_H
+#define US_GOV_PEER_DAEMON_H
+
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
+#include <stddef.h>
+#include <iostream>
 #include <sstream>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 #include "us/gov/auth/daemon.h"
 #include "peer_t.h"

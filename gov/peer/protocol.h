@@ -1,10 +1,19 @@
-#ifndef USGOV_43feb86adb9469dd0ab43fe0ccfd2f37615284c9edef0b158f44276e8ee8270f
-#define USGOV_43feb86adb9469dd0ab43fe0ccfd2f37615284c9edef0b158f44276e8ee8270f
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
+#ifndef US_GOV_PEER_PROTOCOL_H
+#define US_GOV_PEER_PROTOCOL_H
 
 #include <inttypes.h>
 
 namespace us { namespace gov { namespace protocol {
-    static constexpr uint16_t peer_base{300};
+
+/** @brief Offset to identify peer protcol layer
+ *
+ */
+static constexpr uint16_t peer_base{300};
+
 }}}
 
 #endif

@@ -1,11 +1,15 @@
-#ifndef USGOV_e71c29d5f8c07b8000435dfe6a5f1e49605b1b2041dad14a3ac898464ed5dd49
-#define USGOV_e71c29d5f8c07b8000435dfe6a5f1e49605b1b2041dad14a3ac898464ed5dd49
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
 
-#include <array>
-#include <chrono>
-#include <cstdint>
+#ifndef US_GOV_PEER_PEER_T_H
+#define US_GOV_PEER_PEER_T_H
+
 #include <iostream>
+#include <cstdint>
 #include <string>
+#include <chrono>
+#include <array>
 
 #include "us/gov/auth/peer_t.h"
 
@@ -16,13 +20,10 @@ using datagram=socket::datagram;
 class daemon;
 
 class peer_t: public auth::peer_t {
-
 protected:
-
     virtual void dump_all(ostream& os) const override;
 
 public:
-
     enum stage_t {
         disconnected=0,
         connected,
@@ -57,4 +58,3 @@ public:
 }}}
 
 #endif
-

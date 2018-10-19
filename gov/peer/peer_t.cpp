@@ -1,8 +1,13 @@
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
+#include "peer_t.h"
+
 #include <iomanip>
 #include <sstream>
 #include <tuple>
 
-#include "peer_t.h"
 #include "daemon.h"
 #include "protocol.h"
 

@@ -9,7 +9,7 @@
 
 namespace us { namespace gov { namespace protocol {
 
-/** @brief Offset to identify this protcol layer
+/** @brief Offset to identify socket protcol layer
  *
  */
 static constexpr uint16_t protocol_suffix{0};

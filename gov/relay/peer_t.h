@@ -1,10 +1,17 @@
-#ifndef USGOV_3d35aa81b0878e69d28258c4aef5f5262a78347f006f491e1a1fecfa3893ec9e
-#define USGOV_3d35aa81b0878e69d28258c4aef5f5262a78347f006f491e1a1fecfa3893ec9e
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
 
-#include <us/gov/peer/peer_t.h>
+#ifndef US_GOV_RELAY_PEER_T_H
+#define US_GOV_RELAY_PEER_T_H
+
+#include "us/gov/peer/peer_t.h"
 
 namespace us { namespace gov { namespace relay {
 
+/** @brief Alias for peer_t type
+ *
+ */
 typedef peer::peer_t peer_t;
 
 }}}
