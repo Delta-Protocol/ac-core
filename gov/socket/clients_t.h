@@ -21,8 +21,8 @@ using namespace std;
  *
  * \brief Hash tables of client objects
  *
- * Manages the client by providing different hash tables, one for each different
- * status a client can be: Active/Wait/Remove/Attic
+ * Manages the client by providing different hash tables, one for each
+ * different status a client can be: Active/Wait/Remove/Attic
  */
 class clients_t: public unordered_map<int,client*> {
 private:
