@@ -39,7 +39,7 @@ public:
 };
 
 class local_delta:public engine::policies_local_delta<hash_t, policies_traits> {
-
+    typedef engine::policies_local_delta<hash_t, policies_traits> base;
 protected:
 
     virtual int app_id() const override;

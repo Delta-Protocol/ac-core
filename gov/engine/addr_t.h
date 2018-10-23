@@ -4,21 +4,19 @@
 #include <string>
 #include <iostream>
 
-namespace us{ namespace gov {
-namespace engine {
+namespace us{ namespace gov{ namespace engine{
 using namespace std;
 
-        struct addr_t {
-            virtual ~addr_t() {}
-            virtual void to_stream(ostream& os) const=0;
-            static addr_t* from_stream(istream& is);
-        };
+class addr_t {
+public:
+    virtual ~addr_t() {}
+    virtual void to_stream(ostream& os) const=0;
+    static addr_t* from_stream(istream& is);
+};
 
+ostream& operator << (ostream& os, const addr_t& o);
 
-    ostream& operator << (ostream& os, const addr_t& o);
-
-}
-}}
+}}}
 
 
 

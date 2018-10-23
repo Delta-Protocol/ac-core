@@ -1,19 +1,18 @@
 #include "tcp_addr.h"
 
-typedef us::gov::engine::tcp_addr c;
 using namespace std;
 using namespace us::gov::engine;
 
-constexpr char c::id;
+constexpr char tcp_addr::m_id;
 
-void c::to_stream(ostream& os) const {
-   os << id << ' ' << address << ' ' << port;
+void tcp_addr::to_stream(ostream& os) const {
+    os << m_id << ' ' << m_address << ' ' << m_port;
 }
 
-c::b* c::from_stream(istream& is) {
-    auto i=new c();
-    is >> i->address;
-    is >> i->port;
+tcp_addr::b* tcp_addr::from_stream(istream& is) {
+    auto i=new tcp_addr();
+    is >> i->m_address;
+    is >> i->m_port;
     return i;
 }
 

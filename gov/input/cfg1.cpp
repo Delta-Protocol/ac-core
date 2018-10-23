@@ -9,7 +9,7 @@ using namespace std;
 using namespace us::gov::input;
 
 cfg1::cfg1(const keys_t::priv_t& privk, const string& home): m_keys(privk), cfg0(home) {
-    if (!m_keys.pub.valid) {
+    if (!m_keys.get_pubkey().is_valid()) {
         cerr << "Invalid node pubkey" << endl;
         exit(1);
     }
@@ -63,7 +63,7 @@ cfg1 cfg1::load(const string& home) {
     string keyfile=k_file(home);
     if (!file_exists(keyfile)) {
         crypto::ec::keys k=crypto::ec::keys::generate();
-        write_k(home,k.priv);
+        write_k(home,k.get_privkey());
     }
 
     auto pk=load_priv_key(home);

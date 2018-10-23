@@ -4,11 +4,11 @@
 #include <us/gov/auth/peer_t.h>
 #include "daemon.h"
 
-namespace us { namespace wallet {
+namespace us{ namespace wallet{
 using namespace std;
 
-struct peer_t: auth::peer_t {
-   typedef auth::peer_t b;
+class peer_t: public auth::peer_t {
+public:
    peer_t(int);
    virtual ~peer_t();
 
@@ -16,27 +16,7 @@ struct peer_t: auth::peer_t {
         return static_cast<wallet_daemon*>(m_parent)->authorize(p);
    }
    virtual const keys& get_keys() const;
-
-/*
-//----------------------------------------------------------------------REMOVE TO ENABLE AUTH AGAIN
-bool process_work(datagram*d) {
-//cout << "PROCESS WORK WALLET PEER" << endl;
-        verification_completed();
-        return false;
-}
-
-
-    //TODO remove when java implements run_auth_responder
-   virtual string run_auth_responder() override {
-cout << "AUTH RESPONDER" << endl;
-        verification_completed();
-        return "";
-   }
-//-/--------------------------------------------------------------------REMOVE TO ENABLE AUTH AGAIN
-
-*/
 };
-
 }}
 
 #endif

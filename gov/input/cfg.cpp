@@ -50,6 +50,6 @@ cfg cfg::load(const string& home) {
             addrs.push_back(addr);
     }
 
-    return cfg(x.m_keys.priv,x.m_home,move(addrs));
+    return cfg(x.m_keys.get_privkey(),x.m_home,move(addrs));
 }
 

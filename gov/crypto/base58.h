@@ -12,17 +12,15 @@
  * - E-mail usually won't line-break if there's no punctuation to break at.
  * - Double-clicking selects the whole string as one word if it's all alphanumeric.
  */
-#ifndef BITCOIN_BASE58_H
-#define BITCOIN_BASE58_H
+#ifndef BASE58_H
+#define BASE58_H
 
 #include <string>
 #include <vector>
 #include <array>
 
-namespace us { namespace gov {
-namespace crypto {
+namespace us{ namespace gov{ namespace crypto{
 namespace b58 {
-	using namespace std;
 
 /**
  * Encode a byte sequence as a base58-encoded string.
@@ -52,9 +50,7 @@ bool decode(const char* psz, std::array<unsigned char,32>&);
  */
 bool decode(const std::string& str, std::vector<unsigned char>& vchRet);
 
-}
-}
-}}
+}}}}
 
 #endif
 

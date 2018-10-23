@@ -3,32 +3,9 @@
 
 #include "../id/daemon.h"
 
-namespace us { namespace gov {
-namespace auth {
-
-using namespace std;
-
-
-typedef id::daemon daemon;
-
-/*
-struct daemon:id::daemon {
-	typedef id::daemon b;
-
-	daemon();
-    daemon(uint16_t port, uint16_t edges);
-	virtual ~daemon();
-
-//	virtual socket::client* create_client(int sock) override=0;
-	void dump(ostream& os) const;
-
-//	virtual bool process_work(socket::peer_t *p, datagram*d) override;
-
-};
-*/
-
-}
-}}
+namespace us{ namespace gov{ namespace auth{
+    typedef id::daemon daemon;
+}}}
 
 #endif
 

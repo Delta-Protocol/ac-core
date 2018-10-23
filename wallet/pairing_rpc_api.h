@@ -4,22 +4,18 @@
 #include "pairing_api.h"
 #include "rpc_api.h"
 
-namespace us{ namespace wallet {
+namespace us{ namespace wallet{
 using namespace std;
 
-    struct pairing_rpc_api: us::wallet::pairing_api, virtual rpc_api {
-        typedef rpc_api b;
-        using us::wallet::pairing_api::pub_t;
+class pairing_rpc_api: public us::wallet::pairing_api, virtual public rpc_api{
+public:
+    using us::wallet::pairing_api::pub_t;
 
-        pairing_rpc_api(const b::keys&k, const string& walletd_host, uint16_t walletd_port);
-        virtual ~pairing_rpc_api();
+    pairing_rpc_api(const rpc_api::keys&k, const string& walletd_host, uint16_t walletd_port);
+    virtual ~pairing_rpc_api();
 
-//#include <us/api/apitool_generated_pairing_functions_cpp_override>
-#include <us/api/apitool_generated__functions_pairing_cpp_override>
-
-    };
-
-
+    #include <us/api/apitool_generated__functions_pairing_cpp_override> //APITOOL
+};
 }}
 
 #endif

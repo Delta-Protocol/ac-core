@@ -3,41 +3,47 @@
 
 #include <us/gov/id/peer_t.h>
 
-namespace us{ namespace gov {
-namespace auth {
+namespace us{ namespace gov{ namespace auth{
 
 using namespace std;
 
-struct peer_t: id::peer_t {
-       typedef id::peer_t b;
-        enum stage_t {
-            denied=0,
-            authorized,
-            num_stages
-        };
-        constexpr static array<const char*,num_stages> stagestr={"denied","authorized"};
+class peer_t: public id::peer_t {
+public:    
+    peer_t(int sock=0):id::peer_t(sock) {}
+    virtual ~peer_t(){}
 
-        peer_t(int sock=0);
-        virtual ~peer_t();
+    enum stage_t {
+        denied=0,
+        authorized,
+        num_stages
+    };
 
-        virtual const keys& get_keys() const=0;
+    void set_stage(stage_t s){
+        m_stage = s;
+    }
 
-        virtual void verification_completed() override;
+    stage_t get_stage() const {
+        return m_stage;
+    }
+    
+protected:
+    virtual const keys& get_keys() const=0;
+    virtual void verification_completed() override;
+    virtual bool authorize(const pubkey_t& p) const=0;
+    virtual void dump_all(ostream& os) const override {
+                                       dump(os);
+                                       id::peer_t::dump_all(os);
+    }
 
-        virtual bool authorize(const pubkey_t& p) const=0;
-        void dump(ostream& os) const;
-        virtual void dump_all(ostream& os) const override {
-                        dump(os);
-                        b::dump_all(os);
-                }
-
-        //virtual string run_auth() override;
-
-        stage_t stage{denied};
+private:
+    void dump(ostream& os) const;
+  
+private:
+    constexpr static array<const char*,num_stages> m_stagestr={"denied","authorized"};
+    stage_t m_stage{denied};
 };
 
-}
-}}
+}}}
 
 #endif
 

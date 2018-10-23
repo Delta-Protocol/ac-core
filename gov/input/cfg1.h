@@ -11,7 +11,6 @@ namespace us { namespace gov { namespace input {
 using namespace std;
 
 class cfg1: public cfg0 {
-
 public:
 
     typedef crypto::ec::keys keys_t;

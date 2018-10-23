@@ -4,68 +4,82 @@
 #include <string>
 #include <unordered_map>
 #include <us/gov/crypto.h>
-//#include "pairing_api.h"
 #include <mutex>
 
-namespace us { namespace wallet {
+namespace us{ namespace wallet{
 using namespace std;
 
-struct pairing {
-	typedef gov::crypto::ec::keys::pub_t pub_t;
-	typedef pub_t::hash_t hash_t;
+class pairing {
+public:
+    typedef gov::crypto::ec::keys::pub_t pub_t;
+    typedef pub_t::hash_t hash_t;
 
     pairing(const string& homedir);
     virtual ~pairing();
 
-//    typedef us::api::pairing api;
-
-    struct device {
-        device() {
-        }
-        device(const pub_t& pub, const string& name): pub(pub), name(name) {
-        }
-        device(const device& other): pub(other.pub), name(other.name) {
-        }
-        static string default_name;
+    class device {
+    friend class pairing; 
+    public:
+        device() {}
+        device(const pub_t& pub, const string& name): m_pub(pub), m_name(name) {}
+        device(const device& other): m_pub(other.m_pub), m_name(other.m_name) {}
 
         void to_stream(ostream&) const;
         static pair<bool,device> from_stream(istream&);
         void dump(ostream& os) const;
 
-        string name;
-        pub_t pub;
-        //int seq{0}; //used to avoid replay attacks
+    private:
+        static string m_default_name;
+        string m_name;
+        pub_t m_pub;
     };
 
-    struct devices_t: unordered_map<hash_t,device> {
+    class devices_t: public unordered_map<hash_t,device> {
+    public:
         devices_t(const string& home);
-        static string not_found;
 
         void load();
         void save() const;
-        void load_(); //caller needs to lock mx
-        void save_() const;  //caller needs to lock mx
-        string file;
-        mutable mutex mx;
-        string home;
+        //caller needs to lock mx  
+        void load_();         
+
+        //caller needs to lock mx
+        void save_() const;  
 
         bool authorize(const pub_t& p) const;
 
         void dump(ostream& os) const;
 
-	string pair_request();
+	string pair_request() const;
         void pair(const pub_t& pub, const string& name);
         void unpair(const pub_t& pub);
-        const string& get_name(const pub_t& pub);
-
-	string msg;
+        const string& get_name(const pub_t& pub) const;
+    private:
+        string m_file;
+        mutable mutex m_mx;
+        string m_home;
+        static string m_not_found;
+	string m_msg;
     };
 
-    devices_t devices;
+public:
+    const devices_t& get_devices() const{
+        return m_devices;
+    }
+
+    void pair(const pub_t& pub, const string& name){
+        m_devices.pair(pub, name);
+    }
+
+    void unpair(const pub_t& pub){
+        m_devices.unpair(pub);
+    }
+
+private:
+    devices_t m_devices;
 };
 
-}
-}
+}}
 
 #endif
 

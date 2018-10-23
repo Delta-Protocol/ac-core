@@ -220,12 +220,12 @@ void tx(us::wallet::wallet_api& wapi, shell_args& args, const params& p, ostream
 	}
 	else if (command=="make_p2pkh") {
         wallet::tx_make_p2pkh_input i;
-        i.rcpt_addr=args.next<cash::hash_t>();
-        i.amount=args.next<cash::cash_t>();
-        i.fee=args.next<cash::cash_t>();
-        i.sigcode_inputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
-        i.sigcode_outputs=args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all);
-        i.sendover=args.next<string>("nopes")=="send";
+        i.set_rcpt_addr(args.next<cash::hash_t>());
+        i.set_amount(args.next<cash::cash_t>());
+        i.set_fee(args.next<cash::cash_t>());
+        i.set_sigcode_inputs(args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all));
+        i.set_sigcode_outputs(args.next<cash::tx::sigcode_t>(cash::tx::sigcode_all));
+        i.set_sendover(args.next<string>("nopes")=="send");
         wapi.tx_make_p2pkh(i,os);
 	}
 	else if (command=="sign") {
@@ -406,12 +406,12 @@ bool run_local(string command, shell_args& args, const params& p) {
         }
         else {
             auto f=cfg_id::load(homedir+"/rpc_client");
-            cout << f.m_keys.pub;
+            cout << f.m_keys.get_pubkey();
         }
     }
 	else if (command=="pair") {
 		pub_t pub=args.next<pub_t>();
-        if (!pub.valid) {
+        if (!pub.is_valid()) {
             os << "Error: Invalid public key";
             ret=false;
         }

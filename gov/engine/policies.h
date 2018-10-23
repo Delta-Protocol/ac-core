@@ -4,21 +4,23 @@
 #include <string>
 #include <array>
 
-namespace us { namespace gov {
-namespace engine {
-	using namespace std;
-	struct param_t {
+namespace us{ namespace gov{ namespace engine{
+using namespace std;
+class param_t {
+public:
+   enum consensus_t { majority=0, 
+                      average, 
+                      median, 
+                      num_types };
+    param_t(int id, consensus_t type): m_id(m_id), m_consensus_type(type) {}
 
-		enum consensus_t { majority=0, average, median, num_types };
-		param_t(int id, consensus_t type): id(id), consensus_type(type) {
-		}
-		constexpr static array<const char*,num_types> typestr={"majority","average","median"};
+    inline bool operator <(const param_t& other) const { return m_id < other.m_id; }
 
-		inline bool operator <(const param_t& other) const { return id < other.id; }
-		int id;
-		consensus_t consensus_type;
-	};
-}}
-}
+private:
+    constexpr static array<const char*,num_types> m_typestr={"majority","average","median"};
+    int m_id;
+    consensus_t m_consensus_type;
+};
+}}}
 #endif
 

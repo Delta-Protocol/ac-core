@@ -4,14 +4,11 @@
 #include <us/gov/input/convert.h>
 #include <us/gov/cash/tx.h>
 
-namespace us{ namespace gov {
-namespace input {
-using namespace std;
+namespace us{ namespace gov {namespace input {
 
-template<> us::gov::cash::tx::sigcode_t convert(const string& s);
+template<> us::gov::cash::tx::sigcode_t convert(const std::string& s);
 
-}
-}}
+}}}
 
 #endif
 

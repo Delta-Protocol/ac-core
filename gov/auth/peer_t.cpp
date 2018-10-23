@@ -1,29 +1,18 @@
 #include "peer_t.h"
-
-typedef us::gov::auth::peer_t c;
-using namespace std;
-
-constexpr array<const char*,c::num_stages> c::stagestr;
-
-c::peer_t(int sock):b(sock) {
-}
-
-c::~peer_t() {
-}
-
 #include <us/gov/engine/daemon.h>
 
-void c::verification_completed() {
-    //b::verification_completed();
-    if (unlikely(!verification_is_fine())) {
+using namespace us::gov::auth;
+using namespace std;
+
+constexpr array<const char*,peer_t::num_stages> peer_t::m_stagestr;
+
+void peer_t::verification_completed() {
+    if (unlikely(!verification_is_fine()) || unlikely(!authorize(get_pubkey()))) {
         return;
     }
-   	if (unlikely(!authorize(pubkey))) {
-        return;
-   	}
-   	stage=authorized;
+    m_stage=authorized;
 }
-void c::dump(ostream& os) const {
-    os << "auth: " << this << ' ' << pubkey << " " << stagestr[stage] << endl;
+void peer_t::dump(ostream& os) const {
+    os << "auth: " << this << ' ' << get_pubkey() << " " << m_stagestr[m_stage] << endl;
 }
 

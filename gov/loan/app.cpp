@@ -43,19 +43,19 @@ void app::dbhash(hasher_t&) const {
 
 void app::import(const engine::app::delta& gg, const engine::pow_t& w) {
     // TO IMPLEMENT
+    cout << "loan: importING appgut2 MULTIPLICITY " << gg.get_multiplicity() << endl;
 }
 
 void us::gov::loan::local_delta::to_stream(ostream& os) const {
-    b::to_stream(os);
+    base::to_stream(os);
 }
 
 void us::gov::loan::local_delta::from_stream(istream& is) {
-    b::from_stream(is);
+    base::from_stream(is);
 }
 
 void us::gov::loan::delta::to_stream(ostream& os) const {
-    base_t::b1::to_stream(os);
-
+    base_t::base_1::to_stream(os);
 }
 
 delta* us::gov::loan::delta::from_stream(istream& is) {

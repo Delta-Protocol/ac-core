@@ -4,35 +4,27 @@
 #include <us/gov/cash/app.h>
 #include <us/gov/cash/tx.h>
 
-namespace us { namespace gov {
-namespace cash {
+namespace us{ namespace gov{ namespace cash{
 
-	struct p2pkh {
-		typedef crypto::ec::keys keys;
-		typedef keys::pub_t pubkey_t;
-		typedef keys::priv_t privkey_t;
-		static hash_t locking_program_hash;
+class p2pkh {
+public:
+    typedef crypto::ec::keys keys;
+    typedef keys::pub_t pubkey_t;
+    typedef keys::priv_t privkey_t;
+        
+    static  hash_t locking_program_hash;
 
-		static bool check_input(const hash_t& addreess, const tx&, const size_t& this_index, const string& locking_program_input);
-		static string create_input(const tx& t, const size_t& this_index, const tx::sigcodes_t&, const privkey_t&);
-		static string create_input(const ec::sigmsg_hasher_t::value_type&, const tx::sigcodes_t&, const privkey_t&);
-	};
-/*
-	struct multisig {
-		typedef app::accounts_t::tx tx;
-		typedef crypto::ec::keys keys;
-		typedef keys::pub_t pubkey_t;
-		typedef keys::priv_t privkey_t;
-		static hash_t locking_program_hash;
+    static bool check_input(const hash_t& addreess, 
+                            const tx&, const size_t& this_index, 
+                            const string& locking_program_input);
 
-		static bool check_input(const hash_t& addreess, const tx&, const size_t& this_index, const string& locking_program_input);
-		static string create_input(const tx& t, const size_t& this_index, const tx::sigcodes_t&, const privkey_t&);
-		static string create_input(const ec::sigmsg_hasher_t::value_type&, const tx::sigcodes_t&, const privkey_t&);
-	};
-*/
+    static string create_input(const tx& t, const size_t& this_index,
+                               const tx::sigcodes_t&, const privkey_t&);
 
-}
-}}
+    static string create_input(const ec::sigmsg_hasher_t::value_type&,
+                               const tx::sigcodes_t&, const privkey_t&);
+};
+}}}
 
 
 #endif

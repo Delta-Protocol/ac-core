@@ -8,37 +8,31 @@
 #include "ec.h"
 #include <stdio.h>
 
-namespace us { namespace gov {
-namespace crypto {
+namespace us{ namespace gov{ namespace crypto{
 
 using CryptoPP::AutoSeededRandomPool;
-using namespace std;
 
-typedef crypto::ec::keys keys;
+class symmetric_encryption {
+public:
+    symmetric_encryption(const ec::keys::priv_t&, const ec::keys::pub_t&);
+    symmetric_encryption(const std::vector<unsigned char>& );
+    const std::vector<unsigned char> encrypt(const std::vector<unsigned char>&);     
+    const std::vector<unsigned char> decrypt(const std::vector<unsigned char>&);
 
-    class symmetric_encryption {
-        AutoSeededRandomPool prng_;
+private: 
+    void set_iv_from_ciphertext(const std::vector<unsigned char>&);  
+private:
+    AutoSeededRandomPool m_prng_;
         
-        const static size_t key_size = 16;
-        const static size_t iv_size = 12;
-        const int tag_size = 16;
+    const static size_t m_key_size = 16;
+    const static size_t m_iv_size = 12;
+    const int m_tag_size = 16;
         
-        unsigned char key_[key_size];
-        unsigned char iv_[iv_size];
-        
-        void set_iv_from_ciphertext(const vector<unsigned char>&);
-       // bool set_agreed_key_value(const keys::priv_t&, const keys::pub_t&);
+    unsigned char m_key_[m_key_size];
+    unsigned char m_iv_[m_iv_size];
+};
 
-        public:
-            symmetric_encryption(const keys::priv_t&, const keys::pub_t&);
-            symmetric_encryption(const vector<unsigned char>& );
-            const vector<unsigned char> encrypt(const vector<unsigned char>&);     //returns an empty vector<unsigned char> if encrypt is unsuccessful.
-            const vector<unsigned char> decrypt(const vector<unsigned char>&);     //returns an empty vector<unsigned char> if decrypt is unsuccessful.
-            
-        };
-
-}
-}}
+}}}
 #endif
 
 

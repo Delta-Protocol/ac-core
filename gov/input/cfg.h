@@ -9,7 +9,6 @@ namespace us { namespace gov { namespace input {
 using namespace std;
 
 class cfg: public cfg1 {
-
 public:
 
     cfg(const keys_t::priv_t& privk, const string& home, vector<string>&& seed_nodes);

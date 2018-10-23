@@ -26,192 +26,217 @@
 #include "syncd.h"
 
 
-namespace us { namespace gov {
-namespace engine {
-	using namespace std;
-	using socket::datagram;
-    using namespace std::chrono;
+namespace us{ namespace gov{ namespace engine{
+using namespace std;
+using socket::datagram;
+using namespace std::chrono;
 
+class daemon {
+public:
+    typedef crypto::ec::keys keys;
 
-	struct daemon {
-		typedef crypto::ec::keys keys;
+    daemon(const keys&, const string& home, 
+           uint16_t port, uint8_t num_edges,const 
+           vector<string>& seed_nodes);
+    daemon(const daemon&)=delete;
+    daemon(daemon&&)=delete;
+    ~daemon();
 
-		daemon(const keys&, const string& home, uint16_t port, uint8_t num_edges,const vector<string>& seed_nodes);
-		daemon(const daemon&)=delete;
-		daemon(daemon&&)=delete;
-		~daemon();
+    void constructor();
 
-		void constructor();
+    void add(app*app);
 
-		void add(app*app);
+    static bool file_exists(const string& f);
 
-		static bool file_exists(const string& f);
+    void eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle);
 
-        void eat_diff(const diff::hash_t& voted_tip, cycle_t& cycle);
+    inline const dfs::daemon& dfs() const { 
+        return m_peerd; 
+    }
+    inline dfs::daemon& dfs() { 
+        return m_peerd; 
+    }
 
-        inline const dfs::daemon& dfs() const { return peerd; }
-        inline dfs::daemon& dfs() { return peerd; }
+public:
+    bool process_work(peer_t *c, datagram*d);
+    bool process_app_query(peer_t *c, datagram*d);
+    bool process_evidence(datagram*d);
 
-		bool process_work(peer_t *c, datagram*d);
-		bool process_app_query(peer_t *c, datagram*d);
-		bool process_evidence(datagram*d);
-		void process_vote_tip(peer_t *c, datagram*d);
+    void on_sync();
+    void list_apps(ostream& os) const;
+    bool sysop_allowed{false};
+    bool get_prev(const string& filename, diff::hash_t& prev) const;
+    string shell_command(int app_id, const string& cmdline) const;
+    void clear();
 
-		void relay(int num, peer_t* exclude, datagram* d) {
-			peerd.send(num,exclude,d);
-		}
+    template<typename T>
+    struct hold: unordered_set<T*> {
+        hold() {}
+        ~hold() {  
+            for (auto p:*this) 
+                delete p;
+        }
 
-        template<typename T>
-        struct hold: unordered_set<T*> {
-            hold() {  
-            }
-            ~hold() {  
-                for (auto p:*this) delete p;
-            }
-            void add(T* d) {
-                unique_lock<mutex> lock(mx);
-                this->emplace(d);
-            }
-            void wait_empty() const {
-                unique_lock<mutex> lock(mx);
-                if(this->empty()) return;
-                cv.wait(lock,[&]{ return this->empty() || program::_this.terminated; });
-            }
-            mutable mutex mx;
-            mutable condition_variable cv;
-        };
-        hold<datagram> evidences_on_hold;
+        void add(T* d) {
+            unique_lock<mutex> lock(mx);
+            this->emplace(d);
+        }
 
-        struct calendar_t: multimap<uint64_t, pair<evidence*, app*>> { //TODO implement < operator to solve deterministicly the order, in the unli$
+        void wait_empty() const {
+            unique_lock<mutex> lock(mx);
+            if(this->empty()) 
+                return;
+            cv.wait(lock,[&]{ return this->empty() || program::_this.terminated; });
+        }
+        mutable mutex mx;
+        mutable condition_variable cv;
+    };
+ 
+    struct calendar_t: multimap<uint64_t, pair<evidence*, app*>> { 
             
-            ~calendar_t() {
-                for (auto&i:*this) delete i.second.first;
-            }
+        ~calendar_t() {
+            for (auto&i:*this) 
+                delete i.second.first;
+        }
             
-            void schedule(evidence * e, app* p) {
-                lock_guard<mutex> lock(mx);
-                emplace(e->ts,make_pair(e,p));
-            }
+        void schedule(evidence * e, app* p) {
+            lock_guard<mutex> lock(mx);
+            emplace(e->get_ts(),make_pair(e,p));
+        }
 
-            mutex mx;
-        };
-
-        calendar_t calendar;
-
-        void on_sync();
-        void flush_evidences_on_hold();
-
-        void dbg_output() const;
-		void vote_tip(const diff& b);
-		void dump(ostream& os) const;
-		void list_apps(ostream& os) const;
-        void evidence_processor();
-
-		bool need_sync(const string& target) const;
-		void sync(const string& target);
-
-		void process_incoming_local_deltas(peer_t *c, datagram*d);
-
-		bool sysop_allowed{false};
-		bool get_prev(const string& filename, diff::hash_t& prev) const;
-
-		void send(const local_deltas& g, peer_t* exclude=0);
-
-        cycle_t cycle;
-
-		void stage1(cycle_t&);
-		void stage2(cycle_t&);
-		bool stage3(cycle_t&);
-		void stage4(cycle_t&);
-		void run();
-
-		void load_head();
-
-		local_deltas* create_local_deltas();
-
-		void update_peers_state();
-
-        void clear(); //clear database
-
-		bool process_sysop_request(peer_t *c, datagram*d);
+        mutex mx;
+    };
 
 
-		bool import(const diff& b);
-		diff::hash_t last_block_imported;
-		mutable mutex mx_import;
-		diff::hash_t get_last_block_imported() const;
-		void set_last_block_imported(const diff::hash_t&);
-		void set_last_block_imported_(const diff::hash_t&);
+    struct apps:unordered_map<int,app*> {
+        virtual ~apps() { 
+            for (auto i:*this) 
+                delete i.second; 
+        }
+        void dump(ostream& os) const;
+        string shell_command(int app_id, const string& cmdline) const;
+    };
 
-		string shell_command(int app_id, const string& cmdline) const;
-		
-		struct apps:unordered_map<int,app*> {
-			virtual ~apps() { for (auto i:*this) delete i.second; }
-			void dump(ostream& os) const;
-			string shell_command(int app_id, const string& cmdline) const;
+    vector<peer_t*> get_nodes() const;
+    bool patch_db(const vector<diff::hash_t>& patches);
+    string get_random_node(const unordered_set<string>& exclude_addrs) const;
+    peer_t* get_random_edge(const peer_t* exclude) const;
+    peer_t* get_random_edge() const;
+    void print_performances(ostream&) const;
 
-		};
+    void run();
+private:
+    void process_vote_tip(peer_t *c, datagram*d);
+    void relay(int num, peer_t* exclude, datagram* d) {
+        m_peerd.send(num,exclude,d);
+    }
 
-		vector<peer_t*> get_nodes() const;
-		vector<peer_t*> get_people();
+private:
+    void flush_evidences_on_hold();
+    void dbg_output() const;
+    void vote_tip(const diff& b);
+    void dump(ostream& os) const;
 
-		bool patch_db(const vector<diff::hash_t>& patches);
-
-		string get_random_node(const unordered_set<string>& exclude_addrs) const;
-		vector<peer_t*> get_nodes(const peer_t* exclude) const;
-		peer_t* get_random_edge(const peer_t* exclude) const;
-
-		const diff::hash_t& dbhash_off() const;
-
-		mutable diff::hash_t cached_dbhash;
-		mutable bool cached_dbhash_ok{false};
-
-		peer_t* get_random_edge() const;
-
-		networking peerd;
-
-		diff* pool{0};
-		mutable mutex mx_pool;
-
-		apps apps_;
-		auth::app* auth_app;
-
-		void print_performances(ostream&) const;
-		string timestamp() const;
-
-//        void start_new_blockchain(const string& addr);
-
-		struct votes_t:unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> { // <pubkey,pair<hash,count>>
-			typedef unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> b;
-			void clear();
-			bool add(const pubkey_t::hash_t&,const diff::hash_t& v);
-			diff::hash_t select();
-			mutex mx;
-		};
-		
-		syncd_t syncd;
-
-		struct sysops_t:unordered_map<peer_t *,shell> {
-			sysops_t(daemon&d): d(d) {}
-			bool process_work(peer_t *p, datagram*d);
-			mutex mx;
-			daemon& d;
-		};
-
-		sysops_t sysops;
+private:
+    void evidence_processor();
+    bool need_sync(const string& target) const;
+    void sync(const string& target);
+    void process_incoming_local_deltas(peer_t *c, datagram*d);
 
 
-		votes_t votes;
-		string home;
+private:
+    void send(const local_deltas& g, peer_t* exclude=0);
+    void stage1(cycle_t&);
+    void stage2(cycle_t&);
+    bool stage3(cycle_t&);
+    void stage4(cycle_t&);
 
-		mutable mt19937_64 rng;
+private:
+    void load_head();
+    local_deltas* create_local_deltas();
+    void update_peers_state();
 
-        keys id;
+private:
+    bool process_sysop_request(peer_t *c, datagram*d);
+    bool import(const diff& b);
+    diff::hash_t get_last_block_imported() const;
+    void set_last_block_imported(const diff::hash_t&);
+    void set_last_block_imported_(const diff::hash_t&);
+    vector<peer_t*> get_people();
+    vector<peer_t*> get_nodes(const peer_t* exclude) const;
+    const diff::hash_t& dbhash_off() const;
+    string timestamp() const;
 
-	};
+public:
+    struct votes_t:unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> { 
+        typedef unordered_map<pubkey_t::hash_t,pair<diff::hash_t,unsigned long>> b;
+        void clear();
+        bool add(const pubkey_t::hash_t&,const diff::hash_t& v);
+        diff::hash_t select();
+        mutex mx;
+    };
 
-}}
-}
+    struct sysops_t:unordered_map<peer_t *,shell> {
+        sysops_t(daemon&d): d(d) {}
+        bool process_work(peer_t *p, datagram*d);
+        mutex mx;
+        daemon& d;
+    };
+
+public:
+    const keys& get_id() const {
+        return m_id;
+    } 
+
+    mt19937_64& get_rng(){
+        return m_rng;
+    } 
+
+    const networking& get_peerd() const {
+        return m_peerd;
+    }
+
+    void add_ip_to_seed_nodes(const string& ip){
+        m_peerd.add_ip_to_seed_nodes(ip); 
+    }
+
+    void peerd_daemon_timer(){
+        m_peerd.daemon_timer();
+    }
+
+    auth::app* get_auth_app() const {
+        return m_auth_app;
+    }
+
+    const string& get_home() const {
+        return m_home;
+    }
+
+    const syncd_t& get_syncd() const {
+        return m_syncd;
+    }
+
+private:
+    hold<datagram> m_evidences_on_hold;
+    cycle_t m_cycle;
+    calendar_t m_calendar;
+    diff::hash_t m_last_block_imported;
+    mutable mutex m_mx_import;
+    mutable diff::hash_t m_cached_dbhash;
+    mutable bool m_cached_dbhash_ok{false};
+    networking m_peerd;
+    diff* m_pool{0};
+    mutable mutex m_mx_pool;
+    apps m_apps_;
+    auth::app* m_auth_app;
+    syncd_t m_syncd;
+    sysops_t m_sysops;
+    votes_t m_votes;
+    string m_home;
+    mutable mt19937_64 m_rng;
+    keys m_id;
+};
+}}}
 
 #endif
 
