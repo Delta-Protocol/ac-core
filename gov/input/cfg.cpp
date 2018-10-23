@@ -59,6 +59,6 @@ c c::load(const string& home) {
                 }
 //                cout << "loaded ip address of " << addrs.size() << " seed nodes" << endl;
 
-            return cfg(x.keys.priv,x.home,move(addrs));
+            return cfg(x.keys.get_privkey(),x.home,move(addrs));
 }
 

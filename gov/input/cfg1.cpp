@@ -13,7 +13,7 @@ using namespace us::gov::input;
 typedef us::gov::input::cfg1 c;
 
 c::cfg1(const keys_t::priv_t& privk, const string& home): keys(privk), b(home) {
-	if (!keys.pub.valid) {
+	if (!keys.get_pubkey().is_valid()) {
 		cerr << "Invalid node pubkey" << endl;
 		exit(1);
 	}
@@ -69,7 +69,7 @@ c c::load(const string& home) {
                 if (!file_exists(keyfile)) {
                         cout << "Generating cryptographic keys..."; cout.flush();
                         crypto::ec::keys k=crypto::ec::keys::generate();
-                        write_k(home,k.priv);
+                        write_k(home,k.get_privkey());
                         cout << "done." << endl;
                 }
                 auto pk=load_priv_key(home);

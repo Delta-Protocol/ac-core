@@ -13,7 +13,6 @@ using namespace std;
 struct cfg1: cfg0 {
     typedef cfg0 b;
 	typedef crypto::ec::keys keys_t;
-	//cfg();
 	virtual ~cfg1();
        cfg1(const keys_t::priv_t& privk, const string& home);
         cfg1(const cfg1& other);

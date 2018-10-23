@@ -3,17 +3,16 @@
 #include "base58.h"
 #include <us/gov/likely.h>
 #include <cstring>
+#include <iostream>
 
 using namespace us::gov::crypto;
 using namespace std;
 
-typedef us::gov::crypto::sha256 c;
-
-c::sha256() : bytes(0) {
+sha256::sha256() : bytes(0) {
     initialize(s);
 }
 
-void c::initialize(uint32_t* s) {
+void sha256::initialize(uint32_t* s) {
     s[0] = 0x6a09e667ul;
     s[1] = 0xbb67ae85ul;
     s[2] = 0x3c6ef372ul;
@@ -24,7 +23,7 @@ void c::initialize(uint32_t* s) {
     s[7] = 0x5be0cd19ul;
 }
 
-void c::transform(uint32_t* s, const unsigned char* chunk) { // Perform one SHA-256 transformation, processing a 64-byte chunk.
+void sha256::transform(uint32_t* s, const unsigned char* chunk) { // Perform one SHA-256 transformation, processing a 64-byte chunk.
     uint32_t a = s[0], b = s[1], c = s[2], d = s[3], e = s[4], f = s[5], g = s[6], h = s[7];
     uint32_t w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15;
 
@@ -106,16 +105,16 @@ void c::transform(uint32_t* s, const unsigned char* chunk) { // Perform one SHA-
     s[7] += h;
 }
 
-void c::write(const string& data) {
-	if(unlikely(data.empty())) return;
-	write(reinterpret_cast<const unsigned char*>(&data[0]), data.size());
+void sha256::write(const string& data) {
+    if(unlikely(data.empty())) 
+        return;
+    write(reinterpret_cast<const unsigned char*>(&data[0]), data.size());
 }
 
-void c::write(const unsigned char* data, size_t len) {
+void sha256::write(const unsigned char* data, size_t len) {
     const unsigned char* end = data + len;
     size_t bufsize = bytes % 64;
     if (bufsize && bufsize + len >= 64) {
-        // Fill the buffer, and process it.
         memcpy(buf + bufsize, data, 64 - bufsize);
         bytes += 64 - bufsize;
         data += 64 - bufsize;
@@ -123,23 +122,21 @@ void c::write(const unsigned char* data, size_t len) {
         bufsize = 0;
     }
     while (end >= data + 64) {
-        // Process full chunks directly from the source.
         transform(s, data);
         bytes += 64;
         data += 64;
     }
     if (end > data) {
-        // Fill the buffer with what remains.
         memcpy(buf + bufsize, data, end - data);
         bytes += end - data;
     }
 }
 
-void c::write(const ripemd160::value_type& data) {
-	write(&data[0],ripemd160::output_size);
+void sha256::write(const ripemd160::value_type& data) {
+    write(&data[0],ripemd160::output_size);
 }
 
-void c::finalize(value_type& hash) {
+void sha256::finalize(value_type& hash) {
     static const unsigned char pad[64] = {0x80};
     unsigned char sizedesc[8];
     WriteBE64(sizedesc, bytes << 3);
@@ -155,7 +152,7 @@ void c::finalize(value_type& hash) {
     WriteBE32(&hash[28], s[7]);
 }
 
-void c::finalize(unsigned char hash[output_size]) {
+void sha256::finalize(unsigned char hash[output_size]) {
     static const unsigned char pad[64] = {0x80};
     unsigned char sizedesc[8];
     WriteBE64(sizedesc, bytes << 3);
@@ -171,51 +168,56 @@ void c::finalize(unsigned char hash[output_size]) {
     WriteBE32(hash + 28, s[7]);
 }
 
-void c::reset() {
+void sha256::reset() {
     bytes = 0;
     initialize(s);
 }
 
-#include <iostream>
-string c::value_type::to_b58() const {
-	return b58::encode(&(*this)[0],&(*this)[0]+output_size);
+string sha256::value_type::to_b58() const {
+    return b58::encode(&(*this)[0],&(*this)[0]+output_size);
 }
 
-string c::value_type::to_hex() const {
-	assert(false);
+string sha256::value_type::to_hex() const {
+    assert(false);
 }
 
-c::value_type c::value_type::from_b58(const string& s) {
-	value_type k;
-	vector<unsigned char> v;
-	if (unlikely(!b58::decode(s,v))) {
-		cerr << "Error reading sha256, invalid b58 encoding." << endl;
-		exit(1);//todo
-	}
-	if (unlikely(v.size()!=output_size)) return k;
-	for (int i=0; i<output_size; ++i) k[i]=v[i]; 
-	return move(k);
+sha256::value_type sha256::value_type::from_b58(const string& s) {
+    value_type k;
+    vector<unsigned char> v;
+    if (unlikely(!b58::decode(s,v))) {
+        cerr << "Error reading sha256, invalid b58 encoding." << endl;
+        exit(1);//todo
+    }
+    if (unlikely(v.size()!=output_size)) return k;
+    for (int i=0; i<output_size; ++i) 
+        k[i]=v[i]; 
+    return move(k);
 }
 
-c::value_type c::value_type::from_hex(const string& s) {
-	assert(false);
+sha256::value_type sha256::value_type::from_hex(const string& s) {
+    assert(false);
 }
 
-bool c::value_type::operator < (const value_type& other) const { //result depends on endianness (different results in different archs), ok for local hash tables
-	for (int i=0; i<output_size; i+=8)
-		if (*reinterpret_cast<const uint64_t*>(&(*this)[i]) < *reinterpret_cast<const uint64_t*>(&other[i])) return true;
-	return false;
+bool sha256::value_type::operator < (const value_type& other) const {
+    for (int i=0; i<output_size; i+=8){
+        if (*reinterpret_cast<const uint64_t*>(&(*this)[i]) < *reinterpret_cast<const uint64_t*>(&other[i])) 
+            return true;
+    }
+    return false;
 }
 
-bool c::value_type::is_zero() const {
-	for (int i=0; i<output_size; i+=8)
-		if (*reinterpret_cast<const uint64_t*>(&(*this)[i])!=0) return false;
-	return true;
+bool sha256::value_type::is_zero() const {
+    for (int i=0; i<output_size; i+=8){
+        if (*reinterpret_cast<const uint64_t*>(&(*this)[i])!=0) 
+        return false;
+    }
+    return true;
 }
 
-void c::value_type::zero() {
-	for (int i=0; i<output_size; i+=8)
-		*reinterpret_cast<uint64_t*>(&(*this)[i])=0;
+void sha256::value_type::zero() {
+    for (int i=0; i<output_size; i+=8){
+        *reinterpret_cast<uint64_t*>(&(*this)[i])=0;
+    }
 }
 
 

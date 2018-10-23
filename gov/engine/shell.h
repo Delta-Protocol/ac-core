@@ -6,24 +6,24 @@
 #include <iostream>
 
 
-namespace us { namespace gov {
-namespace engine {
-	using namespace std;
-	struct daemon;
-	struct shell {
-		shell(daemon&d):d(d) {}
-		void help(ostream&) const;
-		string command(const string& cmd);
+namespace us{ namespace gov{ namespace engine{
+using namespace std;
+class daemon;
 
-		daemon& d;
-		int level{7};
-		int cur_app{-1};
-		string memory_cmd_lvl; //commands compatible across level, repeatable after level changes
-	};
+class shell {
+public:
+    shell(daemon&d):m_d(d) {}
+    void help(ostream&) const;
+    string command(const string& cmd);
 
+private:
+    daemon& m_d;
+    int m_level{7};
+    int m_cur_app{-1};
+    string m_memory_cmd_lvl; 
+};
 
-}}
-}
+}}}
 
 #endif
 

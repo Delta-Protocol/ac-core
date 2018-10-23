@@ -52,7 +52,7 @@ void c::db_t::dump(ostream& os) const {
 }
 
 void c::import(const engine::app::delta& gg, const engine::pow_t& w) {
-    cout << "loan: importING appgut2 MULTIPLICITY " << gg.multiplicity << endl;
+    cout << "loan: importING appgut2 MULTIPLICITY " << gg.get_multiplicity() << endl;
 }
 
 void us::gov::loan::local_delta::to_stream(ostream& os) const {
@@ -64,7 +64,7 @@ void us::gov::loan::local_delta::from_stream(istream& is) {
 }
 
 void us::gov::loan::delta::to_stream(ostream& os) const {
-	b::b1::to_stream(os);
+	b::base_1::to_stream(os);
 
 }
 

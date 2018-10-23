@@ -5,45 +5,85 @@
 #include <us/gov/crypto.h>
 #include <us/gov/cash.h>
 
-namespace us{ namespace wallet {
+namespace us{ namespace wallet{
 using namespace std;
 
-struct wallet_api {
-  typedef us::gov::crypto::ec::keys::priv_t priv_t;
-  typedef us::gov::crypto::ec::keys::pub_t pub_t;
-  typedef us::gov::cash::tx::sigcode_t sigcode_t;
-  typedef us::gov::cash::hash_t hash_t;
-  typedef us::gov::cash::cash_t cash_t;
+class wallet_api {
+public:
+    typedef us::gov::crypto::ec::keys::priv_t priv_t;
+    typedef us::gov::crypto::ec::keys::pub_t pub_t;
+    typedef us::gov::cash::tx::sigcode_t sigcode_t;
+    typedef us::gov::cash::hash_t hash_t;
+    typedef us::gov::cash::cash_t cash_t;
 
-    struct tx_make_p2pkh_input {
+    class tx_make_p2pkh_input {
+    public:
         typedef  us::gov::cash::tx::sigcode_t sigcode_t;
-
-        hash_t rcpt_addr;
-        cash_t amount;
-        cash_t fee;
-        sigcode_t sigcode_inputs;
-        sigcode_t sigcode_outputs;
-        bool sendover;
-
         void to_stream(ostream&) const;
         static tx_make_p2pkh_input from_stream(istream&);
+    public:
+        const hash_t& get_rcpt_addr() const {
+            return m_rcpt_addr;  
+        }
+        void set_rcpt_addr(const hash_t& ra){
+            m_rcpt_addr = ra;  
+        }
+
+        const cash_t& get_amount() const {
+            return m_amount;
+        }
+        void set_amount(const cash_t& am){
+            m_amount = am;
+        }
+
+        const cash_t& get_fee() const {
+            return m_fee;
+        }
+        void set_fee(const cash_t& f){
+            m_fee = f;
+        }
+
+        const sigcode_t& get_sigcode_inputs() const {
+            return m_sigcode_inputs;
+        }
+        void set_sigcode_inputs(const sigcode_t& s){
+            m_sigcode_inputs = s;
+        }
+
+        const sigcode_t& get_sigcode_outputs() const {
+            return m_sigcode_outputs; 
+        }
+        void set_sigcode_outputs(const sigcode_t& s){
+            m_sigcode_outputs = s; 
+        }
+
+        bool get_sendover() const {
+            return m_sendover;
+        }
+
+        void set_sendover(bool v){
+            m_sendover = v;
+        }
+
+    private:
+        hash_t m_rcpt_addr;
+        cash_t m_amount;
+        cash_t m_fee;
+        sigcode_t m_sigcode_inputs;
+        sigcode_t m_sigcode_outputs;
+        bool m_sendover;
     };
 
+    virtual ~wallet_api() {}
 
-  virtual ~wallet_api() {}
-
-//#include <us/api/apitool_generated_wallet_functions_cpp_purevir>
-#include <us/api/apitool_generated__functions_wallet_cpp_purevir>
-
+#include <us/api/apitool_generated__functions_wallet_cpp_purevir> //APITOOL
 };
 
-
-    static ostream& operator << (ostream& os, const wallet_api::tx_make_p2pkh_input& o) {
-        o.to_stream(os);
-        return os;
-    }
+static ostream& operator << (ostream& os, const wallet_api::tx_make_p2pkh_input& o) {
+    o.to_stream(os);
+    return os;
+}
 
 }}
-
 
 #endif

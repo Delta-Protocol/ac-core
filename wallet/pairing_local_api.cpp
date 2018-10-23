@@ -4,32 +4,29 @@
 #include <us/gov/socket/datagram.h>
 #include <us/gov/cash.h>
 
-typedef us::wallet::pairing_local_api c;
 using namespace us::wallet;
 using namespace std;
 
 
-c::pairing_local_api(const string& homedir): b(homedir) {
-}
+pairing_local_api::pairing_local_api(const string& homedir): pairing(homedir) {}
 
-c::~pairing_local_api() {
-}
+pairing_local_api::~pairing_local_api() {}
 
-void c::pair(const pub_t& pk, const string& name, ostream&os) {
-    if (!pk.valid) {
+void pairing_local_api::pair(const pub_t& pk, const string& name, ostream&os) {
+    if (!pk.is_valid()) {
         os << "Error: invalid public key.";
         return;
     }
-    devices.pair(pk,name);
-	os << "done.";
+    pairing::pair(pk,name);
+    os << "done.";
 }
 
-void c::unpair(const pub_t& pk, ostream&os) {
-    devices.unpair(pk);
-	os << "done.";
+void pairing_local_api::unpair(const pub_t& pk, ostream&os) {
+    pairing::unpair(pk);
+    os << "done.";
 }
 
-void c::list_devices(ostream&os) {
-    devices.dump(os);
+void pairing_local_api::list_devices(ostream&os) {
+    get_devices().dump(os);
 }
 

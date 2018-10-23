@@ -3,24 +3,23 @@
 
 #include "addr_t.h"
 
-namespace us{ namespace gov {
-namespace engine {
+namespace us{ namespace gov{ namespace engine{
 using namespace std;
 
-        struct tcp_addr: addr_t {
-            typedef addr_t b;
+class tcp_addr: public addr_t {
+public:
+    typedef addr_t b;
+    virtual void to_stream(ostream& os) const override;
+    static addr_t* from_stream(istream& is);
 
-            static constexpr char id{'A'};
-            virtual void to_stream(ostream& os) const override;
-            static addr_t* from_stream(istream& is);
+    static constexpr char m_id{'A'};
 
-            string address;
-            uint16_t port;
-        };
+private:
+    string m_address;
+    uint16_t m_port;
+};
 
-
-}
-}}
+}}}
 
 #endif
 

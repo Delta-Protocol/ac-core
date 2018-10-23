@@ -1,118 +1,119 @@
 #include "pairing.h"
+#include <us/gov/auth/peer_t.h>
 #include <fstream>
 
-typedef us::wallet::pairing c;
 using namespace std;
 using namespace us::wallet;
 
-string c::device::default_name("my device");
-string c::devices_t::not_found("not found");
+string pairing::device::m_default_name("my device");
+string pairing::devices_t::m_not_found("not found");
 
-c::pairing(const string& homedir):devices(homedir) {
-}
+pairing::pairing(const string& homedir):m_devices(homedir) {}
 
-c::~pairing() {
-}
+pairing::~pairing() {}
 
-c::devices_t::devices_t(const string& home): home(home) {
+pairing::devices_t::devices_t(const string& home): m_home(home) {
     assert(!home.empty());
     load();
 }
 
-void c::devices_t::load() {
-	lock_guard<mutex> lock(mx);
+void pairing::devices_t::load() {
+    lock_guard<mutex> lock(m_mx);
     load_();
 }
 
-void c::devices_t::save() const {
-	lock_guard<mutex> lock(mx);
+void pairing::devices_t::save() const {
+    lock_guard<mutex> lock(m_mx);
     save_();
 }
 
-void c::devices_t::load_() {
+void pairing::devices_t::load_() {
     clear();
-    ifstream is(home+"/d");
+    ifstream is(m_home+"/d");
     while (is.good()) {
         auto d=device::from_stream(is);
-        if (!d.first) break;
-	    if (!d.second.pub.valid) break;
-        emplace(d.second.pub.hash(),d.second);
+        if (!d.first) 
+            break;
+        if (!d.second.m_pub.is_valid()) 
+            break;
+        emplace(d.second.m_pub.hash(),d.second);
     }
 }
 
-void c::devices_t::save_() const {
-    ofstream os(home+"/d");
+void pairing::devices_t::save_() const {
+    ofstream os(m_home+"/d");
     for (auto&i:*this) {
         i.second.to_stream(os);
         os << ' ';
     }
-//    cout << "saved devices " << (home+"/d") << endl;
 }
 
-void c::device::to_stream(ostream&os) const {
-    os << pub << ' ' << name;
+void pairing::device::to_stream(ostream&os) const {
+    os << m_pub << ' ' << m_name;
 }
 
-pair<bool,c::device> c::device::from_stream(istream&is) {
-    pair<bool,device> d;
-    is >> d.second.pub;
-    is >> d.second.name;
+pair<bool, pairing::device> pairing::device::from_stream(istream& is) {
+    std::pair<bool,pairing::device> d;
+    is >> d.second.m_pub;
+    is >> d.second.m_name;
     d.first=is.good();
     return move(d);
 }
 
-void c::device::dump(ostream& os) const {
-    os << pub << ' ' << name;
+void pairing::device::dump(ostream& os) const {
+    os << m_pub << ' ' << m_name;
 }
 
-#include <us/gov/auth/peer_t.h>
-
-bool c::devices_t::authorize(const pub_t& p) const {
-    lock_guard<mutex> lock(mx);
+bool pairing::devices_t::authorize(const pub_t& p) const {
+    lock_guard<mutex> lock(m_mx);
     if (empty()) {
-cout << "authorizing first device " << p << endl;
-        const_cast<c::devices_t&>(*this).emplace(p.hash(),device(p,"First_seen_device"));
+        cout << "authorizing first device " << p << endl;
+        const_cast<pairing::devices_t&>(*this).emplace(p.hash(),device(p,"First_seen_device"));
         save_();
         return true;
     }
     if (find(p.hash())!=end()) {
-       cout << "found in the entry list  " << p << endl;
+        cout << "found in the entry list  " << p << endl;
         return true;
     }
-cout << "not authorizing " << p << endl;
+    cout << "not authorizing " << p << endl;
     return false;
 }
 
-string c::devices_t::pair_request() { //return a random message to sign by the requester
-	return us::gov::auth::peer_t::get_random_message();
+string pairing::devices_t::pair_request() const { 
+    return us::gov::auth::peer_t::get_random_message();
 }
 
-void c::devices_t::pair(const pub_t& pub, const string& name) {
-	lock_guard<mutex> lock(mx);
+void pairing::devices_t::pair(const pub_t& pub, const string& name) {
+    lock_guard<mutex> lock(m_mx);
     string n=name;
-    if (n.empty()) n=device::default_name;
+    if (n.empty()) 
+        n=device::m_default_name;
     auto r=emplace(pub.hash(),device(pub,name));
-    if (!r.second) r.first->second.name=n; //rename
+    if (!r.second) 
+        r.first->second.m_name=n;
     save_();
 }
 
-void c::devices_t::unpair(const pub_t& pub) {
-	lock_guard<mutex> lock(mx);
+void pairing::devices_t::unpair(const pub_t& pub) {
+    lock_guard<mutex> lock(m_mx);
     auto i=find(pub.hash());
-    if (i==end()) return;
+    if (i==end()) 
+        return;
     erase(i);
     save_();
 }
 
-const string& c::devices_t::get_name(const pub_t& pub) {
-	lock_guard<mutex> lock(mx);
+const string& pairing::devices_t::get_name(const pub_t& pub) const {
+    lock_guard<mutex> lock(m_mx);
     auto i=find(pub.hash());
-    if (i==end()) return not_found;
-    return i->second.name;
+    if (i==end()) 
+        return m_not_found;
+    return i->second.m_name;
 }
 
-void c::devices_t::dump(ostream& os) const {
-	lock_guard<mutex> lock(mx);
+void pairing::devices_t::dump(ostream& os) const {
+    lock_guard<mutex> lock(m_mx);
     for (auto&i:*this) {
         i.second.dump(os);
         os << endl;

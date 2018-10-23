@@ -110,7 +110,7 @@ struct shell_client: us::gov::auth::peer_t {
 	}
 
     virtual bool authorize(const pubkey_t& p) const override {
-        return k.pub == p; //pub key of other end should be our pub key (only node sysop is allowed to rpc into gov)
+        return k.get_pubkey() == p; //pub key of other end should be our pub key (only node sysop is allowed to rpc into gov)
     }
 
 	const keys& k;
@@ -183,7 +183,7 @@ void run_daemon(const params&p) {
 	using us::gov::input::cfg_daemon;
 	string homedir=p.homedir+"/gov";
 	cfg_daemon conf=cfg_daemon::load(homedir);
-	cout << "Node public key is " << conf.keys.pub << " address " << conf.keys.pub.hash() << endl;
+	cout << "Node public key is " << conf.keys.get_pubkey() << " address " << conf.keys.get_pubkey().hash() << endl;
 	engine::daemon d(conf.keys,conf.home,p.port,p.edges,conf.seed_nodes);
 	d.sysop_allowed=p.shell;
 	d.add(new cash::app());

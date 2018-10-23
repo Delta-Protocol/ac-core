@@ -4,13 +4,10 @@
 #include <stdint.h>
 #include <us/gov/socket/protocol.h>
 
-namespace us { namespace gov {
-namespace protocol {
+namespace us{ namespace gov{ namespace protocol{
 
-#include <us/api/apitool_generated__protocol_gov_id_cpp>
+#include <us/api/apitool_generated__protocol_gov_id_cpp> 
 
-}
-}
-}
+}}}
 
 #endif

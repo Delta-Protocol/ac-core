@@ -4,19 +4,14 @@
 using namespace us::gov::engine;
 using namespace std;
 
-typedef us::gov::engine::signed_data c;
-
-
-void c::sign(const crypto::ec::keys& k) {
-	pubkey=k.pub;
-	string msg=message_to_sign();
-	signature=crypto::ec::instance.sign_encode(k.priv,msg);
-//cout << "signed local_deltas " << endl << "--" << msg << "--" << signature << " " << pubkey << endl;
+void signed_data::sign(const crypto::ec::keys& k) {
+    m_pubkey=k.get_pubkey();
+    string msg=message_to_sign();
+    m_signature=crypto::ec::get_instance().sign_encode(k.get_privkey(),msg);
 }
 
-bool c::verify() const {
-//cout << "verifying local_deltas " << endl << "--" << message_to_sign() << "--" << signature << " " << pubkey << endl;
-	return crypto::ec::instance.verify(pubkey,message_to_sign(),signature);
+bool signed_data::verify() const {
+    return crypto::ec::get_instance().verify(m_pubkey,message_to_sign(),m_signature);
 }
 
 

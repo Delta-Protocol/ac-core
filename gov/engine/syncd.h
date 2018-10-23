@@ -8,47 +8,47 @@
 #include "diff.h"
 
 
-namespace us{ namespace gov {
-namespace engine {
+namespace us{ namespace gov{ namespace engine{
 using namespace std;
 
-		struct syncd_t: us::gov::signal_handler::callback {
-			typedef diff::hash_t hash_t;
-			syncd_t(daemon* d);
-			void dump(ostream& os) const;
+class syncd_t: public us::gov::signal_handler::callback {
+public:
+    typedef diff::hash_t hash_t;
+    syncd_t(daemon* d);
 
-			void run();
-			void update(const hash_t& head, const hash_t& tail);
-			void update(const hash_t& tail);
-			void update();
-			void wait();
-			void wait(const chrono::steady_clock::duration& d);
-			virtual void on_finish();
+    void dump(ostream& os) const;
+    void run();
 
-            const hash_t& tip() const;
+    void update(const hash_t& head, const hash_t& tail);
+    void update(const hash_t& tail);
 
-			daemon* d;
-			condition_variable cv;
-			mutable mutex mx;
+    bool in_sync() const;
 
-			bool in_sync() const;
-			hash_t head;
-			hash_t cur;
-			hash_t tail;
-			bool resume{false};
+private:
+    void update();
 
-			//void signal_file_arrived();
+    void wait();
+    void wait(const chrono::steady_clock::duration& d);
 
-		    
-            //condition_variable cv_wait4file;
-		    //mutex mx_wait4file;
-			bool file_arrived{false};
+    virtual void on_finish();
+
+    const hash_t& tip() const;
 
 
-		};
+    bool resume{false};
+    bool file_arrived{false};
 
-}}
-}
+private:
+    daemon* m_d;
+    condition_variable m_cv;
+    mutable mutex m_mx;
+
+    hash_t m_head;
+    hash_t m_cur;
+    hash_t m_tail;
+};
+
+}}}
 
 #endif
 
