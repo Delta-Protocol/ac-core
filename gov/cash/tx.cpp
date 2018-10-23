@@ -1,3 +1,5 @@
+#include "tx.h"
+
 #include <iostream>
 #include <sys/time.h>
 #include <thread>
@@ -7,7 +9,7 @@
 #include <us/gov/crypto/base58.h>
 #include <us/gov/likely.h>
 #include "protocol.h"
-#include "tx.h"
+
 
 using namespace us::gov;
 using namespace us::gov::cash;

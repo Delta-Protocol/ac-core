@@ -72,6 +72,6 @@ cfg1 cfg1::load(const string& home) {
         exit(1);
     }
 
-    return cfg1(pk.second,x.m_home);
+    return cfg1(pk.second,x.get_home());
 }
 

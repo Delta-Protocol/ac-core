@@ -1,16 +1,14 @@
-#ifndef USGOV_46373a79c914cc1afc4dcf1f5c83a282d35ddf519feb546780be965072e21ade
-#define USGOV_46373a79c914cc1afc4dcf1f5c83a282d35ddf519feb546780be965072e21ade
+#ifndef US_GOV_INPUT_SHELL_ARGS_H
+#define US_GOV_INPUT_SHELL_ARGS_H
 
 #include <string>
 #include "convert.h"
 
-namespace us { namespace gov { namespace input {
+namespace us{ namespace gov{ namespace input{
 using namespace std;
 
 class shell_args {
-
 public:
-
     shell_args(int argc, char** argv):m_argc(argc), m_argv(argv) {}
 
     template<typename T>
@@ -35,6 +33,15 @@ public:
         return m_argc-m_num;
     }
 
+    int get_num() const {
+        return m_num;
+    }
+ 
+    void set_num(int num){
+        m_num = num; 
+    }
+
+private:
     int m_argc;
     char** m_argv;
     int m_num{1};

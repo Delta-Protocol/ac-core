@@ -1,21 +1,23 @@
-#ifndef USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
-#define USGOV_075dfff39e95d4a4a7a088fe2ea0fc252d6fa47e6b62b043b4babd2e2b511780
+#ifndef US_GOV_CRYPTO_EC_H
+#define US_GOV_CRYPTO_EC_H
 
 #include <iostream>
 #include <vector>
 #include <array>
 #include <secp256k1.h>
-#include "double_sha256.h"
+
 #include <us/gov/likely.h>
+
+#include "double_sha256.h"
 #include "sha256.h"
 
 namespace us{ namespace gov{ namespace crypto{
 using namespace std;
 
-struct ec {
-
-typedef secp256k1_ecdsa_signature signature;
-typedef sha256 sigmsg_hasher_t;
+class ec {
+public:
+    typedef secp256k1_ecdsa_signature signature;
+    typedef sha256 sigmsg_hasher_t;
 
 public:
     ec();

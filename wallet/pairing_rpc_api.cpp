@@ -1,7 +1,7 @@
 #include "pairing_rpc_api.h"
-#include "protocol.h"
 #include <sstream>
 #include <us/gov/socket/datagram.h>
+#include "protocol.h"
 
 typedef us::wallet::pairing_rpc_api c;
 using namespace us::wallet;

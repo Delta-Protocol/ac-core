@@ -20,7 +20,7 @@ wallet_daemon::~wallet_daemon() {}
 
 bool wallet_daemon::send_error_response(socket::peer_t *c, datagram*d, 
                                                   const string& error) {
-    auto s=d->service;
+    auto s=d->get_service();
     delete d;
     c->send(new datagram(s+1,"E "+error)); 
     return true;
@@ -29,7 +29,7 @@ bool wallet_daemon::send_error_response(socket::peer_t *c, datagram*d,
 bool wallet_daemon::send_response(socket::peer_t *c, 
                                   datagram*d, 
                                   const string& payload) {
-    auto s=d->service;
+    auto s=d->get_service();
     delete d;
     c->send(new datagram(s+1,payload));
     return true;
@@ -190,7 +190,7 @@ bool wallet_daemon::process_work(socket::peer_t *c, datagram*d) {
     }
     cout << "b" << endl;
 
-	switch(d->service) {
+	switch(d->get_service()) {
         #include <us/api/apitool_generated__protocol_wallet-daemon_cpp_service_router>
 		break;
 		default: break;

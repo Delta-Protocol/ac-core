@@ -1,19 +1,9 @@
-#ifndef USGOV_c13d19f0c3971de6c878039137bc456aee76c735c59394602b4d3ee39130825d
-#define USGOV_c13d19f0c3971de6c878039137bc456aee76c735c59394602b4d3ee39130825d
+#ifndef US_GOV_ENGINE_DAEMON_H
+#define US_GOV_ENGINE_DAEMON_H
 
-#include <us/gov/auth.h>
-#include "diff.h"
-#include "peer_t.h"
-#include "app.h"
-#include "auth_app.h"
-#include "policies.h"
-#include "cycle.h"
-#include <us/gov/signal_handler.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <map>
-#include <us/gov/dfs.h>
-
 #include <vector>
 #include <cassert>
 #include <thread>
@@ -21,10 +11,20 @@
 #include <ctime>
 #include <condition_variable>
 #include <mutex>
+
+#include <us/gov/signal_handler.h>
+#include <us/gov/dfs.h>
+#include <us/gov/auth.h>
+
 #include "shell.h"
 #include "networking.h"
 #include "syncd.h"
-
+#include "diff.h"
+#include "peer_t.h"
+#include "app.h"
+#include "auth_app.h"
+#include "policies.h"
+#include "cycle.h"
 
 namespace us{ namespace gov{ namespace engine{
 using namespace std;

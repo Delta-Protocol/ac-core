@@ -1,5 +1,5 @@
-#ifndef USGOV_f0164e5b85e25bbdcb03ffe3d537b65893ccd1250bf2d05f3de97557fb69bb70
-#define USGOV_f0164e5b85e25bbdcb03ffe3d537b65893ccd1250bf2d05f3de97557fb69bb70
+#ifndef US_GOV_WALLET_PEER_T_H
+#define US_GOV_WALLET_PEER_T_H
 
 #include <us/gov/auth/peer_t.h>
 #include "daemon.h"

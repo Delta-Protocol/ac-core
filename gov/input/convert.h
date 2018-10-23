@@ -1,5 +1,5 @@
-#ifndef USGOV_47334c096bbab50a71f79cb22e1790fb59c211aff5c75577eb0464efe6bff764
-#define USGOV_47334c096bbab50a71f79cb22e1790fb59c211aff5c75577eb0464efe6bff764
+#ifndef US_GOV_INPUT_CONVERT_H
+#define US_GOV_INPUT_CONVERT_H
 
 #include <us/gov/crypto.h>
 

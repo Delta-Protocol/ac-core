@@ -1,5 +1,5 @@
-#ifndef USGOV_55d8e2ce05caf6e0dbf1dbea7491413a4c994d9cde70ecd5a74889434dba5f67
-#define USGOV_55d8e2ce05caf6e0dbf1dbea7491413a4c994d9cde70ecd5a74889434dba5f67
+#ifndef US_GOV_LOAN_PROTOCOL_H
+#define US_GOV_LOAN_PROTOCOL_H
 
 #include <stdint.h>
 #include <us/gov/peer/protocol.h>

@@ -32,7 +32,7 @@ daemon::evidences_t* daemon::retrieve_evidences() { //caller must take the lock
 }
 
 bool daemon::process_work(socket::peer_t *c, datagram*d) {
-    if (protocol::is_evidence(d->service)) {
+    if (protocol::is_evidence(d->get_service())) {
         datagram::hash_t h=d->compute_hash();
         {
             unique_lock<mutex> lock(m_mx_evidences);

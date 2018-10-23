@@ -50,6 +50,15 @@ public:
 
     void dump(ostream& os) const;
 
+    const chrono::steady_clock::time_point& get_since() const {
+        return m_since;
+    }
+
+    const stage_t& get_stage() const {
+        return m_stage;
+    }
+
+private:
     chrono::steady_clock::time_point m_sent_ping;
     chrono::steady_clock::time_point m_since;
     stage_t m_stage;

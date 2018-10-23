@@ -1,12 +1,15 @@
 #include "wallet_local_api.h"
-#include "protocol.h"
+
 #include <sstream>
+#include <utility>
+#include <string>
+
 #include <us/gov/socket/datagram.h>
 #include <us/gov/cash.h>
 #include <us/gov/cash/tx.h>
 #include <us/gov/socket/datagram.h>
-#include <utility>
-#include <string>
+
+#include "protocol.h"
 
 using namespace us::wallet;
 using namespace std;

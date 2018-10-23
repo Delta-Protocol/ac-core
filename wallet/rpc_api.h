@@ -1,9 +1,8 @@
-#ifndef USGOV_be7dc84108784c4af35dada40b3f9b325e2d9f0782781c75529a2c286e0cfa5c
-#define USGOV_be7dc84108784c4af35dada40b3f9b325e2d9f0782781c75529a2c286e0cfa5c
+#ifndef US_GOV_WALLET_RPC_API_H
+#define US_GOV_WALLET_RPC_API_H
 
-#include <us/gov/auth/peer_t.h>
 #include <chrono>
-
+#include <us/gov/auth/peer_t.h>
 
 namespace us{ namespace wallet{
 

@@ -1,5 +1,5 @@
-#ifndef USGOV_f6953615b74a0604cb0ab84de1c7b7bed3fa40f4ef7e8920ab18e18fa71df3b7
-#define USGOV_f6953615b74a0604cb0ab84de1c7b7bed3fa40f4ef7e8920ab18e18fa71df3b7
+#ifndef US_GOV_INPUT_CFG1_H
+#define US_GOV_INPUT_CFG1_H
 
 #include <string>
 #include <utility>
@@ -25,6 +25,10 @@ public:
  
     static cfg1 load(const string& home);
 
+    const keys_t& get_keys() const {
+        return m_keys;
+    }
+private:
     keys_t m_keys;
 };
 

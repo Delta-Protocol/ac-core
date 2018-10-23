@@ -66,7 +66,7 @@ delta* us::gov::loan::delta::from_stream(istream& is) {
 
 uint64_t us::gov::loan::delta::merge(engine::app::local_delta* other0) {
     local_delta* other=static_cast<local_delta*>(other0);
-    auto val=other->m_fees;
+    auto val=other->get_fees();
     base_t::merge(other0);
     return val;
 }

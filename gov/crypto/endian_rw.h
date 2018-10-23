@@ -1,5 +1,5 @@
-#ifndef USGOV_e5acce2140cfdf81b2fc07daee27f8bb0244681c5993c3ec13ed393478783d50
-#define USGOV_e5acce2140cfdf81b2fc07daee27f8bb0244681c5993c3ec13ed393478783d50
+#ifndef US_GOV_CRYPO_ENDIAN_RW_H
+#define US_GOV_CRYPO_ENDIAN_RW_H
 
 // Copyright (c) 2014 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying

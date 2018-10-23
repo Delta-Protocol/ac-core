@@ -1,5 +1,5 @@
-#ifndef USGOV_33de4fece6646b4a064a30507e7a1a35c3b5bcd4dc9c1c87059904e7ac05e335
-#define USGOV_33de4fece6646b4a064a30507e7a1a35c3b5bcd4dc9c1c87059904e7ac05e335
+#ifndef US_GOV_CASH_TX_H
+#define US_GOV_CASH_TX_H
 
 #include <vector>
 #include <map>

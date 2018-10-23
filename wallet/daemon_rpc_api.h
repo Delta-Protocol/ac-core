@@ -1,5 +1,5 @@
-#ifndef USGOV_46f2187412c13fb1cda264a13918b064da18651df7b676f60bd3b649a5c59f42
-#define USGOV_46f2187412c13fb1cda264a13918b064da18651df7b676f60bd3b649a5c59f42
+#ifndef US_GOV_WALLET_DAEMON_RPC_API_H
+#define US_GOV_WALLET_DAEMON_RPC_API_H
 
 #include "daemon_api.h"
 #include "wallet_rpc_api.h"

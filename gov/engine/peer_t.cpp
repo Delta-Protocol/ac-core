@@ -1,8 +1,10 @@
 #include "peer_t.h"
+
+#include <us/gov/likely.h>
+
 #include "daemon.h"
 #include "protocol.h"
 #include "networking.h"
-#include <us/gov/likely.h>
 
 using namespace us::gov::engine;
 using namespace std;

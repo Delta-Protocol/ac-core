@@ -27,7 +27,7 @@ peer_t::~peer_t() {
 void peer_t::on_detach() {
     while(!program::_this.terminated) { 
         this_thread::yield(); //spinlock
-        if (!m_busy.load()) break;
+        if (!load_busy()) break;
     }
     m_parent=0;
     disconnect();
@@ -44,7 +44,7 @@ void peer_t::disconnect() {
 
 bool peer_t::process_work(datagram* d) { //executed by thread from pool
     assert(d!=0);
-    switch(d->service) {
+    switch(d->get_service()) {
         case protocol::gov_socket_ping: {
             delete d;
             send(new datagram(protocol::gov_socket_pong,"pong"));

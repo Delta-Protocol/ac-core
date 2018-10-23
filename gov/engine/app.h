@@ -9,9 +9,9 @@
 
 #include <us/gov/peer.h>
 #include <us/gov/socket.h>
-#include "evidence.h"
 #include <us/gov/crypto.h>
 
+#include "evidence.h"
 
 namespace us{ namespace gov{ namespace engine{
 using namespace std;

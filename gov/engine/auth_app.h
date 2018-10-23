@@ -1,16 +1,19 @@
-#ifndef USGOV_1889feb46c109de0a04e33395e575f90dccd36322bcf52a8e6c93042928b612a
-#define USGOV_1889feb46c109de0a04e33395e575f90dccd36322bcf52a8e6c93042928b612a
+#ifndef US_GOV_ENGINE_AUTH_APP_H
+#define US_GOV_ENGINE_AUTH_APP_H
 
-#include "app.h"
-#include "peer_t.h"
-#include "policies.h"
-#include <string>
-#include <us/gov/crypto/hash.h>
 #include <map>
 #include <set>
 #include <mutex>
 #include <random>
 #include <unordered_set>
+#include <string>
+
+#include <us/gov/crypto/hash.h>
+
+#include "app.h"
+#include "peer_t.h"
+#include "policies.h"
+
 
 namespace us{ namespace gov{ namespace engine{
 

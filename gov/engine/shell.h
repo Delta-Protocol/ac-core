@@ -1,10 +1,9 @@
-#ifndef USGOV_a77bb134f65a2d28d9cf7823a14041036d606c371217ddd8b91b59f77a73b6b1
-#define USGOV_a77bb134f65a2d28d9cf7823a14041036d606c371217ddd8b91b59f77a73b6b1
+#ifndef US_GOV_ENGINE_SHELL_H
+#define US_GOV_ENGINE_SHELL_H
 
 #include <cstdint>
 #include <string>
 #include <iostream>
-
 
 namespace us{ namespace gov{ namespace engine{
 using namespace std;

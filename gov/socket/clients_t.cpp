@@ -27,7 +27,7 @@ void clients_t::remove(client* c) {
 
 void clients_t::read_sockets() {
     static char w='w';
-    ::write(m_locli.m_sock, &w, 1);
+    ::write(m_locli.get_sock(), &w, 1);
 }
 
 void clients_t::grow() {
@@ -41,9 +41,9 @@ void clients_t::grow() {
         lock_guard<mutex> lock(m_mx);
         for (auto i:t) {
             assert(i);
-            assert(find(i->m_sock)==end());
-            assert(i->m_sock!=0);
-            emplace(i->m_sock,i);
+            assert(find(i->get_sock())==end());
+            assert(i->get_sock()!=0);
+            emplace(i->get_sock(),i);
         }
     }
     if (!t.empty()) read_sockets();
@@ -61,7 +61,7 @@ void clients_t::shrink() {
     for (auto c:copy) {
         iterator i;
         c->on_detach();
-        i=find(c->m_sock);
+        i=find(c->get_sock());
         if (likely(i!=end())) { //it is not in main container
             erase(i); //no other thread can remove from main container
             m_attic.add(c);
@@ -97,9 +97,10 @@ vector<int> clients_t::update() {
         a.reserve(size());
         for (auto i=begin(); i!=end();) {
             auto& c=*i->second;
-            if (likely(c.m_sock) ) { //disconnected client?
-                if (!c.m_busy.load()) s.emplace_back(c.m_sock);
-                    a.emplace_back(&c);
+            if (likely(c.get_sock()) ) { //disconnected client?
+                if (!c.load_busy()) 
+                    s.emplace_back(c.get_sock());
+                a.emplace_back(&c);
                 ++i;
             }
             else {
@@ -128,7 +129,7 @@ void clients_t::attic_t::add(client*cl) {
 
 void clients_t::attic_t::purge() {
     for (auto i=begin(); i!=end(); ) {
-        if ((*i)->m_busy.load()) {
+        if ((*i)->load_busy()) {
             ++i;
             continue;
         }
@@ -146,7 +147,8 @@ clients_t::rmlist::~rmlist() {
 }
 
 bool clients_t::rmlist::add(client* c) {
-    if(c->m_sock==0) return false;
+    if(c->get_sock()==0) 
+        return false;
     lock_guard<mutex> lock(m_mx);
     emplace(c);
     return true;

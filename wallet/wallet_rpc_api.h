@@ -1,5 +1,5 @@
-#ifndef USGOV_539edd8ed1d3f598bd26328c77e0124d3e69f055536f18aaf86c5b2e98ee5e0e
-#define USGOV_539edd8ed1d3f598bd26328c77e0124d3e69f055536f18aaf86c5b2e98ee5e0e
+#ifndef US_GOV_WALLET_WALLET_RPC_API_H
+#define US_GOV_WALLET_WALLET_RPC_API_H
 
 #include "wallet_api.h"
 #include "rpc_api.h"

@@ -1,11 +1,13 @@
 #include "diff.h"
-#include "app.h"
-#include<us/gov/likely.h>
-#include <us/gov/crypto/base58.h>
 
 #include <cassert>
 #include <iomanip>
 #include <vector>
+
+#include <us/gov/likely.h>
+#include <us/gov/crypto/base58.h>
+
+#include "app.h"
 
 using namespace us::gov::engine;
 using namespace std;

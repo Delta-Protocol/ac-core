@@ -1,9 +1,10 @@
-#ifndef USGOV_1a04abafd244aa56917030342d01e6017e089433f96dd01ee598fed0d91162dd
-#define USGOV_1a04abafd244aa56917030342d01e6017e089433f96dd01ee598fed0d91162dd
+#ifndef US_GOV_DFS_DAEMON_H
+#define US_GOV_DFS_DAEMON_H
 
-#include <us/gov/relay.h>
 #include <iostream>
 #include <vector>
+
+#include <us/gov/relay.h>
 
 namespace us{ namespace gov{ namespace dfs{ 
 using namespace std;

@@ -1,6 +1,8 @@
 #include "pairing.h"
-#include <us/gov/auth/peer_t.h>
+
 #include <fstream>
+
+#include <us/gov/auth/peer_t.h>
 
 using namespace std;
 using namespace us::wallet;

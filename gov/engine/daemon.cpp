@@ -1,10 +1,13 @@
 #include "daemon.h"
+
 #include <fstream>
+
 #include <us/gov/auth.h>
 #include <us/gov/likely.h>
-#include "protocol.h"
 #include <us/gov/signal_handler.h>
 #include <us/gov/crypto/base58.h>
+
+#include "protocol.h"
 
 using namespace us::gov::engine;
 using namespace std;
@@ -34,7 +37,6 @@ void daemon::add(app*app) {
     }
     m_apps_.emplace(app->get_id(),app);
 }
-
 
 bool daemon::patch_db(const vector<diff::hash_t>& patches) {
     cout << "Applying " << patches.size() << " patches" << endl;
@@ -357,7 +359,7 @@ void daemon::send(const local_deltas& g, peer_t* exclude) {
 local_deltas* daemon::create_local_deltas() {
     auto* mg=new local_deltas();
     {
-        lock_guard<mutex> lock(m_peerd.m_mx_evidences);
+        lock_guard<mutex> lock(m_peerd.get_evidences());
         for (auto&i:m_apps_) {
             auto* amg=i.second->create_local_delta(); 
             if (amg!=0) {
@@ -478,7 +480,7 @@ bool daemon::process_evidence(datagram*d) {
 
     assert(m_syncd.in_sync());
     string payload=d->parse_string();
-    auto service = d->service;
+    auto service = d->get_service();
     delete d;
     
     bool processed=false;
@@ -525,7 +527,7 @@ bool daemon::process_sysop_request(peer_t *c, datagram*d) {
 }
 
 bool daemon::process_work(peer_t *c, datagram*d) {
-    switch(d->service) {
+    switch(d->get_service()) {
         case protocol::vote_tip: {
             process_vote_tip(c,d);
             return true;
@@ -635,7 +637,7 @@ diff::hash_t daemon::votes_t::select() {
 }
 
 bool daemon::sysops_t::process_work(peer_t *p, datagram*d) {
-    if (d->service!=protocol::sysop) 
+    if (d->get_service()!=protocol::sysop) 
         return false;
     lock_guard<mutex> lock(mx);
     auto i=find(p);

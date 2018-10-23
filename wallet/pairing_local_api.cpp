@@ -1,12 +1,11 @@
 #include "pairing_local_api.h"
-#include "protocol.h"
 #include <sstream>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/cash.h>
+#include "protocol.h"
 
 using namespace us::wallet;
 using namespace std;
-
 
 pairing_local_api::pairing_local_api(const string& homedir): pairing(homedir) {}
 

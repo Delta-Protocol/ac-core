@@ -1,9 +1,10 @@
-#ifndef USGOV_8aa9f31d37f503d177a79739f204352b88f353e78c88f6d62fdcbe86273e7754
-#define USGOV_8aa9f31d37f503d177a79739f204352b88f353e78c88f6d62fdcbe86273e7754
+#ifndef US_GOV_ENGINE_CYCLE_H
+#define US_GOV_ENGINE_CYCLE_H
 
 #include <chrono>
 #include <string>
 #include <atomic>
+
 #include "diff.h"
 
 namespace us{ namespace gov{ namespace engine{

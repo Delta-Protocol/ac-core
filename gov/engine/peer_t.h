@@ -1,5 +1,5 @@
-#ifndef USGOV_5369cd4184b5cf59017909fa4ac73e6f59eb5af656bfd6f5212953d549e6aba5
-#define USGOV_5369cd4184b5cf59017909fa4ac73e6f59eb5af656bfd6f5212953d549e6aba5
+#ifndef US_GOV_ENGINE_PEER_T_H
+#define US_GOV_ENGINE_PEER_T_H
 
 #include <us/gov/dfs/daemon.h>
 
@@ -18,7 +18,6 @@ public:
         wallet,
         num_stages
     };
-
 
     peer_t(int sock):b(sock) {}
     virtual ~peer_t() {

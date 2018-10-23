@@ -1,5 +1,5 @@
-#ifndef USGOV_b05bd77af998c823ed16a99e5cd5a0faa0ef03d000b57ee63148072bf9a65c79
-#define USGOV_b05bd77af998c823ed16a99e5cd5a0faa0ef03d000b57ee63148072bf9a65c79
+#ifndef US_GOV_WALLET_WALLET_LOCAL_API_H
+#define US_GOV_WALLET_WALLET_LOCAL_API_H
 
 #include "wallet_api.h"
 #include "wallet.h"

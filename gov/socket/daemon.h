@@ -43,6 +43,8 @@ private:
 
         disconnections_t disconnections;
     };
+
+private:
     perf_t m_perf;
 
     void process_work(peer_t *c);

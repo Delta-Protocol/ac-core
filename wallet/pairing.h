@@ -1,10 +1,11 @@
-#ifndef USGOV_2db53cabc8e424c213eaec41bfee681cd2c20ca24af646b25ed7950072018f45
-#define USGOV_2db53cabc8e424c213eaec41bfee681cd2c20ca24af646b25ed7950072018f45
+#ifndef US_GOV_WALLET_PAIRING_H
+#define US_GOV_WALLET_PAIRING_H
 
 #include <string>
 #include <unordered_map>
-#include <us/gov/crypto.h>
 #include <mutex>
+
+#include <us/gov/crypto.h>
 
 namespace us{ namespace wallet{
 using namespace std;

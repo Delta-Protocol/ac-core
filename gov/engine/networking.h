@@ -1,12 +1,13 @@
-#ifndef USGOV_75e4bd922f2de31a967ff5ad48fd3c21a0df7b241765114881ed8761ed8ca7cd
-#define USGOV_75e4bd922f2de31a967ff5ad48fd3c21a0df7b241765114881ed8761ed8ca7cd
+#ifndef US_GOV_ENGINE_NETWORKING_H
+#define US_GOV_ENGINE_NETWORKING_H
+
+#include <vector>
+#include <unordered_set>
+#include <string>
 
 #include <us/gov/dfs/daemon.h>
 #include <us/gov/peer/peer_t.h>
 #include <us/gov/relay/peer_t.h>
-#include <vector>
-#include <unordered_set>
-#include <string>
 #include "us/gov/socket/client.h"
 
 namespace us{ namespace gov{ namespace engine{

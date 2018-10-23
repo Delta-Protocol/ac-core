@@ -1,9 +1,13 @@
 #include "sha256.h"
-#include "endian_rw.h"
-#include "base58.h"
-#include <us/gov/likely.h>
+
 #include <cstring>
 #include <iostream>
+
+#include <us/gov/likely.h>
+
+#include "endian_rw.h"
+#include "base58.h"
+
 
 using namespace us::gov::crypto;
 using namespace std;
