@@ -1,5 +1,9 @@
-#ifndef USGOV_51d4393eec61d2ef445fd79c7b25d5d8a548fe50d2c4e798f97944ce8faf3208
-#define USGOV_51d4393eec61d2ef445fd79c7b25d5d8a548fe50d2c4e798f97944ce8faf3208
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
+#ifndef US_GOV_LOAN_APP_H
+#define US_GOV_LOAN_APP_H
 
 #include <array>
 #include <cstdint>
@@ -38,22 +42,48 @@ public:
     constexpr static array<const char*,num_params> paramstr={"next_patch"};
 };
 
+/*!
+ * \class local_delta
+ *
+ * \brief define local changes to serialize to on a given node. It can be seen
+ *        like transaction collected by a node.
+ *
+ */
 class local_delta:public engine::policies_local_delta<hash_t, policies_traits> {
+private:
     typedef engine::policies_local_delta<hash_t, policies_traits> base;
-protected:
 
+protected:
     virtual int app_id() const override;
     virtual void to_stream(ostream&) const override;
     virtual void from_stream(istream&) override;
 
 public:
 
-    local_delta() {}
+    /** @brief Default constructor
+     *
+     */
+    local_delta() {};
+
+    /** @brief Virtaul destructor
+     *
+     */
     virtual ~local_delta() {}
 
+    /** @brief Transaction fees applied when merging imported deltas
+     *
+     */
     cash_t m_fees{0};
 };
 
+/*!
+ * \class local_delta
+ *
+ * \brief define imported deltas and the policy to merge them. By default the
+ *        policy to merge is based on a majority_merger which merges the hashes
+ *        with the highest frequency
+ *
+ */
 class delta: public engine::policies_delta<hash_t,
                                            policies_traits,
                                            engine::majority_merger<hash_t>> {
@@ -71,14 +101,36 @@ protected:
 
 public:
 
+    /** @brief Default constructor
+     *
+     */
     delta() {}
+
+    /** @brief Virtaul destructor
+     *
+     */
     virtual ~delta() {}
 
+    /** @brief Read incoming deltas
+     *  @param[in] is input stream to read from
+     *  @return pointer to delta object
+     *
+     */
     static delta* from_stream(istream& is);
 
+    /** @brief Transaction fees applied when merging imported deltas
+     *
+     */
     cash_t m_fees{0};
 };
 
+/*!
+ * \class app
+ *
+ * \brief define loan application which inherit from engine::app that manges
+ *        all the operations on deltas
+ *
+ */
 class app: public engine::app {
 
 private:
@@ -89,8 +141,6 @@ private:
     class policies_t: public engine::policies_t<hash_t, policies_traits> {
 
     public:
-
-        typedef engine::policies_t<hash_t, policies_traits> b;
 
         policies_t() { temp_load(); }
         void temp_load() { (*this)[next_patch]=0; }
@@ -114,10 +164,28 @@ protected:
 
 public:
 
+    /** @brief Define name of the loan app
+     *
+     */
     constexpr static const char* name={"rep"};
+
+    /** @brief Get identifier of load app (hard coded to 40)
+     *  @return int identifier of loan app
+     */
     static int id() { return 40; }
 
+    /** @brief Default constructor
+     *
+     *  Initialise a new local delta and the associated policy for
+     *  merging the local deltas
+     *
+     */
     app();
+
+    /** @brief Virtual destructor
+     *
+     *  Delete instantiated local delta
+     */
     virtual ~app();
 };
 

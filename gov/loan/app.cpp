@@ -1,3 +1,7 @@
+/****************************************************************************
+ * Copyright (C) 2018 by                                                    *
+ ****************************************************************************/
+
 #include "app.h"
 
 #include <mutex>
@@ -43,7 +47,7 @@ void app::dbhash(hasher_t&) const {
 
 void app::import(const engine::app::delta& gg, const engine::pow_t& w) {
     // TO IMPLEMENT
-    cout << "loan: importING appgut2 MULTIPLICITY " << gg.get_multiplicity() << endl;
+    cout << "loan: importing app MULTIPLICITY " << gg.get_multiplicity() << endl;
 }
 
 void us::gov::loan::local_delta::to_stream(ostream& os) const {
