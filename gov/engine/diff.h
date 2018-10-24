@@ -1,17 +1,19 @@
-#ifndef USGOV_5be98661b464a5d857a59dc71f31d27ce8d4c8f8f678e03cca8653a2a3372b9f
-#define USGOV_5be98661b464a5d857a59dc71f31d27ce8d4c8f8f678e03cca8653a2a3372b9f
+#ifndef US_GOV_ENGINE_DIFF_H
+#define US_GOV_ENGINE_DIFF_H
 
 #include <vector>
 #include <cassert>
 #include <unordered_map>
 #include <thread>
-#include <us/gov/socket.h>
-#include <us/gov/auth.h>
 #include <map>
-#include <us/gov/crypto/hash.h>
-#include <us/gov/crypto/ec.h>
+
 #include "app.h"
 #include "signed_data.h"
+
+#include <us/gov/socket.h>
+#include <us/gov/auth.h>
+#include <us/gov/crypto/hash.h>
+#include <us/gov/crypto/ec.h>
 
 namespace us{ namespace gov{ namespace engine{
 

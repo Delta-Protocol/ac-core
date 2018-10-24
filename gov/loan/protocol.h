@@ -2,8 +2,8 @@
  * Copyright (C) 2018 by                                                    *
  ****************************************************************************/
 
-#ifndef US_GOV_PEER_PROTOCOL_H
-#define US_GOV_PEER_PROTOCOL_H
+#ifndef US_GOV_LOAN_PROTOCOL_H
+#define US_GOV_LOAN_PROTOCOL_H
 
 #include <stdint.h>
 #include <us/gov/peer/protocol.h>

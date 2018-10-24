@@ -35,8 +35,8 @@ daemon::~daemon() {
 
 void daemon::attach(client*c, bool wakeupselect) {
     assert(c!=0);
-    assert(static_cast<peer_t*>(c)->m_parent==0);
-    static_cast<peer_t*>(c)->m_parent=this;
+    assert(static_cast<peer_t*>(c)->get_parent()==0);
+    static_cast<peer_t*>(c)->set_parent(this);
     server::attach(c, wakeupselect);
 }
 
@@ -102,7 +102,7 @@ void daemon::process_work(peer_t *c) {
         break;
     }
 
-    c->m_busy.store(false);
+    c->store_busy(false);
     m_clients.read_sockets(); //might have more datagrams to process
 }
 

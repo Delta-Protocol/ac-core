@@ -1,9 +1,12 @@
 #include "daemon.h"
-#include "protocol.h"
-#include <us/gov/engine/diff.h>
-#include <us/gov/stacktrace.h>
+
 #include <filesystem>
 #include <fstream>
+
+#include <us/gov/engine/diff.h>
+#include <us/gov/stacktrace.h>
+
+#include "protocol.h"
 
 using namespace std::chrono;
 namespace fs = std::filesystem;
@@ -15,7 +18,7 @@ bool daemon::process_work(socket::peer_t *c, socket::datagram*d) {
     if (relay::daemon::process_work(c,d))
         return true;
     relay::peer_t* p=static_cast<relay::peer_t*>(c);
-    switch(d->service) {
+    switch(d->get_service()) {
         case protocol::file_request: 
              request(p,d); 
              break;
@@ -38,7 +41,7 @@ void daemon::request(relay::peer_t *c, socket::datagram*d) {
         auto n=this->get_random_edge(c);
         if (unlikely(n==0))
             return;
-        cout << "block not found in HD, requesting it from peer " << n->m_addr << endl;
+        cout << "block not found in HD, requesting it from peer " << n->get_address() << endl;
         auto r=n->send(new socket::datagram(protocol::file_request,hash_b58));
         cout << r << endl;
         return;
@@ -177,7 +180,7 @@ string daemon::load(const string& hash_b58,
         if (unlikely(n==0))
         	return "";
         cout << "DFS: querying file for " << hash_b58
-             << " from peer " << n->m_addr << endl;
+             << " from peer " << n->get_address() << endl;
         auto r=n->send(new socket::datagram(protocol::file_request,hash_b58));
         cout << r << endl;
         return "";

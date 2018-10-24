@@ -1,9 +1,10 @@
-#ifndef USGOV_7e890654e98bf7c2878b37b6916dcb394f32fdcde3e1c8e0ac04dfd8d224f02c
-#define USGOV_7e890654e98bf7c2878b37b6916dcb394f32fdcde3e1c8e0ac04dfd8d224f02c
+#ifndef US_GOV_ENGINE_SIGNED_DATA_H
+#define US_GOV_ENGINE_SIGNED_DATA_H
+
+#include <string>
 
 #include <us/gov/crypto/hash.h>
 #include <us/gov/crypto/ec.h>
-#include <string>
 
 namespace us{ namespace gov{ namespace engine{
 using namespace std;

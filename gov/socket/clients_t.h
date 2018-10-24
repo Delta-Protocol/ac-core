@@ -53,6 +53,7 @@ private:
         mutable mutex m_mx;
     };
 
+private:
     mutable mutex m_mx_active;
     mutable mutex m_mx;
     vector<client*> m_active;
@@ -148,9 +149,35 @@ public:
      */
     void grow();
 
-    /** @brief public member that instantiate a loopback client
+    /** @brief Connect client to server
+     *  @param[in] host address of the server to connect to
+     *  @param[in] port of the server to connect to
+     *  @param[in] block flag set property of the open file descriptor as blocking
+     *  @return string with error message or empty string on success
+     *
+     *  The following error messages could be returned:
+     *  - 'socket is non zero.' is the socket is already bound
+     *  - 'Error. Timeout obtaining peername' if after 500ms the name of the
+     *    peer cannot be obtained
+     *  - 'Connection refused. errno=' server refuses connection and will
+     *     print the error number
      *
      */
+    string connect(const string& host,
+                   uint16_t port,
+                   bool block=false){
+        return m_locli.connect(host, port, block);
+    }
+
+    /** @brief Close the socket connection
+     *  @return Void
+     *
+     */
+    void disconnect(){
+        m_locli.disconnect();
+    }
+
+private:
     client m_locli; //loopback
 };
 

@@ -1,5 +1,5 @@
-#ifndef USGOV_ca166ff10aed048381709f1009faa3b5040c245209c75c126fd4984045d546a2
-#define USGOV_ca166ff10aed048381709f1009faa3b5040c245209c75c126fd4984045d546a2
+#ifndef US_GOV_WALLET_DAEMON_LOCAL_API_H
+#define US_GOV_WALLET_DAEMON_LOCAL_API_H
 
 #include "daemon_api.h"
 #include "wallet_local_api.h"
@@ -23,7 +23,7 @@ public:
     using w::tx_make_p2pkh_input;
 
 #include <us/api/apitool_generated__functions_wallet-daemon_cpp_impl>  //APITOOL
-    };
+};
 }}
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef USGOV_501a1656c74ab5296d94d111b535c5b05fb98098d2116c600b391f6e612eca22
-#define USGOV_501a1656c74ab5296d94d111b535c5b05fb98098d2116c600b391f6e612eca22
+#ifndef US_GOV_WALLET_PAIRING_LOCAL_API_H
+#define US_GOV_WALLET_PAIRING_LOCAL_API_H
 
 #include <us/wallet/pairing_api.h>
 #include "pairing.h"

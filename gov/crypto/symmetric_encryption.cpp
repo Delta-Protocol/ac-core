@@ -1,6 +1,9 @@
 #include "symmetric_encryption.h"
+
 #include <iterator>
+
 #include <secp256k1_ecdh.h>
+
 #include <crypto++/cryptlib.h>
 #include <crypto++/filters.h>
 #include <crypto++/gcm.h>

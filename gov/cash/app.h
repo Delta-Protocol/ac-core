@@ -1,8 +1,6 @@
-#ifndef USGOV_49e5fff0395fac385e48353d91ae777f7b0ba92baa74a883f127855ad412c9e0
-#define USGOV_49e5fff0395fac385e48353d91ae777f7b0ba92baa74a883f127855ad412c9e0
+#ifndef US_GOV_CASH_APP_H
+#define US_GOV_CASH_APP_H
 
-#include <us/gov/auth.h>
-#include <us/gov/engine.h>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -13,6 +11,8 @@
 #include <atomic>
 #include <mutex>
 
+#include <us/gov/auth.h>
+#include <us/gov/engine.h>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/signal_handler.h>
 #include <us/gov/crypto/crypto.h>

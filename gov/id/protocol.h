@@ -1,5 +1,5 @@
-#ifndef USGOV_f7ece82349b5b34e6f48f4dd802ec8765a675855c2e34bc29f2fdc5cc28ed4ba
-#define USGOV_f7ece82349b5b34e6f48f4dd802ec8765a675855c2e34bc29f2fdc5cc28ed4ba
+#ifndef US_GOV_ID_PROTOCOL_H
+#define US_GOV_ID_PROTOCOL_H
 
 #include <stdint.h>
 #include <us/gov/socket/protocol.h>

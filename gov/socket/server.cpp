@@ -69,7 +69,7 @@ void server::on_finish() {
 
 void server::attach(client*c, bool wakeupselect) {
     assert(c);
-    assert(c->m_sock!=0);
+    assert(c->get_sock()!=0);
     m_clients.add(c,wakeupselect);
 }
 
@@ -112,7 +112,7 @@ void server::run() {
         return;
     }
 
-    auto r=m_clients.m_locli.connect("127.0.0.1",m_port);
+    auto r=m_clients.connect("127.0.0.1",m_port);
     if (unlikely(!r.empty())) {
         close(m_sock);
         m_sock=0;
@@ -167,7 +167,7 @@ void server::run() {
             }
 
             auto cl=create_client(nnew);
-            if (unlikely(banned_throttle(cl->m_addr))) {
+            if (unlikely(banned_throttle(cl->get_address()))) {
                 delete cl;
             }
             else {
@@ -186,8 +186,9 @@ void server::run() {
             }
             auto p=c->second;
 
-            if (p->m_busy.load()) continue;
-            p->m_busy.store(true);
+            if (p->load_busy()) 
+                continue;
+            p->store_busy(true);
             receive_and_process(p);
         }
     }
@@ -197,6 +198,6 @@ void server::run() {
     close(loopback);
     m_sock=0;
     loopback=0;
-    m_clients.m_locli.disconnect();
+    m_clients.disconnect();
 }
 

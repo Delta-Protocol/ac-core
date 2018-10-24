@@ -1,4 +1,5 @@
 #include "shell.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -7,7 +8,9 @@
 #include <chrono>
 #include <cassert>
 #include <sstream>
+
 #include <vector>
+
 #include <us/gov/signal_handler.h>
 #include "daemon.h"
 

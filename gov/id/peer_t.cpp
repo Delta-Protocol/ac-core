@@ -1,11 +1,12 @@
 #include "peer_t.h"
-#include "protocol.h"
+
 #include <sstream>
 #include <fstream>
 
 #include <us/gov/crypto/base58.h>
 
 #include "daemon.h"
+#include "protocol.h"
 
 using namespace us::gov::id;
 using namespace std;
@@ -124,7 +125,7 @@ const peer_t::keys& peer_t::get_keys() const {
 }
 
 bool peer_t::process_work(datagram*d) {
-    switch(d->service) {
+    switch(d->get_service()) {
         case protocol::gov_id_request: 
             process_request(d,get_keys()); 
             break;

@@ -1,14 +1,15 @@
-#ifndef USGOV_7d0dac324059aa8fa70622923a29506fe6d9689a9cc3e3072571557fe53e03f1
-#define USGOV_7d0dac324059aa8fa70622923a29506fe6d9689a9cc3e3072571557fe53e03f1
+#ifndef US_GOV_WALLET_WALLET_H
+#define US_GOV_WALLET_WALLET_H
 
 #include <unordered_map>
+#include <fstream>
+
 #include <us/gov/cash.h>
 #include <us/gov/crypto.h>
 #include <us/gov/auth.h>
-#include <fstream>
-#include <unordered_map>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/crypto.h>
+
 #include "wallet_api.h"
 
 namespace us{ namespace wallet{

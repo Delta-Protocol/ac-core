@@ -29,7 +29,7 @@ void daemon::daemon_timer() { // network mutation
 
 void daemon::check_latency(const peers_t& a) {
     for (auto&i:a) {
-        if (i->m_stage==peer_t::connected) {
+        if (i->get_stage()==peer_t::connected) {
             cout << "SENDING PING from check_latency" << endl;
             i->ping();
         }
@@ -51,7 +51,9 @@ daemon::peers_t daemon::adjust_peer_number() {
 void daemon::add_peers(peers_t& a) {
     int n=m_edges-a.asize()+1; //must be signed int
     unordered_set<string> exclude;
-    for (auto i:a) if (i!=0) exclude.emplace(i->m_addr);
+    for (auto i:a) 
+        if (i!=0) 
+            exclude.emplace(i->get_address());
     int m=0;
 
     while(n>0) {
@@ -87,7 +89,7 @@ vector<peer_t*> daemon::in_service(const peers_t& a) const {
     vector<peer_t*> ans;
     for (auto& i:a) {
         auto& c=static_cast<peer_t&>(*i);
-        if (c.m_stage==peer_t::service) ans.push_back(&c);
+        if (c.get_stage()==peer_t::service) ans.push_back(&c);
     }
     return move(ans);
 }
@@ -96,7 +98,7 @@ void daemon::purge_slow(peers_t&a) {
     peers_t copy;
     copy.reserve(a.size());
     for (auto& i:a) {
-        if (i->m_stage==peer_t::exceed_latency) {
+        if (i->get_stage()==peer_t::exceed_latency) {
             i->disconnect();
         }
         else {
@@ -112,8 +114,8 @@ daemon::peers_t::iterator daemon::oldest(peers_t& v) const {
     for (auto i=v.begin(); i!=v.end(); ++i) {
         if (*i==0) continue;
         auto& c=static_cast<peer_t&>(**i);
-        if (c.m_since<cur) {
-            cur=c.m_since;
+        if (c.get_since()<cur) {
+            cur=c.get_since();
             o=i;
         }
     }

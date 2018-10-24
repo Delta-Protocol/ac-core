@@ -29,9 +29,7 @@ using socket::datagram;
  *
  */
 class daemon: public auth::daemon {
-
 private:
-
     uint16_t m_edges;
 
     class peers_t: public vector<peer_t*> {
@@ -62,7 +60,6 @@ private:
     vector<peer_t*> in_service(const peers_t& a) const;
 
 protected:
-
     virtual void daemon_timer() override;
     virtual string get_random_peer(const unordered_set<string>& exclude) const=0;
     peers_t active() const;

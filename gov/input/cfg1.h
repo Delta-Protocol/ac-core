@@ -75,9 +75,14 @@ public:
      */
     static cfg1 load(const string& home);
 
-    /** @brief public member object containing public and private keys objects
-     *
+    /** @brief get keys
+     *  @return public member object containing public and private keys objects
      */
+    const keys_t& get_keys() const {
+        return m_keys;
+    }
+
+private:
     keys_t m_keys;
 };
 

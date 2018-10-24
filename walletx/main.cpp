@@ -266,7 +266,7 @@ void run_daemon(const params& p) {
 
 //	us::gov::filesystem::cfg cfg=us::gov::filesystem::cfg::load(p.homedir);
     string homedir=p.homedir+"/wallet";
-	wallet_daemon* d=new wallet_daemon(cfg1::load(homedir).m_keys, p.listening_port, homedir, p.backend_host, p.backend_port);
+	wallet_daemon* d=new wallet_daemon(cfg1::load(homedir).get_keys(), p.listening_port, homedir, p.backend_host, p.backend_port);
 
     auto k=cfg1::load_priv_key(p.homedir+"/gov");
     if (k.first) d->add_address(k.second);
@@ -332,7 +332,7 @@ bool run_local(string command, shell_args& args, const params& p) {
 	else {
 		using us::gov::input::cfg_id;
 		auto f=cfg_id::load(homedir+"/rpc_client");
-		papi=new us::wallet::daemon_rpc_api(f.m_keys, p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
+		papi=new us::wallet::daemon_rpc_api(f.get_keys(), p.walletd_host,p.walletd_port); //rpc to a wallet daemon, same role as android app
 	}
 
     if (p.json) papi=new us::wallet::json::daemon_api(papi);
@@ -344,7 +344,7 @@ bool run_local(string command, shell_args& args, const params& p) {
 
 	if (command=="transfer") { //shortcut to tx fn
 		command="tx";
-		--args.m_num; //repeat command transfer
+		args.set_num(args.get_num()-1); //repeat command transfer
 	}
 
 	if (command=="tx") {
@@ -406,7 +406,7 @@ bool run_local(string command, shell_args& args, const params& p) {
         }
         else {
             auto f=cfg_id::load(homedir+"/rpc_client");
-            cout << f.m_keys.get_pubkey();
+            cout << f.get_keys().get_pubkey();
         }
     }
 	else if (command=="pair") {

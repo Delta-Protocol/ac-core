@@ -1,11 +1,12 @@
-#ifndef USGOV_5a3346e45d07feaf4864a3e08a47717c8da7429ee7accc342f7bc496c9fdb846
-#define USGOV_5a3346e45d07feaf4864a3e08a47717c8da7429ee7accc342f7bc496c9fdb846
+#ifndef US_GOV_CRYPTO_RIPEMD160_H
+#define US_GOV_CRYPTO_RIPEMD160_H
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <string>
 #include <cassert>
 #include <cstring>
+
+#include <string>
 #include <array>
 #include <iostream>
 

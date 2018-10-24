@@ -242,7 +242,7 @@ namespace ctpl {
         }
 
         void init() { this->nWaiting = 0; this->isStop = false; this->isDone = false; }
-
+    private:
         std::vector<std::unique_ptr<std::thread>> threads;
         std::vector<std::shared_ptr<std::atomic<bool>>> flags;
         detail::Queue<std::function<void(int id)> *> q;

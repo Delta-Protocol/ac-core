@@ -1,12 +1,14 @@
-#ifndef USGOV_58cbbc93ca211d1d3a8d23b3465a0ddfa220130869c491eb636d63f598241f67
-#define USGOV_58cbbc93ca211d1d3a8d23b3465a0ddfa220130869c491eb636d63f598241f67
+#ifndef US_GOV_CRYPTO_SHA256_H
+#define US_GOV_CRYPTO_SHA256_H
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <string>
 #include <cassert>
 #include <cstring>
+
+#include <string>
 #include <array>
+
 #include <us/gov/likely.h>
 #include "ripemd160.h"
 
@@ -18,7 +20,8 @@ public:
     static constexpr size_t output_size = 32;
     sha256();
 
-    struct value_type:array<unsigned char,output_size> {
+    class value_type: public array<unsigned char,output_size> {
+    public:
         value_type() {}
         value_type(int) { zero(); }
 

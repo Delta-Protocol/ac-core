@@ -1,5 +1,5 @@
-#ifndef USGOV_d99aa614ace853bcae148b472d209a4651c9b4bcdd2773e1d531e579bde9ba9c
-#define USGOV_d99aa614ace853bcae148b472d209a4651c9b4bcdd2773e1d531e579bde9ba9c
+#ifndef US_GOV_CASH_PROTOCOL_H
+#define US_GOV_CASH_PROTOCOL_H
 
 #include <stdint.h>
 #include <us/gov/relay/protocol.h>

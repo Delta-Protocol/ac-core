@@ -37,7 +37,6 @@ typedef hasher_t::value_type hash_t;
  *
  */
 class policies_traits {
-
 public:
 
     /*! Enumerates type of policy */
@@ -62,6 +61,7 @@ public:
 class local_delta:public engine::policies_local_delta<hash_t, policies_traits> {
 private:
     typedef engine::policies_local_delta<hash_t, policies_traits> base;
+    cash_t m_fees{0};
 
 protected:
     virtual int app_id() const override;
@@ -80,10 +80,13 @@ public:
      */
     virtual ~local_delta() {}
 
-    /** @brief Transaction fees applied when merging imported deltas
+    /** @brief Get transaction fees applied when merging deltas
+     *  @return integer fee
      *
      */
-    cash_t m_fees{0};
+    const cash_t get_fees() const {
+        return m_fees;
+    }
 };
 
 /*!
@@ -97,15 +100,14 @@ public:
 class delta: public engine::policies_delta<hash_t,
                                            policies_traits,
                                            engine::majority_merger<hash_t>> {
-
 private:
+    cash_t m_fees{0};
 
     typedef engine::policies_delta<hash_t,
                                    policies_traits,
                                    engine::majority_merger<hash_t>> base_t;
 
 protected:
-
     virtual uint64_t merge(engine::app::local_delta* other0) override;
     virtual void to_stream(ostream& os) const override;
 
@@ -127,11 +129,6 @@ public:
      *
      */
     static delta* from_stream(istream& is);
-
-    /** @brief Transaction fees applied when merging imported deltas
-     *
-     */
-    cash_t m_fees{0};
 };
 
 /*!
@@ -142,15 +139,14 @@ public:
  *
  */
 class app: public engine::app {
-
 private:
-
     loan::local_delta* m_pool{0};
     mutex m_mx_pool;
 
     class policies_t: public engine::policies_t<hash_t, policies_traits> {
-
     public:
+
+        typedef engine::policies_t<hash_t, policies_traits> b;
 
         policies_t() { temp_load(); }
         void temp_load() { (*this)[next_patch]=0; }
@@ -159,12 +155,12 @@ private:
     void add_policies();
     void dump_policies(ostream& os) const;
 
+private:
     policies_t m_policies;
     policies_t m_policies_local;
     mutable mutex m_mx_policies;
 
 protected:
-
     virtual string get_name() const override { return name; }
     virtual int get_id() const override { return id(); }
     virtual string shell_command(const string& cmdline) override;

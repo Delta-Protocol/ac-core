@@ -151,6 +151,11 @@ public:
 
     /** @brief Public member to identify the service of this datagram
      */
+    uint16_t get_service() const {
+        return service;
+    }
+
+private:
     uint16_t service;
 };
 

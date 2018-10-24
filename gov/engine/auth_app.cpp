@@ -1,5 +1,7 @@
 #include "auth_app.h"
+
 #include <random>
+
 #include "daemon.h"
 
 using namespace std;
@@ -57,7 +59,7 @@ void app::basic_auth_completed(peer_t* p) {
         }
         if (i==m_db.m_hall.end()){
             p->set_stage(peer_t::out);
-            m_pool->m_to_hall.push_back(make_pair(p->get_pubkey().hash(),p->m_addr));
+            m_pool->m_to_hall.push_back(make_pair(p->get_pubkey().hash(),p->get_address()));
         }else{
             p->set_stage(peer_t::hall);
         }

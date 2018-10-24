@@ -1,5 +1,5 @@
-#ifndef USGOV_7f56782e8ba6adc1469f36dc752c8f1d9729121ed3ab14b7f4b336757ba0af2c
-#define USGOV_7f56782e8ba6adc1469f36dc752c8f1d9729121ed3ab14b7f4b336757ba0af2c
+#ifndef US_GOV_CRYPTO_DOUBLE_SHA256_H
+#define US_GOV_CRYPTO_DOUBLE_SHA256_H
 
 #include <string>
 #include <us/gov/likely.h>

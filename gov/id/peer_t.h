@@ -1,5 +1,5 @@
-#ifndef USGOV_adb8d14e20731e001ab4e0eb7742ff5881fc9a7fabb4666497868c91f9a18570
-#define USGOV_adb8d14e20731e001ab4e0eb7742ff5881fc9a7fabb4666497868c91f9a18570
+#ifndef US_GOV_ID_PEER_T_H
+#define US_GOV_ID_PEER_T_H
 
 #include <us/gov/socket/peer_t.h>
 #include <us/gov/crypto/crypto.h>
@@ -8,7 +8,7 @@
 namespace us{ namespace gov{ namespace id{
 using namespace std;
 
-struct daemon;
+class daemon;
 
 class peer_t: public socket::peer_t {
 public:

@@ -1,5 +1,5 @@
-#ifndef USGOV_295e7aaeb03ee968854f88efb260a727b72d3462dca2a2504a293306aa97060e
-#define USGOV_295e7aaeb03ee968854f88efb260a727b72d3462dca2a2504a293306aa97060e
+#ifndef US_GOV_CASH_INPUT_CONVERT_H
+#define US_GOV_CASH_INPUT_CONVERT_H
 
 #include <us/gov/input/convert.h>
 #include <us/gov/cash/tx.h>

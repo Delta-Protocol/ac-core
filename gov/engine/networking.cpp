@@ -5,8 +5,6 @@ using namespace us::gov::engine;
 using namespace us::gov;
 using namespace std;
 
-typedef us::gov::engine::networking c;
-
 networking::networking(engine::daemon* parent, 
                        const string& home): b(home), m_parent(parent) {
 }
@@ -18,7 +16,7 @@ networking::networking(uint16_t port, uint16_t edges,
                                             m_seed_nodes(seed_nodes) {
 }
 
-const networking::keys& c::get_keys() const {
+const networking::keys& networking::get_keys() const {
     return m_parent->get_id();
 }
 
@@ -70,11 +68,11 @@ bool networking::process_evidence(datagram*d) {
 }
 
 bool networking::process_work(socket::peer_t *c, datagram*d) { 
-    if (protocol::is_node_protocol(d->service)) { 
+    if (protocol::is_node_protocol(d->get_service())) { 
         if (m_parent->process_work(static_cast<peer_t*>(c),d)) 
             return true;
     }
-    if (protocol::is_app_query(d->service)) {
+    if (protocol::is_app_query(d->get_service())) {
         if (m_parent->process_app_query(static_cast<peer_t*>(c),d)) 
             return true;
     }

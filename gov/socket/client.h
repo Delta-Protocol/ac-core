@@ -189,19 +189,36 @@ public:
      */
     string address() const;
 
-    /** @brief Flag that marks if the client is busy processing work
+    /** @brief Store the flag that marks if the client is busy processing work
      *
      */
+    void store_busy(bool v){
+        m_busy.store(v);
+    }
+
+    /** @brief Return the flag that marks if the client is busy processing work
+     *
+     */
+    atomic<bool> load_busy(){
+        return m_busy.load();
+    }
+
+    /** @brief Return peer name public attribute
+     *
+     */
+    const string& get_address() const {
+        return m_addr; 
+    }
+
+    /** @brief Return socket identifier public attribute
+     *
+     */  
+    int get_sock() const {
+        return m_sock;
+    }
+private:
     atomic<bool> m_busy{false};
-
-    /** @brief Peer name public attribute
-     *
-     */
     string m_addr;
-
-    /** @brief Socket identifier public attribute
-     *
-     */
     int m_sock;
 };
 

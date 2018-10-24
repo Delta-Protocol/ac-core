@@ -1,11 +1,11 @@
-#ifndef USGOV_98e8c16336dfe2bb0f4b26ffe37d808f974893b94c081f2f0f0419f11ac5e0ae
-#define USGOV_98e8c16336dfe2bb0f4b26ffe37d808f974893b94c081f2f0f0419f11ac5e0ae
+#ifndef US_GOV_WALLET_DAEMON_H
+#define US_GOV_WALLET_DAEMON_H
 
+#include <unordered_map>
+#include "daemon_local_api.h"
 #include <us/gov/auth/daemon.h>
 #include <us/gov/crypto/ec.h>
 #include "wallet.h"
-#include <unordered_map>
-#include "daemon_local_api.h"
 
 namespace us{ namespace wallet{
 

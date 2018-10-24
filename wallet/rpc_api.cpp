@@ -1,13 +1,12 @@
 #include "rpc_api.h"
-#include "protocol.h"
 #include <sstream>
 #include <us/gov/socket.h>
 #include <us/gov/cash.h>
+#include "protocol.h"
 
 using namespace us::wallet;
 using namespace us;
 using namespace std;
-
 
 rpc_api::rpc_api(const gov::auth::peer_t::keys&k, 
                  const string& walletd_host, 

@@ -1,5 +1,5 @@
-#ifndef USGOV_623b2ff2c7648665400db382bc9542b909646b0c7f35010ee4d34b7a4e819d4c
-#define USGOV_623b2ff2c7648665400db382bc9542b909646b0c7f35010ee4d34b7a4e819d4c
+#ifndef US_GOV_AUTH_PEER_T_H
+#define US_GOV_AUTH_PEER_T_H
 
 #include <us/gov/id/peer_t.h>
 

@@ -1,5 +1,5 @@
-#ifndef USGOV_cecc5cb611fac4022cc60e3a9caee608906e8b3256ea18a917c439b57efff781
-#define USGOV_cecc5cb611fac4022cc60e3a9caee608906e8b3256ea18a917c439b57efff781
+#ifndef US_GOV_INPUT_CFG0_H
+#define US_GOV_INPUT_CFG0_H
 
 #include <string>
 
@@ -7,9 +7,7 @@ namespace us { namespace gov { namespace input {
 using namespace std;
 
 class cfg0 {
-
 public:
-
     cfg0(const string& home);
     cfg0(const cfg0& other);
     virtual ~cfg0();
@@ -24,6 +22,10 @@ public:
     static void mkdir_tree(string sub, string dir);
     static cfg0 load(const string& home);
 
+    const string& get_home() const {
+        return m_home;
+    }
+private:
     string m_home;
 };
 

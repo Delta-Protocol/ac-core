@@ -164,10 +164,10 @@ pair<string,datagram*> client::recv(uint16_t expected_service) {
     }
     datagram*d=r.second;
     while(true) { //delete garbage injected by hackers
-        if (d->service==us::gov::protocol::gov_socket_error) {
+        if (d->get_service()==us::gov::protocol::gov_socket_error) {
             return move(r);
         }
-        if (d->service==expected_service) {
+        if (d->get_service()==expected_service) {
             break;
         }
         else {

@@ -1,5 +1,5 @@
-#ifndef USGOV_bcd39cb0e30ff62fab250e5e57bdcff3af1e5a4e8299d35f59dd942bd6f80adc
-#define USGOV_bcd39cb0e30ff62fab250e5e57bdcff3af1e5a4e8299d35f59dd942bd6f80adc
+#ifndef US_GOV_WALLET_PROTOCOL_H
+#define US_GOV_WALLET_PROTOCOL_H
 
 #include <inttypes.h>
 

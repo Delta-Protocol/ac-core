@@ -1,8 +1,8 @@
 #include "wallet.h"
-#include "protocol.h"
 #include <us/gov/input.h>
 #include <us/gov/protocol.h>
 #include <us/gov/cash/locking_programs/p2pkh.h>
+#include "protocol.h"
 
 using namespace us::wallet;
 using namespace std;
@@ -137,7 +137,7 @@ wallet::query_accounts(socket::peer_t& peer,
         return move(ret);
     }
 
-    if (response.second->service==gov::protocol::gov_socket_error) {
+    if (response.second->get_service()==gov::protocol::gov_socket_error) {
         ret.first=response.second->parse_string();
         delete response.second;
         return move(ret);

@@ -1,5 +1,5 @@
-#ifndef USGOV_97f4ca5009925205caddff033edb001948dc6b58d5c2e82468ef782c1a30b756
-#define USGOV_97f4ca5009925205caddff033edb001948dc6b58d5c2e82468ef782c1a30b756
+#ifndef US_GOV_DFS_PROOCOL_H
+#define US_GOV_DFS_PROOCOL_H
 
 #include <inttypes.h>
 #include <us/gov/relay/protocol.h>

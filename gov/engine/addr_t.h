@@ -1,5 +1,5 @@
-#ifndef USGOV_35983b282eac9c91c0e90893cd4b3586191237650a0dc3908a66e683a0dd15b5
-#define USGOV_35983b282eac9c91c0e90893cd4b3586191237650a0dc3908a66e683a0dd15b5
+#ifndef US_GOV_ENGINE_ADDR_T_H
+#define US_GOV_ENGINE_ADDR_T_H
 
 #include <string>
 #include <iostream>
@@ -17,8 +17,6 @@ public:
 ostream& operator << (ostream& os, const addr_t& o);
 
 }}}
-
-
 
 #endif
 

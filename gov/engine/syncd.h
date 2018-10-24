@@ -1,12 +1,12 @@
-#ifndef USGOV_77adc1ef338434dcbe2fd89f5a86d54ba6fe219dcb84f80d6903a1ee04fc73ea
-#define USGOV_77adc1ef338434dcbe2fd89f5a86d54ba6fe219dcb84f80d6903a1ee04fc73ea
+#ifndef US_GOV_ENGINE_SYNCD_H
+#define US_GOV_ENGINE_SYNCD_H
 
 #include <condition_variable>
 #include <mutex>
 #include <chrono>
+
 #include <us/gov/signal_handler.h>
 #include "diff.h"
-
 
 namespace us{ namespace gov{ namespace engine{
 using namespace std;

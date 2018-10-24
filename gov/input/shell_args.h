@@ -8,7 +8,7 @@
 #include <string>
 #include "convert.h"
 
-namespace us { namespace gov { namespace input {
+namespace us{ namespace gov{ namespace input{
 using namespace std;
 
 /*!
@@ -65,6 +65,15 @@ public:
         return m_argc-m_num;
     }
 
+    int get_num() const {
+        return m_num;
+    }
+ 
+    void set_num(int num){
+        m_num = num; 
+    }
+
+private:
     int m_argc;
     char** m_argv;
     int m_num{1};

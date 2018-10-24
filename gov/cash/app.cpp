@@ -1,15 +1,18 @@
 #include "app.h"
-#include "protocol.h"
+
 #include <thread>
 #include <chrono>
-#include <us/gov/crypto/base58.h>
-#include <us/gov/likely.h>
-#include "tx.h"
-#include <us/gov/engine/daemon.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#include <us/gov/crypto/base58.h>
+#include <us/gov/likely.h>
+#include <us/gov/engine/daemon.h>
+
 #include "locking_programs/p2pkh.h"
+#include "tx.h"
+#include "protocol.h"
 
 using namespace us::gov;
 using namespace us::gov::cash;
@@ -93,7 +96,7 @@ engine::app::local_delta* app::create_local_delta() {
 }
 
 bool app::process_query(peer_t* c, datagram* d) {
-    switch(d->service) {
+    switch(d->get_service()) {
         case protocol::cash_query: {
             cash_query(c,d);
             return true;

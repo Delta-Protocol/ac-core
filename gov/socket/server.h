@@ -43,7 +43,7 @@ private:
     int m_sock {0};
 
 protected:
-    virtual void receive_and_process(client*c) { c->m_busy.store(false); };
+    virtual void receive_and_process(client*c) { c->store_busy(false); };
     virtual void attach(client*,bool wakeupselect=true);
     virtual client* create_client(int sock);
     virtual void on_finish() override;

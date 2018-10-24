@@ -34,7 +34,6 @@ protected:
     virtual bool process_work(socket::peer_t *c, datagram*d) override;
 
 public:
-
     /** @brief Alias for set of datagrams of type evidence
      *
      */
@@ -80,13 +79,17 @@ public:
      */
     evidences_t* retrieve_evidences(); //caller must take the lock
 
-    /** @brief Mutex to lock on evidences. The caller should hold the mutex
+    /** @brief Returns the mutex to lock on evidences. The caller should hold the mutex
      *         when retrieving evidence datagrams
+     * @return reference to mutex to lock on evidences
      *
      */
-    mutable mutex m_mx_evidences;
-
+    mutex& get_evidences(){
+        return m_mx_evidences;
+    }
+   
 private:
+    mutable mutex m_mx_evidences;
     evidences_t* m_evidences;
 };
 

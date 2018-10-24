@@ -1,8 +1,8 @@
 #include "wallet_rpc_api.h"
-#include "protocol.h"
 #include <sstream>
 #include <us/gov/socket/datagram.h>
 #include <us/gov/cash.h>
+#include "protocol.h"
 
 using namespace us::wallet;
 using namespace std;

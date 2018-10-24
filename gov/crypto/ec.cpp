@@ -1,10 +1,13 @@
 #include "ec.h"
-#include <sstream>
+
 #include <iomanip>
 #include <iomanip>
+#include <cassert>
+
 #include <vector>
 #include <fstream>
-#include <cassert>
+#include <sstream>
+
 #include "base58.h"
 #include <secp256k1_ecdh.h>
 

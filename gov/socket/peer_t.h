@@ -72,12 +72,24 @@ public:
      */
     virtual void disconnect() override;
 
-    /** @brief Member variable holding the pointer to the parent daemon
+    /** @brief Return member variable holding the pointer to the parent daemon
+     *  @return member variable holding the pointer to the parent daemon
      *
      *  The parent is initialised when the client is created
      *  by the daemon (in socket layer) and it is used to identify who
      *  created the peer and access functionalities exposed by the parent only.
      */
+    const daemon* get_parent() const {
+        return m_parent;
+    } 
+
+    /** @brief Set member variable holding the pointer to the parent daemon
+     *  @param[in] pointer to daemon
+     */
+    void set_parent(daemon* d){
+        m_parent = d;
+    } 
+protected:
     daemon* m_parent{0};
 };
 
