@@ -217,11 +217,11 @@ public:
         return m_outputs;
     }
     
-    void set_locking_program_input(int n, const string& s){
-        if(m_inputs.size() < n){
-            m_inputs[n].set_locking_program_input(s);
-        }else{
+      void set_locking_program_input(int n, const string& s){
+        if(m_inputs.size() <= n){
             assert(!"Out of boundary");
+        }else{
+            m_inputs[n].set_locking_program_input(s);
         }
     }
 
