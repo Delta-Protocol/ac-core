@@ -113,6 +113,10 @@ public:
     }
     virtual void process(const evidence&) override {}
 
+    local_delta* get_pool(){
+        return m_pool;   
+    }
+    
 private:
     local_delta* m_pool{0};
     mutex m_mx_pool;

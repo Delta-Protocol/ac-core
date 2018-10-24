@@ -10,28 +10,27 @@ using namespace std;
 using socket::datagram;
 
 struct params {
-	params() {
+    params() {
         const char* env_p = std::getenv("HOME");
         if (!env_p) {
             cerr << "No $HOME env var defined" << endl;
             exit(1);
         }
         homedir=env_p;
-    	homedir+="/.us";
-	}
+        homedir+="/.us";
+    }
     void dump(ostream& os) const {
         os << "home: " << homedir << endl;
     }
-
     string homedir;
 };
 
 void help() {
-	params p;
-	cout << "us-genesis [options] <WAN address>    The IP address other nodes will use to reach this node." << endl;
-	cout << "Options are:" << endl;
-	cout << "  -home <homedir>   Set home directory (default is ~/.us) " << endl;
-	cout << "  -h            Print this help and exit " << endl;
+    params p;
+    cout << "us-genesis [options] <WAN address>    The IP address other nodes will use to reach this node." << endl;
+    cout << "Options are:" << endl;
+    cout << "  -home <homedir>   Set home directory (default is ~/.us) " << endl;
+    cout << "  -h            Print this help and exit " << endl;
 }
 
 #include <us/gov/input.h>
@@ -44,12 +43,10 @@ string parse_options(shell_args& args, params& p) {
         cmd=args.next<string>();
         if (cmd=="-home") {
             p.homedir=args.next<string>();
-        }
-		else if (cmd=="-h") {
-			help();
-			exit(0);
-		}
-        else {
+        }else if (cmd=="-h") {
+            help();
+            exit(0);
+        }else {
             break;
         }
     }
@@ -68,13 +65,13 @@ using us::gov::engine::diff;
 struct genesis_daemon: engine::daemon {
 
     genesis_daemon(const us::gov::crypto::ec::keys& a, const string& b):engine::daemon(a,b,0,0,vector<string>()) {
-	    add(new cash::app());
+        add(new cash::app());
     }
 
     void start_new_blockchain(const string& addr) {
         assert(!addr.empty());
         auto pool=new diff();
-        auth_app->pool->to_hall.push_back(make_pair(id.pub.hash(),addr));
+        get_auth_app()->get_pool()->m_to_hall.push_back(make_pair(get_id().get_pubkey().hash(),addr));
         auto* mg=create_local_deltas();
         assert(mg!=0);
         pool->allow(*mg);
@@ -87,7 +84,6 @@ struct genesis_daemon: engine::daemon {
         }
         delete pool;
     }
-
 };
 
 
@@ -106,36 +102,36 @@ int main(int argc, char** argv) {
     p.dump(cout);
 
     if (address.empty()) {
-			cerr << "I need the address of the genesis node." << endl;
-            help();
-			exit(1);
+        cerr << "I need the address of the genesis node." << endl;
+        help();
+        exit(1);
     }
 
-	if (!cfg::ensure_dir(p.homedir)) {
-		cerr << "Cannot create dir " << p.homedir << endl;
-		exit(1);
-	}
+    if (!cfg::ensure_dir(p.homedir)) {
+        cerr << "Cannot create dir " << p.homedir << endl;
+        exit(1);
+    }
 
-	p.homedir+="/gov";
+    p.homedir+="/gov";
 
-	if (cfg::exists_dir(p.homedir)) {
-		cerr << "Cannot start a new blockchain if home dir exists: " << p.homedir << endl;
-		exit(1);
-	}
+    if (cfg::exists_dir(p.homedir)) {
+        cerr << "Cannot start a new blockchain if home dir exists: " << p.homedir << endl;
+        exit(1);
+    }
 
-	cfg conf=cfg::load(p.homedir);
+    cfg conf=cfg::load(p.homedir);
 
-	if (!conf.m_keys.pub.valid) {
-		cerr << "Invalid node pubkey" << endl;
-		exit(1);
-	}
+    if (!conf.get_keys().get_pubkey().is_valid()) {
+        cerr << "Invalid node pubkey" << endl;
+        exit(1);
+    }
 
-        cout << "Node public key is " << conf.m_keys.pub << " address " << conf.m_keys.pub.hash() << endl;
-	genesis_daemon d(conf.m_keys,conf.m_home); //,0,0,vector<string>());
+    cout << "Node public key is " << conf.get_keys().get_pubkey() << " address " << conf.get_keys().get_pubkey().hash() << endl;
+    genesis_daemon d(conf.get_keys(),conf.get_home()); //,0,0,vector<string>());
 
 //    cout << "Adding genesis block with 1 node " << p.genesis_address << endl;
     d.start_new_blockchain(address);
     cout << "New blockchain has been created. home is " << p.homedir << endl;
-	return 0;
+    return 0;
 }
 

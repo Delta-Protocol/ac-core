@@ -151,14 +151,15 @@ private:
     bool stage3(cycle_t&);
     void stage4(cycle_t&);
 
+protected:
+    local_deltas* create_local_deltas();
+    bool import(const diff& b);
 private:
     void load_head();
-    local_deltas* create_local_deltas();
     void update_peers_state();
 
 private:
     bool process_sysop_request(peer_t *c, datagram*d);
-    bool import(const diff& b);
     diff::hash_t get_last_block_imported() const;
     void set_last_block_imported(const diff::hash_t&);
     void set_last_block_imported_(const diff::hash_t&);
