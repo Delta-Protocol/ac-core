@@ -21,6 +21,13 @@ namespace us { namespace gov { namespace peer {
 using namespace std;
 using socket::datagram;
 
+/*!
+ * \class daemon
+ *
+ * \brief Manages peers. Provides interface to the classes that inherits from it
+ *        to purge or add new peers and send datagrams
+ *
+ */
 class daemon: public auth::daemon {
 private:
     uint16_t m_edges;
@@ -58,12 +65,53 @@ protected:
     peers_t active() const;
 
 public:
+
+    /** @brief Default constructor. Initialise the number of peers to zero
+     *
+     */
     daemon();
+
+    /** @brief Constructor.
+     *  @param[in] port port of the server to connect to
+     *  @param[in] edges size of the threadpool representing number
+     *             of neighbour nodes
+     *
+     * It calls the constructor of the base class and initialise the port
+     * of the server to connect to and the size of the threadpool (edges) which
+     * corresponds to the number of neighbour nodes
+     *
+     */
     daemon(uint16_t port, uint16_t edges);
+
+    /** @brief Virtual destructor
+     *
+     */
     virtual ~daemon();
 
+    /** @brief Dump information regarding this peer manager
+     *  @param[out] os output stream to print to
+     *  @return Void
+     *
+     */
     void dump(ostream& os) const;
+
+    /** @brief Send a datagram to a number of the neighbour peers
+     *  @param[in] num number of neighbours to send the message to
+     *  @param[in] exclude send datagram to all but this one
+     *  @param[in] d datagram to send
+     *  @return Void
+     *
+     *  If num is zero then it sends the datagram to all the neighbours. Otherwise
+     *  it sends the datagram to 'num' peers. The list of peers is always randomly
+     *  reshuffled so datagrams are not sent to the same peers.
+     *
+     */
     void send(int num, peer_t* exclude, datagram* d);
+
+    /** @brief Get list of active clients that are in 'service" statuse
+     *  @return vector of pointer to in 'service' peers
+     *
+     */
     vector<peer_t*> in_service() const;
 };
 
