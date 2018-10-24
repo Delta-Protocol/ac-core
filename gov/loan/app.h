@@ -30,15 +30,25 @@ typedef int64_t cash_t;
 typedef crypto::ripemd160 hasher_t;
 typedef hasher_t::value_type hash_t;
 
+/*!
+ * \class policies_traits
+ *
+ * \brief define merging policy for local deltas
+ *
+ */
 class policies_traits {
 
 public:
 
+    /*! Enumerates type of policy */
     enum paramid {
         next_patch=0,
         num_params,
     };
 
+    /** @brief Map enumerator to string
+     *
+     */
     constexpr static array<const char*,num_params> paramstr={"next_patch"};
 };
 
