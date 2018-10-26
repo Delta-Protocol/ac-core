@@ -304,7 +304,7 @@ vector<unsigned char> c::sign(const keys::priv_t& pk, const sigmsg_hasher_t::val
 }
 bool c::generate_shared_key(unsigned char* shared_key, size_t size, const keys::priv_t& priv, const keys::pub_t& pub){
 	unsigned char temp_key[32];
-	if(!secp256k1_ecdh(ctx, temp_key, &pub, &priv[0])) { //LE
+	if(!secp256k1_ecdh(ctx, temp_key, &pub, &priv[0],NULL,NULL)) { //LE
         cerr << "Could not create shared secret";
 	return false;
     }
